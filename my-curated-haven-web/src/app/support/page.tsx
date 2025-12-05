@@ -94,10 +94,10 @@ export default function Support() {
                 <div className="py-24 px-6 md:px-12 animate-fade-in">
                     <div className="max-w-4xl mx-auto text-center">
                         <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 font-heading">
-                            How can we help you?
+                            My Curated Haven Support
                         </h1>
                         <p className="text-xl text-foreground/70 mb-8">
-                            Find answers to common questions or get in touch with our support team
+                            Get help with the My Curated Haven app. Find answers to common questions or contact our support team directly.
                         </p>
 
                         {/* Search Bar */}
@@ -119,18 +119,20 @@ export default function Support() {
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-3xl font-bold text-center mb-12 font-heading">Quick Ways to Get Support</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <Card className="text-center hover:shadow-xl transition-all cursor-pointer bg-white">
-                                <div className="inline-block p-4 bg-primary/10 rounded-2xl mb-4">
-                                    <Mail className="text-primary" size={32} />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Email Support</h3>
-                                <p className="text-foreground/60 mb-4">
-                                    Get help via email
-                                </p>
-                                <a href="mailto:support@mycuratedhaven.com" className="text-primary font-semibold hover:underline">
-                                    support@mycuratedhaven.com
-                                </a>
-                            </Card>
+                            <a href="mailto:support@mycuratedhaven.com" className="block">
+                                <Card className="text-center hover:shadow-xl transition-all cursor-pointer bg-white h-full">
+                                    <div className="inline-block p-4 bg-primary/10 rounded-2xl mb-4">
+                                        <Mail className="text-primary" size={32} />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Email Support</h3>
+                                    <p className="text-foreground/60 mb-4">
+                                        We typically respond within 24-48 hours
+                                    </p>
+                                    <p className="text-primary font-semibold hover:underline break-all">
+                                        support@mycuratedhaven.com
+                                    </p>
+                                </Card>
+                            </a>
 
                             <Card className="text-center hover:shadow-xl transition-all cursor-pointer bg-white">
                                 <div className="inline-block p-4 bg-secondary/10 rounded-2xl mb-4">
@@ -265,6 +267,15 @@ export default function Support() {
                         <p className="mt-8 text-sm text-foreground/60">
                             Average response time: 24-48 hours
                         </p>
+                        <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm">
+                            <a href="/privacy" className="text-foreground/60 hover:text-primary transition-colors underline">
+                                Privacy Policy
+                            </a>
+                            <span className="text-foreground/30">•</span>
+                            <a href="/terms" className="text-foreground/60 hover:text-primary transition-colors underline">
+                                Terms of Service
+                            </a>
+                        </div>
                     </div>
                 </div>
             </main>
