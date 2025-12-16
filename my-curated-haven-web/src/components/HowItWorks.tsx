@@ -119,10 +119,12 @@ export default function HowItWorks() {
                     className="text-center mt-16"
                 >
                     <p className="text-foreground/60 mb-6">Ready to get started?</p>
-                    <button className="bg-primary text-white text-lg px-10 py-4 rounded-full font-semibold hover:bg-primary/90 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2 mx-auto">
-                        <Download size={20} />
-                        Download for iOS
-                    </button>
+                    <a href="https://apps.apple.com/us/app/my-curated-haven/id6755850584" target="_blank" rel="noopener noreferrer">
+                        <button className="bg-primary text-white text-lg px-10 py-4 rounded-full font-semibold hover:bg-primary/90 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center gap-2 mx-auto">
+                            <Download size={20} />
+                            Download for iOS
+                        </button>
+                    </a>
                 </motion.div>
             </div>
         </section>

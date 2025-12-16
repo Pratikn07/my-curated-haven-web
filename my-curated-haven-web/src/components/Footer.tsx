@@ -24,7 +24,7 @@ export default function Footer() {
                         <ul className="space-y-3 text-white/70 text-sm">
                             <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
                             <li><Link href="/resources" className="hover:text-white transition-colors">Resources</Link></li>
-                            <li><Link href="https://apps.apple.com/app/my-curated-haven" className="hover:text-white transition-colors">Download App</Link></li>
+                            <li><Link href="https://apps.apple.com/us/app/my-curated-haven/id6755850584" className="hover:text-white transition-colors">Download App</Link></li>
                         </ul>
                     </div>
 
