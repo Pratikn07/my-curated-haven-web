@@ -1,5 +1,6 @@
 import Image from 'next/image';
 
+// App Store link added - triggering fresh deployment
 export default function Hero() {
   return (
     <section className="w-full pt-12 pb-24 px-6 sm:px-8 overflow-hidden">
