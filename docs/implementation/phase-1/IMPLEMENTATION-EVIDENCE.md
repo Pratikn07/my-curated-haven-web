@@ -5,6 +5,9 @@ Status: code complete and checked on a local production server. Not deployed to 
 ## Source
 
 - Branch: `phase-1-site-foundation-k7m2`
+- Implementation commit: `692d77ed8a7b1b5c602362c0d411e6411f873876`
+- Pull request: https://github.com/Pratikn07/my-curated-haven-web/pull/4
+- Preview: https://my-curated-haven-web-git-ph-a1a1c1-pratik-r-nandoskars-projects.vercel.app (Vercel SSO)
 - Base: `4dabbaa0d97a0c4fc6c465cd145e750d56c2d01b` (main after the Phase 1–3 documentation merges)
 - Reviewed app baseline in the plan: `eb5d5b7c27fbda31586fdfcc96c6b1fbc2921caf`
 - Main moved forward from that baseline by documentation commits only. The application files at `4dabbaa` match that baseline.
@@ -17,8 +20,9 @@ Status: code complete and checked on a local production server. Not deployed to 
 - Live responses from https://mycuratedhaven.com/ send `server: Vercel`.
 - GitHub production deployment at the time of this work: `4dabbaa`, created `2026-09-22T20:32:42Z`.
 - That deployment is the rollback target. Restoring it returns the previous public site, including the deferred pages.
-- Pull requests on this repository already create Vercel preview deployments. Preview access protection was not verified. Treat preview URLs as public.
-- This branch does not put the old Features, Resources, Careers, or Contact bodies on the preview. Those routes return 404.
+- Pull requests on this repository create Vercel preview deployments.
+- An unauthenticated request to this branch's preview returns HTTP 302 to Vercel SSO and `x-robots-tag: noindex`. The preview is not public.
+- Page content on that preview was not opened after signing in. The route results below are from the local production server.
 
 ## Baseline commands, before edits
 
@@ -93,7 +97,7 @@ Screenshots from that run:
 
 ## Acceptance items still open
 
-- A16 preview: local production-mode review is done. The Vercel preview exists only after this branch is pushed. It is not access-protected evidence.
+- A16 preview: local production-mode review is done. After push, the Vercel preview required SSO. Its HTML was not reviewed while signed in.
 - Phase 2 CI is not installed. The Phase 2 specification asks for `.github/workflows/web-ci.yml`, job `web-quality`, and Playwright. This branch adds local scripts instead of that workflow, so the two do not collide.
 - Support mailbox delivery was not tested. No test email was sent. The address is the one already published on the site.
 - Price, paid recipe count, refund terms, and future additions remain undecided and are not stated as offers.
