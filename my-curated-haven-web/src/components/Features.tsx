@@ -1,5 +1,7 @@
 "use client";
 
+/** Dormant. Not mounted. Review content register C04 before reuse. */
+
 import { MessageCircle, BookOpen, Users, Stethoscope, ShoppingBag, Camera } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -68,7 +70,7 @@ export default function Features() {
                         Everything You Need, <span className="text-gradient">Thoughtfully Curated</span>
                     </h2>
                     <p className="text-xl text-foreground/70 leading-relaxed">
-                        From AI-powered guidance to milestone tracking, we've built every feature with one goal:
+                        From AI-powered guidance to milestone tracking, we&apos;ve built every feature with one goal:
                         giving you more confidence and peace of mind.
                     </p>
                 </motion.div>

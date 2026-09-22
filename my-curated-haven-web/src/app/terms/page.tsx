@@ -11,13 +11,16 @@ export default function Terms() {
             <main className="flex-1 pt-20 pb-16">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Terms of Service</h1>
-                    <p className="text-foreground/60 mb-12">Last updated: December 3, 2025</p>
+                    <p className="text-foreground/60 mb-6">Last updated: December 3, 2025</p>
+                    <p className="leading-relaxed mb-12 rounded-2xl bg-accent px-4 py-3 text-foreground">
+                        Note added September 22, 2026: these terms still describe the earlier mobile app as well as the website. The public website does not currently sell a recipe collection or any other product. Purchase terms, including refunds, will be added before any sale.
+                    </p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
                             <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">1. Agreement to Terms</h2>
                             <p className="leading-relaxed">
-                                These Terms of Service ("Terms") constitute a legally binding agreement between you and My Curated Haven ("Company," "we," "us," or "our") concerning your access to and use of the My Curated Haven mobile application and website (collectively, the "Service").
+                                These Terms of Service (&quot;Terms&quot;) constitute a legally binding agreement between you and My Curated Haven (&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) concerning your access to and use of the My Curated Haven mobile application and website (collectively, the &quot;Service&quot;).
                             </p>
                             <p className="leading-relaxed">
                                 By accessing or using the Service, you agree that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, you are not authorized to access or use the Service and should not use the Service.
@@ -30,7 +33,7 @@ export default function Terms() {
                         <section>
                             <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">2. Changes to Terms</h2>
                             <p className="leading-relaxed">
-                                We reserve the right to modify these Terms at any time. We will provide notice of material changes by updating the "Last updated" date at the top of these Terms and, in some cases, we may provide additional notice such as adding a statement to our homepage or sending you a notification.
+                                We reserve the right to modify these Terms at any time. We will provide notice of material changes by updating the &quot;Last updated&quot; date at the top of these Terms and, in some cases, we may provide additional notice such as adding a statement to our homepage or sending you a notification.
                             </p>
                             <p className="leading-relaxed">
                                 Your continued use of the Service following the posting of revised Terms means that you accept and agree to the changes. You are expected to check this page frequently to be aware of any changes.
@@ -100,7 +103,7 @@ export default function Terms() {
 
                             <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">6.1 Your Content</h3>
                             <p className="leading-relaxed">
-                                You may be able to post, upload, or share content through the Service, including photos, milestone entries, forum posts, and messages ("User Content"). You retain all ownership rights to your User Content. However, by posting User Content, you grant us a non-exclusive, worldwide, royalty-free license to use, store, display, and distribute your User Content as necessary to provide the Service.
+                                You may be able to post, upload, or share content through the Service, including photos, milestone entries, forum posts, and messages (&quot;User Content&quot;). You retain all ownership rights to your User Content. However, by posting User Content, you grant us a non-exclusive, worldwide, royalty-free license to use, store, display, and distribute your User Content as necessary to provide the Service.
                             </p>
 
                             <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">6.2 Content Restrictions</h3>
@@ -170,7 +173,7 @@ export default function Terms() {
                                 <strong>IMPORTANT:</strong> The Service provides general parenting information and support. It is NOT a substitute for professional medical advice, diagnosis, or treatment.
                             </p>
                             <p className="leading-relaxed">
-                                The content provided through the Service, including AI-generated responses, should not be relied upon for medical decisions. Always seek the advice of your pediatrician or other qualified health provider with questions regarding your child's health or medical condition.
+                                The content provided through the Service, including AI-generated responses, should not be relied upon for medical decisions. Always seek the advice of your pediatrician or other qualified health provider with questions regarding your child&apos;s health or medical condition.
                             </p>
                             <p className="leading-relaxed">
                                 In case of a medical emergency, call 911 or your local emergency number immediately. Do not rely on the Service for emergency medical assistance.
@@ -187,7 +190,7 @@ export default function Terms() {
                         <section>
                             <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">11. Disclaimer of Warranties</h2>
                             <p className="leading-relaxed">
-                                THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+                                THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
                             </p>
                             <p className="leading-relaxed">
                                 We do not warrant that:
@@ -218,7 +221,7 @@ export default function Terms() {
                         <section>
                             <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">13. Indemnification</h2>
                             <p className="leading-relaxed">
-                                You agree to defend, indemnify, and hold harmless My Curated Haven and its affiliates from any claims, damages, losses, liabilities, and expenses (including attorneys' fees) arising from:
+                                You agree to defend, indemnify, and hold harmless My Curated Haven and its affiliates from any claims, damages, losses, liabilities, and expenses (including attorneys&apos; fees) arising from:
                             </p>
                             <ul className="list-disc pl-6 space-y-2 my-4">
                                 <li>Your use of the Service</li>
@@ -245,7 +248,7 @@ export default function Terms() {
 
                             <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">15.2 Binding Arbitration</h3>
                             <p className="leading-relaxed">
-                                If informal resolution is unsuccessful, any dispute arising from these Terms or your use of the Service will be resolved through binding arbitration in accordance with the American Arbitration Association's rules. The arbitration will take place in [Your State/Country], and judgment on the award may be entered in any court having jurisdiction.
+                                If informal resolution is unsuccessful, any dispute arising from these Terms or your use of the Service will be resolved through binding arbitration in accordance with the American Arbitration Association&apos;s rules. The arbitration will take place in [Your State/Country], and judgment on the award may be entered in any court having jurisdiction.
                             </p>
 
                             <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">15.3 Class Action Waiver</h3>

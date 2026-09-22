@@ -1,3 +1,4 @@
+/** Dormant. Not mounted. Review content register C08 before reuse. */
 export default function Testimonials() {
     const testimonials = [
         {
@@ -29,7 +30,7 @@ export default function Testimonials() {
                         Loved by <span className="text-primary">Parents</span>
                     </h2>
                     <p className="text-lg text-foreground/70 leading-relaxed">
-                        Don't just take our word for it. Here's what parents in our community have to say.
+                        Don&apos;t just take our word for it. Here&apos;s what parents in our community have to say.
                     </p>
                 </div>
 
@@ -51,7 +52,7 @@ export default function Testimonials() {
 
                             {/* Quote */}
                             <p className="text-foreground/80 leading-relaxed mb-6 italic">
-                                "{testimonial.quote}"
+                                &quot;{testimonial.quote}&quot;
                             </p>
 
                             {/* Author */}
