@@ -1,5 +1,7 @@
 # Phase 1 implementation package
 
+[All implementation plans](../README.md) · [Phase 2 foundation plan](../phase-2/README.md)
+
 Status: planning documents only. Application changes and deployment are not completed by this package.
 
 ## Outcome
