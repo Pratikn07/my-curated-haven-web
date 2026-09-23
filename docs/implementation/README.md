@@ -13,6 +13,7 @@ Planning status and product delivery status are separate. Merging a plan does no
 | 3 | Mobile-first design system, components, layouts and print patterns | [Phase 3 overview](phase-3/README.md) | Design source present, [recorded evidence](phase-3/IMPLEMENTATION-EVIDENCE.md) |
 | 4 | Backend security, recipe data, access rules and migrations | [Phase 4 overview](phase-4/README.md) | Plan documented, backend implementation pending |
 | 6 | Public free recipes, browsing, filters, detail and print | [Phase 6 overview](phase-6/README.md) | Plan documented, implementation and content handoff pending |
+| 7 | Optional accounts and private saved recipes | [Phase 7 overview](phase-7/README.md) | Plan documented, identity verification and implementation pending |
 
 ## Product direction
 
@@ -33,6 +34,7 @@ See [confirmed scope and unresolved decisions](phase-1/PRODUCT-SCOPE.md). Do not
 5. Establish the [Phase 4 backend foundation](phase-4/README.md) before public recipe and purchase work.
 6. Complete Phase 5 source mapping, recipe review and selection of the three free recipes.
 7. Deliver the [Phase 6 free recipe experience](phase-6/README.md). Frontend work can proceed with protected synthetic fixtures, but public release requires the backend and content gates.
+8. Add [Phase 7 accounts and saved recipes](phase-7/README.md), preserving anonymous free access and verified native identity continuity.
 
 Phase 1 documentation originally merged through [PR #1](https://github.com/Pratikn07/my-curated-haven-web/pull/1). Main now also contains Phase 1–3 implementation source and evidence files. Those files report work at their recorded commits and list outstanding checks. Source presence is not a fresh verification of current production behaviour.
 
@@ -45,7 +47,7 @@ Phase 1 documentation originally merged through [PR #1](https://github.com/Prati
 | 4 | Backend security and data foundation | [Detailed Phase 4 plan](phase-4/IMPLEMENTATION-PLAN.md) |
 | 5 | Recipe structure and editorial review | Not written in this package |
 | 6 | Free recipe experience | [Detailed Phase 6 plan](phase-6/IMPLEMENTATION-PLAN.md) |
-| 7 | Accounts and favourites | Not written in this package |
+| 7 | Accounts and favourites | [Detailed Phase 7 plan](phase-7/IMPLEMENTATION-PLAN.md) |
 | 8 | One-time checkout and purchased access | Not written in this package |
 | 9 | Analytics | Not written in this package |
 | 10 | Launch QA | Not written in this package |
