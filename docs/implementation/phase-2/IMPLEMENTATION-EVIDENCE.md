@@ -7,7 +7,8 @@ Status: setup implemented locally. CI, merge blocking, and a signed-in preview r
 - Branch: `phase-2-delivery-foundation-b7k2`
 - Base: `phase-1-site-foundation-k7m2` at `0857e36`
 - Application directory: `my-curated-haven-web/`
-- Gitlinks left unchanged: `parenting_app`, `SuperClaude_Framework`
+- Gitlink commits left unchanged: `parenting_app` `b92605d`, `SuperClaude_Framework` `8f12b19`
+- `.gitmodules` was added because those gitlinks had no URL file. `actions/checkout` failed with `No url found for submodule path` until the URLs were recorded. CI still checks out with `submodules: false`, so it does not clone them.
 
 Phase 1 application code is already on this base, so the browser suite covers the current public site, including deferred-route 404s. Those checks are not skipped.
 
