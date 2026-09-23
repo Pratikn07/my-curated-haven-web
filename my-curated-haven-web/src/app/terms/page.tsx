@@ -1,14 +1,6 @@
-"use client";
-
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
 export default function Terms() {
     return (
-        <div className="min-h-screen flex flex-col bg-background">
-            <Navbar />
-
-            <main className="flex-1 pt-20 pb-16">
+        <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Terms of Service</h1>
                     <p className="text-foreground/60 mb-6">Last updated: December 3, 2025</p>
@@ -298,9 +290,6 @@ export default function Terms() {
                         </div>
                     </div>
                 </div>
-            </main>
-
-            <Footer />
         </div>
     );
 }
