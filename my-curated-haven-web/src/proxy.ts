@@ -37,6 +37,18 @@ function unavailableHtml() {
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname.replace(/\/+$/, "") || "/";
+  const reviewRoute = pathname === "/design-review";
+  if (reviewRoute && process.env.VERCEL_ENV === "production") {
+    return new NextResponse(unavailableHtml(), {
+      status: 404,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-store",
+      },
+    });
+  }
+
   if (!deferredPaths.has(pathname)) {
     return NextResponse.next();
   }
@@ -61,5 +73,7 @@ export const config = {
     "/careers/:path*",
     "/contact",
     "/contact/:path*",
+    "/design-review",
+    "/design-review/:path*",
   ],
 };

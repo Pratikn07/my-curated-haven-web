@@ -1,23 +1,18 @@
 import type { Metadata } from "next";
-import { Outfit, Inter, Cormorant_Garamond } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
+import SiteShell from "@/components/layout/SiteShell";
 import "./globals.css";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const inter = Inter({
-  variable: "--font-body",
+  variable: "--font-inter-source",
   subsets: ["latin"],
   display: "swap",
 });
 
 const cormorant = Cormorant_Garamond({
-  variable: "--font-logo",
+  variable: "--font-cormorant-source",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["600", "700"],
   display: "swap",
 });
 
@@ -39,10 +34,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${outfit.variable} ${inter.variable} ${cormorant.variable} antialiased font-body bg-background text-foreground`}
-      >
-        {children}
+      <body className={`${inter.variable} ${cormorant.variable} antialiased`}>
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

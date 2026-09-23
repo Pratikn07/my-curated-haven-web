@@ -5,43 +5,29 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#3D405B] text-white py-16 px-6 sm:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid sm:grid-cols-2 gap-12 mb-12">
-          <div>
-            <Link href="/" className="inline-block rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-              <span className="text-3xl font-bold" style={{ fontFamily: "var(--font-logo)", fontWeight: 700 }}>
-                <span className="text-white">My </span>
-                <span className="text-primary">Curated</span>
-                <span className="text-white"> Haven</span>
-              </span>
-            </Link>
-            <p className="text-white/70 text-sm leading-relaxed mt-4 max-w-sm">
-              Recipes by Tiny Soho, inside My Curated Haven.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-bold text-lg mb-4 font-heading">Explore</h2>
-            <ul className="space-y-3 text-white/70 text-sm">
-              {footerLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="hover:text-white transition-colors rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <footer className="border-t border-border bg-surface-muted">
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-2">
+        <div>
+          <Link href="/" className="font-brand text-2xl font-semibold">
+            My Curated Haven
+          </Link>
+          <p className="mt-2 max-w-sm text-text-muted">
+            Recipes by Tiny Soho, inside My Curated Haven.
+          </p>
         </div>
-
-        <div className="pt-8 border-t border-white/10 text-center text-white/60 text-sm">
-          © {year} My Curated Haven. All rights reserved.
-        </div>
+        <ul className="grid gap-2">
+          {footerLinks.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href} className="inline-flex min-h-11 items-center font-semibold">
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
+      <p className="px-4 pb-8 text-center text-sm text-text-muted">
+        © {year} My Curated Haven. All rights reserved.
+      </p>
     </footer>
   );
 }

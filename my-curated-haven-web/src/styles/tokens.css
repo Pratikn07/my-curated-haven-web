@@ -1,0 +1,51 @@
+:root {
+  --canvas: #fdfcf8;
+  --surface: #ffffff;
+  --surface-muted: #f4f1de;
+  --text: #3d405b;
+  --text-muted: #666578;
+  --brand-terracotta: #e07a5f;
+  --brand-sage: #8ba888;
+  --action: #a34f3b;
+  --action-hover: #8b402f;
+  --action-foreground: #ffffff;
+  --accent-strong: #526849;
+  --border-subtle: #ddd9d1;
+  --border-control: #767386;
+  --focus: #3d405b;
+  --danger: #b42318;
+  --success: #526849;
+
+  --background: var(--canvas);
+  --foreground: var(--text);
+  --primary: var(--brand-terracotta);
+  --primary-light: #f2b5a5;
+  --primary-dark: var(--action);
+  --secondary: var(--brand-sage);
+  --secondary-light: #b8d0b5;
+  --secondary-dark: var(--accent-strong);
+  --accent: var(--surface-muted);
+  --surface-glass: var(--surface);
+  --border: var(--border-subtle);
+  --error: var(--danger);
+
+  --font-body: var(--font-inter-source), Inter, "Segoe UI", sans-serif;
+  --font-heading: var(--font-inter-source), Inter, "Segoe UI", sans-serif;
+  --font-brand: var(--font-cormorant-source), "Cormorant Garamond", Georgia, serif;
+  --font-logo: var(--font-brand);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+  --header-offset: 4.5rem;
+  --z-header: 40;
+  --z-skip: 50;
+  --z-dialog: 60;
+}

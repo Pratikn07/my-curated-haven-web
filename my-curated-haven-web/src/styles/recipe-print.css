@@ -1,0 +1,34 @@
+@media print {
+  body:has(.recipe-print-root) header,
+  body:has(.recipe-print-root) footer,
+  body:has(.recipe-print-root) .skip-link,
+  body:has(.recipe-print-root) .no-print {
+    display: none !important;
+  }
+
+  body:has(.recipe-print-root) {
+    background: #fff;
+    color: #1c1917;
+  }
+
+  .recipe-print-root {
+    max-width: none;
+    color: #1c1917;
+  }
+
+  .recipe-print-root h1,
+  .recipe-print-root h2,
+  .recipe-print-root li {
+    break-after: avoid;
+  }
+
+  .recipe-print-root li,
+  .recipe-print-root p {
+    break-inside: avoid;
+  }
+
+  .recipe-print-image {
+    max-height: 2.5in;
+    width: auto;
+  }
+}

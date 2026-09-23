@@ -1,26 +1,18 @@
-"use client";
- 
-import { motion } from "framer-motion";
 import { ReactNode } from "react";
- 
+
 interface SectionProps {
   children: ReactNode;
   className?: string;
   id?: string;
   delay?: number;
+  title?: string;
 }
- 
-export default function Section({ children, className = "", id, delay = 0 }: SectionProps) {
+
+export default function Section({ children, className = "", id, title }: SectionProps) {
   return (
-    <motion.section
-      id={id}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, delay, ease: "easeOut" }}
-      className={`py-24 px-6 md:px-12 ${className}`}
-    >
+    <section id={id} className={`py-8 sm:py-12 ${className}`}>
+      {title ? <h2 className="mb-4 text-2xl font-semibold sm:text-3xl">{title}</h2> : null}
       {children}
-    </motion.section>
+    </section>
   );
 }
