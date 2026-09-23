@@ -11,8 +11,9 @@ Planning status and product delivery status are separate. Merging a plan does no
 | 1 | Preserve existing work, align public routes and recipe-first messaging | [Phase 1 overview](phase-1/README.md) | Implementation source present, [recorded evidence](phase-1/IMPLEMENTATION-EVIDENCE.md) |
 | 2 | Repeatable setup, CI, tests, protected previews and release checks | [Phase 2 overview](phase-2/README.md) | Setup source present, [recorded evidence](phase-2/IMPLEMENTATION-EVIDENCE.md) |
 | 3 | Mobile-first design system, components, layouts and print patterns | [Phase 3 overview](phase-3/README.md) | Design source present, [recorded evidence](phase-3/IMPLEMENTATION-EVIDENCE.md) |
-| 4 | Backend security, recipe data, access rules and migrations | [Phase 4 overview](phase-4/README.md) | Plan documented, backend implementation pending |
-| 6 | Public free recipes, browsing, filters, detail and print | [Phase 6 overview](phase-6/README.md) | Plan documented, implementation and content handoff pending |
+| 4 | Backend security, recipe data, access rules and migrations | [Phase 4 overview](phase-4/README.md) | Implementation source present, [recorded evidence](phase-4/IMPLEMENTATION-EVIDENCE.md) |
+| 5 | Recipe structure, editorial review, and catalog ingestion | [Phase 5 overview](phase-5/README.md) | Catalog audited, mapping rules defined, [handoff complete](phase-5/IMPLEMENTATION-HANDOFF.md) |
+| 6 | Public free recipes, browsing, filters, detail and print | [Phase 6 overview](phase-6/README.md) | Plan documented, implementation pending |
 | 7 | Optional accounts and private saved recipes | [Phase 7 overview](phase-7/README.md) | Plan documented, identity verification and implementation pending |
 
 ## Product direction
@@ -45,7 +46,7 @@ Phase 1 documentation originally merged through [PR #1](https://github.com/Prati
 | 0 | Product and commercial decisions | Current decisions recorded in Phase 1 scope |
 | 3 | Mobile-first design system | [Detailed Phase 3 plan](phase-3/IMPLEMENTATION-PLAN.md) |
 | 4 | Backend security and data foundation | [Detailed Phase 4 plan](phase-4/IMPLEMENTATION-PLAN.md) |
-| 5 | Recipe structure and editorial review | Not written in this package |
+| 5 | Recipe structure and editorial review | [Detailed Phase 5 plan](phase-5/IMPLEMENTATION-PLAN.md) |
 | 6 | Free recipe experience | [Detailed Phase 6 plan](phase-6/IMPLEMENTATION-PLAN.md) |
 | 7 | Accounts and favourites | [Detailed Phase 7 plan](phase-7/IMPLEMENTATION-PLAN.md) |
 | 8 | One-time checkout and purchased access | Not written in this package |
