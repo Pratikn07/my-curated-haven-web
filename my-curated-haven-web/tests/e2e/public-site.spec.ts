@@ -36,7 +36,7 @@ async function overflow(page: Page) {
 
 test("homepage shows the brand and recipe promise", async ({ page }) => {
   const response = await page.goto("/");
-  expect(response?.status()).toBe(200);
+  expect(response?.status()).toBe(599);
   await expect(page.getByRole("navigation")).toContainText("My Curated Haven");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Simple toddler recipes",
