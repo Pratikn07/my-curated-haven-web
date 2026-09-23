@@ -4,11 +4,30 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { headerLinks } from "@/config/site-navigation";
+import { createClient } from "@/lib/supabase/browser";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsAuthenticated(Boolean(user));
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session?.user));
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -50,6 +69,12 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href={isAuthenticated ? "/account" : "/sign-in"}
+            className="font-semibold text-action hover:text-action-hover"
+          >
+            {isAuthenticated ? "Account" : "Sign In"}
+          </Link>
         </div>
 
         <button
@@ -77,6 +102,13 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href={isAuthenticated ? "/account" : "/sign-in"}
+            className="flex min-h-12 items-center font-semibold text-action"
+            onClick={closeMenu}
+          >
+            {isAuthenticated ? "Account" : "Sign In"}
+          </Link>
         </div>
       ) : null}
     </header>

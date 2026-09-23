@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Badge from "@/components/ui/Badge";
+import SaveRecipeButton from "./SaveRecipeButton";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
 
 export type RecipeExample = {
@@ -17,6 +18,9 @@ export type RecipeExample = {
 export type RecipeCardProps = {
   recipe: RecipeCatalogItem | RecipeExample;
   priority?: boolean;
+  isSaved?: boolean;
+  isAuthenticated?: boolean;
+  showSaveButton?: boolean;
 };
 
 function isCatalogItem(
@@ -25,7 +29,13 @@ function isCatalogItem(
   return "slug" in recipe && typeof recipe.slug === "string";
 }
 
-export default function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
+export default function RecipeCard({
+  recipe,
+  priority = false,
+  isSaved = false,
+  isAuthenticated = false,
+  showSaveButton = false,
+}: RecipeCardProps) {
   const isCatalog = isCatalogItem(recipe);
   const slug = isCatalog ? recipe.slug : undefined;
   const title = recipe.title;
@@ -104,17 +114,29 @@ export default function RecipeCard({ recipe, priority = false }: RecipeCardProps
           ) : null}
         </div>
 
-        <div className="flex flex-wrap gap-2 pt-1">
-          {accessLabel ? (
-            <Badge variant={accessLabel.includes("Free") ? "free" : "collection"}>
-              {accessLabel}
-            </Badge>
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex flex-wrap gap-2">
+            {accessLabel ? (
+              <Badge variant={accessLabel.includes("Free") ? "free" : "collection"}>
+                {accessLabel}
+              </Badge>
+            ) : null}
+            {dietLabels.map((label) => (
+              <Badge key={label} variant="outline">
+                {label}
+              </Badge>
+            ))}
+          </div>
+
+          {showSaveButton && slug ? (
+            <SaveRecipeButton
+              recipeId={recipe.id}
+              recipeSlug={slug}
+              initialIsSaved={isSaved}
+              isAuthenticated={isAuthenticated}
+              variant="compact"
+            />
           ) : null}
-          {dietLabels.map((label) => (
-            <Badge key={label} variant="outline">
-              {label}
-            </Badge>
-          ))}
         </div>
       </div>
     </article>
