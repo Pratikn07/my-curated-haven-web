@@ -18,6 +18,8 @@
     "check:routes": "node scripts/check-public-routes.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.0",
     "framer-motion": "^12.23.25",
     "lucide-react": "^0.555.0",
     "next": "^16.3.6",

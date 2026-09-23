@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "./lib/supabase/session";
 
 const deferredPaths = new Set(["/features", "/resources", "/careers", "/contact"]);
 
@@ -35,9 +36,11 @@ function unavailableHtml() {
 </html>`;
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname.replace(/\/+$/, "") || "/";
   const reviewRoute = pathname === "/design-review";
+
+  // Enforce production exclusion for design review
   if (reviewRoute && process.env.VERCEL_ENV === "production") {
     return new NextResponse(unavailableHtml(), {
       status: 404,
@@ -49,31 +52,25 @@ export function proxy(request: NextRequest) {
     });
   }
 
-  if (!deferredPaths.has(pathname)) {
-    return NextResponse.next();
+  // Enforce early 404 for deferred launch routes
+  if (deferredPaths.has(pathname)) {
+    return new NextResponse(unavailableHtml(), {
+      status: 404,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-store",
+      },
+    });
   }
 
-  return new NextResponse(unavailableHtml(), {
-    status: 404,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "X-Robots-Tag": "noindex, nofollow",
-      "Cache-Control": "no-store",
-    },
-  });
+  // Refresh user session cookies without forcing global redirects
+  const { supabaseResponse } = await updateSession(request);
+  return supabaseResponse;
 }
 
 export const config = {
   matcher: [
-    "/features",
-    "/features/:path*",
-    "/resources",
-    "/resources/:path*",
-    "/careers",
-    "/careers/:path*",
-    "/contact",
-    "/contact/:path*",
-    "/design-review",
-    "/design-review/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
