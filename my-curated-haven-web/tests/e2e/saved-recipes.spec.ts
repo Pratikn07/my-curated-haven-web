@@ -179,6 +179,8 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
       test.skip();
     }
     await clearMailpit();
+    // Allow GoTrue 1s max_frequency window to clear between serial tests
+    await new Promise((r) => setTimeout(r, 1500));
   });
 
   test("Buyer A can sign in via OTP code and view account overview", async ({ page }) => {
