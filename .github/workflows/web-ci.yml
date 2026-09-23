@@ -40,11 +40,13 @@ jobs:
         with:
           version: 2.104.0
 
-      - name: Authenticate Docker to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Configure Supabase image registry
+        run: echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=public.ecr.aws" >> $GITHUB_ENV
 
       - name: Start Supabase stack
         working-directory: ${{ github.workspace }}
+        env:
+          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: |
           supabase start
           supabase db reset
@@ -113,16 +115,20 @@ jobs:
         with:
           version: 2.104.0
 
-      - name: Authenticate Docker to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Configure Supabase image registry
+        run: echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=public.ecr.aws" >> $GITHUB_ENV
 
       - name: Start Supabase stack
+        env:
+          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: supabase start
 
       - name: Verify clean migration replay
         run: supabase db reset
 
       - name: Run database access matrix tests (pgTAP)
+        env:
+          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: supabase test db
 
       - name: Verify generated TypeScript types drift
