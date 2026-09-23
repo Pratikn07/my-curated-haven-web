@@ -2,27 +2,36 @@
   "name": "my-curated-haven-web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "packageManager": "npm@11.5.1",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "verify": "npm run lint && npm run typecheck && npm run build && npm run test:e2e",
     "check:routes": "node scripts/check-public-routes.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.23.25",
     "lucide-react": "^0.555.0",
-    "next": "^16.0.7",
+    "next": "^16.3.6",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "^16.0.7",
+    "eslint-config-next": "^16.3.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

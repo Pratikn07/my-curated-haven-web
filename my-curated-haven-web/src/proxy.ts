@@ -35,7 +35,7 @@ function unavailableHtml() {
 </html>`;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname.replace(/\/+$/, "") || "/";
   if (!deferredPaths.has(pathname)) {
     return NextResponse.next();
