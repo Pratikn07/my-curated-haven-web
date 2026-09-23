@@ -1,6 +1,6 @@
 # Phase 2 implementation evidence
 
-Status: setup implemented locally. CI, merge blocking, and a signed-in preview review are recorded after the pull request runs. Production is not changed by this branch.
+Status: setup implemented, CI passed, and the main ruleset blocks a failing check. Production is not changed by this branch. A signed-in preview review is still a human step.
 
 ## Source
 
@@ -41,7 +41,8 @@ Next.js 16.3 renames `middleware.ts` to `proxy.ts`. The deferred-route 404 moved
 - Canonical domain: https://mycuratedhaven.com/ stays public.
 - Last known-good production deployment before this work: source `4dabbaa`, created `2026-09-22T20:32:42Z`.
 - Preview protection: an anonymous request to the Phase 1 preview returned HTTP 302 to Vercel SSO and `x-robots-tag: noindex`.
-- Repository rulesets: none. `main` is not branch-protected. This account has not been shown to have ruleset admin rights. That gate stays incomplete until an owner applies it.
+- Repository ruleset `main`, id `23852646`: https://github.com/Pratikn07/my-curated-haven-web/rules/23852646
+- It requires a pull request, the `web-quality` check, and an up-to-date branch. It blocks force-push and deletion. Required approving reviews: 0. Bypass actors: none.
 
 ## Local checks
 
@@ -56,8 +57,27 @@ Node 24.5.0. No production credentials.
 
 The production build is served on `http://127.0.0.1:3000` by Playwright and closed when the run finishes.
 
+## CI and merge gate
+
+| Result | Link |
+| --- | --- |
+| Passing `web-quality` on `7f82282` | https://github.com/Pratikn07/my-curated-haven-web/actions/runs/35801270099 |
+| Job name reported by GitHub | `web-quality` |
+| Deliberate failure, not merged | https://github.com/Pratikn07/my-curated-haven-web/actions/runs/35801473801 |
+| Pull request for that failure | https://github.com/Pratikn07/my-curated-haven-web/pull/6 , closed |
+| Merge state while the check was failing | `BLOCKED` |
+
+The failing pull request was closed and its branch deleted. It was not merged.
+
+## Preview
+
+- Implementation pull request: https://github.com/Pratikn07/my-curated-haven-web/pull/5
+- Preview: https://my-curated-haven-web-git-ph-8aaf86-pratik-r-nandoskars-projects.vercel.app
+- Anonymous request on 2026-09-23: HTTP 302 to Vercel SSO, `x-robots-tag: noindex`
+- Signed-in confirmation of the preview pages was not done from this session.
+
 ## Still outside this phase
 
-- Required status check on `main` until an owner can create the ruleset after the first green `web-quality` run.
-- Signed-in review of the new preview. Anonymous denial is the check this branch can perform.
+- Signed-in review of the preview pages. Anonymous access is already denied.
 - No Stripe, Supabase, recipe data, or design-system replacement.
+- Production deployment. Merging this pull request to `main` would deploy it.
