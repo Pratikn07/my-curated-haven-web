@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: web-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -39,8 +40,13 @@ jobs:
         with:
           version: 2.104.0
 
+      - name: Configure Supabase image registry
+        run: echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=public.ecr.aws" >> $GITHUB_ENV
+
       - name: Start Supabase stack
         working-directory: ${{ github.workspace }}
+        env:
+          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: |
           supabase start
           supabase db reset
@@ -73,7 +79,7 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Build
-        run: npm run build
+        run: npm run build -- --webpack
 
       - name: Browser tests
         run: |
@@ -109,13 +115,20 @@ jobs:
         with:
           version: 2.104.0
 
+      - name: Configure Supabase image registry
+        run: echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=public.ecr.aws" >> $GITHUB_ENV
+
       - name: Start Supabase stack
+        env:
+          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: supabase start
 
       - name: Verify clean migration replay
         run: supabase db reset
 
       - name: Run database access matrix tests (pgTAP)
+        env:
+          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: supabase test db
 
       - name: Verify generated TypeScript types drift
@@ -140,7 +153,7 @@ jobs:
 
       - name: Build Next.js
         working-directory: my-curated-haven-web
-        run: npm run build
+        run: npm run build -- --webpack
 
       - name: Run data access integration tests
         working-directory: my-curated-haven-web

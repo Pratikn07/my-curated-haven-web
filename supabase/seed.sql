@@ -113,7 +113,27 @@ INSERT INTO auth.identities (
 ON CONFLICT (provider_id, provider) DO NOTHING;
 
 -- ============================================================================
--- 2. Synthetic Catalog Entries
+-- 2. Synthetic Legacy Recipes (for foreign key compatibility with saved_recipes)
+-- ============================================================================
+INSERT INTO public.recipes (
+  id,
+  title,
+  description,
+  image_url,
+  time_minutes
+) VALUES
+('10000000-0000-0000-0000-000000000001', 'Synthetic Free Oat Bake', 'A nourishing warm oat bake designed for simple mornings.', 'recipe-previews/synth-free-oat-bake.webp', 35),
+('10000000-0000-0000-0000-000000000002', 'Synthetic Free Veggie Frittata', 'Baked farm eggs with tender spinach and sweet peppers.', 'recipe-previews/synth-free-veggie-frittata.webp', 25),
+('10000000-0000-0000-0000-000000000003', 'Synthetic Free Berry Smoothie Bowl', 'Refreshing nutrient-dense smoothie bowl for self-feeding.', 'recipe-previews/synth-free-berry-smoothie.webp', 10),
+('20000000-0000-0000-0000-000000000001', 'Synthetic Paid Golden Toddler Soup', 'Rich squash and carrot soup for busy evening meals.', 'recipe-previews/synth-paid-golden-soup.webp', 40),
+('20000000-0000-0000-0000-000000000002', 'Synthetic Paid Herb Butter Salmon', 'Flaky wild salmon cakes with fresh baby herbs.', 'recipe-previews/synth-paid-herb-salmon.webp', 30),
+('30000000-0000-0000-0000-000000000001', 'Synthetic Draft Warm Quinoa Salad', 'Nutty quinoa tossed with steamed garden peas.', 'recipe-previews/synth-draft-warm-salad.webp', 20),
+('30000000-0000-0000-0000-000000000002', 'Synthetic Withdrawn Spiced Lentils', 'Spiced creamy red lentils for growing toddlers.', 'recipe-previews/synth-withdrawn-spiced-lentils.webp', 25),
+('40000000-0000-0000-0000-000000000001', 'Synthetic Withdrawn Seed Bread', 'Withdrawn loaf formula removed from publication.', 'recipe-previews/synth-withdrawn-bread.webp', 60)
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================================
+-- 3. Synthetic Catalog Entries
 -- ============================================================================
 INSERT INTO public.recipe_catalog (
   id,
@@ -415,3 +435,25 @@ ON CONFLICT (user_id, release_id) DO UPDATE SET
   state = EXCLUDED.state,
   expires_at = EXCLUDED.expires_at,
   revoked_at = EXCLUDED.revoked_at;
+
+-- ============================================================================
+-- 7. Synthetic Saved Recipes
+-- ============================================================================
+-- Buyer A has bookmarked Free Recipe 1 and a Withdrawn Recipe
+INSERT INTO public.saved_recipes (
+  user_id,
+  recipe_id,
+  created_at
+) VALUES
+(
+  '00000000-0000-0000-0000-000000000001', -- Buyer A
+  '10000000-0000-0000-0000-000000000001', -- Free Recipe 1 (available)
+  now() - interval '2 days'
+),
+(
+  '00000000-0000-0000-0000-000000000001', -- Buyer A
+  '40000000-0000-0000-0000-000000000001', -- Withdrawn Recipe (unavailable)
+  now() - interval '3 days'
+)
+ON CONFLICT (user_id, recipe_id) DO NOTHING;
+
