@@ -10,16 +10,16 @@ Read current repository instructions and evidence first. Main already contains P
 
 ## Task checklist
 
-- [ ] P4-01: verify product project, identity strategy and migration owner.
-- [ ] P4-02: inventory live metadata and native compatibility.
-- [ ] P4-03: establish a disposable local backend.
-- [ ] P4-04: implement minimum schema and synthetic fixtures.
-- [ ] P4-05: enforce and test role-based access.
-- [ ] P4-06: separate public/private storage.
-- [ ] P4-07: add typed request-scoped Next.js integration.
-- [ ] P4-08: replay and rehearse migrations.
-- [ ] P4-09: add backend CI without weakening web-quality.
-- [ ] P4-10: record shared rollout readiness and handoff.
+- [x] P4-01: verify product project, identity strategy and migration owner (parenting app confirmed on separate database).
+- [x] P4-02: inventory live metadata and native compatibility.
+- [x] P4-03: establish a disposable local backend (`supabase/config.toml`).
+- [x] P4-04: implement minimum schema and synthetic fixtures (`20260923042735_phase4_schema.sql`, `seed.sql`).
+- [x] P4-05: enforce and test role-based access (`01_access_matrix.test.sql`).
+- [x] P4-06: separate public/private storage (`recipe-previews`, `recipe-protected`).
+- [x] P4-07: add typed request-scoped Next.js integration (`src/lib/types/`, `src/lib/supabase/`, `src/lib/data/`).
+- [x] P4-08: replay and rehearse migrations (`supabase db reset`).
+- [x] P4-09: add backend CI without weakening web-quality (`backend-quality` job in `.github/workflows/web-ci.yml`).
+- [x] P4-10: record shared rollout readiness and handoff ([IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md)).
 
 Check tasks only with execution evidence.
 
