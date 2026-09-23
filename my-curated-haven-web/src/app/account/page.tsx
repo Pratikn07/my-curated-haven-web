@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { signOutAction } from "./actions";
-import { Bookmark, Mail, HelpCircle, AlertTriangle } from "lucide-react";
+import { Bookmark, ShoppingBag, Mail, HelpCircle, AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Account | My Curated Haven",
@@ -28,7 +28,7 @@ export default async function AccountPage() {
           Account Overview
         </h1>
         <p className="mt-2 text-base text-text-muted">
-          Manage your saved recipe collection and account settings.
+          Manage your saved recipe collection, purchased collections, and account settings.
         </p>
       </header>
 
@@ -58,7 +58,27 @@ export default async function AccountPage() {
         </section>
 
         {/* Navigation Grid */}
-        <section className="grid gap-6 sm:grid-cols-2">
+        <section className="grid gap-6 sm:grid-cols-3">
+          <Link
+            href="/account/collections"
+            className="group flex flex-col justify-between rounded-[var(--radius-card)] border border-border bg-surface p-6 transition-all hover:border-action hover:shadow-sm"
+          >
+            <div>
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-action/10 text-action">
+                <ShoppingBag className="h-6 w-6" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground group-hover:text-action transition-colors">
+                My Collections
+              </h2>
+              <p className="mt-2 text-sm text-text-muted">
+                Access your purchased recipe collections and printables.
+              </p>
+            </div>
+            <div className="mt-6 flex items-center font-semibold text-action text-sm">
+              <span>View collections &rarr;</span>
+            </div>
+          </Link>
+
           <Link
             href="/account/saved-recipes"
             className="group flex flex-col justify-between rounded-[var(--radius-card)] border border-border bg-surface p-6 transition-all hover:border-action hover:shadow-sm"

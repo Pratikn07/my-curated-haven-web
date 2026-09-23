@@ -457,3 +457,88 @@ INSERT INTO public.saved_recipes (
 )
 ON CONFLICT (user_id, recipe_id) DO NOTHING;
 
+-- ============================================================================
+-- 8. Phase 8: Commercial Offers, Manifests, and Access Sources
+-- ============================================================================
+INSERT INTO private.commercial_offers (
+  id,
+  release_id,
+  provider_account_id,
+  provider_mode,
+  provider_product_id,
+  provider_price_id,
+  currency,
+  base_minor_amount,
+  tax_mode,
+  quantity,
+  terms_version,
+  refund_policy_version,
+  access_policy_version,
+  sale_enabled,
+  manifest_hash
+) VALUES (
+  'f0000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000001',
+  'acct_test_synthetic',
+  'test',
+  'prod_synth_comfort_haven',
+  'price_synth_comfort_1500',
+  'usd',
+  1500,
+  'inclusive',
+  1,
+  '2026-09-v1',
+  '2026-09-v1',
+  '2026-09-v1',
+  true,
+  'sha256_synth_manifest_v1'
+)
+ON CONFLICT (provider_account_id, provider_mode, provider_price_id) DO UPDATE SET
+  base_minor_amount = EXCLUDED.base_minor_amount,
+  sale_enabled = EXCLUDED.sale_enabled;
+
+INSERT INTO private.release_manifests (
+  id,
+  release_id,
+  member_recipe_ids,
+  manifest_checksum,
+  approved_by,
+  approved_at
+) VALUES (
+  'b0000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000001',
+  ARRAY['20000000-0000-0000-0000-000000000001'::uuid],
+  'sha256_synth_manifest_v1',
+  'editorial-lead@tinysoho.test',
+  now() - interval '10 days'
+)
+ON CONFLICT (release_id) DO NOTHING;
+
+INSERT INTO private.access_sources (
+  user_id,
+  release_id,
+  source_kind,
+  source_id,
+  is_eligible,
+  valid_from
+) VALUES
+(
+  '00000000-0000-0000-0000-000000000001', -- Buyer A
+  'a0000000-0000-0000-0000-000000000001',
+  'stripe_purchase',
+  'order-seed-001',
+  true,
+  now() - interval '5 days'
+),
+(
+  '00000000-0000-0000-0000-000000000003', -- Revoked C
+  'a0000000-0000-0000-0000-000000000001',
+  'stripe_purchase',
+  'order-seed-002',
+  false,
+  now() - interval '10 days'
+)
+ON CONFLICT (source_kind, source_id, release_id) DO UPDATE SET
+  is_eligible = EXCLUDED.is_eligible;
+
+

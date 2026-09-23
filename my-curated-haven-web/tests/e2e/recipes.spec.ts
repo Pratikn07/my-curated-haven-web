@@ -149,7 +149,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     expect(parsed.recipeInstructions.length).toBeGreaterThan(0);
   });
 
-  test("unentitled, draft, or invalid recipe slugs return not-found", async ({
+  test("draft or invalid recipe slugs return not-found, while paid slug shows preview with locked body", async ({
     page,
   }) => {
     // Non-existent slug
@@ -166,12 +166,11 @@ test.describe("Phase 6 Free Recipe Experience", () => {
       /not available|not found/i
     );
 
-    // Paid slug without entitlement
+    // Paid slug without entitlement shows preview with locked instructions
     const paidRes = await page.goto("/recipes/synth-paid-golden-soup");
-    expect(paidRes?.status()).toBe(404);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      /not available|not found/i
-    );
+    expect(paidRes?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: "Collection Recipe" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Ingredients" })).toHaveCount(0);
   });
 
   test("mobile viewport (320px) has zero horizontal overflow", async ({ page }) => {
