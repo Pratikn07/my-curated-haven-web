@@ -124,6 +124,10 @@ jobs:
         working-directory: my-curated-haven-web
         run: npx playwright install --with-deps chromium
 
+      - name: Build Next.js
+        working-directory: my-curated-haven-web
+        run: npm run build
+
       - name: Run data access integration tests
         working-directory: my-curated-haven-web
         run: npx playwright test tests/e2e/data-access.spec.ts --project=chromium-desktop
