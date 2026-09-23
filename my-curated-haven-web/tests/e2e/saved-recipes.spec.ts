@@ -12,7 +12,7 @@ async function overflow(page: Page) {
 /**
  * Polls Mailpit API to retrieve the latest 6-digit OTP code sent to a specific email.
  */
-async function getLatestOtp(email: string, timeoutMs = 12_000): Promise<string> {
+async function getLatestOtp(email: string, timeoutMs = 20_000): Promise<string> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
@@ -208,6 +208,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await page.goto("/sign-in?returnTo=/account/saved-recipes");
     await page.getByLabel(/email address/i).fill("buyer-a@synthetic.test");
     await page.getByRole("button", { name: "Continue with Email" }).click();
+    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
 
     const otp = await getLatestOtp("buyer-a@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
@@ -239,6 +240,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await page.goto("/sign-in?returnTo=/recipes");
     await page.getByLabel(/email address/i).fill("buyer-a@synthetic.test");
     await page.getByRole("button", { name: "Continue with Email" }).click();
+    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
 
     const otp = await getLatestOtp("buyer-a@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
@@ -282,6 +284,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await page.goto("/sign-in?returnTo=/account/saved-recipes");
     await page.getByLabel(/email address/i).fill("nonbuyer-b@synthetic.test");
     await page.getByRole("button", { name: "Continue with Email" }).click();
+    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
 
     const otp = await getLatestOtp("nonbuyer-b@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
@@ -304,6 +307,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await page.goto("/sign-in?returnTo=/account");
     await page.getByLabel(/email address/i).fill("buyer-a@synthetic.test");
     await page.getByRole("button", { name: "Continue with Email" }).click();
+    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
 
     const otp = await getLatestOtp("buyer-a@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
