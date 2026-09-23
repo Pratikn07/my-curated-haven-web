@@ -3,15 +3,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import {
   getRecipeBySlug,
   getPublishedCatalog,
   type RecipeIngredient,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
+import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import PrintButton from "@/components/recipe/PrintButton";
+import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
 import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
@@ -106,6 +108,12 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   const { catalog, body } = result.recipe;
   const instructions = normalizeInstructions(body.instructions);
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
+
+  // Fetch auth and saved recipe state
+  const user = await getCurrentUser();
+  const supabase = await createClient();
+  const savedIds = user ? await getSavedRecipeIds(supabase, user.id) : new Set<string>();
+  const isSaved = savedIds.has(catalog.id);
 
   // Fetch sibling free recipes for discovery section
   let otherRecipes: RecipeCatalogItem[] = [];
@@ -218,6 +226,14 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </div>
 
           <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0">
+            <div className="no-print flex-1 sm:flex-initial">
+              <SaveRecipeButton
+                recipeId={catalog.id}
+                recipeSlug={catalog.slug}
+                initialIsSaved={isSaved}
+                isAuthenticated={Boolean(user)}
+              />
+            </div>
             <a
               href="#recipe-content"
               className="no-print inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-xl border border-border-control bg-surface px-4 text-sm font-semibold text-foreground hover:bg-surface-muted focus-visible:outline-2 sm:flex-initial"
@@ -363,7 +379,13 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </p>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             {otherRecipes.map((other) => (
-              <RecipeCard key={other.id} recipe={other} />
+              <RecipeCard
+                key={other.id}
+                recipe={other}
+                isSaved={savedIds.has(other.id)}
+                isAuthenticated={Boolean(user)}
+                showSaveButton={true}
+              />
             ))}
           </div>
         </section>
