@@ -75,6 +75,133 @@ export type Database = {
           },
         ]
       }
+      articles: {
+        Row: {
+          age_max_days: number | null
+          age_min_days: number | null
+          body_md: string
+          created_at: string | null
+          id: string
+          last_reviewed_at: string | null
+          locale: string
+          reviewer: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          age_max_days?: number | null
+          age_min_days?: number | null
+          body_md: string
+          created_at?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          locale?: string
+          reviewer?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          age_max_days?: number | null
+          age_min_days?: number | null
+          body_md?: string
+          created_at?: string | null
+          id?: string
+          last_reviewed_at?: string | null
+          locale?: string
+          reviewer?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_from_user: boolean
+          message: string
+          message_type: string | null
+          response: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_from_user?: boolean
+          message: string
+          message_type?: string | null
+          response?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_from_user?: boolean
+          message?: string
+          message_type?: string | null
+          response?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          birth_date: string | null
+          created_at: string | null
+          developmental_stage: string | null
+          gender: Database["public"]["Enums"]["gender"] | null
+          id: string
+          last_milestone_check: string | null
+          name: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string | null
+          developmental_stage?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          last_milestone_check?: string | null
+          name: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string | null
+          developmental_stage?: string | null
+          gender?: Database["public"]["Enums"]["gender"] | null
+          id?: string
+          last_milestone_check?: string | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_recipes: {
         Row: {
           position: number
@@ -143,6 +270,113 @@ export type Database = {
           },
         ]
       }
+      conversation_summaries: {
+        Row: {
+          child_id: string | null
+          created_at: string | null
+          id: string
+          key_insights: string[] | null
+          period_end: string
+          period_start: string
+          summary_period: string
+          topics: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          child_id?: string | null
+          created_at?: string | null
+          id?: string
+          key_insights?: string[] | null
+          period_end: string
+          period_start: string
+          summary_period: string
+          topics?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          child_id?: string | null
+          created_at?: string | null
+          id?: string
+          key_insights?: string[] | null
+          period_end?: string
+          period_start?: string
+          summary_period?: string
+          topics?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_summaries_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_summaries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_tips: {
+        Row: {
+          category: string
+          child_age_months: number | null
+          created_at: string | null
+          description: string
+          id: string
+          is_viewed: boolean | null
+          parenting_stage: Database["public"]["Enums"]["parenting_stage"]
+          quick_tips: string[] | null
+          tip_date: string
+          title: string
+          user_id: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          category: string
+          child_age_months?: number | null
+          created_at?: string | null
+          description: string
+          id?: string
+          is_viewed?: boolean | null
+          parenting_stage: Database["public"]["Enums"]["parenting_stage"]
+          quick_tips?: string[] | null
+          tip_date: string
+          title: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          category?: string
+          child_age_months?: number | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          is_viewed?: boolean | null
+          parenting_stage?: Database["public"]["Enums"]["parenting_stage"]
+          quick_tips?: string[] | null
+          tip_date?: string
+          title?: string
+          user_id?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_tips_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       free_recipe_slots: {
         Row: {
           assigned_at: string
@@ -168,6 +402,156 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      milestone_templates: {
+        Row: {
+          age_max_months: number
+          age_min_months: number
+          category: Database["public"]["Enums"]["milestone_type"]
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          age_max_months: number
+          age_min_months: number
+          category: Database["public"]["Enums"]["milestone_type"]
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          age_max_months?: number
+          age_min_months?: number
+          category?: Database["public"]["Enums"]["milestone_type"]
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          sort_order?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
+      milestones: {
+        Row: {
+          achieved_at: string | null
+          child_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          milestone_type: Database["public"]["Enums"]["milestone_type"]
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          achieved_at?: string | null
+          child_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          milestone_type: Database["public"]["Enums"]["milestone_type"]
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          achieved_at?: string | null
+          child_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          milestone_type?: Database["public"]["Enums"]["milestone_type"]
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_mentions_log: {
+        Row: {
+          had_affiliate: boolean | null
+          id: string
+          mentioned_at: string | null
+          product_name: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          had_affiliate?: boolean | null
+          id?: string
+          mentioned_at?: string | null
+          product_name: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          had_affiliate?: boolean | null
+          id?: string
+          mentioned_at?: string | null
+          product_name?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          feeding_preference:
+            | Database["public"]["Enums"]["feeding_preference"]
+            | null
+          has_completed_onboarding: boolean | null
+          id: string
+          name: string
+          parenting_stage: Database["public"]["Enums"]["parenting_stage"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          feeding_preference?:
+            | Database["public"]["Enums"]["feeding_preference"]
+            | null
+          has_completed_onboarding?: boolean | null
+          id: string
+          name: string
+          parenting_stage?:
+            | Database["public"]["Enums"]["parenting_stage"]
+            | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          feeding_preference?:
+            | Database["public"]["Enums"]["feeding_preference"]
+            | null
+          has_completed_onboarding?: boolean | null
+          id?: string
+          name?: string
+          parenting_stage?:
+            | Database["public"]["Enums"]["parenting_stage"]
+            | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       recipe_bodies: {
         Row: {
@@ -294,15 +678,791 @@ export type Database = {
         }
         Relationships: []
       }
+      recipe_user_preferences: {
+        Row: {
+          common_substitutes_used: Json | null
+          cooking_skill_level: string | null
+          created_at: string | null
+          cuisine_preference: string | null
+          id: string
+          profile_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          common_substitutes_used?: Json | null
+          cooking_skill_level?: string | null
+          created_at?: string | null
+          cuisine_preference?: string | null
+          id?: string
+          profile_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          common_substitutes_used?: Json | null
+          cooking_skill_level?: string | null
+          created_at?: string | null
+          cuisine_preference?: string | null
+          id?: string
+          profile_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_user_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
+          age_range_max: number
+          age_range_min: number
+          allergens: string[] | null
+          calories: number | null
+          created_at: string | null
+          cuisine: string | null
+          description: string | null
+          dietary_tags: string[] | null
+          difficulty: string | null
+          feeding_types: string[]
+          id: string
+          image_description: string | null
+          image_url: string | null
+          ingredients: Json
+          instructions: Json
+          kitchen_style_tags: string[] | null
+          meal_types: string[] | null
+          rating: number | null
+          servings: number | null
+          storage: string | null
+          time_minutes: number | null
+          tips: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          age_range_max?: number
+          age_range_min?: number
+          allergens?: string[] | null
+          calories?: number | null
+          created_at?: string | null
+          cuisine?: string | null
+          description?: string | null
+          dietary_tags?: string[] | null
+          difficulty?: string | null
+          feeding_types?: string[]
+          id?: string
+          image_description?: string | null
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          kitchen_style_tags?: string[] | null
+          meal_types?: string[] | null
+          rating?: number | null
+          servings?: number | null
+          storage?: string | null
+          time_minutes?: number | null
+          tips?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          age_range_max?: number
+          age_range_min?: number
+          allergens?: string[] | null
+          calories?: number | null
+          created_at?: string | null
+          cuisine?: string | null
+          description?: string | null
+          dietary_tags?: string[] | null
+          difficulty?: string | null
+          feeding_types?: string[]
+          id?: string
+          image_description?: string | null
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          kitchen_style_tags?: string[] | null
+          meal_types?: string[] | null
+          rating?: number | null
+          servings?: number | null
+          storage?: string | null
+          time_minutes?: number | null
+          tips?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category: string | null
+          content: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          parenting_stages:
+            | Database["public"]["Enums"]["parenting_stage"][]
+            | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          parenting_stages?:
+            | Database["public"]["Enums"]["parenting_stage"][]
+            | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          parenting_stages?:
+            | Database["public"]["Enums"]["parenting_stage"][]
+            | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      saved_articles: {
+        Row: {
+          article_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_articles_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_articles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_recipes: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_analytics: {
+        Row: {
+          created_at: string | null
+          id: string
+          query: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          query: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          query?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      shop_affiliates: {
+        Row: {
+          base_url: string
+          commission_rate: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          priority: number | null
+          slug: string
+          store_tag: string | null
+          tag_param: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          base_url: string
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          priority?: number | null
+          slug: string
+          store_tag?: string | null
+          tag_param?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          base_url?: string
+          commission_rate?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          priority?: number | null
+          slug?: string
+          store_tag?: string | null
+          tag_param?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      shop_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          emoji: string
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          emoji?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          emoji?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      shop_clicks: {
+        Row: {
+          affiliate_id: string | null
+          clicked_at: string | null
+          id: string
+          product_id: string
+          section_type:
+            | Database["public"]["Enums"]["recommendation_section"]
+            | null
+          session_id: string | null
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          affiliate_id?: string | null
+          clicked_at?: string | null
+          id?: string
+          product_id: string
+          section_type?:
+            | Database["public"]["Enums"]["recommendation_section"]
+            | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          affiliate_id?: string | null
+          clicked_at?: string | null
+          id?: string
+          product_id?: string
+          section_type?:
+            | Database["public"]["Enums"]["recommendation_section"]
+            | null
+          session_id?: string | null
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_clicks_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "shop_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_product_affiliates: {
+        Row: {
+          affiliate_id: string
+          affiliate_product_id: string | null
+          affiliate_url: string
+          created_at: string | null
+          id: string
+          is_available: boolean | null
+          is_primary: boolean | null
+          last_checked_at: string | null
+          price: number | null
+          product_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          affiliate_product_id?: string | null
+          affiliate_url: string
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          is_primary?: boolean | null
+          last_checked_at?: string | null
+          price?: number | null
+          product_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          affiliate_product_id?: string | null
+          affiliate_url?: string
+          created_at?: string | null
+          id?: string
+          is_available?: boolean | null
+          is_primary?: boolean | null
+          last_checked_at?: string | null
+          price?: number | null
+          product_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_product_affiliates_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "shop_affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_product_affiliates_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_products: {
+        Row: {
+          age_range_max: number | null
+          age_range_min: number | null
+          category_id: string | null
+          category_slug: string | null
+          click_count: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          name_variants: string[] | null
+          original_price: number | null
+          price: number | null
+          rating: number | null
+          review_count: number | null
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          category_id?: string | null
+          category_slug?: string | null
+          click_count?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          name_variants?: string[] | null
+          original_price?: number | null
+          price?: number | null
+          rating?: number | null
+          review_count?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          age_range_max?: number | null
+          age_range_min?: number | null
+          category_id?: string | null
+          category_slug?: string | null
+          click_count?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          name_variants?: string[] | null
+          original_price?: number | null
+          price?: number | null
+          rating?: number | null
+          review_count?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "shop_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_user_recommendations: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          product_ids: string[]
+          section_type: Database["public"]["Enums"]["recommendation_section"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          product_ids: string[]
+          section_type: Database["public"]["Enums"]["recommendation_section"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          product_ids?: string[]
+          section_type?: Database["public"]["Enums"]["recommendation_section"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shop_user_saved_products: {
+        Row: {
+          id: string
+          product_id: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          saved_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_user_saved_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activity_log: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          milestone_id: string | null
+          resource_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          milestone_id?: string | null
+          resource_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["activity_type"]
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          milestone_id?: string | null
+          resource_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_milestone_progress: {
+        Row: {
+          child_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          is_completed: boolean | null
+          milestone_template_id: string | null
+          notes: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          child_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          milestone_template_id?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          child_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          milestone_template_id?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_milestone_progress_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_milestone_progress_milestone_template_id_fkey"
+            columns: ["milestone_template_id"]
+            isOneToOne: false
+            referencedRelation: "milestone_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_milestone_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress_stats: {
+        Row: {
+          content_saved: number | null
+          created_at: string | null
+          id: string
+          milestones_completed: number | null
+          questions_asked: number | null
+          resources_viewed: number | null
+          search_queries: number | null
+          tips_received: number | null
+          updated_at: string | null
+          user_id: string | null
+          week_start_date: string
+        }
+        Insert: {
+          content_saved?: number | null
+          created_at?: string | null
+          id?: string
+          milestones_completed?: number | null
+          questions_asked?: number | null
+          resources_viewed?: number | null
+          search_queries?: number | null
+          tips_received?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          week_start_date: string
+        }
+        Update: {
+          content_saved?: number | null
+          created_at?: string | null
+          id?: string
+          milestones_completed?: number | null
+          questions_asked?: number | null
+          resources_viewed?: number | null
+          search_queries?: number | null
+          tips_received?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_shop_click: {
+        Args: { product_id_input: string }
+        Returns: undefined
+      }
+      search_shop_products: {
+        Args: { query_text: string; result_limit?: number }
+        Returns: {
+          product_id: string
+          relevance: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      activity_type:
+        | "resource_viewed"
+        | "resource_saved"
+        | "resource_shared"
+        | "milestone_completed"
+        | "milestone_uncompleted"
+        | "question_asked"
+        | "tip_viewed"
+        | "search_performed"
+        | "category_filtered"
+      feeding_preference: "breastfeeding" | "formula" | "mixed"
+      gender: "male" | "female" | "other"
+      milestone_type: "physical" | "cognitive" | "social" | "emotional"
+      parenting_stage:
+        | "expecting"
+        | "newborn"
+        | "infant"
+        | "toddler"
+        | "preschool"
+        | "school"
+      recommendation_section:
+        | "for_you"
+        | "chat_based"
+        | "age_based"
+        | "recipe_based"
+        | "milestone_based"
+        | "category_spotlight"
+        | "top_rated"
+        | "popular"
+        | "search"
+        | "saved"
+      shop_category:
+        | "feeding"
+        | "sleep"
+        | "safety"
+        | "toys"
+        | "health"
+        | "clothing"
+        | "travel"
+        | "nursery"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -432,7 +1592,52 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      activity_type: [
+        "resource_viewed",
+        "resource_saved",
+        "resource_shared",
+        "milestone_completed",
+        "milestone_uncompleted",
+        "question_asked",
+        "tip_viewed",
+        "search_performed",
+        "category_filtered",
+      ],
+      feeding_preference: ["breastfeeding", "formula", "mixed"],
+      gender: ["male", "female", "other"],
+      milestone_type: ["physical", "cognitive", "social", "emotional"],
+      parenting_stage: [
+        "expecting",
+        "newborn",
+        "infant",
+        "toddler",
+        "preschool",
+        "school",
+      ],
+      recommendation_section: [
+        "for_you",
+        "chat_based",
+        "age_based",
+        "recipe_based",
+        "milestone_based",
+        "category_spotlight",
+        "top_rated",
+        "popular",
+        "search",
+        "saved",
+      ],
+      shop_category: [
+        "feeding",
+        "sleep",
+        "safety",
+        "toys",
+        "health",
+        "clothing",
+        "travel",
+        "nursery",
+      ],
+    },
   },
 } as const
 
