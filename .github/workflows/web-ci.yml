@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: web-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -38,6 +39,9 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: 2.104.0
+
+      - name: Authenticate Docker to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Start Supabase stack
         working-directory: ${{ github.workspace }}
@@ -108,6 +112,9 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: 2.104.0
+
+      - name: Authenticate Docker to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Start Supabase stack
         run: supabase start
