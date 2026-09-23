@@ -12,7 +12,7 @@ COMMENT ON COLUMN public.children.last_milestone_check IS 'Last date when milest
 -- Create conversation summaries table for long-term memory
 CREATE TABLE IF NOT EXISTS public.conversation_summaries (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   child_id UUID REFERENCES public.children(id) ON DELETE CASCADE,
   summary_period TEXT NOT NULL CHECK (summary_period IN ('week', 'month')),
   topics JSONB DEFAULT '{}'::jsonb, -- {"sleep": 3, "feeding": 2, "tantrums": 5}
