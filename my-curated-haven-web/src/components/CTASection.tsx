@@ -1,3 +1,4 @@
+/** Dormant. Not mounted. Review content register C06 and C07 before reuse. */
 export default function CTASection() {
     return (
         <section className="py-24 bg-gradient-primary relative overflow-hidden">

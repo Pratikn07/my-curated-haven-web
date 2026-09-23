@@ -22,8 +22,14 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "My Curated Haven | AI-Powered Parenting Companion",
-  description: "Your personalized parenting guide. Track milestones, get daily tips, and chat with our AI assistant.",
+  metadataBase: new URL("https://mycuratedhaven.com"),
+  title: {
+    default: "My Curated Haven | Simple toddler recipes for busy families",
+    template: "%s | My Curated Haven",
+  },
+  description:
+    "Simple toddler recipes for busy families. Recipes by Tiny Soho, inside My Curated Haven. The recipe collection is in preparation.",
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

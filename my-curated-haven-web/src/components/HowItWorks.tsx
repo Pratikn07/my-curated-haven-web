@@ -1,5 +1,7 @@
 "use client";
 
+/** Dormant. Not mounted. Review content register C05 and C06 before reuse. */
+
 import { Download, UserPlus, Sparkles, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -57,7 +59,7 @@ export default function HowItWorks() {
                         Getting Started is <span className="text-gradient">Simple</span>
                     </h2>
                     <p className="text-xl text-foreground/70 leading-relaxed">
-                        Join thousands of parents who've made parenting a little easier. Here's how to begin your journey.
+                        Join thousands of parents who&apos;ve made parenting a little easier. Here&apos;s how to begin your journey.
                     </p>
                 </motion.div>
 

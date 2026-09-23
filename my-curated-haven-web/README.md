@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# My Curated Haven
 
-## Getting Started
+Next.js site for https://mycuratedhaven.com/. Commands run from this directory. Git commands run from the repository root.
 
-First, run the development server:
+## Setup
+
+Node `24.5.0` is pinned in `.nvmrc`. npm `11.5.1` is the package manager. The production host uses the Node 24 line and may not match this exact patch.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+No environment variables are required. See `.env.example`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Local development server |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Generate route types, then `tsc --noEmit` |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run test:e2e` | Playwright against the production server |
+| `npm run verify` | Lint, typecheck, build, then browser tests |
 
-## Learn More
+Install Playwright browsers once before the first local run:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx playwright install chromium webkit
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`npm run test:e2e` expects `npm run build` to have finished. `npm run verify` builds first.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+CI runs these checks from `.github/workflows/web-ci.yml`. It does not use production credentials.

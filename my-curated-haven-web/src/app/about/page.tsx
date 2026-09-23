@@ -1,57 +1,67 @@
-"use client";
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Section from "@/components/ui/Section";
-import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
-import { Heart, Shield, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function About() {
-    return (
-        <div className="min-h-screen flex flex-col bg-background">
-            <Navbar />
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <Navbar />
 
-            <main className="flex-1 pt-20">
-                <Section className="text-center py-32">
-                    <Badge variant="accent" className="mb-6">Our Mission</Badge>
-                    <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-8 font-heading">
-                        Empowering parents to <br />
-                        <span className="text-gradient">thrive, not just survive.</span>
-                    </h1>
-                    <p className="text-xl text-foreground/70 max-w-3xl mx-auto leading-relaxed">
-                        We believe that parenting should be filled with joy, not anxiety. Our mission is to provide every parent with the personalized support, expert knowledge, and tools they need to raise happy, healthy children.
-                    </p>
-                </Section>
+      <main className="flex-1 px-6 sm:px-8 py-16">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-sm font-semibold tracking-wide text-foreground/70 mb-4">
+            Recipes by Tiny Soho, inside My Curated Haven
+          </p>
+          <h1 className="text-4xl sm:text-6xl font-bold text-foreground mb-6 font-heading">
+            My Curated Haven
+          </h1>
+          <p className="text-xl text-foreground/70 leading-relaxed mb-6">
+            My Curated Haven is the product. It began as a parenting companion. Tiny Soho grew from that work as the place parents find toddler food ideas.
+          </p>
+          <p className="text-lg text-foreground/70 leading-relaxed mb-10">
+            This website is the home for those recipes: simple toddler recipes for busy families. The recipe collection is in preparation. Parenting tools, accounts, and purchases are not part of the site yet.
+          </p>
 
-                <Section className="bg-white">
-                    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
-                        <div className="text-center">
-                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                                <Heart size={32} />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-4 font-heading">Empathy First</h3>
-                            <p className="text-foreground/70">We understand the challenges of parenting because we've been there. Everything we build is designed with compassion.</p>
-                        </div>
-                        <div className="text-center">
-                            <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-secondary">
-                                <Shield size={32} />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-4 font-heading">Trust & Safety</h3>
-                            <p className="text-foreground/70">Your family's privacy and safety are our top priorities. We adhere to the strictest data protection standards.</p>
-                        </div>
-                        <div className="text-center">
-                            <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary-dark">
-                                <Sparkles size={32} />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-4 font-heading">Innovation</h3>
-                            <p className="text-foreground/70">We leverage the latest technology to provide you with the most accurate, timely, and helpful support possible.</p>
-                        </div>
-                    </div>
-                </Section>
-            </main>
+          <div className="grid gap-6">
+            <section className="rounded-3xl bg-white border border-primary/10 p-6">
+              <h2 className="text-2xl font-bold font-heading mb-2">The product</h2>
+              <p className="text-foreground/70 leading-relaxed">
+                My Curated Haven stays the name of the product and of mycuratedhaven.com.
+              </p>
+            </section>
+            <section className="rounded-3xl bg-white border border-primary/10 p-6">
+              <h2 className="text-2xl font-bold font-heading mb-2">The recipes</h2>
+              <p className="text-foreground/70 leading-relaxed">
+                Tiny Soho is the content brand. Recipe pages will live here, inside My Curated Haven, when they are ready to publish.
+              </p>
+            </section>
+            <section className="rounded-3xl bg-white border border-primary/10 p-6">
+              <h2 className="text-2xl font-bold font-heading mb-2">What is public now</h2>
+              <p className="text-foreground/70 leading-relaxed">
+                You can read this site and email support. There is no recipe library, no checkout, and no live chat.
+              </p>
+            </section>
+          </div>
 
-            <Footer />
+          <p className="mt-10 text-foreground/70">
+            Questions go to{" "}
+            <Link href="/support" className="font-semibold text-foreground underline underline-offset-4">
+              Support
+            </Link>
+            . The{" "}
+            <Link href="/privacy" className="font-semibold text-foreground underline underline-offset-4">
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link href="/terms" className="font-semibold text-foreground underline underline-offset-4">
+              Terms
+            </Link>{" "}
+            remain available and still need a review before any new account or payment data is collected.
+          </p>
         </div>
-    );
+      </main>
+
+      <Footer />
+    </div>
+  );
 }

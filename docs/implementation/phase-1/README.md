@@ -2,7 +2,7 @@
 
 [All implementation plans](../README.md) · [Phase 2 foundation plan](../phase-2/README.md)
 
-Status: planning documents only. Application changes and deployment are not completed by this package.
+Status: specification. Implementation evidence for branch `phase-1-site-foundation-k7m2` is in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md). Production is unchanged until that branch is reviewed and released.
 
 ## Outcome
 

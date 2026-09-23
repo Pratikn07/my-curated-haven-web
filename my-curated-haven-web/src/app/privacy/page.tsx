@@ -11,16 +11,19 @@ export default function Privacy() {
             <main className="flex-1 pt-20 pb-16">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-foreground/60 mb-12">Last updated: December 3, 2025</p>
+                    <p className="text-foreground/60 mb-6">Last updated: December 3, 2025</p>
+                    <p className="leading-relaxed mb-12 rounded-2xl bg-accent px-4 py-3 text-foreground">
+                        Note added September 22, 2026: this policy still describes the earlier mobile app as well as the website. The public website does not currently offer accounts, payments, or recipe purchases. We will update this policy before those features launch.
+                    </p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
                             <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">1. Introduction</h2>
                             <p className="leading-relaxed">
-                                My Curated Haven ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website (collectively, the "Service"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
+                                My Curated Haven (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and website (collectively, the &quot;Service&quot;). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
                             </p>
                             <p className="leading-relaxed">
-                                We reserve the right to make changes to this Privacy Policy at any time and for any reason. We will alert you about any changes by updating the "Last updated" date of this Privacy Policy. You are encouraged to periodically review this Privacy Policy to stay informed of updates.
+                                We reserve the right to make changes to this Privacy Policy at any time and for any reason. We will alert you about any changes by updating the &quot;Last updated&quot; date of this Privacy Policy. You are encouraged to periodically review this Privacy Policy to stay informed of updates.
                             </p>
                         </section>
 
@@ -60,7 +63,7 @@ export default function Privacy() {
                                 <li>Payment processors</li>
                             </ul>
 
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">2.4 Children's Privacy</h3>
+                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">2.4 Children&apos;s Privacy</h3>
                             <p className="leading-relaxed">
                                 We do not knowingly collect personal information from children under 13 years of age. The information collected about children (name, date of birth) is entered by parents/guardians and is used solely to provide personalized parenting content. This data is encrypted and never shared with third parties. If you believe we have collected information from a child under 13, please contact us immediately at privacy@mycuratedhaven.com.
                             </p>
@@ -72,7 +75,7 @@ export default function Privacy() {
                                 We use the information we collect or receive:
                             </p>
                             <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li><strong>To provide and maintain our Service</strong> - Deliver personalized content, tips, and milestone tracking based on your child's age and development</li>
+                                <li><strong>To provide and maintain our Service</strong> - Deliver personalized content, tips, and milestone tracking based on your child&apos;s age and development</li>
                                 <li><strong>To improve our Service</strong> - Analyze usage patterns to enhance user experience and develop new features</li>
                                 <li><strong>To communicate with you</strong> - Send administrative information, updates, and respond to inquiries</li>
                                 <li><strong>To send marketing communications</strong> - With your consent, send you promotional materials (you can opt out at any time)</li>
@@ -99,7 +102,7 @@ export default function Privacy() {
                             </p>
                             <ul className="list-disc pl-6 space-y-2 my-4">
                                 <li>Sell or rent your personal information to third parties</li>
-                                <li>Share your child's information with advertisers</li>
+                                <li>Share your child&apos;s information with advertisers</li>
                                 <li>Use your AI chat conversations for advertising purposes</li>
                             </ul>
                         </section>
