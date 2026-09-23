@@ -18,6 +18,7 @@ const deferredCopy = [
 
 const sitemapUrls = [
   "https://mycuratedhaven.com/",
+  "https://mycuratedhaven.com/recipes",
   "https://mycuratedhaven.com/about",
   "https://mycuratedhaven.com/support",
   "https://mycuratedhaven.com/privacy",
@@ -85,7 +86,7 @@ test("header and footer links stay on this site", async ({ page }) => {
   expect(hrefs.length).toBeGreaterThan(0);
   for (const href of hrefs) {
     expect(href, "deferred or future route linked").not.toMatch(
-      /^\/(features|resources|careers|contact|recipes|account)(\/|$)/,
+      /^\/(features|resources|careers|contact|account)(\/|$)/,
     );
     const response = await page.request.get(href);
     expect(response.status(), href).toBeLessThan(400);
@@ -198,7 +199,7 @@ test("sitemap lists only the public pages", async ({ request }) => {
   for (const url of sitemapUrls) {
     expect(xml).toContain(url);
   }
-  for (const blocked of ["/features", "/resources", "/careers", "/contact", "/recipes"]) {
+  for (const blocked of ["/features", "/resources", "/careers", "/contact"]) {
     expect(xml).not.toContain(`mycuratedhaven.com${blocked}`);
   }
 });
@@ -212,8 +213,8 @@ test("metadata uses the official origin", async ({ page }) => {
   );
 });
 
-test("the site does not link to a purchase or recipe library", async ({ page }) => {
+test("the site does not link to a purchase or mobile app store", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("link", { name: /buy/i })).toHaveCount(0);
-  await expect(page.locator("a[href*='/recipes'], a[href*='apps.apple.com']")).toHaveCount(0);
+  await expect(page.locator("a[href*='checkout'], a[href*='apps.apple.com']")).toHaveCount(0);
 });

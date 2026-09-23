@@ -1,13 +1,31 @@
 import type { MetadataRoute } from "next";
 import { SITE_ORIGIN, indexableRoutes } from "@/config/site-navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getPublishedCatalog } from "@/lib/data/recipes";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date("2026-09-22");
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const defaultDate = new Date("2026-09-22");
 
-  return indexableRoutes.map((route) => ({
+  const staticEntries: MetadataRoute.Sitemap = indexableRoutes.map((route) => ({
     url: `${SITE_ORIGIN}${route.path}`,
-    lastModified,
+    lastModified: defaultDate,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
+
+  try {
+    const supabase = await createClient();
+    const catalog = await getPublishedCatalog(supabase);
+
+    const recipeEntries: MetadataRoute.Sitemap = catalog.map((recipe) => ({
+      url: `${SITE_ORIGIN}/recipes/${recipe.slug}`,
+      lastModified: recipe.publishedAt ? new Date(recipe.publishedAt) : defaultDate,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+
+    return [...staticEntries, ...recipeEntries];
+  } catch {
+    return staticEntries;
+  }
 }

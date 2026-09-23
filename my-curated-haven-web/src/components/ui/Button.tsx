@@ -1,9 +1,10 @@
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, Ref } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   busy?: boolean;
   busyLabel?: string;
   variant?: "primary" | "secondary";
+  ref?: Ref<HTMLButtonElement>;
 };
 
 export default function Button({
@@ -14,6 +15,7 @@ export default function Button({
   children,
   disabled,
   type = "button",
+  ref,
   ...props
 }: ButtonProps) {
   const styles =
@@ -23,6 +25,7 @@ export default function Button({
 
   return (
     <button
+      ref={ref}
       type={type}
       disabled={disabled || busy}
       aria-busy={busy || undefined}
