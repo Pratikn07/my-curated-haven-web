@@ -56,6 +56,25 @@ async function clearMailpit() {
   }
 }
 
+async function submitEmailWithRetry(page: Page) {
+  const continueBtn = page.getByRole("button", { name: "Continue with Email" });
+  await continueBtn.click();
+
+  const codeHeading = page.getByRole("heading", { name: "Enter Verification Code" });
+  const rateLimitNotice = page.getByText(/you can only request this after/i);
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (await codeHeading.isVisible({ timeout: 2000 }).catch(() => false)) {
+      return;
+    }
+    if (await rateLimitNotice.isVisible().catch(() => false)) {
+      await page.waitForTimeout(1200);
+      await continueBtn.click();
+    }
+  }
+  await expect(codeHeading).toBeVisible({ timeout: 10_000 });
+}
+
 test.describe("Phase 7: Return Path Sanitization Unit Checks", () => {
   test("allows valid local recipe and account paths", () => {
     expect(sanitizeReturnTo("/recipes")).toBe("/recipes");
@@ -167,10 +186,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
 
     const emailInput = page.getByLabel(/email address/i);
     await emailInput.fill("buyer-a@synthetic.test");
-    await page.getByRole("button", { name: "Continue with Email" }).click();
-
-    // Code step appears
-    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
+    await submitEmailWithRetry(page);
     await expect(page.getByText("buyer-a@synthetic.test")).toBeVisible();
 
     // Retrieve OTP from Mailpit
@@ -207,8 +223,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     // 1. Sign in as Buyer A
     await page.goto("/sign-in?returnTo=/account/saved-recipes");
     await page.getByLabel(/email address/i).fill("buyer-a@synthetic.test");
-    await page.getByRole("button", { name: "Continue with Email" }).click();
-    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
+    await submitEmailWithRetry(page);
 
     const otp = await getLatestOtp("buyer-a@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
@@ -239,8 +254,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     // 1. Sign in as Buyer A
     await page.goto("/sign-in?returnTo=/recipes");
     await page.getByLabel(/email address/i).fill("buyer-a@synthetic.test");
-    await page.getByRole("button", { name: "Continue with Email" }).click();
-    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
+    await submitEmailWithRetry(page);
 
     const otp = await getLatestOtp("buyer-a@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
@@ -283,8 +297,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     // Sign in as Nonbuyer B
     await page.goto("/sign-in?returnTo=/account/saved-recipes");
     await page.getByLabel(/email address/i).fill("nonbuyer-b@synthetic.test");
-    await page.getByRole("button", { name: "Continue with Email" }).click();
-    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
+    await submitEmailWithRetry(page);
 
     const otp = await getLatestOtp("nonbuyer-b@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
@@ -306,8 +319,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     // 1. Sign in as Buyer A
     await page.goto("/sign-in?returnTo=/account");
     await page.getByLabel(/email address/i).fill("buyer-a@synthetic.test");
-    await page.getByRole("button", { name: "Continue with Email" }).click();
-    await expect(page.getByRole("heading", { name: "Enter Verification Code" })).toBeVisible();
+    await submitEmailWithRetry(page);
 
     const otp = await getLatestOtp("buyer-a@synthetic.test");
     await page.getByLabel(/6-digit code/i).fill(otp);
