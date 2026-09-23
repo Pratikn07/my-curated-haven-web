@@ -13,9 +13,11 @@ Planning status and product delivery status are separate. Merging a plan does no
 | 3 | Mobile-first design system, components, layouts and print patterns | [Phase 3 overview](phase-3/README.md) | Design source present, [recorded evidence](phase-3/IMPLEMENTATION-EVIDENCE.md) |
 | 4 | Backend security, recipe data, access rules and migrations | [Phase 4 overview](phase-4/README.md) | Implementation source present, [recorded evidence](phase-4/IMPLEMENTATION-EVIDENCE.md) |
 | 5 | Recipe structure, editorial review, and catalog ingestion | [Phase 5 overview](phase-5/README.md) | Catalog audited, mapping rules defined, [handoff complete](phase-5/IMPLEMENTATION-HANDOFF.md) |
-| 6 | Public free recipes, browsing, filters, detail and print | [Phase 6 overview](phase-6/README.md) | Plan documented, implementation pending |
-| 7 | Optional accounts and private saved recipes | [Phase 7 overview](phase-7/README.md) | Plan documented, identity verification and implementation pending |
+| 6 | Public free recipes, browsing, filters, detail and print | [Phase 6 overview](phase-6/README.md) | Implementation source merged in PR #14, [recorded evidence](phase-6/IMPLEMENTATION-EVIDENCE.md) |
+| 7 | Optional accounts and private saved recipes | [Phase 7 overview](phase-7/README.md) | Plan documented, implementation proposed in [PR #15](https://github.com/Pratikn07/my-curated-haven-web/pull/15), verification pending |
+| 8 | One-time checkout and purchased access | [Detailed plan PR #16](https://github.com/Pratikn07/my-curated-haven-web/pull/16) | Plan pushed, merge and implementation pending at the Phase 10 planning baseline |
 | 9 | Recipe funnel analytics, payment measurement and Tiny Soho attribution | [Phase 9 overview](phase-9/README.md) | Plan documented, implementation and provider decisions pending |
+| 10 | Launch QA, integrated journeys, security and release evidence | [Phase 10 overview](phase-10/README.md) | Plan documented, QA execution and launch approval pending |
 
 ## Product direction
 
@@ -37,8 +39,9 @@ See [confirmed scope and unresolved decisions](phase-1/PRODUCT-SCOPE.md). Do not
 6. Complete Phase 5 source mapping, recipe review and selection of the three free recipes.
 7. Deliver the [Phase 6 free recipe experience](phase-6/README.md). Frontend work can proceed with protected synthetic fixtures, but public release requires the backend and content gates.
 8. Add [Phase 7 accounts and saved recipes](phase-7/README.md), preserving anonymous free access and verified native identity continuity.
-9. Deliver Phase 8 one-time checkout and purchased access before enabling purchase analytics. Its detailed package is not present at this baseline.
+9. Deliver Phase 8 one-time checkout and purchased access before enabling purchase analytics. Its detailed package is proposed in [PR #16](https://github.com/Pratikn07/my-curated-haven-web/pull/16), pending merge at the Phase 10 planning baseline.
 10. Implement [Phase 9 measurement](phase-9/README.md) progressively as recipe, account and payment features become available. Keep Instagram automation separate from product data.
+11. Execute [Phase 10 launch QA](phase-10/README.md) against the integrated release candidate, close blocking defects and hand the evidence to Phase 11.
 
 Phase 1 documentation originally merged through [PR #1](https://github.com/Pratikn07/my-curated-haven-web/pull/1). Main now also contains Phase 1–3 implementation source and evidence files. Those files report work at their recorded commits and list outstanding checks. Source presence is not a fresh verification of current production behaviour.
 
@@ -52,9 +55,9 @@ Phase 1 documentation originally merged through [PR #1](https://github.com/Prati
 | 5 | Recipe structure and editorial review | [Detailed Phase 5 plan](phase-5/IMPLEMENTATION-PLAN.md) |
 | 6 | Free recipe experience | [Detailed Phase 6 plan](phase-6/IMPLEMENTATION-PLAN.md) |
 | 7 | Accounts and favourites | [Detailed Phase 7 plan](phase-7/IMPLEMENTATION-PLAN.md) |
-| 8 | One-time checkout and purchased access | Not written in this package |
+| 8 | One-time checkout and purchased access | [Detailed plan PR #16](https://github.com/Pratikn07/my-curated-haven-web/pull/16), pending merge at this baseline |
 | 9 | Analytics | [Detailed Phase 9 plan](phase-9/IMPLEMENTATION-PLAN.md) |
-| 10 | Launch QA | Not written in this package |
+| 10 | Launch QA | [Detailed Phase 10 plan](phase-10/IMPLEMENTATION-PLAN.md) |
 | 11 | Staged launch and operations | Not written in this package |
 | 12 | Evidence-led parenting expansion | Not written in this package |
 
