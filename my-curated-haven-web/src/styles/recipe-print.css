@@ -1,34 +1,64 @@
 @media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* Hide navigation, global headers/footers, dialogs, and non-printable elements */
   body:has(.recipe-print-root) header,
   body:has(.recipe-print-root) footer,
+  body:has(.recipe-print-root) nav,
+  body:has(.recipe-print-root) dialog,
   body:has(.recipe-print-root) .skip-link,
-  body:has(.recipe-print-root) .no-print {
+  body:has(.recipe-print-root) .no-print,
+  .no-print {
     display: none !important;
   }
 
   body:has(.recipe-print-root) {
-    background: #fff;
-    color: #1c1917;
+    background: #fff !important;
+    color: #1c1917 !important;
   }
 
   .recipe-print-root {
-    max-width: none;
-    color: #1c1917;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #1c1917 !important;
+    background: #fff !important;
   }
 
+  /* Prevent headings from being orphaned at the bottom of a page */
   .recipe-print-root h1,
   .recipe-print-root h2,
-  .recipe-print-root li {
+  .recipe-print-root h3 {
     break-after: avoid;
+    page-break-after: avoid;
   }
 
-  .recipe-print-root li,
-  .recipe-print-root p {
+  /* Allow lists and sections to flow naturally across pages */
+  .recipe-print-root section {
+    break-inside: auto;
+    page-break-inside: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Short paragraphs and list items avoid breaking inside if practical */
+  .recipe-print-root li {
     break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .recipe-print-image {
-    max-height: 2.5in;
+    max-height: 2.2in;
     width: auto;
+    object-fit: contain;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Make links visible without underlines and remove anchor URLs clutter */
+  .recipe-print-root a {
+    text-decoration: none !important;
+    color: inherit !important;
   }
 }

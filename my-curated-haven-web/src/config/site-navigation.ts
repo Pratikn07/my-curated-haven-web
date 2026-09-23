@@ -9,11 +9,13 @@ export type NavLink = {
 
 export const headerLinks: NavLink[] = [
   { href: "/", label: "Home" },
+  { href: "/recipes", label: "Recipes" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
 ];
 
 export const footerLinks: NavLink[] = [
+  { href: "/recipes", label: "Recipes" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
   { href: "/privacy", label: "Privacy" },
@@ -26,6 +28,7 @@ export const indexableRoutes: {
   priority: number;
 }[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
+  { path: "/recipes", changeFrequency: "weekly", priority: 0.8 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/support", changeFrequency: "monthly", priority: 0.6 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
