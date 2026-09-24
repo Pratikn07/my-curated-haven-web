@@ -21,6 +21,16 @@ Planning status and product delivery status are separate. Merging a plan does no
 | 11 | Staged launch, operations, support and first-month review | [Phase 11 overview](phase-11/README.md) | Plan documented, production preparation and launch execution pending |
 | 12 | Evidence-led parenting expansion, native reuse and one bounded pilot | [Phase 12 overview](phase-12/README.md) | Plan documented, research, feature selection and pilot execution pending |
 
+## Separate implementation efforts
+
+These efforts sit outside the numbered roadmap. They keep their own task IDs, scope and release evidence.
+
+| Effort | Focus | Start here | Delivery status |
+| --- | --- | --- | --- |
+| Homepage vision and feature previews | Broader My Curated Haven homepage, recipe entry and static sneak peeks of Parenting Chat, Curated Shop and Bloom | [Homepage vision plan](homepage-vision/README.md) | Plan documented, homepage implementation and release pending |
+
+The homepage effort does not implement the previewed features, replace Phase 12 or create Phase 13. Its release state follows verified recipe and commerce readiness.
+
 ## Product direction
 
 My Curated Haven remains the brand and https://mycuratedhaven.com/ remains the official domain. “Recipes by Tiny Soho, inside My Curated Haven.” connects the audience to the product.
@@ -72,3 +82,5 @@ Some work overlaps. Define analytics events before feature instrumentation, and 
 Use `docs/implementation/phase-N/` for each future phase. Add a README linking to the detailed plan and supporting documents. Keep one authoritative plan per phase and update this index when a new phase is added.
 
 Record task IDs, dependencies, file targets, verification and remaining questions. Mark work complete only with execution evidence. Preserve older phase links rather than renaming directories during routine updates.
+
+For separate efforts, use a descriptive directory such as `homepage-vision/` and a distinct task prefix. Keep these entries in the separate-efforts table rather than extending the numbered phase sequence.
