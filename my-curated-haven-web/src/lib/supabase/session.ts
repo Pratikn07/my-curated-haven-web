@@ -4,11 +4,23 @@ import type { Database } from "../types/database";
 import { getSupabasePublicConfig } from "./env";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  const passthrough = NextResponse.next({ request });
 
-  const { url: supabaseUrl, key: supabaseAnonKey } = getSupabasePublicConfig();
+  try {
+    return await refreshSession(request, passthrough);
+  } catch {
+    return { supabaseResponse: passthrough, user: null };
+  }
+}
+
+async function refreshSession(request: NextRequest, passthrough: NextResponse) {
+  const config = getSupabasePublicConfig();
+  if (!config) {
+    return { supabaseResponse: passthrough, user: null };
+  }
+
+  let supabaseResponse = passthrough;
+  const { url: supabaseUrl, key: supabaseAnonKey } = config;
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
