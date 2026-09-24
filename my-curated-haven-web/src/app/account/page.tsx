@@ -121,20 +121,20 @@ export default async function AccountPage() {
             </div>
             <div className="min-w-0">
               <h2 className="text-base font-bold text-foreground">
-                Account Closure & Data Deletion
+                Request Account Closure
               </h2>
               <p className="mt-1 text-sm text-text-muted break-words">
-                To close your My Curated Haven account and remove your bookmarks and personal
-                data, please send a message to{" "}
+                To request closure of your My Curated Haven account, email our support team at{" "}
                 <a
                   href="mailto:support@mycuratedhaven.com"
                   className="font-medium text-action underline hover:text-action-hover break-all"
                 >
                   support@mycuratedhaven.com
                 </a>{" "}
-                from your registered email address (<span className="break-all">{user.email}</span>). Account closure is
-                support-assisted to ensure identity verification and protect shared mobile app
-                settings.
+                from your registered email address (<span className="break-all">{user.email}</span>).
+                Sending an email does not by itself delete your account or saved recipes. Because
+                this login may be shared with the parenting app, support will verify your identity
+                and review what can be closed or removed.
               </p>
             </div>
           </div>

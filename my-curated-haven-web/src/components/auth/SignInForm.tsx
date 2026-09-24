@@ -86,8 +86,18 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
               Sign In
             </h1>
             <p className="mt-2 text-sm text-text-muted">
-              Enter your email to receive a one-time verification code. Sign in to save
-              recipes and access them across all your devices.
+              Enter your email to receive a one-time verification code. If you enter a new
+              email address, we&apos;ll create a My Curated Haven account for you. Sign in to
+              save recipes and access them across all your devices. By continuing, you agree
+              to our{" "}
+              <Link href="/terms" className="underline hover:text-foreground">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="underline hover:text-foreground">
+                Privacy Policy
+              </Link>
+              .
             </p>
           </div>
 
@@ -128,17 +138,6 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
             {isPending ? "Sending code..." : "Continue with Email"}
           </button>
 
-          <p className="text-center text-xs text-text-muted">
-            By continuing, you agree to our{" "}
-            <Link href="/terms" className="underline hover:text-foreground">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="underline hover:text-foreground">
-              Privacy Policy
-            </Link>
-            .
-          </p>
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="space-y-6">
