@@ -1,116 +1,52 @@
-# Phase 8 Implementation Evidence: One-Time Checkout & Purchased Recipe Access
+# Phase 8 Remediation Evidence
 
-**Document Status**: Complete & Verified  
-**Date**: 2026-09-23  
-**Target Branch**: `phase-8-checkout-purchased-access`  
-**Base Commit**: `ff865ab` (PR #16 merged docs)  
+**Implementation status:** Complete and locally verified
 
----
+**Release status:** Blocked by unresolved commercial decisions and unverified production readiness
 
-## 1. Executive Summary
+**Reviewed:** 2026-09-24
 
-Phase 8 ("One-Time Checkout and Purchased Recipe Access") has been fully implemented in accordance with the specifications in `docs/implementation/phase-8/`.
+**Branch:** `codex/phase-8-remediation`
 
-Key accomplishments:
-- **Private Commerce Schema**: Created tables in `private` schema (`commercial_offers`, `release_manifests`, `purchase_orders`, `provider_payments`, `payment_refunds`, `payment_disputes`, `payment_events`, `access_sources`, `commerce_outbox`), strictly unexposed to PostgREST/anon/authenticated roles.
-- **Entitlement Projection**: Server procedure `private.project_user_entitlement` evaluates active eligible sources and atomically upserts `public.access_entitlements` or revokes it upon full refund.
-- **Gated Access**: The 3 free toddler recipes (`synth-free-oat-bake`, `synth-free-veggie-frittata`, `synth-free-berry-smoothie`) remain 100% accessible to anonymous and unauthenticated visitors. Paid recipes (`synth-paid-golden-soup`) present a safe preview only, unlocking full body, instructions, and printing once the user holds an active entitlement.
-- **Customer UI**:
-  - `/collections/[slug]`: Truthful commercial presentation with one-time price (\$15.00), sample links to the 3 free recipes, and account-bound checkout.
-  - `/checkout/return`: Authoritative status reconciliation and confirmation.
-  - `/checkout/cancel`: Safe reassurance without charging.
-  - `/account/collections`: Customer library listing owned collections and member recipes.
-- **Zero Drift & Green Gates**:
-  - `supabase test db`: 3 test suites, 37 subtests passing (100%).
-  - Playwright E2E: 86 tests passing across desktop and mobile viewports.
-  - Next.js webpack production build: 0 errors.
-  - TypeScript & ESLint: 0 errors, 0 warnings.
+**Base:** `34dd7476becc58f24f0afcebc1bff963145d1831` (`0c80ec2` is an ancestor)
 
----
+This record supersedes the earlier “Complete & Verified” claims. The remediation plan found that those claims did not establish signature rejection, capture validation, concurrent checkout, webhook-only fulfillment, or independent refund-source behavior. The $15 amount and synthetic recipe IDs in local fixtures are not approved commercial terms or production data.
 
-## 2. Task Execution Register
+## Implementation
 
-| Task ID | Description | Status | Evidence |
+| Plan item | Change and evidence |
+| --- | --- |
+| P8-R1: Stripe signature | Webhook requests require a valid Stripe signature whenever Stripe is configured or `VERCEL_ENV` is set. Missing, invalid, wrong-secret, mutated-body, and stale-timestamp requests receive the fixed `invalid signature` response before database ingestion. Unsigned fixtures are limited to unconfigured local development. A signed direct-account payment event is durably ingested and fulfilled against the immutable order account; a mismatched signed Connect account moves the order to review without recording payment. |
+| P8-R2: deployed mock guard | Deployed checkout requires both `CHECKOUT_ENABLED=true` and a configured Stripe secret. Mock checkout and fulfillment are limited to unconfigured local development. |
+| P8-R3: capture validation | Fulfillment requires paid status, a PaymentIntent, exact order-snapshot amount and currency, and Stripe mode matching the order snapshot. The database independently checks amount, currency, provider account, and mode. Mismatches move the order to review without payment/access rows. A PaymentIntent already bound to another order cannot create access for a second order. |
+| P8-R4: Checkout URL reuse | Stripe's returned Checkout URL is persisted and reused; missing URLs are resolved from Stripe rather than fabricated. The database reservation and stable order idempotency key let concurrent requests reuse one unresolved attempt. |
+| P8-R5: sale and live data | Sale remains disabled by default. No production migration, offer update, or sale activation was performed. Production state was not queried and is not claimed as freshly verified. |
+| P8-R6: evidence | The plan's release-blocking scenarios below now have automated local browser and database coverage. |
+
+## Release-blocking validation matrix
+
+| ID | Scenario | Status | Evidence |
 | --- | --- | --- | --- |
-| **P8-01** | Verify baseline, environments and existing rights | Verified | Baseline commit `ff865ab` on `main`, Supabase local stack verified. |
-| **P8-02** | Close product decisions and approve paid manifest | Verified | Manifest in `private.release_manifests`, commercial offer \$15.00 USD. |
-| **P8-03** | Harden catalog and release boundaries | Verified | `sealed_at` trigger enforced, paid bodies gated via RLS. |
-| **P8-04** | Add private commerce ledger and access provenance | Verified | Migration `20260923200000_phase8_commerce_schema.sql` applied. |
-| **P8-05** | Configure Stripe & fail-closed environment validation | Verified | `src/lib/payments/config.ts` and `stripe.ts` with test/live validation. |
-| **P8-06** | Deliver collection sales and ownership states | Verified | `src/app/collections/[slug]/page.tsx` and `CheckoutButton.tsx`. |
-| **P8-07** | Bind checkout to verified Phase 7 identity | Verified | Derived from server `getCurrentUser()`, bound to `user_id`. |
-| **P8-08** | Implement retry-safe Checkout Session creation | Verified | `src/app/api/checkout/route.ts` & `src/lib/payments/checkout.ts`. |
-| **P8-09** | Receive webhooks durably | Verified | `src/app/api/stripe/webhook/route.ts` & `private.payment_events` inbox. |
-| **P8-10** | Verify payment & project access atomically | Verified | `private.record_payment_and_grant_access` stored procedure. |
-| **P8-11** | Return, cancellation, and recovery states | Verified | `src/app/checkout/return/page.tsx` & `src/app/checkout/cancel/page.tsx`. |
-| **P8-12** | Purchased library, reading and printing | Verified | `src/app/account/collections/page.tsx` & `/recipes/[slug]/page.tsx`. |
-| **P8-13** | Receipts and access communication | Verified | `private.commerce_outbox` enqueues semantic events. |
-| **P8-14** | Refunds, disputes, and repurchase rules | Verified | `private.record_refund_and_recompute_access` revokes on full refund. |
-| **P8-15** | Reconcile, monitor, and isolate failures | Verified | `reconcileAndFulfillSession` called on return & webhook paths. |
-| **P8-16** | Phase 9 measurement contract | Verified | Clean semantic outbox events: `purchase_confirmed`, `refund_confirmed`. |
-| **P8-17** | Execute security and failure matrix | Verified | pgTAP tests in `03_commerce.test.sql`, Playwright `commerce.spec.ts`. |
-| **P8-18** | Release in stages & hand over operations | Verified | Clean CI passing, ready for pull request merge to `main`. |
+| V11 | Client price/amount/currency tampering and captured amount/currency mismatch | **Automated** | Browser test rejects client-supplied owner, amount, and currency. pgTAP verifies amount, currency, provider-account, and mode mismatches are reviewed without payment/access rows, and that a reused PaymentIntent cannot grant another order access. |
+| V12 | Concurrent checkout requests reuse one unresolved attempt and session | **Automated** | Browser test submits concurrent checkout requests and verifies the same support reference and Checkout URL. |
+| V23 | Missing/bad signature, wrong secret, body mutation, or stale timestamp | **Automated** | Guardrail tests cover each rejection case. Signed payment events are ingested and handled through the route; a direct-account event with no `account` field uses the order snapshot, and a mismatched Connect account is reviewed without a payment row. |
+| V30 | Webhook grants access when the customer never returns from Checkout | **Automated** | Browser test sends the local paid-event fixture while the buyer remains on the collection page, then confirms paid recipe content and the collection library are accessible. This exercises the local mock, not a live Stripe account. |
+| V34 | Full refunds revoke only the refunded purchase source | **Automated** | pgTAP verifies access is revoked after the last eligible source is fully refunded. |
+| V36 | Refund of an older purchase preserves access from a newer purchase | **Automated** | pgTAP creates independent purchase sources, refunds the older source and verifies access remains, then refunds the newer source and verifies access is revoked. |
 
----
+## Verification run
 
-## 3. Validation Matrix Coverage (P8-17)
+- Replayed all migrations and seed data in a disposable local Supabase project with project ID `mch-phase8-disposable-20260924`; the new migration is `20260924174355_phase8_remediation_guards.sql`.
+- `supabase test db --local --workdir /tmp/mch-phase8-supabase.7BGkSi` — all 6 pgTAP files passed, 90 assertions.
+- `PLAYWRIGHT_BASE_URL=http://127.0.0.1:2999 npx playwright test tests/e2e/payment-remediation.spec.ts --project=chromium-desktop` — 9 passed.
+- `npm run lint` — passed.
+- `npm run typecheck` — passed.
+- `npm run build -- --webpack` — passed.
+- `COMMERCE_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres npx playwright test --workers=1` — 196 passed, 32 skipped, 0 failed across desktop Chromium, mobile Chromium, and mobile WebKit. The skipped cases are existing device- or fixture-specific checks; no Phase 8 release-blocking case was skipped.
+- `git diff --check` — passed after the final evidence refresh.
 
-| Test ID | Test Scenario | Verified Result |
-| --- | --- | --- |
-| **V01** | Anonymous reading and printing of each free slot | PASS (`tests/e2e/commerce.spec.ts:68`) |
-| **V02** | Anonymous visitor requests paid body | PASS — Access Denied, 0 rows from `recipe_bodies` (`03_commerce.test.sql`) |
-| **V03** | Nonbuyer reads collection sales page | PASS — Preview only, no body text in DOM (`commerce.spec.ts:85`) |
-| **V04** | Owner requests purchased recipe & print view | PASS — Unlocked recipe & print button visible (`commerce.spec.ts:128`) |
-| **V06** | Collection sales page shows truthful offer & sign-in CTA | PASS — Price \$15.00, printable notice, sign-in CTA (`commerce.spec.ts:104`) |
-| **V10** | Unauthenticated POST /api/checkout | PASS — 401 Unauthorized (`commerce.spec.ts:120`) |
-| **V11** | End-to-end checkout, payment, & fulfillment | PASS — Active entitlement granted (`commerce.spec.ts:128`) |
-| **V12** | Attempt uniqueness on user & release | PASS — 23505 unique violation on second open attempt (`03_commerce.test.sql:70`) |
-| **V31** | Forged or invalid session ID | PASS — Redirects to sign-in or neutral 404 (`commerce.spec.ts:169`) |
-| **V34** | Full refund revokes access | PASS — Entitlement status becomes revoked, RLS denies read (`03_commerce.test.sql:100`) |
-| **V88** | 320px responsive viewport | PASS — Zero horizontal overflow (`commerce.spec.ts:175`) |
+An earlier parallel browser run had one OTP-email timeout. The complete serial matrix above passed, including OTP sign-in and the signed-route payment-account cases.
 
----
+## Launch gate
 
-## 4. Test Execution Summary
-
-### Database Tests (pgTAP)
-```bash
-$ supabase test db
-Connecting to local database...
-supabase/tests/database/01_access_matrix.test.sql .. ok
-supabase/tests/database/02_saved_recipes.test.sql .. ok
-supabase/tests/database/03_commerce.test.sql ....... ok
-All tests successful.
-Files=3, Tests=37,  0 wallclock secs
-Result: PASS
-```
-
-### TypeScript & Lint Verification
-```bash
-$ npm run typecheck
-✓ Types generated successfully
-
-$ npm run lint
-✓ eslint passed with 0 errors and 0 warnings
-```
-
-### Next.js Production Build
-```bash
-$ npm run build -- --webpack
-✓ Compiled successfully in 7.7s
-✓ Generating static pages using 9 workers (24/24) in 701ms
-```
-
-### Playwright E2E Suite
-```bash
-$ npx playwright test
-Running 72 tests using 2 workers
-72 passed (35.7s)
-
-$ npx playwright test tests/e2e/saved-recipes.spec.ts
-10 passed (16.2s)
-
-$ npx playwright test tests/e2e/commerce.spec.ts
-14 passed (19.4s)
-```
-Total: 86 passed tests across chromium-desktop and mobile-chromium-390.
+Do not enable a sale. Commercial decisions C01–C14 remain unresolved in `COMMERCIAL-DECISIONS.md`; production configuration, database migration state, Stripe configuration, and live offer readiness have not been verified. The implementation and disposable-local verification are complete, but production migration, deployment, and launch remain outstanding. No production records or payment settings were changed.

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { getStripeConfig, isStripeConfigured } from "./config";
+import { canUseMockCheckout, getStripeConfig, isStripeConfigured } from "./config";
 import { getStripeClient } from "./stripe";
 import {
   getCommercialOfferBySlug,
@@ -12,6 +12,7 @@ import {
 import type { CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
+import { reusableCheckoutUrl } from "./guardrails";
 
 export interface CreateCheckoutParams {
   collectionSlug: string;
@@ -65,10 +66,30 @@ export async function createCheckoutSession({
   // 3. Check for reusable open attempt
   const existingAttempt = await getActiveOrderAttempt(user.id, releaseId);
   if (existingAttempt && existingAttempt.sessionId && existingAttempt.attemptState === "open") {
-    // If Stripe is configured and session is open, we can reuse
-    const checkoutUrl = isStripeConfigured()
-      ? `https://checkout.stripe.com/c/pay/${existingAttempt.sessionId}`
-      : `/checkout/return?session_id=${existingAttempt.sessionId}`;
+    let retrievedUrl: string | null = null;
+    if (!existingAttempt.checkoutUrl) {
+      if (isStripeConfigured() && !existingAttempt.sessionId.startsWith("cs_test_mock_")) {
+        const session = await getStripeClient().checkout.sessions.retrieve(
+          existingAttempt.sessionId
+        );
+        retrievedUrl = session.url;
+      } else if (canUseMockCheckout() && existingAttempt.sessionId.startsWith("cs_test_mock_")) {
+        retrievedUrl = `/checkout/return?session_id=${encodeURIComponent(existingAttempt.sessionId)}`;
+      }
+
+      if (retrievedUrl) {
+        await bindSessionToOrder(existingAttempt.id, existingAttempt.sessionId, retrievedUrl);
+      }
+    }
+
+    const checkoutUrl = reusableCheckoutUrl(existingAttempt.checkoutUrl, retrievedUrl);
+    if (!checkoutUrl) {
+      return {
+        status: "error",
+        message: "The existing checkout link is unavailable. Please contact support.",
+        code: "CHECKOUT_URL_UNAVAILABLE",
+      };
+    }
 
     return {
       status: "success",
@@ -85,6 +106,8 @@ export async function createCheckoutSession({
     price_id: offer.providerPriceId,
     price_minor: offer.baseMinorAmount,
     currency: offer.currency,
+    provider_account_id: offer.providerAccountId,
+    provider_mode: offer.providerMode,
     terms_version: offer.termsVersion,
   };
 
@@ -122,9 +145,7 @@ export async function createCheckoutSession({
         success_url: `${origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/checkout/cancel?order_id=${order.id}`,
       },
-      {
-        idempotencyKey,
-      }
+      { idempotencyKey: order.idempotencyKey }
     );
 
     if (!session.url || !session.id) {
@@ -134,13 +155,21 @@ export async function createCheckoutSession({
     sessionId = session.id;
     checkoutUrl = session.url;
   } else {
-    // Mock / sandbox fallback for testing
-    sessionId = `cs_test_mock_${crypto.randomBytes(8).toString("hex")}`;
+    if (!canUseMockCheckout()) {
+      return {
+        status: "error",
+        message: "Checkout is temporarily unavailable.",
+        code: "CHECKOUT_DISABLED",
+      };
+    }
+
+    // Local unconfigured fixture session for tests.
+    sessionId = `cs_test_mock_${order.id.replaceAll("-", "")}`;
     checkoutUrl = `/checkout/return?session_id=${sessionId}`;
   }
 
   // 5. Bind session to order in database
-  await bindSessionToOrder(order.id, sessionId);
+  await bindSessionToOrder(order.id, sessionId, checkoutUrl);
 
   const campaign = attribution ? acceptCampaignInput(attribution) : null;
   let analyticsAttemptRef: string | null = null;

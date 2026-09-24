@@ -21,16 +21,23 @@ export async function POST(request: Request) {
       };
     };
 
-    if (isStripeConfigured() && signature) {
+    const stripeConfigured = isStripeConfigured();
+    const allowUnsignedFixture =
+      !stripeConfigured && process.env.VERCEL_ENV === undefined;
+
+    if (!allowUnsignedFixture) {
+      if (!signature) {
+        return NextResponse.json({ error: "invalid signature" }, { status: 400 });
+      }
+
       try {
         const verified = constructWebhookEvent(rawBody, signature, config.webhookSecret);
         event = verified as unknown as typeof event;
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Invalid signature";
-        return NextResponse.json({ error: `Webhook signature verification failed: ${msg}` }, { status: 400 });
+      } catch {
+        return NextResponse.json({ error: "invalid signature" }, { status: 400 });
       }
     } else {
-      // In mock / test mode or test environments
+      // Unsigned fixtures are restricted to local, unconfigured development.
       try {
         const parsed = JSON.parse(rawBody);
         event = {

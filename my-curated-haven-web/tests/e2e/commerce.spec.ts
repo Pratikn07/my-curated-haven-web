@@ -136,7 +136,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     expect(unauthRes.status()).toBe(401);
   });
 
-  test("V11, V22, V30, V36: End-to-end purchase, webhook fulfillment, and recipe unlocking", async ({ page }) => {
+  test("V11, V12, V30: rejects client price overrides; concurrent checkout reuses one session and webhook fulfills without a return", async ({ page }) => {
     const testEmail = `buyer-${Date.now()}@synthetic.test`;
 
     // 1. Sign in via OTP
@@ -154,16 +154,60 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     const buyButton = page.getByRole("button", { name: /Buy Collection — \$15\.00/i });
     await expect(buyButton).toBeVisible();
 
-    // 3. Click Buy Collection -> Starts checkout session and redirects to return flow
-    await buyButton.click();
-    await page.waitForURL(/\/checkout\/return\?session_id=/, { timeout: 15_000 });
+    const tamperedCheckout = await page.request.post("/api/checkout", {
+      data: {
+        collectionSlug: "comfort-haven-collection",
+        userId: "00000000-0000-0000-0000-000000000001",
+        amount: 1,
+        currency: "eur",
+      },
+    });
+    expect(tamperedCheckout.status()).toBe(400);
+    expect(await tamperedCheckout.json()).toMatchObject({ error: "Unknown checkout field." });
 
-    // 4. Return page confirms purchase and access activation
-    await expect(page.getByRole("heading", { name: "Purchase Confirmed!" })).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText(/Access Status:/i)).toBeVisible();
-    await expect(page.getByText(/Active & Unlocked/i)).toBeVisible();
+    // Two simultaneous requests must reserve one order and reuse one Checkout URL.
+    const checkoutReplies = await page.evaluate(async () => {
+      const createAttempt = async () => {
+        const response = await fetch("/api/checkout", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ collectionSlug: "comfort-haven-collection" }),
+        });
+        return { status: response.status, body: await response.json() };
+      };
+      return Promise.all([createAttempt(), createAttempt()]);
+    });
 
-    // 5. Customer can now read and print the previously locked recipe!
+    expect(checkoutReplies.map((reply) => reply.status)).toEqual([200, 200]);
+    expect(checkoutReplies[0].body.supportReference).toBe(checkoutReplies[1].body.supportReference);
+    expect(checkoutReplies[0].body.checkoutUrl).toBe(checkoutReplies[1].body.checkoutUrl);
+
+    const checkoutUrl = new URL(checkoutReplies[0].body.checkoutUrl, page.url());
+    const sessionId = checkoutUrl.searchParams.get("session_id");
+    expect(sessionId).toMatch(/^cs_test_mock_/);
+
+    // A local Stripe fixture arrives while the browser is still on the collection page.
+    const webhookResponse = await page.request.post("/api/stripe/webhook", {
+      data: {
+        id: `evt_test_checkout_${Date.now()}`,
+        type: "checkout.session.completed",
+        livemode: false,
+        data: {
+          object: {
+            id: sessionId,
+            payment_status: "paid",
+            amount_total: 1500,
+            currency: "usd",
+            payment_intent: `pi_${sessionId}`,
+          },
+        },
+      },
+    });
+    expect(webhookResponse.status()).toBe(200);
+    await expect(page).toHaveURL(/\/collections\/comfort-haven-collection/);
+
+    // The customer can read and print the paid recipe without visiting Checkout return.
     await page.goto("/recipes/synth-paid-golden-soup");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Synthetic Paid Golden Lentil Soup");
     await expect(page.getByRole("heading", { name: "Ingredients" })).toBeVisible();
@@ -174,7 +218,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     const unlockedContent = await page.content();
     expect(unlockedContent).toContain("SENTINEL_PAID_GOLDEN_SOUP_PROTECTED_SECRET");
 
-    // 6. Purchased collection appears in customer library /account/collections
+    // Purchased collection appears in customer library /account/collections.
     await page.goto("/account/collections");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("My Recipe Collections");
     await expect(page.getByText("The Comfort Haven Collection")).toBeVisible();
