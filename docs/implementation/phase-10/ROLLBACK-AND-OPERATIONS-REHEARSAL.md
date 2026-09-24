@@ -52,4 +52,4 @@ Support tooling must record operator, reason, time and before/after state for an
 
 Hand over the tested switch, runbooks, alert routing, actual recovery timings, unresolved noncritical limitations and exact candidate. Phase 11 defines the first audience cohort, traffic expansion, observation window and production smoke.
 
-A controlled live payment, if required to verify merchant settings, needs a concrete approved amount/account/refund procedure and appropriate authorisation. Sandbox success alone does not confirm every live merchant setting. Keep live verification distinct from CI and from this documentation task.
+Use sandbox/test mode for payment tests. Stripe prohibits testing in live mode with real payment details. Verify live merchant configuration through provider settings and observe genuine customer transactions only after the authorised launch. Do not use staff self-purchases/refunds as QA. See [Phase 11 production readiness](../phase-11/PRODUCTION-READINESS.md) and [Stripe testing guidance](https://docs.stripe.com/testing). This clarification supersedes the earlier suggestion of a controlled live test payment.

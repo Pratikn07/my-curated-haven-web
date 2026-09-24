@@ -211,7 +211,7 @@ All tasks below start pending. Dependencies identify order, not completion. Prop
 **Depends on:** P10-15. **Owner:** release lead and operations owner.
 
 - Hand over exact artifact/configuration, rollout cohort, checkout switch, monitoring and rollback steps.
-- Define production read-only smoke checks and the separately authorised controlled payment verification, if needed.
+- Define production read-only smoke checks and sandbox payment validation. Observe genuine sales after authorised launch, with no live test-payment step.
 - Confirm support coverage and decision points for expanding or stopping traffic.
 - Schedule field performance and real-user feedback review after launch, without claiming prelaunch evidence already covers them.
 
