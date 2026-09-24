@@ -176,3 +176,44 @@ Running 105 tests using 9 workers
 - **No User Accounts / Authentication UI**: Reserved for Phase 7 ("Saved Recipes and User Profile").
 - **No Paid Recipe Purchase Flow**: Reserved for Phase 8 ("Paid Collections and Checkout").
 - **No Analytics Tracking**: Reserved for Phase 9 ("Analytics and Feedback").
+
+---
+
+## P6 Remediation Plan Follow-up (PR #24)
+
+The documentation-only remediation plan from PR #24 was implemented on branch `codex/phase-6-free-recipes-remediation`, based on `3475f62` (`docs(phase-6): add the free-recipe remediation plan (#24)`). No production recipe data was changed and no deployment was made.
+
+### P6-R1 — Public catalog uses free slots
+
+- The public `/recipes` index and dynamic sitemap now use only recipes assigned to free slots, preserving slot order.
+- Sibling recommendations use the same free-slot catalog. A failed free-slot lookup does not fall back to all published recipes. Paid recipe detail URLs retain their existing access behavior.
+- Playwright coverage verifies index order, sitemap exclusion, sibling recommendations, and omission of published recipes without free slots.
+
+### P6-R2 — Allergen copy reflects review state
+
+- The `reviewed_no_allergens` state now says: “Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.” It no longer claims the recipe does not contain named common allergens.
+- Listed allergens remain visible as badges. An empty allergen array alone does not imply a completed review; unknown or inconsistent states use the unreviewed warning.
+- Helper-level and page-level Playwright coverage passed for the explicit states and listed badges.
+
+### P6-R3 — Approved recipe rendering coverage
+
+- Added an end-to-end check for `sweet-potato-and-spinach-frittata-fingers`, `soft-baked-blueberry-and-oat-bars`, and `salmon-and-pea-fish-cakes`. When the approved rows are present, it checks the rendered ingredient list and ordered steps against the corresponding recipe body rows, and checks the oat-bars allergen wording.
+- The local Supabase seed has none of these three approved recipes, so this check skipped as permitted by the plan. It makes no production database writes. The selection document contains exact ingredient and step expectations for slot 1 only; slots 2 and 3 are compared to their source rows when available, not to invented editorial expectations. This is a rendering check, not an independent content audit.
+
+### P6-R4 — Manual print review
+
+- Blocked during this follow-up: the live `/recipes` page showed “Recipes Temporarily Unavailable,” and the three approved recipe detail routes showed “Unable to Load Recipe.” A4 and US Letter print previews could not be reviewed or captured.
+- No print CSS was changed. Repeat the manual review once the public recipe pages load, and change CSS only if it fixes an observed clipping issue.
+
+### Verification on the remediation branch
+
+```text
+npm run lint       passed
+npm run typecheck  passed
+npm run build      passed
+git diff --check   passed
+```
+
+A prior full local Playwright run completed with 169 passed, 32 skipped, and 0 failures. During release preparation, after resetting the local Supabase database and running `CI=true npm run verify`, lint, typecheck, and build passed, but the browser suite reported 162 passed, 32 skipped, and 3 failures (4 tests did not run): the saved-recipes OTP test timed out while setting up a browser context; a WebKit analytics-consent click timed out waiting for a stable footer button; and the existing WebKit recipe-search test did not update the URL. The new Phase 6 catalog and allergen checks passed on Chromium desktop; the approved-live-recipe check skipped because its rows are absent locally. These failures did not reproduce in the prior full run. GitHub `web-quality` and `backend-quality` checks are the release gates.
+
+The browser runs emitted non-failing Next.js server messages stating “The destination stream closed early.” All local browser checks used local Supabase fixtures; they do not establish current production data behavior.
