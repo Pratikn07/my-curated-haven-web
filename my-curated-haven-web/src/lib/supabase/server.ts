@@ -1,13 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "../types/database";
+import { getSupabasePublicConfig } from "./env";
 
 export async function createClient() {
   const cookieStore = await cookies();
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321";
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+  const { url: supabaseUrl, key: supabaseAnonKey } = getSupabasePublicConfig();
 
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {

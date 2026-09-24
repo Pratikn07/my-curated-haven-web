@@ -93,11 +93,13 @@ export async function getPublishedCatalog(
     )
     .order("title");
 
-  if (error) {
-    throw new Error(`Failed to fetch recipe catalog: ${error.message}`);
+  if (error || !data) {
+    throw new Error(
+      `Failed to fetch recipe catalog: ${error?.message ?? "empty catalog response"}`
+    );
   }
 
-  return (data || []).map(mapCatalogRow);
+  return data.map(mapCatalogRow);
 }
 
 /**
