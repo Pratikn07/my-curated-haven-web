@@ -15,6 +15,7 @@ Reuse the existing parenting-app identity and saved-recipe model where the verif
 | Document | Purpose |
 | --- | --- |
 | [Implementation plan](IMPLEMENTATION-PLAN.md) | Ordered tasks, file targets and acceptance criteria |
+| [Remediation plan](REMEDIATION-PLAN.md) | Fixes required after the Phase 7 implementation. Documentation only |
 | [Existing accounts and data](EXISTING-ACCOUNTS-AND-DATA.md) | Native source findings, identity reuse and saved-recipe ownership |
 | [Authentication and sessions](AUTHENTICATION-AND-SESSIONS.md) | Email sign-in, cookies, redirects, sign-out and email delivery |
 | [Account and saved-recipe experience](ACCOUNT-AND-SAVED-RECIPES.md) | Mobile flows, saved state and account lifecycle |
