@@ -1,12 +1,33 @@
 "use client";
 
 import Button from "@/components/ui/Button";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import type { RecipeAccessKind } from "@/lib/analytics/events";
 
-export default function PrintButton() {
+interface PrintButtonProps {
+  recipeId?: string;
+  accessKind?: RecipeAccessKind;
+}
+
+export default function PrintButton({ recipeId, accessKind = "free" }: PrintButtonProps) {
+  const handlePrint = () => {
+    if (recipeId) {
+      trackAnalyticsEvent(
+        "recipe_print_requested",
+        {
+          recipe_id: recipeId,
+          access_kind: accessKind,
+        },
+        "recipe_detail"
+      );
+    }
+    window.print();
+  };
+
   return (
     <Button
       variant="secondary"
-      onClick={() => window.print()}
+      onClick={handlePrint}
       className="no-print inline-flex w-full items-center justify-center gap-2 sm:w-auto"
       aria-label="Print this recipe"
     >

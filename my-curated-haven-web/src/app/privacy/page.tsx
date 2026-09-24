@@ -3,9 +3,9 @@ export default function Privacy() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-foreground/60 mb-6">Last updated: December 3, 2025</p>
+                    <p className="text-foreground/60 mb-6">Last updated: September 24, 2026</p>
                     <p className="leading-relaxed mb-12 rounded-2xl bg-accent px-4 py-3 text-foreground">
-                        Note added September 22, 2026: this policy still describes the earlier mobile app as well as the website. The public website does not currently offer accounts, payments, or recipe purchases. We will update this policy before those features launch.
+                        Note: This policy governs our website, user accounts, one-time recipe collection purchases, and optional product analytics. Optional measurement is strictly opt-in and can be adjusted at any time via the Cookie &amp; Analytics Preferences link below.
                     </p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
@@ -150,10 +150,16 @@ export default function Privacy() {
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">9. Cookies and Tracking Technologies</h2>
+                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">9. Cookies and Product Analytics</h2>
                             <p className="leading-relaxed">
-                                We use cookies and similar tracking technologies to track activity on our Service and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Service.
+                                We believe in honest, privacy-friendly defaults. Our approach separates essential functionality from optional product measurement:
                             </p>
+                            <ul className="list-disc pl-6 space-y-2 my-4">
+                                <li><strong>Essential Cookies &amp; Local Storage:</strong> Strictly necessary to provide secure passwordless sign-in, maintain session state, protect private saved recipes, and facilitate Stripe checkout. These cannot be disabled as the site cannot function without them.</li>
+                                <li><strong>Optional Product Analytics:</strong> Strictly optional and disabled by default until you explicitly click &quot;Accept Analytics&quot; on our consent banner. We use this measurement to understand aggregate recipe reach, print request counts, and collection purchase interest.</li>
+                                <li><strong>Privacy Safeguards:</strong> We assign a random, pseudonymous identifier stored for up to 90 days. We do <em>not</em> collect raw search terms, dietary choices, names of children, or health profiles. We do <em>not</em> use third-party advertising pixels, retargeting tags, or session replay recordings.</li>
+                                <li><strong>Withdrawing Consent:</strong> You can review, change, or withdraw your consent at any time by clicking &quot;Cookie &amp; Analytics Preferences&quot; in our footer. Withdrawing immediately halts all optional measurement and clears your pseudonymous identifier across your open browser tabs.</li>
+                            </ul>
                         </section>
 
                         <section>

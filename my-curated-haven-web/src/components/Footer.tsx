@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { footerLinks } from "@/config/site-navigation";
+import ManageConsentButton from "@/components/analytics/ManageConsentButton";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -23,6 +24,9 @@ export default function Footer() {
               </Link>
             </li>
           ))}
+          <li>
+            <ManageConsentButton />
+          </li>
         </ul>
       </div>
       <p className="px-4 pb-8 text-center text-sm text-text-muted">
