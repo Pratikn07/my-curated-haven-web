@@ -5,8 +5,33 @@ import {
   getPublishedCatalog,
   getRecipeBySlug,
   getFreeRecipeSlots,
+  getFreeRecipeCatalog,
 } from "../../src/lib/data/recipes";
 import { checkRecipeAccess } from "../../src/lib/data/access";
+
+const approvedFreeRecipeSlugs = [
+  "sweet-potato-and-spinach-frittata-fingers",
+  "soft-baked-blueberry-and-oat-bars",
+  "salmon-and-pea-fish-cakes",
+] as const;
+
+function formatSourceIngredient(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object") return String(value);
+
+  const ingredient = value as Record<string, unknown>;
+  return [ingredient.amount, ingredient.unit, ingredient.item]
+    .filter((part): part is string => typeof part === "string" && part.length > 0)
+    .join(" ");
+}
+
+function sourceStepText(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "text" in value) {
+    return String((value as { text: unknown }).text);
+  }
+  return String(value);
+}
 
 test.describe("Phase 4 access failures", () => {
   test("backend failure is a typed error, not a missing recipe", async () => {
@@ -137,6 +162,23 @@ test.describe("Phase 4 typed data access layer", () => {
     }
   });
 
+  test("public free catalog follows slot order and omits published recipes without slots", async () => {
+    const client = createClient<Database>(supabaseUrl, supabaseAnonKey);
+    const catalog = await getFreeRecipeCatalog(client);
+
+    expect(catalog.map((recipe) => recipe.slug)).toEqual([
+      "synth-free-oat-bake",
+      "synth-free-veggie-frittata",
+      "synth-free-berry-smoothie",
+    ]);
+    expect(catalog.map((recipe) => recipe.slug)).not.toContain(
+      "synth-paid-golden-soup"
+    );
+    expect(catalog.map((recipe) => recipe.slug)).not.toContain(
+      "synth-paid-herb-salmon"
+    );
+  });
+
   test("buyer session can access entitled paid recipe body, while nonbuyer is denied", async () => {
     // 1. Nonbuyer B
     const nonbuyerClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -218,5 +260,103 @@ test.describe("Phase 4 typed data access layer", () => {
       "20000000-0000-0000-0000-000000000001"
     );
     expect(access.type).toBe("denied");
+  });
+});
+
+test.describe("Phase 6 approved live recipe content", () => {
+  test.beforeEach(async ({}, testInfo) => {
+    if (testInfo.project.name !== "chromium-desktop") {
+      test.skip(true, "Approved live recipe content is checked once on desktop");
+    }
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+        headers: { apikey: supabaseAnonKey },
+      });
+      if (res.status >= 500) {
+        test.skip(true, "Local or preview Supabase stack not ready");
+      }
+    } catch {
+      test.skip(true, "Local or preview Supabase stack not reachable");
+    }
+  });
+
+  test("approved free recipes render source ingredients and ordered method steps when rows exist", async ({
+    page,
+  }) => {
+    const client = createClient<Database>(supabaseUrl, supabaseAnonKey);
+    const slots = await getFreeRecipeSlots(client);
+    const slotBySlug = new Map(
+      slots.map(({ recipe }) => [recipe.slug, recipe.id] as const)
+    );
+    const missingSlugs = approvedFreeRecipeSlugs.filter(
+      (slug) => !slotBySlug.has(slug)
+    );
+
+    if (missingSlugs.length > 0) {
+      test.skip(
+        true,
+        `Approved recipe rows are absent from this local/preview seed: ${missingSlugs.join(", ")}`
+      );
+    }
+
+    const recipeIds = approvedFreeRecipeSlugs.map((slug) => slotBySlug.get(slug)!);
+    const { data: bodies, error } = await client
+      .from("recipe_bodies")
+      .select("recipe_id, ingredients, instructions, allergen_review_state, allergens")
+      .in("recipe_id", recipeIds);
+
+    expect(error).toBeNull();
+    const bodyByRecipeId = new Map((bodies ?? []).map((body) => [body.recipe_id, body]));
+    const missingBodies = approvedFreeRecipeSlugs.filter(
+      (slug) => !bodyByRecipeId.has(slotBySlug.get(slug)!)
+    );
+    if (missingBodies.length > 0) {
+      test.skip(
+        true,
+        `Approved recipe bodies are absent from this local/preview seed: ${missingBodies.join(", ")}`
+      );
+    }
+
+    for (const slug of approvedFreeRecipeSlugs) {
+      const recipeId = slotBySlug.get(slug)!;
+      const body = bodyByRecipeId.get(recipeId)!;
+      const expectedIngredients = Array.isArray(body.ingredients)
+        ? body.ingredients.map(formatSourceIngredient)
+        : [];
+      const expectedSteps = Array.isArray(body.instructions)
+        ? body.instructions.map(sourceStepText)
+        : [];
+
+      expect(expectedIngredients, `${slug} source ingredients`).not.toHaveLength(0);
+      expect(expectedSteps, `${slug} source method`).not.toHaveLength(0);
+
+      const response = await page.goto(`/recipes/${slug}`);
+      expect(response?.status(), `${slug} page status`).toBe(200);
+      const renderedIngredients = await page
+        .locator("section[aria-labelledby='ingredients-heading'] li")
+        .allTextContents();
+      expect(renderedIngredients.map((line) => line.trim())).toEqual(
+        expectedIngredients
+      );
+      const renderedSteps = await page
+        .locator("section[aria-labelledby='instructions-heading'] ol > li p")
+        .allTextContents();
+      expect(renderedSteps.map((step) => step.trim())).toEqual(expectedSteps);
+
+      if (slug === "soft-baked-blueberry-and-oat-bars") {
+        const allergenNotice = page.locator(
+          "section[aria-labelledby='allergens-heading']"
+        );
+        await expect(
+          allergenNotice.getByText(
+            "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+            { exact: true }
+          )
+        ).toBeVisible();
+        await expect(allergenNotice).not.toContainText(
+          /dairy, egg, nuts, soy, wheat/i
+        );
+      }
+    }
   });
 });

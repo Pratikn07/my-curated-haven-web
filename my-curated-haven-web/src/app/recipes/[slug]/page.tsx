@@ -6,13 +6,14 @@ import { notFound } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import {
   getRecipeBySlug,
-  getPublishedCatalog,
+  getFreeRecipeCatalog,
   type RecipeIngredient,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import { checkRecipeAccess } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
+import AllergenInformation from "@/components/recipe/AllergenInformation";
 import PrintButton from "@/components/recipe/PrintButton";
 import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
 import RecipeOpenTracker from "@/components/recipe/RecipeOpenTracker";
@@ -25,9 +26,9 @@ const getCachedRecipe = cache(async (slug: string) => {
   return getRecipeBySlug(supabase, slug);
 });
 
-const getCachedCatalog = cache(async () => {
+const getCachedFreeCatalog = cache(async () => {
   const supabase = await createClient();
-  return getPublishedCatalog(supabase);
+  return getFreeRecipeCatalog(supabase);
 });
 
 interface RecipeDetailPageProps {
@@ -132,8 +133,8 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   // Fetch sibling free recipes for discovery section
   let otherRecipes: RecipeCatalogItem[] = [];
   try {
-    const allPublished = await getCachedCatalog();
-    otherRecipes = allPublished.filter((r) => r.slug !== catalog.slug).slice(0, 2);
+    const freeRecipes = await getCachedFreeCatalog();
+    otherRecipes = freeRecipes.filter((r) => r.slug !== catalog.slug).slice(0, 2);
   } catch {
     // Non-critical if recommendation fails
   }
@@ -363,34 +364,10 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               </ol>
             </section>
 
-            {/* Allergens Information */}
-            <section aria-labelledby="allergens-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-              <h2 id="allergens-heading" className="text-xl font-bold text-foreground">
-                Allergen Information
-              </h2>
-              <div className="mt-3 text-sm leading-relaxed text-text-muted">
-                {body.allergenReviewState === "reviewed_listed" && body.allergens?.length ? (
-                  <div>
-                    <p className="font-semibold text-foreground">Contains reviewed allergens:</p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {body.allergens.map((allergen) => (
-                        <Badge key={allergen} variant="collection">
-                          {allergen}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                ) : body.allergenReviewState === "reviewed_no_allergens" ? (
-                  <p className="font-medium text-action">
-                    Reviewed: Does not contain major common allergens (dairy, egg, nuts, soy, wheat). Always check your individual ingredients.
-                  </p>
-                ) : (
-                  <p className="text-text-muted">
-                    Allergen information has not been formally reviewed for this recipe. Please check all ingredient packaging carefully.
-                  </p>
-                )}
-              </div>
-            </section>
+            <AllergenInformation
+              reviewState={body.allergenReviewState}
+              allergens={body.allergens}
+            />
 
             {/* Storage Guidance and Notes */}
             {(body.storageNotes || body.reviewedNotes) && (

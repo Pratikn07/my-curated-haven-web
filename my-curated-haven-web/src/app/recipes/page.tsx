@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
-import { getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
+import { getFreeRecipeCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeFilters from "@/components/recipe/RecipeFilters";
@@ -104,7 +104,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 
   try {
     const supabase = await createClient();
-    catalog = await getPublishedCatalog(supabase);
+    catalog = await getFreeRecipeCatalog(supabase);
     user = await getCurrentUser();
     if (user) {
       savedIds = await getSavedRecipeIds(supabase, user.id);
