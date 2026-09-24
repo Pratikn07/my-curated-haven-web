@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
 import { requestOtpAction, verifyOtpAction } from "@/app/sign-in/actions";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 interface SignInFormProps {
   returnTo?: string;
@@ -15,6 +16,18 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [resendNotice, setResendNotice] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const startedTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (startedTrackedRef.current) return;
+    startedTrackedRef.current = true;
+    trackAnalyticsEvent(
+      "sign_in_started",
+      { entry_point: returnTo || "direct" },
+      "sign_in"
+    );
+  }, [returnTo]);
 
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +50,13 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
 
     startTransition(async () => {
       const res = await verifyOtpAction(email, code, returnTo);
-      if (!res.success) {
+      if (res.success) {
+        trackAnalyticsEvent(
+          "sign_in_completed",
+          { entry_point: returnTo || "direct" },
+          "sign_in"
+        );
+      } else {
         setError(res.error || "Invalid or expired verification code.");
       }
     });

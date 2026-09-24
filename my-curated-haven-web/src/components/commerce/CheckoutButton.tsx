@@ -4,11 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { Loader2, Lock, CheckCircle2 } from "lucide-react";
 import type { OwnershipStatus } from "@/lib/payments/types";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { getSessionCampaign } from "@/lib/analytics/campaigns";
 
 interface CheckoutButtonProps {
   collectionSlug: string;
   formattedPrice: string;
   ownershipState: OwnershipStatus;
+  releaseId?: string;
   className?: string;
 }
 
@@ -16,6 +19,7 @@ export default function CheckoutButton({
   collectionSlug,
   formattedPrice,
   ownershipState,
+  releaseId,
   className = "",
 }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -60,11 +64,35 @@ export default function CheckoutButton({
     setIsLoading(true);
     setErrorMessage(null);
 
+    if (releaseId) {
+      trackAnalyticsEvent(
+        "checkout_clicked",
+        {
+          collection_release_id: releaseId,
+          entry_point: "collection_page",
+        },
+        "collection_detail"
+      );
+    }
+
     try {
+      const campaign = getSessionCampaign();
+      const bodyPayload = {
+        collectionSlug,
+        attribution: campaign
+          ? {
+              utm_source: campaign.utm_source,
+              utm_medium: campaign.utm_medium,
+              utm_campaign: campaign.utm_campaign,
+              utm_content: campaign.utm_content,
+            }
+          : undefined,
+      };
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collectionSlug }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
@@ -109,7 +137,10 @@ export default function CheckoutButton({
       </button>
 
       {errorMessage && (
-        <p className="text-sm font-medium text-red-600" role="alert">
+        <p
+          role="alert"
+          className="text-sm font-medium text-red-600 dark:text-red-400 mt-1"
+        >
           {errorMessage}
         </p>
       )}

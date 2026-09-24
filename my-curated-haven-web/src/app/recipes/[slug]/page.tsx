@@ -14,6 +14,7 @@ import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import PrintButton from "@/components/recipe/PrintButton";
 import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
+import RecipeOpenTracker from "@/components/recipe/RecipeOpenTracker";
 import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { Lock } from "lucide-react";
@@ -250,7 +251,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   Jump to recipe
                 </a>
                 <div className="flex-1 sm:flex-initial">
-                  <PrintButton />
+                  <PrintButton recipeId={catalog.id} accessKind={isFree ? "free" : "paid"} />
                 </div>
               </>
             )}
@@ -319,6 +320,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </div>
         ) : body ? (
           <>
+            <RecipeOpenTracker recipeId={catalog.id} accessKind={isFree ? "free" : "paid"} />
             {/* Ingredients Section */}
             <section aria-labelledby="ingredients-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
               <h2 id="ingredients-heading" className="text-2xl font-bold text-foreground">

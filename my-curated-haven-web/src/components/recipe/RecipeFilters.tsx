@@ -3,6 +3,8 @@
 import { useId, useRef, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { toResultCountBucket } from "@/lib/analytics/schema";
 
 import {
   AVAILABLE_MEALS,
@@ -71,6 +73,14 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateFilters({ q: searchInput.trim().slice(0, 120) });
+    trackAnalyticsEvent(
+      "recipe_search_submit",
+      {
+        result_count_bucket: toResultCountBucket(totalCount),
+        zero_results: totalCount === 0,
+      },
+      "recipes"
+    );
   };
 
   const openDialog = () => {
@@ -86,11 +96,21 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   };
 
   const applyDialogFilters = () => {
+    const activeFilterCount =
+      draftMeals.length + draftDiets.length + (draftMaxTime ? 1 : 0);
     updateFilters({
       meals: draftMeals,
       diets: draftDiets,
       maxTime: draftMaxTime,
     });
+    trackAnalyticsEvent(
+      "recipe_filter_apply",
+      {
+        active_filter_count: activeFilterCount,
+        result_count_bucket: toResultCountBucket(totalCount),
+      },
+      "recipes"
+    );
     closeDialog();
   };
 

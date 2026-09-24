@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { signOutAction } from "./actions";
+import SignOutButton from "@/components/account/SignOutButton";
 import { Bookmark, ShoppingBag, Mail, HelpCircle, AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -46,14 +46,7 @@ export default async function AccountPage() {
               </p>
             </div>
 
-            <form action={signOutAction} className="shrink-0">
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground hover:border-red-300 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30 dark:hover:text-red-300 transition-colors"
-              >
-                Sign out
-              </button>
-            </form>
+            <SignOutButton />
           </div>
         </section>
 

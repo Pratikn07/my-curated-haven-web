@@ -6,6 +6,7 @@ import { getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes"
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeFilters from "@/components/recipe/RecipeFilters";
+import RecipeCatalogTracker from "@/components/recipe/RecipeCatalogTracker";
 import { parseFilterParams } from "@/lib/recipes/filters";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
@@ -152,6 +153,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
       ) : (
         <div className="grid gap-8">
           {/* Client-side filter controls with search params sync */}
+          <RecipeCatalogTracker totalCount={filteredRecipes.length} />
           <Suspense fallback={<div className="h-14 animate-pulse rounded-xl bg-surface-muted" />}>
             <RecipeFilters totalCount={filteredRecipes.length} />
           </Suspense>
