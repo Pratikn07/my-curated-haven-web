@@ -124,7 +124,12 @@ export interface OrderSummaryDto {
 }
 
 export type CheckoutResult =
-  | { status: "success"; checkoutUrl: string; supportReference: string }
+  | {
+      status: "success";
+      checkoutUrl: string;
+      supportReference: string;
+      analyticsAttemptRef?: string | null;
+    }
   | { status: "already_owned"; collectionSlug: string }
   | { status: "unauthenticated" }
   | { status: "error"; message: string; code?: string };

@@ -6,6 +6,7 @@ import { Loader2, Lock, CheckCircle2 } from "lucide-react";
 import type { OwnershipStatus } from "@/lib/payments/types";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
+import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
 
 interface CheckoutButtonProps {
   collectionSlug: string;
@@ -79,6 +80,7 @@ export default function CheckoutButton({
       const campaign = getSessionCampaign();
       const bodyPayload = {
         collectionSlug,
+        analyticsConsent: isAnalyticsPermitted(),
         attribution: campaign
           ? {
               utm_source: campaign.utm_source,
@@ -104,6 +106,10 @@ export default function CheckoutButton({
           return;
         }
         throw new Error(data.error || "Failed to start checkout session.");
+      }
+
+      if (data.analyticsAttemptRef) {
+        rememberAttemptRef(data.analyticsAttemptRef);
       }
 
       if (data.checkoutUrl) {

@@ -42,7 +42,7 @@ export const ALLOWED_ROUTE_KEYS: Record<string, CanonicalRouteKey> = {
   "/terms": "terms",
 };
 
-export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey {
+export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey | null {
   if (ALLOWED_ROUTE_KEYS[pathname]) {
     return ALLOWED_ROUTE_KEYS[pathname];
   }
@@ -52,7 +52,27 @@ export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey {
   if (pathname.startsWith("/collections/")) {
     return "collection_detail";
   }
-  return "home";
+  return null;
+}
+
+export function coarseEntryPoint(
+  returnTo?: string | null
+): "direct" | "recipe" | "collection" | "account" | "other" {
+  if (!returnTo) return "direct";
+  const path = returnTo.split("?")[0]?.split("#")[0] ?? "";
+  if (path.startsWith("/recipes")) return "recipe";
+  if (path.startsWith("/collections")) return "collection";
+  if (path.startsWith("/account")) return "account";
+  if (
+    path === "direct" ||
+    path === "recipe" ||
+    path === "collection" ||
+    path === "account" ||
+    path === "other"
+  ) {
+    return path;
+  }
+  return "other";
 }
 
 export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
@@ -72,4 +92,23 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   purchase_access_activated: ["order_ref", "collection_release_id", "activation_delay_bucket"],
   refund_confirmed: ["refund_ref", "order_ref", "currency", "refunded_minor"],
   purchased_library_open: ["collection_release_id"],
+};
+
+export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
+  page_view: ["route_key", "device_class"],
+  recipe_list_view: ["result_count_bucket", "listing_kind"],
+  recipe_open: ["recipe_id", "access_kind"],
+  recipe_search_submit: ["result_count_bucket", "zero_results"],
+  recipe_filter_apply: ["active_filter_count", "result_count_bucket"],
+  recipe_print_requested: ["recipe_id", "access_kind"],
+  sign_in_started: ["entry_point"],
+  sign_in_completed: ["entry_point"],
+  recipe_save_changed: ["recipe_id", "action"],
+  collection_view: ["collection_release_id"],
+  checkout_clicked: ["collection_release_id", "entry_point"],
+  checkout_created: ["collection_release_id", "attempt_ref"],
+  purchase_confirmed: ["order_ref", "collection_release_id", "currency", "paid_minor"],
+  purchase_access_activated: ["order_ref", "collection_release_id", "activation_delay_bucket"],
+  refund_confirmed: ["refund_ref", "order_ref", "currency", "refunded_minor"],
+  purchased_library_open: [],
 };

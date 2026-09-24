@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
 import { requestOtpAction, verifyOtpAction } from "@/app/sign-in/actions";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { coarseEntryPoint } from "@/lib/analytics/schema";
 
 interface SignInFormProps {
   returnTo?: string;
@@ -24,7 +25,7 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
     startedTrackedRef.current = true;
     trackAnalyticsEvent(
       "sign_in_started",
-      { entry_point: returnTo || "direct" },
+      { entry_point: coarseEntryPoint(returnTo) },
       "sign_in"
     );
   }, [returnTo]);
@@ -53,7 +54,7 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
       if (res.success) {
         trackAnalyticsEvent(
           "sign_in_completed",
-          { entry_point: returnTo || "direct" },
+          { entry_point: coarseEntryPoint(returnTo) },
           "sign_in"
         );
       } else {

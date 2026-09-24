@@ -11,6 +11,7 @@ import {
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
+import { checkRecipeAccess } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import PrintButton from "@/components/recipe/PrintButton";
 import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
@@ -118,6 +119,15 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   const supabase = await createClient();
   const savedIds = user ? await getSavedRecipeIds(supabase, user.id) : new Set<string>();
   const isSaved = savedIds.has(catalog.id);
+  let accessKind: "free" | "paid" = "paid";
+  if (!isAccessDenied) {
+    try {
+      const access = await checkRecipeAccess(supabase, catalog.id);
+      accessKind = access.type === "free" ? "free" : "paid";
+    } catch {
+      accessKind = "paid";
+    }
+  }
 
   // Fetch sibling free recipes for discovery section
   let otherRecipes: RecipeCatalogItem[] = [];
@@ -228,7 +238,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                 Access
               </span>
               <span className={`text-base font-semibold ${isAccessDenied ? "text-text-muted" : "text-action"}`}>
-                {isAccessDenied ? "Collection Recipe" : "Free Toddler Recipe"}
+                {isAccessDenied ? "Collection Recipe" : accessKind === "free" ? "Free Toddler Recipe" : "Your Collection Recipe"}
               </span>
             </div>
           </div>
@@ -251,7 +261,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   Jump to recipe
                 </a>
                 <div className="flex-1 sm:flex-initial">
-                  <PrintButton recipeId={catalog.id} accessKind={isFree ? "free" : "paid"} />
+                  <PrintButton recipeId={catalog.id} accessKind={accessKind} />
                 </div>
               </>
             )}
@@ -320,7 +330,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </div>
         ) : body ? (
           <>
-            <RecipeOpenTracker recipeId={catalog.id} accessKind={isFree ? "free" : "paid"} />
+            <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />
             {/* Ingredients Section */}
             <section aria-labelledby="ingredients-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
               <h2 id="ingredients-heading" className="text-2xl font-bold text-foreground">

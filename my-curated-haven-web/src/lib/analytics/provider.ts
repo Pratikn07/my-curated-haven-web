@@ -1,4 +1,5 @@
 import { type AnalyticsEnvelope } from "./events";
+import { remoteAnalyticsAllowed } from "./environment";
 
 export interface AnalyticsProviderAdapter {
   send(envelope: AnalyticsEnvelope): Promise<void>;
@@ -6,18 +7,16 @@ export interface AnalyticsProviderAdapter {
   getRecordedEvents?(): AnalyticsEnvelope[];
 }
 
+const QUEUE_LIMIT = 20;
+const QUEUE_TTL_MS = 5 * 60 * 1000;
+
 class MockAnalyticsProvider implements AnalyticsProviderAdapter {
   private events: AnalyticsEnvelope[] = [];
-  private maxQueue = 20;
 
   async send(envelope: AnalyticsEnvelope): Promise<void> {
     this.events.push(envelope);
-    if (this.events.length > this.maxQueue) {
-      this.events.shift(); // drop oldest
-    }
-    if (process.env.NODE_ENV === "development") {
-      // Clean, unobtrusive debug log
-      // console.debug("[Analytics Mock]", envelope.event_name, envelope.properties);
+    if (this.events.length > QUEUE_LIMIT) {
+      this.events.shift();
     }
   }
 
@@ -33,50 +32,71 @@ class MockAnalyticsProvider implements AnalyticsProviderAdapter {
 class PostHogAnalyticsProvider implements AnalyticsProviderAdapter {
   private apiKey: string;
   private apiHost: string;
+  private queue: { envelope: AnalyticsEnvelope; queuedAt: number }[] = [];
 
-  constructor(apiKey: string, apiHost = "https://us.i.posthog.com") {
+  constructor(apiKey: string, apiHost: string) {
     this.apiKey = apiKey;
     this.apiHost = apiHost;
   }
 
   async send(envelope: AnalyticsEnvelope): Promise<void> {
+    const now = Date.now();
+    this.queue = this.queue.filter((item) => now - item.queuedAt < QUEUE_TTL_MS);
+    this.queue.push({ envelope, queuedAt: now });
+    if (this.queue.length > QUEUE_LIMIT) {
+      this.queue.shift();
+    }
+
+    const pending = [...this.queue];
+    for (const item of pending) {
+      const delivered = await this.deliver(item.envelope);
+      if (!delivered) return;
+      this.queue = this.queue.filter(
+        (queued) => queued.envelope.event_id !== item.envelope.event_id
+      );
+    }
+  }
+
+  private async deliver(envelope: AnalyticsEnvelope): Promise<boolean> {
     try {
+      const properties: Record<string, unknown> = {
+        ...envelope.properties,
+        route_key: envelope.route_key,
+        schema_version: envelope.schema_version,
+        environment: envelope.environment,
+        session_id: envelope.session_id,
+        $process_person_profile: false,
+      };
+      if (envelope.campaign_code) {
+        properties.campaign_code = envelope.campaign_code;
+      }
+
       const payload = {
         api_key: this.apiKey,
         event: envelope.event_name,
         distinct_id: envelope.browser_id || "anonymous",
-        properties: {
-          ...envelope.properties,
-          $current_url: undefined, // Disallow full URLs
-          $ip: false, // Disallow IP recording
-          route_key: envelope.route_key,
-          schema_version: envelope.schema_version,
-          environment: envelope.environment,
-          campaign_code: envelope.campaign_code,
-          session_id: envelope.session_id,
-        },
+        properties,
         timestamp: envelope.occurred_at,
       };
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      await fetch(`${this.apiHost}/capture/`, {
+      const response = await fetch(`${this.apiHost.replace(/\/$/, "")}/capture/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
         signal: controller.signal,
         keepalive: true,
       });
-
       clearTimeout(timeoutId);
+      return response.ok;
     } catch {
-      // Fail closed: analytics failures must never block the user or throw uncaught errors
+      return false;
     }
   }
 
   reset(): void {
-    // Reset any provider-specific memory if needed
+    this.queue = [];
   }
 }
 
@@ -85,19 +105,15 @@ let activeProvider: AnalyticsProviderAdapter | null = null;
 export function getAnalyticsProvider(): AnalyticsProviderAdapter {
   if (activeProvider) return activeProvider;
 
-  const isEnabled = process.env.NEXT_PUBLIC_ANALYTICS_ENABLED !== "false";
   const postHogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const postHogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 
-  if (isEnabled && postHogKey && typeof window !== "undefined") {
-    activeProvider = new PostHogAnalyticsProvider(
-      postHogKey,
-      process.env.NEXT_PUBLIC_POSTHOG_HOST
-    );
+  if (remoteAnalyticsAllowed() && postHogKey && postHogHost && typeof window !== "undefined") {
+    activeProvider = new PostHogAnalyticsProvider(postHogKey, postHogHost);
   } else {
     activeProvider = new MockAnalyticsProvider();
   }
 
-  // Expose on window for Playwright E2E validation in test/dev
   if (typeof window !== "undefined") {
     (window as unknown as { __mch_analytics_provider?: AnalyticsProviderAdapter }).__mch_analytics_provider =
       activeProvider;

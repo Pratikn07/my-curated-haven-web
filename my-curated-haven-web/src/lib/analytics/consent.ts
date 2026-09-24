@@ -9,11 +9,42 @@ export const CONSENT_STORAGE_KEY = "mch_analytics_consent";
 export const BROWSER_ID_STORAGE_KEY = "mch_browser_id";
 export const SESSION_ID_STORAGE_KEY = "mch_session_id";
 export const CAMPAIGN_STORAGE_KEY = "mch_campaign_attribution";
+export const ATTEMPT_REFS_STORAGE_KEY = "mch_analytics_attempt_refs";
 
 export interface ConsentRecord {
   status: ConsentStatus;
   version: string;
   updatedAt: string;
+}
+
+export function readAttemptRefs(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = sessionStorage.getItem(ATTEMPT_REFS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((value): value is string => typeof value === "string").slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+
+export function rememberAttemptRef(ref: string): void {
+  if (typeof window === "undefined") return;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(ref)) {
+    return;
+  }
+  try {
+    const current = readAttemptRefs();
+    if (current.includes(ref)) return;
+    sessionStorage.setItem(
+      ATTEMPT_REFS_STORAGE_KEY,
+      JSON.stringify([...current, ref].slice(-20))
+    );
+  } catch {
+    // Storage might be restricted
+  }
 }
 
 export function getStoredConsent(): ConsentRecord {
@@ -57,6 +88,7 @@ export function setStoredConsent(status: ConsentStatus): ConsentRecord {
         localStorage.removeItem(BROWSER_ID_STORAGE_KEY);
         sessionStorage.removeItem(SESSION_ID_STORAGE_KEY);
         sessionStorage.removeItem(CAMPAIGN_STORAGE_KEY);
+        sessionStorage.removeItem(ATTEMPT_REFS_STORAGE_KEY);
       }
     } catch {
       // Storage might be restricted

@@ -13,6 +13,25 @@ import { buildAnalyticsEnvelope } from "./sanitize";
 import { getAnalyticsProvider } from "./provider";
 
 const SESSION_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes inactivity
+const VIEW_DEDUP_MS = 50;
+const VIEW_EVENTS = new Set([
+  "page_view",
+  "recipe_list_view",
+  "recipe_open",
+  "collection_view",
+  "purchased_library_open",
+]);
+const recentViews = new Map<string, number>();
+
+function isDuplicateView(eventName: string, payload: unknown): boolean {
+  if (!VIEW_EVENTS.has(eventName)) return false;
+  const key = `${eventName}:${JSON.stringify(payload)}`;
+  const now = Date.now();
+  const prev = recentViews.get(key);
+  if (prev !== undefined && now - prev < VIEW_DEDUP_MS) return true;
+  recentViews.set(key, now);
+  return false;
+}
 
 function getOrCreateBrowserId(): string {
   try {
@@ -61,6 +80,8 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
     return;
   }
 
+  if (isDuplicateView(eventName, payload)) return;
+
   try {
     const browserId = getOrCreateBrowserId();
     const sessionId = getOrCreateSessionId();
@@ -69,11 +90,14 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
     const envelope = buildAnalyticsEnvelope({
       eventName,
       payload,
+      source: "browser",
       browserId,
       sessionId,
       routeKey,
       campaignCode: campaign?.utm_campaign,
     });
+
+    if (!envelope) return;
 
     const provider = getAnalyticsProvider();
     await provider.send(envelope);

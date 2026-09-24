@@ -9,14 +9,14 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   type ConsentStatus,
   getStoredConsent,
+  readAttemptRefs,
   setStoredConsent,
 } from "@/lib/analytics/consent";
-import { parseAndRecordCampaign } from "@/lib/analytics/campaigns";
-import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { resetAnalyticsClient, trackAnalyticsEvent } from "@/lib/analytics/client";
 import { pathToCanonicalRouteKey, toDeviceClass } from "@/lib/analytics/schema";
 import ConsentBanner from "./ConsentBanner";
 import ConsentPreferencesModal from "./ConsentPreferencesModal";
@@ -68,19 +68,18 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
 
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  // Parse campaign params if accepted
   useEffect(() => {
-    if (consentStatus === "accepted" && searchParams) {
-      parseAndRecordCampaign(searchParams);
+    if (consentStatus === "declined" || consentStatus === "withdrawn") {
+      resetAnalyticsClient();
     }
-  }, [consentStatus, searchParams]);
+  }, [consentStatus]);
 
   // Track page view on route transition if consented
   useEffect(() => {
     if (consentStatus === "accepted" && pathname) {
       const routeKey = pathToCanonicalRouteKey(pathname);
+      if (!routeKey) return;
       const deviceClass = typeof navigator !== "undefined"
         ? toDeviceClass(navigator.userAgent)
         : "desktop";
@@ -99,24 +98,7 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
   const acceptConsent = useCallback(() => {
     setStoredConsent("accepted");
     setIsPreferencesOpen(false);
-
-    // Initial page view after accepting
-    if (pathname) {
-      const routeKey = pathToCanonicalRouteKey(pathname);
-      const deviceClass = typeof navigator !== "undefined"
-        ? toDeviceClass(navigator.userAgent)
-        : "desktop";
-
-      trackAnalyticsEvent(
-        "page_view",
-        {
-          route_key: routeKey,
-          device_class: deviceClass,
-        },
-        routeKey
-      );
-    }
-  }, [pathname]);
+  }, []);
 
   const declineConsent = useCallback(() => {
     setStoredConsent("declined");
@@ -124,8 +106,19 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
   }, []);
 
   const withdrawConsent = useCallback(() => {
+    const attemptRefs = readAttemptRefs();
     setStoredConsent("withdrawn");
+    resetAnalyticsClient();
     setIsPreferencesOpen(false);
+    if (attemptRefs.length === 0) return;
+    void fetch("/api/analytics/consent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attemptRefs }),
+      keepalive: true,
+    }).catch(() => {
+      // Local withdrawal already stopped collection.
+    });
   }, []);
 
   return (
@@ -140,8 +133,8 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
         withdrawConsent,
       }}
     >
-      {children}
       {consentStatus === "unknown" && <ConsentBanner />}
+      {children}
       {isPreferencesOpen && <ConsentPreferencesModal />}
     </AnalyticsContext.Provider>
   );
