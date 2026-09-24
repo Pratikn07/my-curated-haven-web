@@ -30,8 +30,10 @@ export function sanitizeReturnTo(raw: string | null | undefined): string {
   // Whitelist intended destinations
   const isRecipePath = trimmed === "/recipes" || trimmed.startsWith("/recipes/");
   const isAccountPath = trimmed === "/account" || trimmed.startsWith("/account/");
+  const isCollectionPath = trimmed === "/collections" || trimmed.startsWith("/collections/");
+  const isCheckoutPath = trimmed === "/checkout" || trimmed.startsWith("/checkout/");
 
-  if (isRecipePath || isAccountPath) {
+  if (isRecipePath || isAccountPath || isCollectionPath || isCheckoutPath) {
     return trimmed;
   }
 

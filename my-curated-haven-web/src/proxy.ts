@@ -69,8 +69,9 @@ export async function proxy(request: NextRequest) {
 
   const isAccountRoute = pathname === "/account" || pathname.startsWith("/account/");
   const isSignInRoute = pathname === "/sign-in";
+  const isCheckoutReturn = pathname === "/checkout/return";
 
-  if (isAccountRoute && !user) {
+  if ((isAccountRoute || isCheckoutReturn) && !user) {
     const returnTarget = pathname + (request.nextUrl.search || "");
     const redirectUrl = new URL(
       `/sign-in?returnTo=${encodeURIComponent(returnTarget)}`,
@@ -84,7 +85,7 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  if (isAccountRoute || isSignInRoute) {
+  if (isAccountRoute || isSignInRoute || isCheckoutReturn) {
     supabaseResponse.headers.set("Cache-Control", "no-store, private");
   }
 
