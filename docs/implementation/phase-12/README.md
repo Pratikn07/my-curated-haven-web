@@ -1,6 +1,6 @@
 # Phase 12: evidence-led parenting expansion
 
-Status: detailed plan only. Research, feature selection, implementation and pilot release are pending. No expansion feature, customer demand result or production approval is established by merging this package.
+Status: source review and proposed research plan recorded on 2026-09-24. Research execution, feature selection, implementation and pilot release are pending. No expansion feature, customer demand result or production approval is established by merging this package.
 
 ## Outcome
 
@@ -28,6 +28,17 @@ Do not turn this phase into a full native-app port. Child profiles, milestones, 
 | [Validation and acceptance](VALIDATION-AND-ACCEPTANCE.md) | Eighty acceptance scenarios and gate evidence |
 | [Implementation handoff](IMPLEMENTATION-HANDOFF.md) | PR sequence, evidence templates, estimates and final decision record |
 
+## Current entry evidence
+
+The source-only entry review and proposed research protocol are recorded here:
+
+- [Baseline and readiness](evidence/phase12-entry-2026-09-24/BASELINE.md)
+- [Web/native reuse and compatibility](evidence/phase12-entry-2026-09-24/REUSE-AND-COMPATIBILITY.md)
+- [Evidence inventory](evidence/phase12-entry-2026-09-24/RESEARCH-SUMMARY.md)
+- [Opt-in research plan](evidence/phase12-entry-2026-09-24/RESEARCH-PLAN.md)
+
+No customer records were queried and no outreach was sent. The planner remains conditional pending a problem brief and approved feature charter.
+
 ## Product invariants
 
 - Brand: My Curated Haven. Domain: https://mycuratedhaven.com/.
@@ -46,4 +57,4 @@ Do not turn this phase into a full native-app port. Child profiles, milestones, 
 
 **Pilot path:** approve one feature, implement its smallest useful version, verify access and compatibility, run the authorised pilot, then record continue, revise or retire. Pilot success does not approve a full parenting platform.
 
-Source baselines: web `6d43d8f1cf75510d82fda00105998ff1875b954d`, native `5e5caa73f5a5d0705572739dd881a96abe9be23b`, reviewed 2026-09-24. Refresh both before execution.
+Source baselines reviewed 2026-09-24: web repository `8e58812be52a0a5d4ad5c1062c810bf43b399ed6`; standalone native `main` `5e5caa73f5a5d0705572739dd881a96abe9be23b`. The web repository's `parenting_app` gitlink points to `b92605d473595d6057663d1ac824a11112eedb0d`; see the entry review for this source-version discrepancy and the still-unverified deployed versions.
