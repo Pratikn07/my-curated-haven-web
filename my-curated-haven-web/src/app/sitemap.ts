@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_ORIGIN, indexableRoutes } from "@/config/site-navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getPublishedCatalog } from "@/lib/data/recipes";
+import { getFreeRecipeCatalog } from "@/lib/data/recipes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const defaultDate = new Date("2026-09-22");
@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = await createClient();
-    const catalog = await getPublishedCatalog(supabase);
+    const catalog = await getFreeRecipeCatalog(supabase);
 
     const recipeEntries: MetadataRoute.Sitemap = catalog.map((recipe) => ({
       url: `${SITE_ORIGIN}/recipes/${recipe.slug}`,

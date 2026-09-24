@@ -35,6 +35,68 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(firstCard.getByText(/Free recipe/i)).toBeVisible();
   });
 
+  test("public recipe surfaces include only free-slot recipes in slot order", async ({
+    page,
+    request,
+  }) => {
+    const expectedIndexHrefs = [
+      "/recipes/synth-free-oat-bake",
+      "/recipes/synth-free-veggie-frittata",
+      "/recipes/synth-free-berry-smoothie",
+    ];
+
+    const response = await page.goto("/recipes");
+    expect(response?.status()).toBe(200);
+    const indexHrefs = await page.locator("article h3 a").evaluateAll((links) =>
+      links.map((link) => (link as HTMLAnchorElement).getAttribute("href"))
+    );
+    expect(indexHrefs).toEqual(expectedIndexHrefs);
+    expect(indexHrefs).not.toContain("/recipes/synth-paid-golden-soup");
+
+    const sitemapResponse = await request.get("/sitemap.xml");
+    expect(sitemapResponse.status()).toBe(200);
+    const sitemap = await sitemapResponse.text();
+    for (const href of expectedIndexHrefs) {
+      expect(sitemap).toContain(`https://mycuratedhaven.com${href}`);
+    }
+    expect(sitemap).not.toContain("synth-paid-golden-soup");
+    expect(sitemap).not.toContain("synth-paid-herb-salmon");
+
+    await page.goto("/recipes/synth-free-oat-bake");
+    const siblingHrefs = await page
+      .locator("section[aria-labelledby='other-recipes-heading'] article h3 a")
+      .evaluateAll((links) =>
+        links.map((link) => (link as HTMLAnchorElement).getAttribute("href"))
+      );
+    expect(siblingHrefs).toEqual(expectedIndexHrefs.slice(1));
+    expect(siblingHrefs).not.toContain("/recipes/synth-paid-golden-soup");
+  });
+
+  test("allergen copy avoids blanket clearance and keeps listed allergen badges", async ({
+    page,
+  }) => {
+    await page.goto("/recipes/synth-free-berry-smoothie");
+    const noAllergens = page.locator("section[aria-labelledby='allergens-heading']");
+    await expect(
+      noAllergens.getByText(
+        "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    for (const allergen of ["dairy", "egg", "nuts", "soy", "wheat"]) {
+      await expect(noAllergens).not.toContainText(allergen);
+    }
+
+    await page.goto("/recipes/synth-free-oat-bake");
+    const listedAllergens = page.locator(
+      "section[aria-labelledby='allergens-heading']"
+    );
+    await expect(
+      listedAllergens.getByText("Contains reviewed allergens:", { exact: true })
+    ).toBeVisible();
+    await expect(listedAllergens.getByText("Tree Nuts", { exact: true })).toBeVisible();
+  });
+
   test("search input updates URL state and filters recipes", async ({ page }) => {
     await page.goto("/recipes");
 

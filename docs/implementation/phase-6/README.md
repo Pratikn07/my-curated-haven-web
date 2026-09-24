@@ -15,6 +15,7 @@ Brand: **My Curated Haven**. Domain: https://mycuratedhaven.com/. Attribution: *
 | Document | Purpose |
 | --- | --- |
 | [Implementation plan](IMPLEMENTATION-PLAN.md) | Ordered tasks, dependencies, file targets and acceptance criteria |
+| [Remediation plan](REMEDIATION-PLAN.md) | Fixes required after the Phase 6 implementation. Documentation only |
 | [Existing recipe reuse](EXISTING-RECIPE-REUSE.md) | Source audit, content handoff and web data contract |
 | [Browsing and filters](BROWSING-AND-FILTERS.md) | Listing, search, URL state, mobile filters and result states |
 | [Detail, print and discovery](DETAIL-PRINT-AND-DISCOVERY.md) | Recipe pages, images, printing and search visibility |

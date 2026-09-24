@@ -34,7 +34,7 @@ Do not advertise `www` and apex as separate products. Decide the canonical origi
 
 Reuse the verified parenting/product project. Instagram automation stays separate. Record both project references and purpose so an operator does not run a recipe migration against Instagram data.
 
-List pending migrations, expected schema/privilege changes and affected native clients. Compare hosted migration history with the repository. Rehearse against an isolated representative environment. Do not run local `db reset`, test seed or broad Phase 5 ingestion against production.
+List pending migrations, expected schema/privilege changes and affected native clients. Compare hosted migration history with the repository. Rehearse against an isolated representative environment. Follow the [Phase 7 targeted-grant plan](../phase-7/REMEDIATION-PLAN.md) and [Phase 8 deployment prerequisites](../phase-8/REMEDIATION-PLAN.md). Do not apply the full pending migration queue blindly. The recorded commerce prerequisites require signature/simulation fixes deployed first. Do not run local `db reset`, test seed or broad Phase 5 ingestion against production.
 
 PR #19 adds newer legacy-read and sealing protections. Verify these are deployed and compatible with the parenting client before paid recipes go live. Table existence is not enough. Test explicit grants, RLS, views/RPCs, storage and the restricted commerce role.
 

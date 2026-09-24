@@ -13,6 +13,7 @@ Keep **My Curated Haven**, https://mycuratedhaven.com/ and **Recipes by Tiny Soh
 | Document | Purpose |
 | --- | --- |
 | [Implementation plan](IMPLEMENTATION-PLAN.md) | Eighteen tasks, dependencies, proposed code targets and acceptance criteria |
+| [Remediation plan](REMEDIATION-PLAN.md) | Fixes required after the Phase 8 implementation. Documentation only |
 | [Commercial decisions](COMMERCIAL-DECISIONS.md) | Confirmed scope, unresolved launch decisions and customer promises |
 | [Existing system and required changes](EXISTING-SYSTEM-AND-CHANGES.md) | Repository findings, existing recipe reuse and gaps to close |
 | [Customer experience](CUSTOMER-EXPERIENCE.md) | Sales page, sign-in, hosted checkout, pending payment and owned library |

@@ -2,7 +2,7 @@
 
 ## Verified source baseline
 
-Repository: `Pratikn07/my-curated-haven-web`. Main at inspection: `fca003c0c274a6530440f93a6bc5a070bb7b8933` on 2026-09-24.
+Repository: `Pratikn07/my-curated-haven-web`. Initial inspection used `fca003c0c274a6530440f93a6bc5a070bb7b8933`. The merge candidate was refreshed against `4dc37df27bbc95341bc7ad30bc2f94f8d23a1c54`, preserving PRs #22 and #24–#27.
 
 | Area | Source evidence | Phase 11 implication |
 | --- | --- | --- |
@@ -15,6 +15,18 @@ Repository: `Pratikn07/my-curated-haven-web`. Main at inspection: `fca003c0c274a
 | Missing configuration | PR #21, `fca003c`, preserves marketing pages while recipe clients fail closed | An HTTP 200 homepage is insufficient evidence of a healthy recipe product |
 
 This is a source review. No fresh production database, Stripe dashboard, mail provider, DNS or customer records were inspected while writing the plan. A prior implementation evidence file does not prove production configuration or commercial approval.
+
+## Later remediation work included in the refresh
+
+- PR #22 adds explicit allergen-review handling. An empty allergen array is not a reviewed safety claim.
+- PR #27 restricts the public index, sitemap and sibling recommendations to free slots. Paid detail access remains a separate boundary.
+- Read the [Phase 6 remediation plan](../phase-6/REMEDIATION-PLAN.md), [Phase 7 remediation plan](../phase-7/REMEDIATION-PLAN.md) and [Phase 8 remediation plan](../phase-8/REMEDIATION-PLAN.md) alongside this package. The Phase 7/8 plans are not evidence of completed fixes.
+- Phase 7's remediation record reports hosted saved-recipe grants still pending at its inspection. It requires a targeted migration path without accidentally applying unrelated commerce or legacy-read changes. Recheck hosted history before execution.
+- Phase 8's remediation record reports commerce tables and a paid release absent from the inspected live project. It explicitly requires signature/simulation fixes deployed before applying commerce SQL. Preserve this ordering and verify the report afresh, rather than assuming source migrations are already live.
+- Phase 6's later evidence records blocked real-recipe print review because public recipe routes were unavailable at its inspection. Local synthetic tests do not close this gap. Verify actual deployed recipe readiness and complete manual A4/Letter review before launch.
+- Phase 8 also identifies reuse of an invented Checkout URL. Include P8-R4's stored/retrieved provider URL fix in launch validation, along with its P8-R1–R6 payment and evidence corrections.
+
+These are attributed repository records, not a fresh production audit by this planning task. Reconcile their timestamps and deployed state during P11-01.
 
 ## Outstanding source findings
 

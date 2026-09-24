@@ -23,7 +23,7 @@ All tasks start pending. Numbers in supporting runbooks are proposed operating t
 
 **Owner:** commerce/backend engineer. **Depends on:** baseline inspection, before production configuration.
 
-- Fix B01–B05 through the Phase 8 design and Phase 10 regression matrix.
+- Fix B01–B05 through the Phase 8 design and Phase 10 regression matrix. Include the merged [Phase 8 remediation plan](../phase-8/REMEDIATION-PLAN.md), especially canonical Checkout URL reuse and accurate evidence.
 - Reject unsigned/noncanonical payment claims, confine simulation to explicit isolated tests and fail closed on missing nonlocal credentials.
 - Preserve real provider IDs, account/mode and authoritative amounts through payment/refund processing.
 - Verify new Supabase hardening against native clients and all body/storage paths.

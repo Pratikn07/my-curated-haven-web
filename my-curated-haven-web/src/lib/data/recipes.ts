@@ -205,15 +205,28 @@ export async function getFreeRecipeSlots(
     `)
     .order("slot");
 
-  if (error) {
-    throw new Error(`Failed to fetch free slots: ${error.message}`);
+  if (error || !data) {
+    throw new Error(
+      `Failed to fetch free slots: ${error?.message ?? "empty free slots response"}`
+    );
   }
 
-  return (data || [])
+  return data
     .filter((row) => row.recipe_catalog !== null)
     .map((row) => ({
       slot: row.slot,
       assignedAt: row.assigned_at,
       recipe: mapCatalogRow(row.recipe_catalog as unknown as Parameters<typeof mapCatalogRow>[0]),
     }));
+}
+
+/**
+ * Fetch only the recipes assigned to free slots, preserving their slot order.
+ * A failed slot lookup is an error; callers must not broaden to all published recipes.
+ */
+export async function getFreeRecipeCatalog(
+  client: SupabaseClient<Database>
+): Promise<RecipeCatalogItem[]> {
+  const slots = await getFreeRecipeSlots(client);
+  return slots.map(({ recipe }) => recipe);
 }
