@@ -137,3 +137,7 @@ Result and next decision: pending
 - Phase 12 receives evidence and proposed scope, not an automatic promise of added features.
 
 If the operating prerequisites are incomplete, report “plan complete, launch preparation blocked” with exact owners/actions. Do not equate a merge with an operational launch.
+
+## Phase 12 continuation
+
+Use the [Phase 12 implementation plan](../phase-12/IMPLEMENTATION-PLAN.md) after preparing the operating evidence above. Research and synthetic prototypes proceed separately from customer exposure. Phase 12 preserves a hold decision when evidence is sparse and requires a new feature charter before any parenting expansion.

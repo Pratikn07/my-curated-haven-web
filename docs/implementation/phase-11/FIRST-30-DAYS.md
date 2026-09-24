@@ -63,3 +63,5 @@ Consider parenting expansion only after the recipe experience operates reliably 
 Prepare options such as improved recipe discovery, meal-planning workflow or another reviewed collection before broader parenting tools, only when evidence supports them. Record expected benefit, implementation cost, privacy implications and a small validation step. No automatic AI/milestone subscription follows from Phase 11.
 
 If demand evidence is sparse, continue the recipe launch and research. If payment/support remains fragile, stabilise first. Closure records should state the limitation rather than manufacture a success story.
+
+The [detailed Phase 12 package](../phase-12/README.md) defines research, native reuse, selection gates and a conditional pilot. Start with its baseline review. The planner specification is an option, not an approved feature or evidence of demand.
