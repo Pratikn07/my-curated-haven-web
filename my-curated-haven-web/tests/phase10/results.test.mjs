@@ -4,6 +4,7 @@ import {
   buildPhase10Results,
   discoverPhase10Scenarios,
   renderCaseResultsCsv,
+  renderPhase10Markdown,
 } from "../../scripts/phase10-results.mjs";
 
 const fakeReport = {
@@ -72,6 +73,40 @@ test("partial coverage stays partial while preserving intentional skip reasons",
   assert.match(results.playwright.skippedTests[0].reason, /runs once on desktop/);
   assert.match(scenario.evidence, /chromium-desktop=pass/);
   assert.match(scenario.evidence, /chromium-mobile=skipped/);
+});
+
+test("Playwright totals cover untagged tests and identify source and integration SHAs", async () => {
+  const report = {
+    suites: [
+      {
+        title: "public-site.spec.ts",
+        file: "tests/e2e/public-site.spec.ts",
+        specs: [
+          {
+            title: "[QA-P04:partial] [QA-P05:partial] canonical metadata",
+            tests: [{ projectId: "desktop", results: [{ status: "passed" }] }],
+          },
+          {
+            title: "untagged navigation test",
+            tests: [{ projectId: "desktop", results: [{ status: "passed" }] }],
+          },
+        ],
+      },
+    ],
+  };
+  const results = await buildPhase10Results(report, {
+    sourceSha: "pr-head-sha",
+    integrationSha: "github-merge-sha",
+  });
+
+  assert.equal(results.playwright.discoveredTestCount, 2);
+  assert.equal(results.playwright.mappedTestCount, 1);
+  assert.equal(results.playwright.resultCount, 2);
+  assert.equal(results.playwright.mappedResultCount, 1);
+  assert.equal(results.candidate.sourceSha, "pr-head-sha");
+  assert.equal(results.candidate.integrationSha, "github-merge-sha");
+  assert.match(renderCaseResultsCsv(results), /QA-P04/);
+  assert.match(renderPhase10Markdown(results), /2 discovered; 1 mapped to Phase 10 cases/);
 });
 
 test("a failed mapped test fails its scenario and unmapped scenarios remain not run or blocked", async () => {

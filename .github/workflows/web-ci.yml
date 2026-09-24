@@ -95,7 +95,8 @@ jobs:
       - name: Assemble Phase 10 scenario evidence
         if: always()
         env:
-          PHASE10_SOURCE_SHA: ${{ github.sha }}
+          PHASE10_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PHASE10_INTEGRATION_SHA: ${{ github.sha }}
         run: npm run report:phase10 -- --report=test-results/phase10-playwright.json --output-dir=phase10-evidence
 
       - name: Upload sanitized browser scenario summary
@@ -182,7 +183,8 @@ jobs:
         if: always()
         working-directory: my-curated-haven-web
         env:
-          PHASE10_SOURCE_SHA: ${{ github.sha }}
+          PHASE10_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PHASE10_INTEGRATION_SHA: ${{ github.sha }}
         run: npm run report:phase10 -- --report=test-results/phase10-playwright.json --output-dir=phase10-evidence/backend
 
       - name: Upload sanitized database scenario summary

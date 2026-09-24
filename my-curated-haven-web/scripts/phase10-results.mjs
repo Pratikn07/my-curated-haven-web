@@ -281,8 +281,8 @@ export async function buildPhase10Results(report, metadata = {}) {
     scenario.approvedNotApplicable = decision;
   }
   const outcomeByScenario = new Map(scenarios.map(({ id }) => [id, []]));
-  let discoveredTestCount = 0;
-  let resultCount = 0;
+  let mappedTestCount = 0;
+  let mappedResultCount = 0;
   const skippedTests = [];
   const suiteSpecs = gatherSpecs(report?.suites);
   const projectNames = new Map(
@@ -295,12 +295,16 @@ export async function buildPhase10Results(report, metadata = {}) {
         throw new Error(`Playwright result references unknown Phase 10 scenario ${tag.id}`);
       }
       for (const test of spec.tests) {
-        discoveredTestCount += 1;
         const outcome = testOutcome(test, projectNames.get(test.projectId) ?? "");
-        resultCount += outcome.statuses.length;
         outcomeByScenario.get(tag.id).push(outcome);
         const scenario = scenarioById.get(tag.id);
         if (scenario && tag.coverage === "full") scenario.coverage = "full";
+      }
+    }
+    if (tags.length > 0) {
+      for (const test of spec.tests) {
+        mappedTestCount += 1;
+        mappedResultCount += testOutcome(test, projectNames.get(test.projectId) ?? "").statuses.length;
       }
     }
     for (const test of spec.tests) {
@@ -336,8 +340,14 @@ export async function buildPhase10Results(report, metadata = {}) {
     ]),
   );
   const playwrightStatuses = { pass: 0, fail: 0, skipped: 0, flaky: 0, notRun: 0 };
+  let discoveredTestCount = 0;
+  let resultCount = 0;
   for (const spec of suiteSpecs) {
     for (const test of spec.tests) {
+      discoveredTestCount += 1;
+      resultCount += Array.isArray(test.results)
+        ? test.results.filter((result) => result.status).length
+        : 0;
       const status = testOutcome(test, projectNames.get(test.projectId) ?? "").status;
       if (status === "pass") playwrightStatuses.pass += 1;
       else if (status === "fail") playwrightStatuses.fail += 1;
@@ -351,6 +361,7 @@ export async function buildPhase10Results(report, metadata = {}) {
     schemaVersion: 1,
     candidate: {
       sourceSha: metadata.sourceSha || "unrecorded",
+      integrationSha: metadata.integrationSha || metadata.sourceSha || "unrecorded",
       generatedAt: metadata.generatedAt || new Date().toISOString(),
       environment: metadata.environment || "local-or-ci-synthetic",
     },
@@ -358,6 +369,8 @@ export async function buildPhase10Results(report, metadata = {}) {
       reportProvided: Boolean(report),
       discoveredTestCount,
       resultCount,
+      mappedTestCount,
+      mappedResultCount,
       ...playwrightStatuses,
       skippedTests,
     },
@@ -422,7 +435,8 @@ export function renderPhase10Markdown(results) {
     "## Phase 10 launch QA evidence",
     "",
     `- Candidate source: \`${results.candidate.sourceSha}\``,
-    `- Playwright tests: ${results.playwright.pass} passed, ${results.playwright.fail} failed, ${results.playwright.skipped} skipped, ${results.playwright.flaky} flaky, ${results.playwright.notRun} not run (${results.playwright.discoveredTestCount} discovered)`,
+    `- CI integration SHA: \`${results.candidate.integrationSha}\``,
+    `- Playwright tests: ${results.playwright.pass} passed, ${results.playwright.fail} failed, ${results.playwright.skipped} skipped, ${results.playwright.flaky} flaky, ${results.playwright.notRun} not run (${results.playwright.discoveredTestCount} discovered; ${results.playwright.mappedTestCount} mapped to Phase 10 cases)`,
     `- Scenario dispositions: ${counts.pass} pass, ${counts.partial} partial, ${counts.fail} fail, ${counts.blocked} blocked, ${counts.not_run} not run, ${counts.not_applicable} approved N/A`,
     "",
     "A green local or CI run is not a release approval. Partial coverage and external/manual blockers remain visible in the attached CSV/JSON case register.",
@@ -457,6 +471,7 @@ async function runCli() {
   const approvedNotApplicable = await readOptionalJson(approvedNaPath);
   const results = await buildPhase10Results(report, {
     sourceSha: readArg("source-sha") || process.env.PHASE10_SOURCE_SHA || process.env.GITHUB_SHA,
+    integrationSha: process.env.PHASE10_INTEGRATION_SHA || process.env.GITHUB_SHA,
     environment: "local-or-ci-synthetic",
     approvedNotApplicable,
   });
