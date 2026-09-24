@@ -4,7 +4,7 @@ This is an engineering execution snapshot for the QA harness. “Partial” mean
 
 | Task | Status | Evidence or remaining work |
 | --- | --- | --- |
-| P10-01 Candidate and owners | Partial | Main baseline refreshed at `de47ca0`; this QA source and repository CI are identifiable. Named release/gate owners, deployment, hosted project, content manifest and commercial settings remain unknown |
+| P10-01 Candidate and owners | Partial | Main baseline refreshed at `5239345`; this QA source and repository CI are identifiable. A production rollback deployment is identified; named release/gate owners, a staging deployment, hosted product project, content manifest and commercial settings remain unknown |
 | P10-02 Environment and fixtures | Partial | Playwright refuses known production origins and requires explicit exact allowlists plus a nonproduction label for remote targets. CI uses synthetic seed data. A separately named staging target and namespaced staging actors are not supplied |
 | P10-03 Trustworthy CI gates | Implemented; CI result linked by PR | Required data tests no longer skip when Supabase is unavailable. Platform-only skips have reasons. CI emits machine-readable results and a sanitized case register; inspect exact PR run for result |
 | P10-04 Public discovery and free recipes | Partial | Existing Playwright checks cover parts of search/filter recovery, public route boundaries, sitemap and metadata. Approved content IDs, full source-body comparison and print evidence are not verified for this candidate |

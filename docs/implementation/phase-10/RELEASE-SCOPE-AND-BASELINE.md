@@ -2,7 +2,7 @@
 
 ## Inspected repository state
 
-Repository: `Pratikn07/my-curated-haven-web`. Refreshed implementation baseline: `de47ca0d828af3457170d2b201fdebebe68701a9` on `main`, merging the Phase 8 remediation in [PR #31](https://github.com/Pratikn07/my-curated-haven-web/pull/31). That PR merged on 2026-09-24; its `web-quality`, `backend-quality`, Vercel Preview and Vercel Preview Comments checks passed. The previous planning baseline was `09e57b595702b1289ef9d84bcf55c8e122e06496`, which predates that remediation.
+Repository: `Pratikn07/my-curated-haven-web`. Refreshed implementation baseline: `52393454d3388be7c5a6954996a9eda54e767ed4` on `main`, merging the docs-only homepage vision plan in [PR #33](https://github.com/Pratikn07/my-curated-haven-web/pull/33). Its Vercel production deployment succeeded. The application source includes the signed-webhook and checkout remediation from [PR #31](https://github.com/Pratikn07/my-curated-haven-web/pull/31), whose `web-quality`, `backend-quality`, Vercel Preview and Vercel Preview Comments checks passed. The previous planning baseline was `09e57b595702b1289ef9d84bcf55c8e122e06496`, which predates the Phase 8 remediation.
 
 | Area | Source state at the refreshed baseline | Required Phase 10 action |
 | --- | --- | --- |
