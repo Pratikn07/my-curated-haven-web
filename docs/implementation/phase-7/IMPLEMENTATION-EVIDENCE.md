@@ -1,6 +1,6 @@
 # Phase 7 implementation evidence
 
-Status: Phase 7's initial implementation report below is historical. The PR #25 remediation is in progress on `codex/phase-7-remediation`; its current verification and release status are recorded in the remediation revalidation section. That section supersedes earlier claims that the live migration was applied and that Phase 7 release verification was complete.
+Status: The PR #25 remediation was implemented on `codex/phase-7-remediation`, merged in PR #28, and deployed to production. The dedicated staging OTP and native password/Google compatibility check remains unverified because no staging project or test inbox was available. No shared Auth settings or email templates were changed.
 
 ---
 
@@ -9,6 +9,7 @@ Status: Phase 7's initial implementation report below is historical. The PR #25 
 - **Original implementation branch**: `phase-7-accounts-saved-recipes` (historical)
 - **Remediation branch**: `codex/phase-7-remediation`
 - **Remediation base commit**: `4dc37df27bbc95341bc7ad30bc2f94f8d23a1c54` (current GitHub `main` when remediation began)
+- **Merged PR / production commit**: [#28](https://github.com/Pratikn07/my-curated-haven-web/pull/28) / `6d43d8f1cf75510d82fda00105998ff1875b954d`
 - **Scope**:
   - Reused existing `public.saved_recipes` table and Supabase Auth authority.
   - Implemented owner-only Row Level Security (RLS) policies, explicit table grants for `authenticated`, revoking `anon`, and high-performance indexing (`idx_saved_recipes_user_created`).
@@ -83,12 +84,12 @@ Statuses and evidence in this matrix describe the initial implementation report.
 | **P7-02** | Define UX and route contracts | Complete | Implemented `/sign-in`, `/account`, and `/account/saved-recipes`. Passwordless email OTP chosen as default flow. Terms & Privacy links clearly disclosed. |
 | **P7-03** | Implement request-scoped auth & protected reads | Complete | Verified identity at server data boundary with `getCurrentUser()`. Upgraded `src/proxy.ts` with route protection and `Cache-Control: no-store, private`. |
 | **P7-04** | Implement sign-in and transactional email | Complete | Passwordless OTP flow implemented with single 6-digit input, paste support, resend, and Mailpit testing integration. |
-| **P7-05** | Establish saved-recipe persistence & policies | Revalidation in progress | The earlier implementation report said the migration was applied, but a fresh linked-project check found it absent from the live migration history. See the remediation follow-up below. |
+| **P7-05** | Establish saved-recipe persistence & policies | Complete | The Phase 7 migration was applied to the live project after the updated web deployment. Post-apply grants and owner-only policies are recorded below. |
 | **P7-06** | Add reliable Save controls | Complete | `SaveRecipeButton` component placed outside title links. State transitions (`Save recipe` -> `Saving...` -> `Saved` -> `Removing...`) verified. Unauthenticated clicks redirect to `/sign-in`. |
 | **P7-07** | Build private saved-recipes page | Complete | `/account/saved-recipes` displays owned bookmarks newest first. Unavailable recipes render neutral card with Remove button without leaking private content. Empty state tested. |
 | **P7-08** | Add minimal account settings & lifecycle | Complete | `/account` displays verified email, link to saved recipes, support-assisted account closure instructions, and local-scope sign out (`supabase.auth.signOut({ scope: 'local' })`). |
 | **P7-09** | Integrate navigation & privacy boundaries | Complete | `Navbar.tsx` updated with auth-aware Sign In / Account link. Account and sign-in routes marked `noindex` and excluded from `sitemap.ts`. Updated deferred-route regex in `public-site.spec.ts`. |
-| **P7-10** | Verify security, failure paths & release | Revalidation in progress | Initial implementation checks are historical. The live migration and post-apply privilege checks, GitHub CI, staging auth compatibility check, and production deployment are tracked in the remediation section below. |
+| **P7-10** | Verify security, failure paths & release | Released; staging Auth compatibility unverified | Local tests, GitHub CI, production deployment, migration, and live privilege/policy checks passed. A staging OTP and native password/Google compatibility check could not be run because no staging project or test inbox was available. See the remediation release evidence below. |
 
 ---
 
@@ -171,13 +172,15 @@ Covering:
 
 ## PR #25 Remediation Revalidation
 
-The checks below revalidate the remediation in `REMEDIATION-PLAN.md` against the current GitHub `main` at `4dc37df27bbc95341bc7ad30bc2f94f8d23a1c54` and the live Supabase project `ccrgvammglkvdlaojgzv`. This revalidation supersedes the earlier P7-05 migration status above.
+The checks below cover the remediation in `REMEDIATION-PLAN.md`, implemented from `main` at `4dc37df27bbc95341bc7ad30bc2f94f8d23a1c54`, and released to the live Supabase project `ccrgvammglkvdlaojgzv` through PR #28 at `6d43d8f1cf75510d82fda00105998ff1875b954d`. This release evidence supersedes the earlier P7-05 migration status above.
 
 ### P7-R1 — saved-recipes migration
 
-- `supabase migration list --linked` confirmed that `20260923180000_phase7_saved_recipes_policies.sql` is not yet in the live migration history. Later Phase 8/9 and hardening migrations are also pending.
+- Before applying the migration, `supabase migration list --linked` confirmed that `20260923180000_phase7_saved_recipes_policies.sql` was absent from live history. Later Phase 8/9 and hardening migrations were also pending.
 - The pre-change privilege check showed `public.recipes` SELECT for `anon` and `authenticated`, with no INSERT/UPDATE/DELETE for either role. `public.saved_recipes` had SELECT for both roles and no INSERT/UPDATE/DELETE.
-- A dry-run using the complete applied migration history plus only the Phase 7 migration listed exactly `20260923180000_phase7_saved_recipes_policies.sql`. No live schema change has been made yet.
+- A dry-run using the applied migration history plus only the Phase 7 migration listed exactly `20260923180000_phase7_saved_recipes_policies.sql`. The migration was then applied through that isolated path; no Phase 8 or later migration was applied.
+- Post-apply checks confirmed `anon` has no `saved_recipes` privileges; `authenticated` has SELECT/INSERT/DELETE but no UPDATE; and `service_role` retains all privileges. RLS is enabled. The three table policies allow only `auth.uid() = user_id` for SELECT, INSERT, and DELETE.
+- `public.recipes` privileges were unchanged: `anon` and `authenticated` retain SELECT and have no INSERT/UPDATE/DELETE privileges.
 - The local database already contains the Phase 7 migration. `supabase test db --local supabase/tests/database/02_saved_recipes.test.sql` passed all 10 tests.
 
 ### P7-R2 — access-gated saves
@@ -198,6 +201,7 @@ The checks below revalidate the remediation in `REMEDIATION-PLAN.md` against the
 
 ### Remediation verification
 
-- `npm run lint`, `npm run typecheck`, and `npm run build` passed.
 - Focused Playwright checks passed: 6 save-access tests, the sign-in and account-closure disclosure checks, and the authenticated free-recipe save/remove journey.
-- The production migration and its post-apply privilege checks remain pending; GitHub CI and the production deployment will be recorded after release.
+- `npm run lint`, `npm run typecheck`, `npm run build`, the focused Playwright checks, and the local saved-recipes pgTAP suite passed. GitHub `web-quality` and `backend-quality` also passed on PR #28.
+- Vercel reported the Production deployment for merge SHA `6d43d8f1cf75510d82fda00105998ff1875b954d` as successful. The canonical `/sign-in` and `/recipes` routes returned HTTP 200; the live sign-in page contained the new account-creation disclosure.
+- Staging OTP delivery and native password/Google compatibility remain unverified: no staging project or designated test inbox was available. Local Auth/Mailpit testing used a synthetic account; no real email was sent and no shared Auth setting or template was changed.
