@@ -115,3 +115,7 @@ Next action: <named person and concrete action>
 - Phase 11 receives the tested artifact and runbooks. Public launch is not implied by this plan's merge.
 
 If prerequisites remain absent, the honest completion state is “QA harness ready, release blocked by prerequisites”. Do not call the product launch-ready until those dependencies and tests are complete.
+
+## Phase 11 package
+
+Continue with the [staged launch and operations plan](../phase-11/README.md). Its refreshed baseline records later access-hardening fixes, outstanding commerce findings and production operating prerequisites. Payment tests use sandbox/test mode, not staff self-purchases in live mode.
