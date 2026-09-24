@@ -97,7 +97,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(listedAllergens.getByText("Tree Nuts", { exact: true })).toBeVisible();
   });
 
-  test("search input updates URL state and filters recipes", async ({ page }) => {
+  test("[QA-J03:partial] search input updates URL state and filters recipes", async ({ page }) => {
     await page.goto("/recipes");
 
     const searchInput = page.getByPlaceholder(/search recipes/i);
@@ -117,7 +117,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(page).not.toHaveURL(/q=Frittata/);
   });
 
-  test("mobile filter dialog opens, updates draft state, and applies", async ({
+  test("[QA-J03:partial] mobile filter dialog opens, updates draft state, and applies", async ({
     page,
   }) => {
     await page.goto("/recipes");
@@ -147,7 +147,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(page).not.toHaveURL(/meal=Breakfast/);
   });
 
-  test("no matches state displays helpful recovery UI", async ({ page }) => {
+  test("[QA-J04:partial] no matches state displays helpful recovery UI", async ({ page }) => {
     await page.goto("/recipes?q=nonexistentxyz12345");
     await expect(page.getByRole("heading", { level: 2 })).toContainText(
       "No matching recipes found"
@@ -158,7 +158,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(page).toHaveURL(/\/recipes$/);
   });
 
-  test("recipe detail page renders complete recipe structure", async ({ page }) => {
+  test("[QA-P06:partial] recipe detail page renders complete recipe structure", async ({ page }) => {
     // Go to recipes and click first recipe card
     await page.goto("/recipes");
     const firstTitleLink = page.locator("article h3 a").first();
@@ -211,7 +211,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     expect(parsed.recipeInstructions.length).toBeGreaterThan(0);
   });
 
-  test("draft or invalid recipe slugs return not-found, while paid slug shows preview with locked body", async ({
+  test("[QA-J08:partial] draft or invalid recipe slugs return not-found, while paid slug shows preview with locked body", async ({
     page,
   }) => {
     // Non-existent slug

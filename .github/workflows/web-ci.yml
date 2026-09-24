@@ -28,6 +28,7 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+      COMMERCE_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
     steps:
       - name: Check out the commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -72,6 +73,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Phase 10 target and result accounting unit tests
+        run: npm run test:phase10:unit
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -88,11 +92,27 @@ jobs:
           printf '%s\n' "$list" | grep -Eq 'Total: [1-9][0-9]* tests'
           npm run test:e2e
 
-      - name: Upload browser failure evidence
+      - name: Assemble Phase 10 scenario evidence
+        if: always()
+        env:
+          PHASE10_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PHASE10_INTEGRATION_SHA: ${{ github.sha }}
+        run: npm run report:phase10 -- --report=test-results/phase10-playwright.json --output-dir=phase10-evidence
+
+      - name: Upload sanitized browser scenario summary
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: phase10-scenarios-${{ github.run_id }}
+          path: my-curated-haven-web/phase10-evidence
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-${{ github.run_id }}
+          name: playwright-failure-${{ github.run_id }}
           path: |
             my-curated-haven-web/playwright-report
             my-curated-haven-web/test-results
@@ -158,3 +178,31 @@ jobs:
       - name: Run data access integration tests
         working-directory: my-curated-haven-web
         run: npx playwright test tests/e2e/data-access.spec.ts --project=chromium-desktop
+
+      - name: Assemble Phase 10 database scenario evidence
+        if: always()
+        working-directory: my-curated-haven-web
+        env:
+          PHASE10_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PHASE10_INTEGRATION_SHA: ${{ github.sha }}
+        run: npm run report:phase10 -- --report=test-results/phase10-playwright.json --output-dir=phase10-evidence/backend
+
+      - name: Upload sanitized database scenario summary
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: phase10-database-scenarios-${{ github.run_id }}
+          path: my-curated-haven-web/phase10-evidence/backend
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload database failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: database-access-failure-${{ github.run_id }}
+          path: |
+            my-curated-haven-web/playwright-report
+            my-curated-haven-web/test-results
+          retention-days: 7
+          if-no-files-found: ignore

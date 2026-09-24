@@ -2,9 +2,9 @@
 
 ## Current pipeline
 
-At the planning baseline, `.github/workflows/web-ci.yml` runs `web-quality` and `backend-quality` on pull requests and main pushes. Both use Ubuntu 24.04 and Supabase CLI 2.104.0. Refreshed main selects `public.ecr.aws` for Supabase image pulls and uses the webpack production build. Web checks start/reset Supabase before lint, typecheck, build and Playwright. Backend checks clean replay, pgTAP, generated-type drift and data-access integration.
+`.github/workflows/web-ci.yml` runs `web-quality` and `backend-quality` on pull requests and main pushes. Both use Ubuntu 24.04 and Supabase CLI 2.104.0. Main selects `public.ecr.aws` for Supabase image pulls and uses the webpack production build. Web checks start/reset a fresh local Supabase database before lint, Phase 10 unit tests, typecheck, build and Playwright; direct commerce database tests receive only the local connection URL. Backend checks clean replay, pgTAP, generated-type drift and data-access integration.
 
-The Playwright configuration has three projects, one worker in CI and zero retries. Existing data-access setup permits skipping when the local database is unreachable. P10-03 must make required release checks fail in that condition. Legitimate project applicability skips, such as desktop-only navigation, remain explicit.
+The Playwright configuration has three projects, one worker in CI and zero retries. The startup guard validates app, Supabase and direct PostgreSQL targets before test discovery. Required data-access tests fail when the local database is unreachable; approved production-content checks can still skip with a specific reason when the candidate's content is absent from the intentionally synthetic CI seed. Project applicability skips remain explicit.
 
 ## Recent registry failure
 
@@ -25,7 +25,7 @@ Never remove a required check, turn startup errors into success, add `continue-o
 
 ## Required result accounting
 
-For each project/suite report discovered, executed, passed, failed, skipped and flaky counts. Link each skipped case to a reason and owner. A required payment/access case that is skipped due to absent credentials, fixtures or service is blocked, not passed.
+For each project/suite report discovered, executed, passed, failed, skipped and flaky counts. The Playwright JSON reporter feeds a sanitized 86-case JSON/CSV register that records project results and skip reasons. CI uploads that summary on every run for 30 days and keeps raw browser diagnostics only on failure. A required payment/access case that is skipped due to absent credentials, fixtures or service is blocked, not passed. Owner-approved N/A is accepted only for optional measurement cases with an owner, scope reason and evidence reference.
 
 Keep a small explicit mapping from scenario IDs to actual test names/manual records. Test-file existence is not execution evidence. Require positive discovery and assert mandatory cases appear in the results. New tests should fail if their setup is unavailable instead of silently exiting.
 
@@ -39,6 +39,7 @@ If retries are introduced, preserve first-failure trace and classify retry succe
 - Verify database migrations and content manifest at deployment, not solely in source.
 - Confirm optional analytics is routed to a nonproduction destination in preview/staging.
 - Keep secrets out of forks/untrusted PR jobs and traces. Publish only redacted evidence.
+- Set exact `PHASE10_ALLOWED_*` allowlists only for isolated nonproduction targets. Never allowlist `mycuratedhaven.com` or the known production Supabase project; the startup guard also hard-blocks those current production identities.
 - Test preview protection with an unauthenticated request and ensure it does not accidentally block the deliberately configured provider callback without a safe design.
 
 ## Evidence retention

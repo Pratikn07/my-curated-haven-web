@@ -98,7 +98,7 @@ test.describe("Phase 8 remediation guardrails", () => {
     });
   });
 
-  test("P8-R1: a bad Stripe signature returns only the fixed error", async () => {
+  test("[QA-S05:partial] P8-R1: a bad Stripe signature returns only the fixed error", async () => {
     await withEnvironment(
       {
         STRIPE_SECRET_KEY: "sk_test_signature_fixture",
@@ -172,7 +172,7 @@ test.describe("Phase 8 remediation guardrails", () => {
     );
   });
 
-  test("P8-R1/R3: signed direct-account capture uses the order account; mismatched Connect account is reviewed", async () => {
+  test("[QA-S05:partial] P8-R1/R3: signed direct-account capture uses the order account; mismatched Connect account is reviewed", async () => {
     test.skip(
       !process.env.COMMERCE_DATABASE_URL,
       "Requires the disposable local Supabase database."
@@ -318,7 +318,7 @@ test.describe("Phase 8 remediation guardrails", () => {
     );
   });
 
-  test("P8-R2: preview cannot use an unconfigured mock checkout", async () => {
+  test("[QA-S19:partial] P8-R2: preview cannot use an unconfigured mock checkout", async () => {
     await withEnvironment({ VERCEL_ENV: "preview" }, () => {
       expect(getStripeConfig().checkoutEnabled).toBe(false);
       expect(canUseMockCheckout()).toBe(false);

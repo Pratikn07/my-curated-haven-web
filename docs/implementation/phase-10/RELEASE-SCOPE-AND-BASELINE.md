@@ -2,7 +2,7 @@
 
 ## Inspected repository state
 
-Repository: `Pratikn07/my-curated-haven-web`. Refreshed planning baseline: `09e57b595702b1289ef9d84bcf55c8e122e06496` on `main`, merging Phase 9 in [PR #20](https://github.com/Pratikn07/my-curated-haven-web/pull/20). The initial draft used `dae5aed5024d29d2e0e4edebeab7e4ab9582e737`. This refresh preserves later work and updates the dependencies before Phase 10 merges.
+Repository: `Pratikn07/my-curated-haven-web`. Refreshed implementation baseline: `52393454d3388be7c5a6954996a9eda54e767ed4` on `main`, merging the docs-only homepage vision plan in [PR #33](https://github.com/Pratikn07/my-curated-haven-web/pull/33). Its Vercel production deployment succeeded. The application source includes the signed-webhook and checkout remediation from [PR #31](https://github.com/Pratikn07/my-curated-haven-web/pull/31), whose `web-quality`, `backend-quality`, Vercel Preview and Vercel Preview Comments checks passed. The previous planning baseline was `09e57b595702b1289ef9d84bcf55c8e122e06496`, which predates the Phase 8 remediation.
 
 | Area | Source state at the refreshed baseline | Required Phase 10 action |
 | --- | --- | --- |
@@ -10,13 +10,13 @@ Repository: `Pratikn07/my-curated-haven-web`. Refreshed planning baseline: `09e5
 | Phases 4–5 | Schema, RLS, ingestion and source mapping present | Test actual access boundaries, migration replay and reviewed content |
 | Phase 6 | Free listing, filters, detail, print and SEO merged in PR #14 | Extend tests to the paid release without losing free access |
 | Phase 7 | Account implementation merged in [PR #15](https://github.com/Pratikn07/my-curated-haven-web/pull/15) | Verify deployed auth, native continuity and private saves |
-| Phase 8 | Detailed plan merged in PR #16, payment implementation in [PR #18](https://github.com/Pratikn07/my-curated-haven-web/pull/18) | Close source gaps below, commercial decisions and real provider staging validation |
+| Phase 8 | Payment implementation in [PR #18](https://github.com/Pratikn07/my-curated-haven-web/pull/18); signed-webhook and checkout remediation in PR #31 | Verify deployed source/configuration, commercial decisions and real provider staging validation |
 | Phase 9 | Measurement implementation merged in PR #20, optional export disabled by default | Verify disabled-state isolation, then consent and provider configuration before enabling |
 | Phase 10 | This planning package | Build and run the release evidence package |
 
 Phase 6 evidence reports 88 passing and 17 skipped tests at its recorded state. Those numbers are historical, not a fresh run or proof of the forthcoming paid release. Mobile browser emulation is not a real iPhone or Instagram-browser test.
 
-Earlier Phase 8 CI attempts failed before tests while downloading `ghcr.io/supabase/postgres:17.6.1.132`. The initial Phase 10 PR subsequently passed both jobs. Current main also configures the public ECR registry. Preserve the earlier failure as infrastructure history, not a current failure or a product-test result. See [CI reliability](CI-AND-ENVIRONMENT-RELIABILITY.md).
+Earlier Phase 8 CI attempts failed before tests while downloading `ghcr.io/supabase/postgres:17.6.1.132`. The Phase 8 remediation PR #31 later passed both CI jobs and its Vercel preview checks. Current main also configures the public ECR registry. Preserve the earlier failure as infrastructure history, not a current failure or a product-test result. The PR checks are not proof of a production deployment. See [CI reliability](CI-AND-ENVIRONMENT-RELIABILITY.md).
 
 ## Existing source to inspect before extending tests
 
@@ -36,18 +36,18 @@ Paths below are repository-relative. Their presence is verified at the planning 
 | Legacy `recipes` and `search_analytics` migrations | Inspect all remaining read paths. New RLS does not automatically close legacy full-body or raw-search access |
 | `.github/workflows/web-ci.yml` | Both jobs start Supabase. Backend job checks clean replay, pgTAP, type drift and data integration |
 
-## Refreshed implementation findings requiring explicit QA
+## Source findings rechecked at `de47ca0`
 
-The following observations come from source at `09e57b5`, not a production exploit test:
+These source observations replace the stale Phase 10 planning findings. They are not production exploit tests or live configuration verification:
 
-- `src/app/api/stripe/webhook/route.ts` verifies signatures only when both Stripe is configured and a signature is present. The alternative branch parses unsigned JSON, including when a configured deployment receives no signature. Require a fail-closed nonlocal route and QA-S05 evidence before enabling sales.
-- `src/lib/payments/config.ts` supplies mock keys and enables checkout unless explicitly disabled. Checkout and fulfilment include simulated paths, including a `cs_test_mock_` prefix. Prove simulated processing is confined to explicit isolated tests and unreachable in staging provider validation or production. A missing credential must never become a successful simulated purchase.
-- `tests/e2e/commerce.spec.ts` includes a purchase flow returning directly from simulated Checkout. This is useful local coverage, not evidence of a real hosted test-mode payment or signed delivery.
+- `src/app/api/stripe/webhook/route.ts` rejects a missing or invalid signature whenever Stripe is configured or `VERCEL_ENV` is set. Unsigned fixture parsing is limited to unconfigured local development. PR #31 added route-boundary regression cases for the unsigned deployed request and invalid signatures.
+- `src/lib/payments/config.ts` enables deployed checkout only when `CHECKOUT_ENABLED=true` and Stripe is configured. `canUseMockCheckout()` and mock fulfilment require an unconfigured, non-Vercel local environment. The merged source guard is verified by PR #31 tests; deployed settings and provider-backed staging are not verified here.
+- `tests/e2e/commerce.spec.ts` includes simulated checkout and fulfilment. This is useful local coverage, not evidence of hosted test-mode payment, provider delivery, or live customer access.
 - Phase 8 evidence marks a $15 USD offer as verified and describes synthetic free recipes. No explicit owner approval for launch pricing appears in this conversation. Treat those values as fixtures until commercial approval and production-manifest reconciliation are recorded.
 - Phase 9 revokes raw `search_analytics` privileges through a new migration. Retest the actual deployed path rather than repeating the older finding as though no fix exists.
 - Phase 9 evidence records no provisioned PostHog project, unavailable Instagram credentials, no named paid-without-access paging route and pending real mobile payload inspection. Keep those readiness gaps visible.
 
-Add a negative test for a missing webhook signature with configured Stripe, a missing secret in a nonlocal deployment and a forged mock-prefixed session. These are launch blockers until fixed and verified. Review the worker, refund/dispute and recovery implementation against the full Phase 8 matrix. Existing evidence labels alone do not prove every planned scenario.
+Review the worker, refund/dispute and recovery implementation against the full Phase 8 matrix. Existing evidence labels and the focused PR #31 tests do not prove every planned scenario.
 
 Reinspect each finding at implementation time. Source presence and historical passing tests are not current production verification.
 

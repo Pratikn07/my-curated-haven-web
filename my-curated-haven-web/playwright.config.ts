@@ -1,23 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
+import { assertSafePhase10Targets } from "./scripts/phase10-target-guard.mjs";
 
 const port = 3000;
-const fallbackBaseURL = `http://127.0.0.1:${port}`;
-
-function resolveBaseURL() {
-  const raw = process.env.PLAYWRIGHT_BASE_URL;
-  if (!raw) return fallbackBaseURL;
-
-  const url = new URL(raw);
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error("PLAYWRIGHT_BASE_URL must use http or https");
-  }
-  if (url.username || url.password) {
-    throw new Error("PLAYWRIGHT_BASE_URL must not include credentials");
-  }
-  return url.origin;
-}
-
-const baseURL = resolveBaseURL();
+const targets = assertSafePhase10Targets();
+const baseURL = targets.appOrigin;
 const externalServer = Boolean(process.env.PLAYWRIGHT_BASE_URL);
 
 export default defineConfig({
@@ -32,6 +18,7 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { open: "never", outputFolder: "playwright-report" }],
+    ["json", { outputFile: "test-results/phase10-playwright.json" }],
   ],
   use: {
     baseURL,
@@ -42,7 +29,7 @@ export default defineConfig({
     ? undefined
     : {
         command: `npm run start -- --hostname 127.0.0.1 --port ${port}`,
-        url: fallbackBaseURL,
+        url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
       },
