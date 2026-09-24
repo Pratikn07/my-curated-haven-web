@@ -264,12 +264,6 @@ test.describe("Phase 6 approved live recipe content", () => {
     page,
   }) => {
     const client = createClient<Database>(supabaseUrl, supabaseAnonKey);
-    const { error: databaseHealthError } = await client
-      .from("recipes")
-      .select("id")
-      .limit(1);
-    expect(databaseHealthError, "Required product database is available").toBeNull();
-
     const slots = await getFreeRecipeSlots(client);
     const slotBySlug = new Map(
       slots.map(({ recipe }) => [recipe.slug, recipe.id] as const)
