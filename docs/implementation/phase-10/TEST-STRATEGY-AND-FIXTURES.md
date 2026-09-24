@@ -24,7 +24,9 @@ Prefer tests at the boundary where a failure matters. A mock returning an entitl
 
 No destructive fixture reset against production. The harness must check target host/project against an explicit nonproduction allowlist before migrations, deletes or fixture writes. Do not copy production emails, children’s details, purchase histories or Instagram identities into fixtures.
 
-The Playwright external-server option removes the need to start a local web server, but does not guarantee a safe target. Add an explicit staging-origin assertion before any state-changing suite. Keep preview protection credentials in the secret store and out of browser traces.
+The Playwright external-server option removes the need to start a local web server, but does not guarantee a safe target. `playwright.config.ts` validates the application, Supabase and every direct PostgreSQL URL before discovery or execution. Loopback HTTP targets are allowed for local/CI work. A remote target requires `PHASE10_TARGET_ENVIRONMENT=preview|sandbox|staging` plus an exact target allowlist: comma-separated origins in `PHASE10_ALLOWED_PLAYWRIGHT_ORIGINS` and `PHASE10_ALLOWED_SUPABASE_ORIGINS`, and `host:port/database` entries in `PHASE10_ALLOWED_DATABASE_TARGETS`. Known production app and Supabase targets are refused even if an allowlist is misconfigured. Do not put credentials in allowlists or browser traces.
+
+CI sets `COMMERCE_DATABASE_URL` to the disposable local Supabase PostgreSQL service so the signed capture/account-mismatch regression test runs instead of skipping. The target guard validates this direct connection before Playwright starts. Missing or unreachable local services must fail required database/access tests; only project-applicability skips may remain.
 
 ## Synthetic actor matrix
 
@@ -80,16 +82,18 @@ npm ci
 npm run lint
 npm run typecheck
 npx playwright install --with-deps chromium webkit
+npm run test:phase10:unit
 npm run build -- --webpack
 npx playwright test --list
 npm run test:e2e
+npm run report:phase10 -- --report=test-results/phase10-playwright.json --output-dir=phase10-evidence
 ```
 
-Confirm installed CLI help and repository scripts at implementation time. Commands above describe the current baseline, not already executed Phase 10 checks. New commerce suites need their own documented command after implementation. An explicit zero test count or skipped mandatory suite fails release verification.
+Confirm installed CLI help and repository scripts at implementation time. `test:phase10:unit` tests the target guard and result accounting. `report:phase10` reads the Playwright JSON result, validates all 86 matrix rows, writes a sanitized JSON/CSV register, and preserves skip reasons. An explicit zero test count or skipped mandatory suite fails release verification.
 
 ## Evidence discipline
 
-Each case records scenario ID, candidate, environment, actor, steps, expected result, actual result, timestamp, test runner/device, result and proof link. Allowed results: pass, fail, blocked, not run, or not applicable with an approved scope reason.
+Each case records scenario ID, candidate, environment, actor, steps, expected result, actual result, timestamp, test runner/device, result and proof link. The generated register distinguishes pass, partial, fail, blocked, not run, and not applicable only when an owner, scope reason and evidence reference are supplied. Its N/A input is limited to optional measurement cases; required paid, privacy, access and accounting scenarios cannot be waived as N/A.
 
 Retain redacted assertions and summaries with the release record. Store full sensitive traces only in an approved restricted location with a named retention period. This repository is public. Never commit cookies, auth URLs/codes, payment secrets, webhook signatures, raw customer payloads or full production exports. Screenshots and PDFs must use synthetic people and approved recipe content.
 

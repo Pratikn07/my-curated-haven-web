@@ -2,9 +2,11 @@
 
 ## Starting position
 
-This is a plan, not an execution report. All sixteen tasks and all 86 scenarios begin pending/not run. Source inspection identified prerequisites and test gaps, but no Phase 10 product QA certification is claimed. Phases 7–9 now have merged implementation source.
+The original plan began with all sixteen tasks and all 86 scenarios pending/not run. This execution refreshed the source baseline to `de47ca0d828af3457170d2b201fdebebe68701a9`, added a guarded test runner and machine-readable scenario accounting, and prepared a candidate-specific NO-GO handoff. The current task status and evidence are recorded in [`evidence/phase10-qa/`](evidence/phase10-qa/). This is not paid-launch certification; no deployment, test-mode provider run, owner approval or real-device review is inferred.
 
-Before implementation, refresh [baseline](RELEASE-SCOPE-AND-BASELINE.md), verify the merged account/payment source against the refreshed findings and link the deployed Phase 8 revision. Phase 9 optional measurement may remain explicitly off, with its isolation tests passing.
+The Phase 8 remediation source is merged in PR #31 and its repository checks passed. The last known-good production rollback target is Vercel deployment `6645839906`, source SHA `de47ca0d828af3457170d2b201fdebebe68701a9` ([deployment](https://my-curated-haven-c2o4nzb4r-pratik-r-nandoskars-projects.vercel.app)); a named staging candidate and its configuration still need to be identified by the release owner. Phase 9 optional measurement may remain off only with the disabled-path isolation evidence and a documented scope decision.
+
+This execution uses one user-requested implementation PR for the available harness and evidence. The suggested PR grouping below remains a planning aid; merging this implementation does not close the staging and approval work that depends on external owners and systems.
 
 ## Suggested PR sequence
 

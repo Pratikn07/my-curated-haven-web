@@ -136,7 +136,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     expect(unauthRes.status()).toBe(401);
   });
 
-  test("V11, V12, V30: rejects client price overrides; concurrent checkout reuses one session and webhook fulfills without a return", async ({ page }) => {
+  test("[QA-J19:partial] [QA-J20:partial] V11, V12, V30: rejects client price overrides; concurrent checkout reuses one session and webhook fulfills without a return", async ({ page }) => {
     const testEmail = `buyer-${Date.now()}@synthetic.test`;
 
     // 1. Sign in via OTP
@@ -226,7 +226,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await expect(page.getByText("Synthetic Paid Golden Lentil Soup")).toBeVisible();
   });
 
-  test("V31: Forged or unrelated session ID reveals no private data", async ({ page }) => {
+  test("[QA-J22:partial] V31: Forged or unrelated session ID reveals no private data", async ({ page }) => {
     // Anonymous lookup on forged session redirects to sign in
     await page.goto("/checkout/return?session_id=cs_forged_fake_123");
     await expect(page).toHaveURL(/\/sign-in/);

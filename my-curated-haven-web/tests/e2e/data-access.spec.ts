@@ -67,17 +67,7 @@ test.describe("Phase 4 typed data access layer", () => {
   // Only run once in desktop to avoid redundant API hits across all mobile viewports
   test.beforeEach(async ({}, testInfo) => {
     if (testInfo.project.name !== "chromium-desktop") {
-      test.skip();
-    }
-    try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/`, {
-        headers: { apikey: supabaseAnonKey },
-      });
-      if (res.status >= 500) {
-        test.skip(true, "Local Supabase stack not ready");
-      }
-    } catch {
-      test.skip(true, "Local Supabase stack not reachable");
+      test.skip(true, "Required data-access integration runs once on desktop to avoid duplicate database/auth work.");
     }
   });
 
@@ -104,7 +94,7 @@ test.describe("Phase 4 typed data access layer", () => {
     }
   });
 
-  test("visitor can retrieve free recipe body but is denied paid recipe body", async () => {
+  test("[QA-S13:partial] visitor can retrieve free recipe body but is denied paid recipe body", async () => {
     const client = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
     // Free recipe returns full body
@@ -268,22 +258,18 @@ test.describe("Phase 6 approved live recipe content", () => {
     if (testInfo.project.name !== "chromium-desktop") {
       test.skip(true, "Approved live recipe content is checked once on desktop");
     }
-    try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/`, {
-        headers: { apikey: supabaseAnonKey },
-      });
-      if (res.status >= 500) {
-        test.skip(true, "Local or preview Supabase stack not ready");
-      }
-    } catch {
-      test.skip(true, "Local or preview Supabase stack not reachable");
-    }
   });
 
   test("approved free recipes render source ingredients and ordered method steps when rows exist", async ({
     page,
   }) => {
     const client = createClient<Database>(supabaseUrl, supabaseAnonKey);
+    const { error: databaseHealthError } = await client
+      .from("recipes")
+      .select("id")
+      .limit(1);
+    expect(databaseHealthError, "Required product database is available").toBeNull();
+
     const slots = await getFreeRecipeSlots(client);
     const slotBySlug = new Map(
       slots.map(({ recipe }) => [recipe.slug, recipe.id] as const)

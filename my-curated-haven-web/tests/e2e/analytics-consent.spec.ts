@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("analytics stays off until accepted, then one page view is recorded", async ({ page }) => {
+test("[QA-A01:partial] analytics stays off until accepted, then one page view is recorded", async ({ page }) => {
   const captures: string[] = [];
   await page.route("**/capture/**", async (route) => {
     captures.push(route.request().url());

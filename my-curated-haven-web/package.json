@@ -14,7 +14,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "verify": "npm run lint && npm run typecheck && npm run build && npm run test:e2e",
+    "test:phase10:unit": "node --test tests/phase10/target-guard.test.mjs tests/phase10/results.test.mjs",
+    "report:phase10": "node scripts/phase10-results.mjs",
+    "verify": "npm run lint && npm run typecheck && npm run test:phase10:unit && npm run build && npm run test:e2e",
     "check:routes": "node scripts/check-public-routes.mjs"
   },
   "dependencies": {

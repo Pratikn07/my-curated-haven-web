@@ -35,7 +35,7 @@ async function overflow(page: Page) {
   );
 }
 
-test("homepage shows the brand and recipe promise", async ({ page }) => {
+test("[QA-J01:partial] homepage shows the brand and recipe promise", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("navigation")).toContainText("My Curated Haven");
@@ -151,7 +151,7 @@ test("tested pages do not throw", async ({ page }) => {
   expect(consoleErrors.filter((message) => !isKnownBrowserNoise(message))).toEqual([]);
 });
 
-test("deferred routes are unavailable", async ({ page }) => {
+test("[QA-J08:partial] deferred routes are unavailable", async ({ page }) => {
   for (const path of deferredRoutes) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(404);
@@ -192,7 +192,7 @@ test("homepage does not ship deferred page text", async ({ page }, testInfo) => 
   }
 });
 
-test("sitemap lists only the public pages", async ({ request }) => {
+test("[QA-P05:partial] sitemap lists only the public pages", async ({ request }) => {
   const response = await request.get("/sitemap.xml");
   expect(response.status()).toBe(200);
   const xml = await response.text();
@@ -204,7 +204,7 @@ test("sitemap lists only the public pages", async ({ request }) => {
   }
 });
 
-test("metadata uses the official origin", async ({ page }) => {
+test("[QA-P04:partial] metadata uses the official origin", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/My Curated Haven/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(

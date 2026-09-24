@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 const narrowPages = ["/", "/about", "/support"];
 
-test("public pages do not scroll sideways at 320px", async ({ page }) => {
+test("[QA-M01:partial] public pages do not scroll sideways at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
   for (const path of narrowPages) {
     await page.goto(path);
@@ -60,7 +60,7 @@ test("empty and failed examples use different recovery text", async ({ page }) =
   await expect(page.getByText("The sample request failed.")).toBeVisible();
 });
 
-test("print layout keeps the sample recipe and hides navigation", async ({ page }) => {
+test("[QA-M09:partial] print layout keeps the sample recipe and hides navigation", async ({ page }) => {
   await page.goto("/design-review");
   await page.emulateMedia({ media: "print" });
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeHidden();
@@ -68,7 +68,7 @@ test("print layout keeps the sample recipe and hides navigation", async ({ page 
   await expect(page.getByText("Allergen information not reviewed")).toBeVisible();
 });
 
-test("touched public pages have no serious accessibility violations", async ({ page }) => {
+test("[QA-M08:partial] touched public pages have no serious accessibility violations", async ({ page }) => {
   for (const path of ["/", "/about", "/support"]) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).analyze();

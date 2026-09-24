@@ -83,7 +83,7 @@ test.describe("Phase 7: Return Path Sanitization Unit Checks", () => {
     expect(sanitizeReturnTo("/account/saved-recipes")).toBe("/account/saved-recipes");
   });
 
-  test("rejects open redirects, protocol-relative URLs, and loops", () => {
+  test("[QA-J10:partial] rejects open redirects, protocol-relative URLs, and loops", () => {
     const fallback = "/account/saved-recipes";
     expect(sanitizeReturnTo("https://evil.com")).toBe(fallback);
     expect(sanitizeReturnTo("//evil.com")).toBe(fallback);
@@ -146,7 +146,7 @@ test.describe("Phase 7: Unauthenticated Experience & Protection", () => {
     expect(await overflow(page)).toBeLessThanOrEqual(1);
   });
 
-  test("clicking Save while unauthenticated redirects to /sign-in with returnTo", async ({ page }) => {
+  test("[QA-J09:partial] clicking Save while unauthenticated redirects to /sign-in with returnTo", async ({ page }) => {
     await page.goto("/recipes");
 
     // Find first recipe card's save button
@@ -182,7 +182,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
 
   test.beforeEach(async ({}, testInfo) => {
     if (testInfo.project.name !== "chromium-desktop") {
-      test.skip();
+      test.skip(true, "Authenticated account tests run once on desktop because the local auth user and Mailpit fixtures are shared serial state.");
     }
     await clearMailpit();
     // Allow GoTrue 1s max_frequency window to clear between serial tests
@@ -311,7 +311,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await expect(page.getByText("2 recipes saved")).toBeVisible();
   });
 
-  test("Nonbuyer B sees isolated empty state and cannot see Buyer A's saved recipes", async ({ page }) => {
+  test("[QA-J12:partial] Nonbuyer B sees isolated empty state and cannot see Buyer A's saved recipes", async ({ page }) => {
     // Sign in as Nonbuyer B
     await page.goto("/sign-in?returnTo=/account/saved-recipes");
     await page.getByLabel(/email address/i).fill("nonbuyer-b@synthetic.test");
