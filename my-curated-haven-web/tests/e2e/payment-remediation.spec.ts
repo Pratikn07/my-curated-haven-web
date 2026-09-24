@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { POST as stripeWebhookPost } from "@/app/api/stripe/webhook/route";
 import { canUseMockCheckout, getStripeConfig } from "@/lib/payments/config";
 import { getCommercePool } from "@/lib/payments/repository";
+import { resolveCommerceDatabaseConnectionString } from "@/lib/payments/database-config";
 import { constructWebhookEvent } from "@/lib/payments/stripe";
 import {
   paymentCaptureMatchesSnapshot,
@@ -80,8 +81,50 @@ async function createWebhookOrder(pool: ReturnType<typeof getCommercePool>, sess
   return id;
 }
 
-test.describe("Phase 8 remediation guardrails", () => {
+test.describe("Payment remediation guardrails", () => {
   test.describe.configure({ mode: "serial" });
+
+  test("P11-B05: deployed commerce database resolution fails closed without an explicit remote URL", () => {
+    const remoteUrl = "postgresql://commerce@db.project-ref.supabase.co:5432/postgres";
+
+    expect(() =>
+      resolveCommerceDatabaseConnectionString({
+        VERCEL_ENV: "production",
+        DATABASE_URL: remoteUrl,
+      }),
+    ).toThrow("COMMERCE_DATABASE_URL is required in deployed environments.");
+
+    expect(() =>
+      resolveCommerceDatabaseConnectionString({
+        VERCEL_ENV: "preview",
+        COMMERCE_DATABASE_URL: "postgresql://commerce@127.0.0.1:5432/postgres",
+      }),
+    ).toThrow(
+      "COMMERCE_DATABASE_URL must not point to a local database in deployed environments.",
+    );
+
+    expect(
+      resolveCommerceDatabaseConnectionString({
+        VERCEL_ENV: "production",
+        COMMERCE_DATABASE_URL: remoteUrl,
+        DATABASE_URL: "postgresql://fallback.example.com/postgres",
+      }),
+    ).toBe(remoteUrl);
+
+    expect(resolveCommerceDatabaseConnectionString({})).toBe(
+      "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
+    );
+    expect(
+      resolveCommerceDatabaseConnectionString({
+        DATABASE_URL: "postgresql://postgres@127.0.0.1:54322/postgres",
+      }),
+    ).toBe("postgresql://postgres@127.0.0.1:54322/postgres");
+    expect(() =>
+      resolveCommerceDatabaseConnectionString({
+        COMMERCE_DATABASE_URL: "https://db.example.com/postgres",
+      }),
+    ).toThrow("Commerce database URL must identify a PostgreSQL database.");
+  });
 
   test("P8-R1: production rejects an unsigned paid event before database access", async () => {
     await withEnvironment({ VERCEL_ENV: "production" }, async () => {

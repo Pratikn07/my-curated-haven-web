@@ -8,15 +8,13 @@ import type {
   CollectionRecipeSummary,
 } from "./types";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
+import { resolveCommerceDatabaseConnectionString } from "./database-config";
 
 let poolInstance: Pool | null = null;
 
 export function getCommercePool(): Pool {
   if (!poolInstance) {
-    const connectionString =
-      process.env.COMMERCE_DATABASE_URL ||
-      process.env.DATABASE_URL ||
-      "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+    const connectionString = resolveCommerceDatabaseConnectionString();
 
     poolInstance = new Pool({
       connectionString,
