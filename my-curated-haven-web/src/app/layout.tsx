@@ -19,11 +19,11 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL("https://mycuratedhaven.com"),
   title: {
-    default: "My Curated Haven | Simple toddler recipes for busy families",
+    default: "My Curated Haven | Parenting, recipes and thoughtful ideas",
     template: "%s | My Curated Haven",
   },
   description:
-    "Simple toddler recipes for busy families. Recipes by Tiny Soho, inside My Curated Haven. The recipe collection is in preparation.",
+    "A parenting companion starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.",
   robots: { index: true, follow: true },
 };
 

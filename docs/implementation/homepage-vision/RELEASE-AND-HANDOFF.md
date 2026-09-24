@@ -2,11 +2,13 @@
 
 ## Starting state
 
-This separate effort defines 18 implementation tasks and 64 acceptance scenarios. All implementation/release work remains pending. The current PR writes the plan only. No homepage code, assets, database, payment setting or customer communication changes with this documentation merge.
+This separate effort defines 18 implementation tasks and 64 acceptance scenarios. The plan PR was documentation-only; a later implementation candidate adds the homepage and static previews while retaining the preparation state. See [the implementation release record](evidence/homepage-vision-implementation-v1/RELEASE-RECORD.md) for its PR, merge and deployment evidence. No database, payment setting or customer communication change is part of this effort.
 
 Keep this package under `docs/implementation/homepage-vision/`. Do not call the effort Phase 13 or fold the tasks into Phase 12. Later product features require their own implementation scope. This work provides an informational introduction to those features.
 
 ## Proposed implementation PRs
+
+The sequence below was the original review proposal. The first implementation grouped the coherent content, composition, metadata, measurement and automated validation changes into one review; manual release gates remain separately recorded.
 
 | PR | Tasks | Review focus |
 | --- | --- | --- |
@@ -107,4 +109,4 @@ Outstanding limitations and next review:
 
 The approved homepage introduces all four pillars, presents a working recipe path appropriate to its release state, and labels every sneak peek clearly. Visitors understand the purchase boundary. Previews expose no real family data and invoke no underlying feature services. Links, metadata, mobile layout and accessibility pass the applicable checks. The official domain shows the approved version, with a named owner for future changes.
 
-The completion report must distinguish “plan merged” from “homepage implemented” and “homepage released.”
+The completion report must distinguish “plan merged” from “homepage implementation merged” and “homepage released.” The current evidence package records which code checks passed and which human or live-release gates remain open.

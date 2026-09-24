@@ -92,6 +92,9 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   purchase_access_activated: ["order_ref", "collection_release_id", "activation_delay_bucket"],
   refund_confirmed: ["refund_ref", "order_ref", "currency", "refunded_minor"],
   purchased_library_open: ["collection_release_id"],
+  homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
+  homepage_preview_opened: ["feature_key", "placement", "content_version"],
+  homepage_preview_viewed: ["feature_key", "content_version"],
 };
 
 export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
@@ -111,4 +114,7 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   purchase_access_activated: ["order_ref", "collection_release_id", "activation_delay_bucket"],
   refund_confirmed: ["refund_ref", "order_ref", "currency", "refunded_minor"],
   purchased_library_open: [],
+  homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
+  homepage_preview_opened: ["feature_key", "placement", "content_version"],
+  homepage_preview_viewed: ["feature_key", "content_version"],
 };

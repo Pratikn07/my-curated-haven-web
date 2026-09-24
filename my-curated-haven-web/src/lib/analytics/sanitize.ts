@@ -45,6 +45,17 @@ const ENTRY_POINTS = new Set([
   "collection_page",
 ]);
 const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
+const HOMEPAGE_FEATURE_KEYS = new Set(["chat", "shop", "bloom"]);
+const HOMEPAGE_PLACEMENTS = new Set(["hero", "overview", "preview", "footer", "final"]);
+const HOMEPAGE_DESTINATIONS = new Set([
+  "recipes_index",
+  "recipe_detail",
+  "collection_detail",
+  "previews",
+  "about",
+  "support",
+]);
+const HOMEPAGE_PRESENTATION_STATES = new Set(["preparation", "free_ready", "collection_ready"]);
 
 const UUID_FIELDS = new Set([
   "recipe_id",
@@ -94,6 +105,15 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "currency" && !CURRENCY_REGEX.test(value)) return fail("currency");
   if (key === "activation_delay_bucket" && !DELAY_BUCKETS.has(value)) {
     return fail("activation_delay_bucket");
+  }
+  if (key === "feature_key" && !HOMEPAGE_FEATURE_KEYS.has(value)) return fail("feature_key");
+  if (key === "placement" && !HOMEPAGE_PLACEMENTS.has(value)) return fail("placement");
+  if (key === "destination" && !HOMEPAGE_DESTINATIONS.has(value)) return fail("destination");
+  if (key === "presentation_state" && !HOMEPAGE_PRESENTATION_STATES.has(value)) {
+    return fail("presentation_state");
+  }
+  if (key === "content_version" && !/^hv-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
+    return fail("content_version");
   }
   return value;
 }

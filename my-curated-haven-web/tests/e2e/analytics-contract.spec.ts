@@ -35,6 +35,54 @@ test("accepts a minimal recipe open", () => {
   expect(result.ok).toBe(true);
 });
 
+test("[homepage-vision] accepts bounded preview events and rejects raw destinations", () => {
+  const accepted = validateAnalyticsEvent("homepage_preview_opened", {
+    feature_key: "chat",
+    placement: "overview",
+    content_version: "hv-2026-09-24",
+  });
+  expect(accepted.ok).toBe(true);
+
+  const rawDestination = validateAnalyticsEvent("homepage_preview_opened", {
+    feature_key: "chat",
+    placement: "overview",
+    content_version: "hv-2026-09-24",
+    destination_url: "/chat?child_id=private",
+  });
+  expect(rawDestination.ok).toBe(false);
+
+  const unknownFeature = validateAnalyticsEvent("homepage_preview_opened", {
+    feature_key: "expert_marketplace",
+    placement: "overview",
+    content_version: "hv-2026-09-24",
+  });
+  expect(unknownFeature.ok).toBe(false);
+
+  const cta = validateAnalyticsEvent("homepage_cta_clicked", {
+    placement: "hero",
+    destination: "recipes_index",
+    presentation_state: "preparation",
+    content_version: "hv-2026-09-24",
+  });
+  expect(cta.ok).toBe(true);
+
+  expect(
+    validateAnalyticsEvent("homepage_cta_clicked", {
+      placement: "hero",
+      destination: "/recipes?email=person@example.com",
+      presentation_state: "preparation",
+      content_version: "hv-2026-09-24",
+    }).ok,
+  ).toBe(false);
+
+  expect(
+    validateAnalyticsEvent("homepage_preview_viewed", {
+      feature_key: "bloom",
+      content_version: "hv-2026-09-24",
+    }).ok,
+  ).toBe(true);
+});
+
 test("keeps only registered campaign values", () => {
   expect(
     acceptCampaignInput({

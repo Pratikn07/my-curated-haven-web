@@ -13,6 +13,16 @@ export type DeviceClass = "mobile" | "desktop" | "tablet";
 export type ResultCountBucket = "0" | "1-5" | "6-10" | "11+";
 export type RecipeAccessKind = "free" | "paid";
 export type RecipeSaveAction = "saved" | "removed";
+export type HomepageFeatureKey = "chat" | "shop" | "bloom";
+export type HomepagePlacement = "hero" | "overview" | "preview" | "footer" | "final";
+export type HomepageDestination =
+  | "recipes_index"
+  | "recipe_detail"
+  | "collection_detail"
+  | "previews"
+  | "about"
+  | "support";
+export type HomepagePresentationState = "preparation" | "free_ready" | "collection_ready";
 
 export type CanonicalRouteKey =
   | "home"
@@ -126,6 +136,24 @@ export interface PurchasedLibraryOpenPayload {
   collection_release_id?: string;
 }
 
+export interface HomepageCtaClickedPayload {
+  placement: HomepagePlacement;
+  destination: HomepageDestination;
+  presentation_state: HomepagePresentationState;
+  content_version: string;
+}
+
+export interface HomepagePreviewOpenedPayload {
+  feature_key: HomepageFeatureKey;
+  placement: HomepagePlacement;
+  content_version: string;
+}
+
+export interface HomepagePreviewViewedPayload {
+  feature_key: HomepageFeatureKey;
+  content_version: string;
+}
+
 export type AnalyticsEventMap = {
   page_view: PageViewPayload;
   recipe_list_view: RecipeListViewPayload;
@@ -143,6 +171,9 @@ export type AnalyticsEventMap = {
   purchase_access_activated: PurchaseAccessActivatedPayload;
   refund_confirmed: RefundConfirmedPayload;
   purchased_library_open: PurchasedLibraryOpenPayload;
+  homepage_cta_clicked: HomepageCtaClickedPayload;
+  homepage_preview_opened: HomepagePreviewOpenedPayload;
+  homepage_preview_viewed: HomepagePreviewViewedPayload;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;
