@@ -8,6 +8,31 @@ import {
 } from "../../src/lib/data/recipes";
 import { checkRecipeAccess } from "../../src/lib/data/access";
 
+test.describe("Phase 4 access failures", () => {
+  test("backend failure is a typed error, not a missing recipe", async () => {
+    const client = createClient<Database>(
+      "http://127.0.0.1:9",
+      "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH",
+      {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: {
+          fetch: (input, init) =>
+            fetch(input, { ...init, signal: AbortSignal.timeout(2000) }),
+        },
+      }
+    );
+
+    const result = await checkRecipeAccess(
+      client,
+      "10000000-0000-0000-0000-000000000001"
+    );
+
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.message.length).toBeGreaterThan(0);
+    }
+  });
+});
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321";
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
