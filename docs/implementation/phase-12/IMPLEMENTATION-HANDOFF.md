@@ -4,6 +4,8 @@
 
 This package contains 20 tasks and 80 acceptance scenarios. Tasks are pending and scenarios are not run. Phase 12 has no selected expansion feature yet. The weekly planner is a concrete conditional blueprint. No child data, schema change, pilot invite or payment is part of this documentation change.
 
+The source-only entry review and proposed research protocol are linked from [the Phase 12 README](README.md#current-entry-evidence). They do not constitute customer research, a feature selection, a charter, or production evidence.
+
 ## Proposed implementation PR sequence
 
 | PR | Tasks | Scope and review focus |
