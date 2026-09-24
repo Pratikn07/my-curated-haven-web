@@ -7,8 +7,11 @@ import {
   getActiveOrderAttempt,
   reservePurchaseOrder,
   bindSessionToOrder,
+  recordCheckoutMeasurement,
 } from "./repository";
 import type { CheckoutResult } from "./types";
+import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
+import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
 
 export interface CreateCheckoutParams {
   collectionSlug: string;
@@ -17,12 +20,16 @@ export interface CreateCheckoutParams {
     email?: string;
   };
   requestOrigin?: string;
+  analyticsConsent?: boolean;
+  attribution?: CampaignInput | null;
 }
 
 export async function createCheckoutSession({
   collectionSlug,
   user,
   requestOrigin,
+  analyticsConsent = false,
+  attribution = null,
 }: CreateCheckoutParams): Promise<CheckoutResult> {
   const config = getStripeConfig();
 
@@ -135,9 +142,23 @@ export async function createCheckoutSession({
   // 5. Bind session to order in database
   await bindSessionToOrder(order.id, sessionId);
 
+  const campaign = attribution ? acceptCampaignInput(attribution) : null;
+  let analyticsAttemptRef: string | null = null;
+  try {
+    analyticsAttemptRef = await recordCheckoutMeasurement({
+      orderId: order.id,
+      campaignCode: campaign?.utm_campaign ?? null,
+      analyticsConsent: analyticsConsent === true,
+      environment: trustedAnalyticsEnvironment(),
+    });
+  } catch {
+    analyticsAttemptRef = null;
+  }
+
   return {
     status: "success",
     checkoutUrl,
     supportReference: order.supportReference,
+    analyticsAttemptRef,
   };
 }

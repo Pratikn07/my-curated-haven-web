@@ -7,6 +7,7 @@ import type {
   OwnershipStatus,
   CollectionRecipeSummary,
 } from "./types";
+import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
 
 let poolInstance: Pool | null = null;
 
@@ -361,6 +362,30 @@ export async function bindSessionToOrder(
   );
 }
 
+export async function recordCheckoutMeasurement(params: {
+  orderId: string;
+  campaignCode: string | null;
+  analyticsConsent: boolean;
+  environment: string;
+}): Promise<string | null> {
+  const pool = getCommercePool();
+  const { rows } = await pool.query(
+    `SELECT private.record_checkout_measurement($1, $2, $3, $4) AS attempt_ref`,
+    [params.orderId, params.campaignCode, params.analyticsConsent, params.environment]
+  );
+  const ref = rows[0]?.attempt_ref;
+  return typeof ref === "string" ? ref : null;
+}
+
+export async function suppressAnalyticsAttempts(attemptRefs: string[]): Promise<number> {
+  const pool = getCommercePool();
+  const { rows } = await pool.query(
+    `SELECT private.suppress_analytics_attempts($1::uuid[]) AS suppressed`,
+    [attemptRefs]
+  );
+  return Number(rows[0]?.suppressed ?? 0);
+}
+
 export async function getOrderSummaryBySessionId(
   sessionId: string,
   userId: string
@@ -521,8 +546,10 @@ export async function recordPaymentAndGrantAccess(params: {
   paidAt: Date;
 }): Promise<void> {
   const pool = getCommercePool();
+  const environment = trustedAnalyticsEnvironment();
   await pool.query(
-    `SELECT private.record_payment_and_grant_access($1, $2, $3, $4, $5, $6, $7, $8)`,
+    `SELECT set_config('app.analytics_environment', $9, true),
+            private.record_payment_and_grant_access($1, $2, $3, $4, $5, $6, $7, $8)`,
     [
       params.orderId,
       params.providerAccountId,
@@ -532,6 +559,7 @@ export async function recordPaymentAndGrantAccess(params: {
       params.capturedAmount,
       params.currency,
       params.paidAt,
+      environment,
     ]
   );
 }
@@ -547,8 +575,10 @@ export async function recordRefundAndRecomputeAccess(params: {
   occurredAt: Date;
 }): Promise<void> {
   const pool = getCommercePool();
+  const environment = trustedAnalyticsEnvironment();
   await pool.query(
-    `SELECT private.record_refund_and_recompute_access($1, $2, $3, $4, $5, $6, $7, $8)`,
+    `SELECT set_config('app.analytics_environment', $9, true),
+            private.record_refund_and_recompute_access($1, $2, $3, $4, $5, $6, $7, $8)`,
     [
       params.orderId,
       params.providerRefundId,
@@ -558,6 +588,7 @@ export async function recordRefundAndRecomputeAccess(params: {
       params.status,
       params.reason,
       params.occurredAt,
+      environment,
     ]
   );
 }

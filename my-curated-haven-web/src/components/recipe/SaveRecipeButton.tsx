@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Bookmark } from "lucide-react";
 import { toggleSaveRecipeAction } from "@/lib/actions/saved-recipes";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 interface SaveRecipeButtonProps {
   recipeId: string;
@@ -47,6 +48,10 @@ export default function SaveRecipeButton({
       if (res.status === "ok") {
         setIsSaved(res.isSaved);
         onSavedChange?.(res.isSaved);
+        trackAnalyticsEvent("recipe_save_changed", {
+          recipe_id: recipeId,
+          action: res.isSaved ? "saved" : "removed",
+        });
       } else if (res.status === "unauthenticated") {
         const returnTarget = `/recipes/${recipeSlug}`;
         router.push(`/sign-in?returnTo=${encodeURIComponent(returnTarget)}`);

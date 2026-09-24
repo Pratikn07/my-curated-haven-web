@@ -7,6 +7,7 @@ import {
   getOrderSummaryBySessionId,
 } from "./repository";
 import type { OrderSummaryDto } from "./types";
+import { drainOptionalAnalyticsExports } from "@/lib/analytics/drain";
 
 export async function reconcileAndFulfillSession(
   sessionId: string,
@@ -149,5 +150,11 @@ export async function processStripeWebhookEvent(event: {
         });
       }
     }
+  }
+
+  try {
+    await drainOptionalAnalyticsExports();
+  } catch {
+    // Optional export never blocks payment or access.
   }
 }
