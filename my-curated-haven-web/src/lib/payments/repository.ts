@@ -254,6 +254,7 @@ export async function getActiveOrderAttempt(
       snapshot,
       attempt_state,
       session_id,
+      checkout_url,
       idempotency_key,
       version,
       created_at,
@@ -278,6 +279,7 @@ export async function getActiveOrderAttempt(
     snapshot: r.snapshot,
     attemptState: r.attempt_state,
     sessionId: r.session_id,
+    checkoutUrl: r.checkout_url,
     idempotencyKey: r.idempotency_key,
     version: r.version,
     createdAt: r.created_at.toISOString(),
@@ -295,7 +297,7 @@ export async function reservePurchaseOrder(params: {
   const pool = getCommercePool();
   const supportRef = "MCH-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-  const insertQuery = `
+  const insertWithReuseQuery = `
     INSERT INTO private.purchase_orders (
       support_reference,
       owner_principal,
@@ -306,6 +308,9 @@ export async function reservePurchaseOrder(params: {
       attempt_state,
       idempotency_key
     ) VALUES ($1, $2, $2, $3, $4, $5, 'creating', $6)
+    ON CONFLICT (user_id, release_id)
+      WHERE attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
+      DO NOTHING
     RETURNING
       id,
       support_reference,
@@ -316,13 +321,14 @@ export async function reservePurchaseOrder(params: {
       snapshot,
       attempt_state,
       session_id,
+      checkout_url,
       idempotency_key,
       version,
       created_at,
       updated_at;
   `;
 
-  const { rows } = await pool.query(insertQuery, [
+  const { rows: insertedRows } = await pool.query(insertWithReuseQuery, [
     supportRef,
     params.userId,
     params.offerId,
@@ -331,7 +337,23 @@ export async function reservePurchaseOrder(params: {
     params.idempotencyKey,
   ]);
 
-  const r = rows[0];
+  let r = insertedRows[0];
+  if (!r) {
+    const existing = await pool.query(
+      `SELECT id, support_reference, owner_principal, user_id, offer_id, release_id,
+              snapshot, attempt_state, session_id, checkout_url, idempotency_key,
+              version, created_at, updated_at
+       FROM private.purchase_orders
+       WHERE user_id = $1 AND release_id = $2
+         AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [params.userId, params.releaseId]
+    );
+    r = existing.rows[0];
+    if (!r) throw new Error("Unable to reserve or reuse the checkout attempt.");
+  }
+
   return {
     id: r.id,
     supportReference: r.support_reference,
@@ -342,6 +364,7 @@ export async function reservePurchaseOrder(params: {
     snapshot: r.snapshot,
     attemptState: r.attempt_state,
     sessionId: r.session_id,
+    checkoutUrl: r.checkout_url,
     idempotencyKey: r.idempotency_key,
     version: r.version,
     createdAt: r.created_at.toISOString(),
@@ -351,14 +374,25 @@ export async function reservePurchaseOrder(params: {
 
 export async function bindSessionToOrder(
   orderId: string,
-  sessionId: string
+  sessionId: string,
+  checkoutUrl: string | null
 ): Promise<void> {
   const pool = getCommercePool();
   await pool.query(
     `UPDATE private.purchase_orders
-     SET session_id = $1, attempt_state = 'open', updated_at = now()
-     WHERE id = $2`,
-    [sessionId, orderId]
+     SET session_id = $1, checkout_url = $2, attempt_state = 'open', updated_at = now()
+     WHERE id = $3`,
+    [sessionId, checkoutUrl, orderId]
+  );
+}
+
+export async function markPurchaseOrderForReview(orderId: string): Promise<void> {
+  const pool = getCommercePool();
+  await pool.query(
+    `UPDATE private.purchase_orders
+     SET attempt_state = 'review', updated_at = now()
+     WHERE id = $1 AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')`,
+    [orderId]
   );
 }
 
@@ -540,7 +574,7 @@ export async function recordPaymentAndGrantAccess(params: {
   providerAccountId: string;
   providerMode: string;
   paymentIntentId: string;
-  chargeId: string;
+  chargeId: string | null;
   capturedAmount: number;
   currency: string;
   paidAt: Date;

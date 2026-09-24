@@ -38,6 +38,7 @@ export interface PurchaseOrder {
   snapshot: Record<string, unknown>;
   attemptState: AttemptState;
   sessionId: string | null;
+  checkoutUrl: string | null;
   idempotencyKey: string;
   version: number;
   createdAt: string;
