@@ -2,21 +2,21 @@
 
 ## Inspected repository state
 
-Repository: `Pratikn07/my-curated-haven-web`. Planning baseline: `dae5aed5024d29d2e0e4edebeab7e4ab9582e737` on `main`, merging Phase 6 in [PR #14](https://github.com/Pratikn07/my-curated-haven-web/pull/14).
+Repository: `Pratikn07/my-curated-haven-web`. Refreshed planning baseline: `09e57b595702b1289ef9d84bcf55c8e122e06496` on `main`, merging Phase 9 in [PR #20](https://github.com/Pratikn07/my-curated-haven-web/pull/20). The initial draft used `dae5aed5024d29d2e0e4edebeab7e4ab9582e737`. This refresh preserves later work and updates the dependencies before Phase 10 merges.
 
-| Area | Source state at this baseline | Required Phase 10 action |
+| Area | Source state at the refreshed baseline | Required Phase 10 action |
 | --- | --- | --- |
 | Phases 1–3 | Source and historical evidence present | Recheck routes, mobile design and CI against the integrated candidate |
 | Phases 4–5 | Schema, RLS, ingestion and source mapping present | Test actual access boundaries, migration replay and reviewed content |
-| Phase 6 | Free listing, filters, detail, print and SEO merged | Extend tests to the paid release without losing free access |
-| Phase 7 | Plan on main, account implementation proposed in [PR #15](https://github.com/Pratikn07/my-curated-haven-web/pull/15) | Require merged and deployed implementation before account sign-off |
-| Phase 8 | Detailed plan in open [PR #16](https://github.com/Pratikn07/my-curated-haven-web/pull/16), payment implementation absent on main | Require commercial decisions, implementation and staging validation |
-| Phase 9 | Detailed measurement plan on main | Verify implementation if enabled, otherwise prove optional capture is off |
+| Phase 6 | Free listing, filters, detail, print and SEO merged in PR #14 | Extend tests to the paid release without losing free access |
+| Phase 7 | Account implementation merged in [PR #15](https://github.com/Pratikn07/my-curated-haven-web/pull/15) | Verify deployed auth, native continuity and private saves |
+| Phase 8 | Detailed plan merged in PR #16, payment implementation in [PR #18](https://github.com/Pratikn07/my-curated-haven-web/pull/18) | Close source gaps below, commercial decisions and real provider staging validation |
+| Phase 9 | Measurement implementation merged in PR #20, optional export disabled by default | Verify disabled-state isolation, then consent and provider configuration before enabling |
 | Phase 10 | This planning package | Build and run the release evidence package |
 
 Phase 6 evidence reports 88 passing and 17 skipped tests at its recorded state. Those numbers are historical, not a fresh run or proof of the forthcoming paid release. Mobile browser emulation is not a real iPhone or Instagram-browser test.
 
-Phase 8 CI failed before tests while downloading `ghcr.io/supabase/postgres:17.6.1.132`. Treat this as an infrastructure blocker, not a passing product test or proof of a product defect. See [CI reliability](CI-AND-ENVIRONMENT-RELIABILITY.md).
+Earlier Phase 8 CI attempts failed before tests while downloading `ghcr.io/supabase/postgres:17.6.1.132`. The initial Phase 10 PR subsequently passed both jobs. Current main also configures the public ECR registry. Preserve the earlier failure as infrastructure history, not a current failure or a product-test result. See [CI reliability](CI-AND-ENVIRONMENT-RELIABILITY.md).
 
 ## Existing source to inspect before extending tests
 
@@ -36,7 +36,20 @@ Paths below are repository-relative. Their presence is verified at the planning 
 | Legacy `recipes` and `search_analytics` migrations | Inspect all remaining read paths. New RLS does not automatically close legacy full-body or raw-search access |
 | `.github/workflows/web-ci.yml` | Both jobs start Supabase. Backend job checks clean replay, pgTAP, type drift and data integration |
 
-Reinspect these findings after Phases 7–9 merge. A planned fix is not a verified fix.
+## Refreshed implementation findings requiring explicit QA
+
+The following observations come from source at `09e57b5`, not a production exploit test:
+
+- `src/app/api/stripe/webhook/route.ts` verifies signatures only when both Stripe is configured and a signature is present. The alternative branch parses unsigned JSON, including when a configured deployment receives no signature. Require a fail-closed nonlocal route and QA-S05 evidence before enabling sales.
+- `src/lib/payments/config.ts` supplies mock keys and enables checkout unless explicitly disabled. Checkout and fulfilment include simulated paths, including a `cs_test_mock_` prefix. Prove simulated processing is confined to explicit isolated tests and unreachable in staging provider validation or production. A missing credential must never become a successful simulated purchase.
+- `tests/e2e/commerce.spec.ts` includes a purchase flow returning directly from simulated Checkout. This is useful local coverage, not evidence of a real hosted test-mode payment or signed delivery.
+- Phase 8 evidence marks a $15 USD offer as verified and describes synthetic free recipes. No explicit owner approval for launch pricing appears in this conversation. Treat those values as fixtures until commercial approval and production-manifest reconciliation are recorded.
+- Phase 9 revokes raw `search_analytics` privileges through a new migration. Retest the actual deployed path rather than repeating the older finding as though no fix exists.
+- Phase 9 evidence records no provisioned PostHog project, unavailable Instagram credentials, no named paid-without-access paging route and pending real mobile payload inspection. Keep those readiness gaps visible.
+
+Add a negative test for a missing webhook signature with configured Stripe, a missing secret in a nonlocal deployment and a forged mock-prefixed session. These are launch blockers until fixed and verified. Review the worker, refund/dispute and recovery implementation against the full Phase 8 matrix. Existing evidence labels alone do not prove every planned scenario.
+
+Reinspect each finding at implementation time. Source presence and historical passing tests are not current production verification.
 
 ## Candidate identity
 
@@ -63,7 +76,7 @@ Deferred features, resources, careers and contact source remain preserved accord
 
 ## Prerequisites before final QA
 
-- Merge and deploy the approved account and payment implementations to isolated staging.
+- Deploy the merged account and payment implementations to isolated staging after closing the nonlocal simulation/signature gaps above.
 - Approve collection membership, one-time price/currency, tax presentation, refund handling, future additions and hosted access wording.
 - Complete recipe editorial review. The source audit count of 70 is not a promise of 70 or 67 paid recipes.
 - Identify engineering, QA, editorial, commerce/support and release owners. One person may fill several roles, but record each responsibility.

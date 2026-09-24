@@ -49,4 +49,4 @@ Run discovery and core purchase navigation on desktop Chromium, mobile Chromium 
 
 Payment evidence must connect provider confirmation, private order, entitlement projection and authorised read. Do not mark QA-J16 or QA-J20 passed solely because a return screen says “success”. Refund and dispute journeys belong to QA-S06–QA-S09 and support rehearsal QA-O07.
 
-If the account or payment implementation is absent, those cases are blocked. The absence is expected at the planning baseline, but remains a blocker for a full paid release.
+Account and payment source is now merged. If the tested deployment lacks either feature, mark those cases blocked. Local simulated purchase coverage does not replace the real provider journey required for a paid release.

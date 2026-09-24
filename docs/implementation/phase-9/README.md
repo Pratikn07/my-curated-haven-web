@@ -28,6 +28,8 @@ Excluded: advertising pixels, retargeting, session recordings, child profiles, h
 
 Baseline inspected: repository main `aa7f0bda36dc2b78a05c578288d992411c26d46f`, 2026-09-23. Phase 4 and Phase 5 implementation source and recorded evidence exist. Phase 6 and Phase 7 are documented plans at this baseline. The shared roadmap assigns payments to Phase 8, but its detailed package is absent at this commit. Treat Phase 8 interfaces below as requirements to agree with its implementation, not existing functions or tables.
 
+Planning update: the [detailed Phase 8 package](../phase-8/README.md) now defines payment and access delivery, with a [Phase 9 event handoff](../phase-8/IMPLEMENTATION-HANDOFF.md#phase-9-contract). The historical baseline above is preserved. Payment implementation is still a prerequisite for purchase measurement.
+
 Begin event contracts and test fixtures now. Enable each feature's instrumentation only when its underlying phase is implemented. Free recipe measurement does not wait for checkout. Purchase reporting does wait for a tested Phase 8 ledger and fulfilment process.
 
 See the [shared index](../README.md). No credentials are needed to review this plan.

@@ -35,4 +35,4 @@ This package defines the implementation work needed to build that evidence. Merg
 
 Price, currency, exact paid membership, refund terms, future additions and hosted access duration still require decisions. QA verifies an approved promise. QA does not invent one.
 
-The baseline and PR statuses in this package were inspected on 2026-09-23. Refresh them when implementation starts. All P10 tasks and QA scenarios start as **not run**, unless an execution record supplies evidence for a named candidate.
+The initial baseline was inspected on 2026-09-23 and refreshed on 2026-09-24 after Phases 7–9 merged. Refresh the baseline and deployment status when implementation starts. All P10 tasks and QA scenarios start as **not run**, unless an execution record supplies evidence for a named candidate.

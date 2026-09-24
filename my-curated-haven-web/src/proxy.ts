@@ -64,8 +64,31 @@ export async function proxy(request: NextRequest) {
     });
   }
 
-  // Refresh user session cookies without forcing global redirects
-  const { supabaseResponse } = await updateSession(request);
+  // Refresh user session cookies and determine verified user
+  const { supabaseResponse, user } = await updateSession(request);
+
+  const isAccountRoute = pathname === "/account" || pathname.startsWith("/account/");
+  const isSignInRoute = pathname === "/sign-in";
+  const isCheckoutReturn = pathname === "/checkout/return";
+
+  if ((isAccountRoute || isCheckoutReturn) && !user) {
+    const returnTarget = pathname + (request.nextUrl.search || "");
+    const redirectUrl = new URL(
+      `/sign-in?returnTo=${encodeURIComponent(returnTarget)}`,
+      request.url
+    );
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    supabaseResponse.cookies.getAll().forEach((c) => {
+      redirectResponse.cookies.set(c);
+    });
+    redirectResponse.headers.set("Cache-Control", "no-store, private");
+    return redirectResponse;
+  }
+
+  if (isAccountRoute || isSignInRoute || isCheckoutReturn) {
+    supabaseResponse.headers.set("Cache-Control", "no-store, private");
+  }
+
   return supabaseResponse;
 }
 

@@ -2,9 +2,9 @@
 
 ## Starting position
 
-This is a plan, not an execution report. All sixteen tasks and all 86 scenarios begin pending/not run. Source inspection identified prerequisites and test gaps, but no Phase 10 product QA certification is claimed.
+This is a plan, not an execution report. All sixteen tasks and all 86 scenarios begin pending/not run. Source inspection identified prerequisites and test gaps, but no Phase 10 product QA certification is claimed. Phases 7–9 now have merged implementation source.
 
-Before implementation, refresh [baseline](RELEASE-SCOPE-AND-BASELINE.md), merge the approved account/payment prerequisites and link the final Phase 8 implementation. Phase 9 optional measurement may remain explicitly off, with its isolation tests passing.
+Before implementation, refresh [baseline](RELEASE-SCOPE-AND-BASELINE.md), verify the merged account/payment source against the refreshed findings and link the deployed Phase 8 revision. Phase 9 optional measurement may remain explicitly off, with its isolation tests passing.
 
 ## Suggested PR sequence
 

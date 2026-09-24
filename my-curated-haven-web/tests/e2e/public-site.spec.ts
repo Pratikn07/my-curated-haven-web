@@ -86,7 +86,7 @@ test("header and footer links stay on this site", async ({ page }) => {
   expect(hrefs.length).toBeGreaterThan(0);
   for (const href of hrefs) {
     expect(href, "deferred or future route linked").not.toMatch(
-      /^\/(features|resources|careers|contact|account)(\/|$)/,
+      /^\/(features|resources|careers|contact)(\/|$)/,
     );
     const response = await page.request.get(href);
     expect(response.status(), href).toBeLessThan(400);

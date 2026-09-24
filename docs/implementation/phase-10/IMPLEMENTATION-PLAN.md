@@ -29,7 +29,7 @@ All tasks below start pending. Dependencies identify order, not completion. Prop
 
 - Build synthetic actors and recipe fixtures listed in [test strategy](TEST-STRATEGY-AND-FIXTURES.md).
 - Guard destructive setup by explicit local/staging allowlists. A missing environment value must stop setup.
-- Verify separate product and Instagram projects, Stripe test mode and nonproduction analytics destination.
+- Verify separate product and Instagram projects, Stripe test mode and nonproduction analytics destination. Require an explicit isolated-test guard for payment simulation and reject missing signatures/configuration in nonlocal deployments before provider staging work.
 - Make fixture creation repeatable and namespace runs so parallel workers do not share mutable orders or accounts.
 
 **Targets:** `supabase/seed.sql`, focused test helpers under `my-curated-haven-web/tests/`, proposed private commerce fixtures after Phase 8 schema exists.
@@ -56,7 +56,7 @@ All tasks below start pending. Dependencies identify order, not completion. Prop
 - Automate QA-J01–QA-J08 from the [journey matrix](CUSTOMER-JOURNEY-MATRIX.md).
 - Assert the exact approved free IDs, full bodies and print access with no session.
 - Test URL filters, refresh/back, clear-all, zero results, malformed parameters and network failures.
-- Update old “no purchase link” assertions to reflect the explicit checkout flag, preserving disabled-state coverage.
+- Update old “no purchase link” assertions to reflect the explicit checkout flag, preserving disabled-state coverage. Separate synthetic CI IDs from the approved staging/production manifest.
 
 **Targets:** `tests/e2e/recipes.spec.ts`, `public-site.spec.ts`, `src/app/recipes/`, recipe filters and navigation.
 
@@ -77,7 +77,7 @@ All tasks below start pending. Dependencies identify order, not completion. Prop
 
 ### P10-06: prove checkout and recovery
 
-**Depends on:** P10-05, approved commercial policy and implemented Phase 8. **Owner:** commerce engineer and QA.
+**Depends on:** P10-05, approved commercial policy and Phase 8 with the refreshed signature/simulation blockers resolved. **Owner:** commerce engineer and QA.
 
 - Execute QA-J15–QA-J24 against Stripe test-mode hosted Checkout.
 - Verify price/currency/quantity derive from the approved server mapping. Browser edits must not change them.
@@ -228,4 +228,4 @@ All tasks below start pending. Dependencies identify order, not completion. Prop
 | Experience and truth | P10-09–P10-12 | Mobile, content, performance and measurement evidence |
 | Recovery and release | P10-13–P10-16 | Recovery rehearsal, defect closure and sign-off |
 
-Plan staffing after prerequisites are known. Missing payment implementation is not a small QA task. Do not give a launch date by assuming the open phases are already finished.
+Plan staffing after prerequisites are known. Merged payment source still needs real provider validation and closure of the refreshed findings. Do not give a launch date by treating source presence as completed launch QA.

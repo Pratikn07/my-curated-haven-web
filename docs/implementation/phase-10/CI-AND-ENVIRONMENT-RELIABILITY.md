@@ -2,13 +2,13 @@
 
 ## Current pipeline
 
-At the planning baseline, `.github/workflows/web-ci.yml` runs `web-quality` and `backend-quality` on pull requests and main pushes. Both use Ubuntu 24.04 and Supabase CLI 2.104.0. Web checks start/reset Supabase before lint, typecheck, build and Playwright. Backend checks clean replay, pgTAP, generated-type drift and data-access integration.
+At the planning baseline, `.github/workflows/web-ci.yml` runs `web-quality` and `backend-quality` on pull requests and main pushes. Both use Ubuntu 24.04 and Supabase CLI 2.104.0. Refreshed main selects `public.ecr.aws` for Supabase image pulls and uses the webpack production build. Web checks start/reset Supabase before lint, typecheck, build and Playwright. Backend checks clean replay, pgTAP, generated-type drift and data-access integration.
 
 The Playwright configuration has three projects, one worker in CI and zero retries. Existing data-access setup permits skipping when the local database is unreachable. P10-03 must make required release checks fail in that condition. Legitimate project applicability skips, such as desktop-only navigation, remain explicit.
 
 ## Recent registry failure
 
-Phase 8 PR #16 workflow run `35913726676` failed twice before tests during database image download. Logs reported `toomanyrequests` for `ghcr.io/supabase/postgres:17.6.1.132`. This is recorded evidence of a dependency download problem. It does not establish a reset deadline or show whether application tests would pass.
+Phase 8 PR #16 workflow run `35913726676` failed twice before tests during database image download. Logs reported `toomanyrequests` for `ghcr.io/supabase/postgres:17.6.1.132`. The initial Phase 10 PR run `35916377137` later passed both jobs. This earlier failure is recorded evidence of a dependency download problem, not a current blocked status. It does not establish a reset deadline or show whether application tests would pass.
 
 Classify each future failure from the actual log. A container registry 429 is different from invalid image tag, missing credentials, unhealthy database, migration error or test assertion. Do not keep retrying a deterministic product failure as though it were rate limiting.
 

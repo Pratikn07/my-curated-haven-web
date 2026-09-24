@@ -1,6 +1,6 @@
 # Security, privacy and payments
 
-Use the Phase 8 design from [PR #16](https://github.com/Pratikn07/my-curated-haven-web/pull/16) until it is merged, then pin the implemented version in the candidate record. Its 54 validation cases remain required for payment implementation. The scenarios here select integrated launch risks and add cross-phase checks. This matrix does not replace Phase 8's detailed tests.
+Use the merged [Phase 8 design](../phase-8/README.md) and pin the implemented version in the candidate record. Its 54 validation cases remain required for payment implementation. The scenarios here select integrated launch risks and add cross-phase checks. This matrix does not replace Phase 8's detailed tests.
 
 ## Payment and access invariants
 
@@ -20,7 +20,7 @@ Use the Phase 8 design from [PR #16](https://github.com/Pratikn07/my-curated-hav
 | QA-S02 | Deliver paid/refund/dispute events out of order | Canonical provider state and approved precedence converge correctly, no regression to obsolete state |
 | QA-S03 | Crash before inbox commit, after inbox commit/before ack, before entitlement commit and after commit/before completion marker | Provider retry or worker recovery loses no confirmed purchase. Uncommitted work rolls back, committed work is safely reprocessed |
 | QA-S04 | Worker lease expires while original worker resumes, concurrent reconciliation runs | Fencing rejects stale writes and serialisation protects the user/release projection. No duplicate grant or lost revocation |
-| QA-S05 | Wrong signature, altered raw body, wrong account/mode, irrelevant or malformed event | Invalid input rejected, valid irrelevant event handled intentionally. No financial or access mutation, no raw secret logging |
+| QA-S05 | Missing/wrong signature with Stripe configured, altered raw body, wrong account/mode, irrelevant or malformed event | Invalid input rejected, valid irrelevant event handled intentionally. No financial or access mutation, no raw secret logging |
 | QA-S06 | Pending, failed and successful full refund | Apply the approved policy at the correct state transition. Pending/failed must not be treated as successful financial adjustment |
 | QA-S07 | Partial and repeated refunds, paginated refund objects | Sum unique successful adjustments in minor units, enforce approved access policy, reconcile all pages and currencies separately |
 | QA-S08 | Open, won, lost and reopened formal dispute | Approved suspension/restoration policy. Winning cannot restore a separately refunded/expired source |
@@ -41,7 +41,7 @@ Test realistic transaction concurrency against PostgreSQL, not solely mocked fun
 | QA-S16 | Warm owner response, then request same URL as nonbuyer/anonymous through CDN and Next.js navigation/prefetch | No cross-user HTML, RSC, metadata, print or cache leakage. Authenticated bodies are never shared publicly |
 | QA-S17 | Sign out/revoke a right while tabs, back-forward cache and a signed URL exist | New server reads deny access after policy propagation. Bound existing URL lifetime explicitly. Already downloaded/printed material is not falsely promised revocable |
 | QA-S18 | Attempt ordinary-user INSERT/UPDATE/DELETE of entitlement, order, membership and other user's saved rows | RLS/privileges reject unauthorised mutation. Legitimate own save works and trusted worker uses least necessary authority |
-| QA-S19 | Missing/wrong server env, inspect generated client bundle and thrown errors | No service/Stripe secret in client assets. No localhost fallback in production, no credentials or raw database messages in responses |
+| QA-S19 | Missing/wrong server env, forged mock-prefixed session, inspect client bundle and errors | No simulated purchase or unsigned processing outside explicit isolated tests. No service/Stripe secret in client assets, local fallback in production or credentials/raw database messages in responses |
 | QA-S20 | Forged or expired session and cross-origin state-changing requests | Current identity verified, safe redirect allowlist and appropriate CSRF/origin controls applied, state unchanged on invalid requests |
 | QA-S21 | Review webhook/auth/support logs, analytics payloads, URLs and error monitoring | No auth codes/cookies, raw recipe search text, payment secrets or child/personal details beyond approved minimal operational data |
 | QA-S22 | Synthetic account deletion and optional analytics deletion with queued exports | Approved retention policy preserved, optional data not reintroduced, support/recovery implications explicit. Do not erase required financial history by accidental cascade |

@@ -43,13 +43,15 @@ Use unique synthetic emails at an owned test domain or local mail sink. Never us
 
 ## Recipe and transaction fixtures
 
-Retain the approved free source identities:
+The reviewed production manifest must retain the approved free source identities:
 
 | Free slot | Source ID |
 | --- | --- |
 | 1 | `0003c4cc-b2cb-4e49-97c8-f4febfed39f9` |
 | 2 | `50663aaa-7e47-4b08-9fd8-a58b390db96d` |
 | 3 | `a61d93da-4d19-4219-a131-bca2468ace88` |
+
+Current CI uses `synth-free-*` recipes with separate synthetic UUIDs. Preserve this isolation and record the mapping. Run the real free-ID assertions against a reviewed staging manifest, not the unrelated local seed. Local fixture success must not be described as production content verification.
 
 Add synthetic paid R1/R2 recipes, a draft, a withdrawn item, long ingredient/step content, an absent image and malformed input fixtures. Mark synthetic bodies with unique sentinel strings to detect leakage across HTML, RSC, JSON-LD, storage and public search. Keep synthetic data out of production publication and sitemaps.
 
@@ -78,7 +80,7 @@ npm ci
 npm run lint
 npm run typecheck
 npx playwright install --with-deps chromium webkit
-npm run build
+npm run build -- --webpack
 npx playwright test --list
 npm run test:e2e
 ```

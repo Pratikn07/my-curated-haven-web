@@ -3,17 +3,22 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import {
   getRecipeBySlug,
   getPublishedCatalog,
   type RecipeIngredient,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
+import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
+import { checkRecipeAccess } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import PrintButton from "@/components/recipe/PrintButton";
+import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
+import RecipeOpenTracker from "@/components/recipe/RecipeOpenTracker";
 import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
+import { Lock } from "lucide-react";
 
 const getCachedRecipe = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -35,14 +40,14 @@ export async function generateMetadata({
   const { slug } = await params;
   const result = await getCachedRecipe(slug);
 
-  if (result.status !== "ok") {
+  if (result.status === "not_found" || result.status === "error") {
     return {
       title: "Recipe Not Found | My Curated Haven",
       robots: { index: false, follow: false },
     };
   }
 
-  const { catalog } = result.recipe;
+  const catalog = result.status === "ok" ? result.recipe.catalog : result.catalog;
   const title = `${catalog.title} | Toddler Recipe | My Curated Haven`;
   const description = catalog.publicSummary;
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
@@ -95,7 +100,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   const { slug } = await params;
   const result = await getCachedRecipe(slug);
 
-  if (result.status === "not_found" || result.status === "access_denied") {
+  if (result.status === "not_found") {
     notFound();
   }
 
@@ -103,9 +108,26 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     throw new Error(result.message);
   }
 
-  const { catalog, body } = result.recipe;
-  const instructions = normalizeInstructions(body.instructions);
+  const isAccessDenied = result.status === "access_denied";
+  const catalog = isAccessDenied ? result.catalog : result.recipe.catalog;
+  const body = isAccessDenied ? null : result.recipe.body;
+  const instructions = body ? normalizeInstructions(body.instructions) : [];
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
+
+  // Fetch auth and saved recipe state
+  const user = await getCurrentUser();
+  const supabase = await createClient();
+  const savedIds = user ? await getSavedRecipeIds(supabase, user.id) : new Set<string>();
+  const isSaved = savedIds.has(catalog.id);
+  let accessKind: "free" | "paid" = "paid";
+  if (!isAccessDenied) {
+    try {
+      const access = await checkRecipeAccess(supabase, catalog.id);
+      accessKind = access.type === "free" ? "free" : "paid";
+    } catch {
+      accessKind = "paid";
+    }
+  }
 
   // Fetch sibling free recipes for discovery section
   let otherRecipes: RecipeCatalogItem[] = [];
@@ -123,13 +145,17 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     name: catalog.title,
     description: catalog.publicSummary,
     image: catalog.previewImagePath ? [catalog.previewImagePath] : [],
-    recipeYield: body.yield,
-    recipeIngredient: body.ingredients.map(formatIngredient),
-    recipeInstructions: instructions.map((step) => ({
-      "@type": "HowToStep",
-      position: step.step,
-      text: step.text,
-    })),
+    ...(body
+      ? {
+          recipeYield: body.yield,
+          recipeIngredient: body.ingredients.map(formatIngredient),
+          recipeInstructions: instructions.map((step) => ({
+            "@type": "HowToStep",
+            position: step.step,
+            text: step.text,
+          })),
+        }
+      : {}),
     ...(catalog.totalMinutes
       ? { totalTime: `PT${catalog.totalMinutes}M` }
       : {}),
@@ -203,7 +229,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                 Yield
               </span>
               <span className="text-base font-semibold text-foreground">
-                {body.yield || "Toddler portions"}
+                {body ? body.yield : "Toddler portions"}
               </span>
             </div>
             <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
@@ -211,22 +237,34 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               <span className="block text-xs font-bold uppercase tracking-wider text-text-muted">
                 Access
               </span>
-              <span className="text-base font-semibold text-action">
-                Free Toddler Recipe
+              <span className={`text-base font-semibold ${isAccessDenied ? "text-text-muted" : "text-action"}`}>
+                {isAccessDenied ? "Collection Recipe" : accessKind === "free" ? "Free Toddler Recipe" : "Your Collection Recipe"}
               </span>
             </div>
           </div>
 
           <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0">
-            <a
-              href="#recipe-content"
-              className="no-print inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-xl border border-border-control bg-surface px-4 text-sm font-semibold text-foreground hover:bg-surface-muted focus-visible:outline-2 sm:flex-initial"
-            >
-              Jump to recipe
-            </a>
-            <div className="flex-1 sm:flex-initial">
-              <PrintButton />
+            <div className="no-print flex-1 sm:flex-initial">
+              <SaveRecipeButton
+                recipeId={catalog.id}
+                recipeSlug={catalog.slug}
+                initialIsSaved={isSaved}
+                isAuthenticated={Boolean(user)}
+              />
             </div>
+            {!isAccessDenied && (
+              <>
+                <a
+                  href="#recipe-content"
+                  className="no-print inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-xl border border-border-control bg-surface px-4 text-sm font-semibold text-foreground hover:bg-surface-muted focus-visible:outline-2 sm:flex-initial"
+                >
+                  Jump to recipe
+                </a>
+                <div className="flex-1 sm:flex-initial">
+                  <PrintButton recipeId={catalog.id} accessKind={accessKind} />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -261,95 +299,129 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
 
       {/* Main Recipe Content Anchor */}
       <div id="recipe-content" className="grid w-full min-w-0 gap-8 [overflow-wrap:anywhere]">
-        {/* Ingredients Section */}
-        <section aria-labelledby="ingredients-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-          <h2 id="ingredients-heading" className="text-2xl font-bold text-foreground">
-            Ingredients
-          </h2>
-          <ul className="mt-4 divide-y divide-border text-base text-foreground">
-            {body.ingredients.map((ing, i) => (
-              <li key={i} className="flex items-start gap-3 py-2.5">
-                <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-action" aria-hidden="true" />
-                <span className="leading-relaxed [overflow-wrap:anywhere]">{formatIngredient(ing)}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Instructions Section */}
-        <section aria-labelledby="instructions-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-          <h2 id="instructions-heading" className="text-2xl font-bold text-foreground">
-            Method & Instructions
-          </h2>
-          <ol className="mt-4 grid gap-4 text-base text-foreground">
-            {instructions.map((step) => (
-              <li key={step.step} className="flex min-w-0 gap-4">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-bold text-foreground">
-                  {step.step}
-                </span>
-                <p className="min-w-0 flex-1 pt-0.5 leading-relaxed [overflow-wrap:anywhere]">{step.text}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* Allergens Information */}
-        <section aria-labelledby="allergens-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-          <h2 id="allergens-heading" className="text-xl font-bold text-foreground">
-            Allergen Information
-          </h2>
-          <div className="mt-3 text-sm leading-relaxed text-text-muted">
-            {body.allergenReviewState === "reviewed_listed" && body.allergens?.length ? (
-              <div>
-                <p className="font-semibold text-foreground">Contains reviewed allergens:</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {body.allergens.map((allergen) => (
-                    <Badge key={allergen} variant="collection">
-                      {allergen}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ) : body.allergenReviewState === "reviewed_no_allergens" ? (
-              <p className="font-medium text-action">
-                Reviewed: Does not contain major common allergens (dairy, egg, nuts, soy, wheat). Always check your individual ingredients.
-              </p>
-            ) : (
-              <p className="text-text-muted">
-                Allergen information has not been formally reviewed for this recipe. Please check all ingredient packaging carefully.
-              </p>
-            )}
-          </div>
-        </section>
-
-        {/* Storage Guidance and Notes */}
-        {(body.storageNotes || body.reviewedNotes) && (
-          <section aria-labelledby="storage-notes-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-            <h2 id="storage-notes-heading" className="text-xl font-bold text-foreground">
-              Storage & Preparation Notes
+        {isAccessDenied ? (
+          /* Gated / Locked Recipe Presentation */
+          <div className="rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-action/10">
+              <Lock className="h-7 w-7 text-action" aria-hidden="true" />
+            </div>
+            <h2 className="mt-4 text-2xl font-bold text-foreground">
+              Collection Recipe
             </h2>
-            <div className="mt-3 grid gap-4 text-sm leading-relaxed text-text-muted">
-              {body.storageNotes && (
-                <div>
-                  <h3 className="font-semibold text-foreground">Storage Instructions:</h3>
-                  <p className="mt-1 whitespace-pre-line break-words">{body.storageNotes}</p>
-                </div>
-              )}
-              {body.reviewedNotes && (
-                <div>
-                  <h3 className="font-semibold text-foreground">Helpful Toddler Feeding Tips:</h3>
-                  <p className="mt-1 whitespace-pre-line break-words">{body.reviewedNotes}</p>
-                </div>
+            <p className="mx-auto mt-2 max-w-lg text-base text-text-muted leading-relaxed">
+              This recipe is part of our curated toddler collection. Sign in with an entitled account or purchase the collection to unlock full ingredients, instructions, and printable views.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/collections/comfort-haven-collection"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white shadow-sm hover:bg-action-hover"
+              >
+                View Collection & Unlock
+              </Link>
+              {!user && (
+                <Link
+                  href={`/sign-in?returnTo=/recipes/${catalog.slug}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
+                >
+                  Sign in to your account
+                </Link>
               )}
             </div>
-          </section>
-        )}
+          </div>
+        ) : body ? (
+          <>
+            <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />
+            {/* Ingredients Section */}
+            <section aria-labelledby="ingredients-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
+              <h2 id="ingredients-heading" className="text-2xl font-bold text-foreground">
+                Ingredients
+              </h2>
+              <ul className="mt-4 divide-y divide-border text-base text-foreground">
+                {body.ingredients.map((ing, i) => (
+                  <li key={i} className="flex items-start gap-3 py-2.5">
+                    <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-action" aria-hidden="true" />
+                    <span className="leading-relaxed [overflow-wrap:anywhere]">{formatIngredient(ing)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-        {/* Print Footer Attribution (visible only in print) */}
-        <div className="hidden border-t border-border pt-4 text-xs text-text-muted print:block">
-          <p>Recipe from My Curated Haven — {canonicalUrl}</p>
-          <p>Recipes by Tiny Soho, inside My Curated Haven.</p>
-        </div>
+            {/* Instructions Section */}
+            <section aria-labelledby="instructions-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
+              <h2 id="instructions-heading" className="text-2xl font-bold text-foreground">
+                Method & Instructions
+              </h2>
+              <ol className="mt-4 grid gap-4 text-base text-foreground">
+                {instructions.map((step) => (
+                  <li key={step.step} className="flex min-w-0 gap-4">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-bold text-foreground">
+                      {step.step}
+                    </span>
+                    <p className="min-w-0 flex-1 pt-0.5 leading-relaxed [overflow-wrap:anywhere]">{step.text}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            {/* Allergens Information */}
+            <section aria-labelledby="allergens-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
+              <h2 id="allergens-heading" className="text-xl font-bold text-foreground">
+                Allergen Information
+              </h2>
+              <div className="mt-3 text-sm leading-relaxed text-text-muted">
+                {body.allergenReviewState === "reviewed_listed" && body.allergens?.length ? (
+                  <div>
+                    <p className="font-semibold text-foreground">Contains reviewed allergens:</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {body.allergens.map((allergen) => (
+                        <Badge key={allergen} variant="collection">
+                          {allergen}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                ) : body.allergenReviewState === "reviewed_no_allergens" ? (
+                  <p className="font-medium text-action">
+                    Reviewed: Does not contain major common allergens (dairy, egg, nuts, soy, wheat). Always check your individual ingredients.
+                  </p>
+                ) : (
+                  <p className="text-text-muted">
+                    Allergen information has not been formally reviewed for this recipe. Please check all ingredient packaging carefully.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {/* Storage Guidance and Notes */}
+            {(body.storageNotes || body.reviewedNotes) && (
+              <section aria-labelledby="storage-notes-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
+                <h2 id="storage-notes-heading" className="text-xl font-bold text-foreground">
+                  Storage & Preparation Notes
+                </h2>
+                <div className="mt-3 grid gap-4 text-sm leading-relaxed text-text-muted">
+                  {body.storageNotes && (
+                    <div>
+                      <h3 className="font-semibold text-foreground">Storage Instructions:</h3>
+                      <p className="mt-1 whitespace-pre-line break-words">{body.storageNotes}</p>
+                    </div>
+                  )}
+                  {body.reviewedNotes && (
+                    <div>
+                      <h3 className="font-semibold text-foreground">Helpful Toddler Feeding Tips:</h3>
+                      <p className="mt-1 whitespace-pre-line break-words">{body.reviewedNotes}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Print Footer Attribution (visible only in print) */}
+            <div className="hidden border-t border-border pt-4 text-xs text-text-muted print:block">
+              <p>Recipe from My Curated Haven — {canonicalUrl}</p>
+              <p>Recipes by Tiny Soho, inside My Curated Haven.</p>
+            </div>
+          </>
+        ) : null}
       </div>
 
       {/* Sibling Free Recipes Discovery Section */}
@@ -363,7 +435,13 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </p>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             {otherRecipes.map((other) => (
-              <RecipeCard key={other.id} recipe={other} />
+              <RecipeCard
+                key={other.id}
+                recipe={other}
+                isSaved={savedIds.has(other.id)}
+                isAuthenticated={Boolean(user)}
+                showSaveButton={true}
+              />
             ))}
           </div>
         </section>

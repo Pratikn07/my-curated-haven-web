@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
+import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeFilters from "@/components/recipe/RecipeFilters";
+import RecipeCatalogTracker from "@/components/recipe/RecipeCatalogTracker";
 import { parseFilterParams } from "@/lib/recipes/filters";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
@@ -97,9 +99,16 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   let catalog: RecipeCatalogItem[] = [];
   let fetchError: string | null = null;
 
+  let user = null;
+  let savedIds = new Set<string>();
+
   try {
     const supabase = await createClient();
     catalog = await getPublishedCatalog(supabase);
+    user = await getCurrentUser();
+    if (user) {
+      savedIds = await getSavedRecipeIds(supabase, user.id);
+    }
   } catch (err) {
     fetchError = err instanceof Error ? err.message : "Unknown error loading recipes";
   }
@@ -144,6 +153,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
       ) : (
         <div className="grid gap-8">
           {/* Client-side filter controls with search params sync */}
+          <RecipeCatalogTracker totalCount={filteredRecipes.length} />
           <Suspense fallback={<div className="h-14 animate-pulse rounded-xl bg-surface-muted" />}>
             <RecipeFilters totalCount={filteredRecipes.length} />
           </Suspense>
@@ -156,6 +166,9 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
                   key={recipe.id}
                   recipe={recipe}
                   priority={index === 0}
+                  isSaved={savedIds.has(recipe.id)}
+                  isAuthenticated={Boolean(user)}
+                  showSaveButton={true}
                 />
               ))}
             </div>
