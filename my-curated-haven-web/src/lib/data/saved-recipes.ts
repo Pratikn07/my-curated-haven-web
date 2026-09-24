@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/database";
 import type { RecipeCatalogItem } from "./recipes";
+import { checkRecipeAccess } from "./access";
 
 export interface SavedRecipeItem {
   id: string;
@@ -15,10 +16,17 @@ export type SavedRecipesResult =
   | { status: "unauthenticated" }
   | { status: "error"; message: string };
 
+export type SavedMutationErrorCode =
+  | "recipe_access_denied"
+  | "recipe_not_found"
+  | "recipe_access_unavailable"
+  | "save_failed"
+  | "remove_failed";
+
 export type SavedMutationResult =
   | { status: "ok"; isSaved: boolean }
   | { status: "unauthenticated" }
-  | { status: "error"; message: string };
+  | { status: "error"; code: SavedMutationErrorCode; message: string };
 
 export async function getSavedRecipes(
   supabase: SupabaseClient<Database>,
@@ -122,6 +130,32 @@ export async function saveRecipe(
   }
 
   try {
+    const access = await checkRecipeAccess(supabase, recipeId);
+
+    if (access.type === "denied") {
+      return {
+        status: "error",
+        code: "recipe_access_denied",
+        message: "This recipe isn't available to save.",
+      };
+    }
+
+    if (access.type === "not_found") {
+      return {
+        status: "error",
+        code: "recipe_not_found",
+        message: "This recipe could not be found.",
+      };
+    }
+
+    if (access.type === "error") {
+      return {
+        status: "error",
+        code: "recipe_access_unavailable",
+        message: "We couldn't verify access to this recipe. Please try again.",
+      };
+    }
+
     // Idempotent insert: duplicate saves resolve to success
     const { error } = await supabase
       .from("saved_recipes")
@@ -131,13 +165,14 @@ export async function saveRecipe(
       );
 
     if (error) {
-      return { status: "error", message: error.message };
+      return { status: "error", code: "save_failed", message: error.message };
     }
 
     return { status: "ok", isSaved: true };
   } catch (err) {
     return {
       status: "error",
+      code: "save_failed",
       message: err instanceof Error ? err.message : "Failed to save recipe",
     };
   }
@@ -160,13 +195,14 @@ export async function removeSavedRecipe(
       .eq("recipe_id", recipeId);
 
     if (error) {
-      return { status: "error", message: error.message };
+      return { status: "error", code: "remove_failed", message: error.message };
     }
 
     return { status: "ok", isSaved: false };
   } catch (err) {
     return {
       status: "error",
+      code: "remove_failed",
       message: err instanceof Error ? err.message : "Failed to remove recipe",
     };
   }

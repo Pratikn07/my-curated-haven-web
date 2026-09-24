@@ -119,13 +119,19 @@ test.describe("Phase 7: Unauthenticated Experience & Protection", () => {
     await expect(page.getByRole("heading", { name: "Sign In", level: 1 })).toBeVisible();
 
     // Disclosure and description
-    await expect(
-      page.getByText(/sign in to save recipes and access them across all your devices/i)
-    ).toBeVisible();
+    const accountDisclosure = page.locator("p").filter({
+      hasText: /enter a new email address.*create.*My Curated Haven account/i,
+    });
+    await expect(accountDisclosure).toContainText(
+      "Enter your email to receive a one-time verification code"
+    );
+    await expect(accountDisclosure).toContainText(
+      "Sign in to save recipes and access them across all your devices"
+    );
 
     // Legal links visible and pointing to Terms and Privacy
-    const termsLink = page.getByRole("link", { name: /terms of service/i });
-    const privacyLink = page.getByRole("link", { name: /privacy policy/i });
+    const termsLink = accountDisclosure.getByRole("link", { name: /terms of service/i });
+    const privacyLink = accountDisclosure.getByRole("link", { name: /privacy policy/i });
     await expect(termsLink).toBeVisible();
     await expect(termsLink).toHaveAttribute("href", "/terms");
     await expect(privacyLink).toBeVisible();
@@ -212,9 +218,19 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await expect(savedLink).toBeVisible();
     await expect(savedLink).toHaveAttribute("href", "/account/saved-recipes");
 
-    // Account closure support instructions
-    await expect(page.getByText(/Account Closure & Data Deletion/i)).toBeVisible();
-    await expect(page.getByText(/support@mycuratedhaven.com/i)).toBeVisible();
+    // Account closure request instructions must not promise immediate deletion
+    const closureSection = page.locator("section").filter({
+      hasText: "support@mycuratedhaven.com",
+    });
+    await expect(
+      closureSection.getByRole("heading", { name: /request account closure/i })
+    ).toBeVisible();
+    await expect(closureSection).toContainText(
+      /sending an email does not by itself delete your account or saved recipes/i
+    );
+    await expect(closureSection.getByRole("link", { name: /support@mycuratedhaven.com/i }))
+      .toHaveAttribute("href", "mailto:support@mycuratedhaven.com");
+    await expect(closureSection).toContainText(/registered email address/i);
 
     // Responsive check at 320px
     await page.setViewportSize({ width: 320, height: 700 });
