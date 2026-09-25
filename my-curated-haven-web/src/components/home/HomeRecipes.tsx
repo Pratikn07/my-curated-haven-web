@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HOMEPAGE_RECIPE_STATE, projectHomepageRecipes } from "@/config/homepage-content";
+import { classifyHomepageRecipeLoadFailure } from "@/lib/data/homepage-recipes";
 import { getFreeRecipeSlots, type FreeSlotItem } from "@/lib/data/recipes";
 import { createClient } from "@/lib/supabase/server";
 import Container from "@/components/layout/Container";
@@ -15,8 +16,20 @@ export default async function HomeRecipes() {
       const supabase = await createClient();
       const slots = await getFreeRecipeSlots(supabase);
       recipes = projectHomepageRecipes(state, slots).map(({ recipe }) => recipe);
-    } catch {
+      if (slots.length === 0) {
+        console.warn("[homepage] No assigned free recipe slots returned", {
+          category: "empty_free_slot_catalog",
+        });
+      } else if (recipes.length === 0) {
+        console.warn("[homepage] No approved homepage recipes matched assigned slots", {
+          category: "no_approved_slot_match",
+        });
+      }
+    } catch (error) {
       unavailable = true;
+      console.error("[homepage] Free recipe list unavailable", {
+        category: classifyHomepageRecipeLoadFailure(error),
+      });
     }
   }
 

@@ -119,7 +119,7 @@ Done when the summary matches the offer and no future entitlement is implied. Ve
 
 ## HV-10: build static Chat, Shop and Bloom previews
 
-Use one reusable preview section structure with image, heading, status, caption and short explanation. Keep all content readable without runtime feature connections. Show meaningful examples of the app's direction rather than generic “coming soon” boxes.
+Use one reusable preview section structure with a raster image or the documented semantic HTML mockup, heading, status, caption and short explanation. For version 1, use the semantic HTML mockup route recorded in `PREVIEW-ASSETS.md`. Keep all content readable without runtime feature connections. Show meaningful examples of the app's direction rather than generic “coming soon” boxes.
 
 Do not add input fields, fake send buttons, retailer links, child selectors, milestone writes or placeholder forms. Any controls drawn inside an image are noninteractive, with nearby preview context. Confirm no native feature service appears in the bundle/network trace.
 

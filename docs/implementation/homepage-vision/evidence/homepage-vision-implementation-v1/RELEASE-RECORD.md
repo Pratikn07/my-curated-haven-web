@@ -1,23 +1,28 @@
 # Implementation release record
 
-Status: implementation candidate reviewed; merge and production status pending final GitHub verification.
+Status: pre-merge candidate record for PR #36; use the linked PR and GitHub deployment record for final integration state.
 Content version: `hv-2026-09-24`
 Presentation state: `preparation`
 
 ## Candidate and integration
 
 - Source branch: `codex/homepage-vision-implementation`
-- Starting main SHA: `8e58812be52a0a5d4ad5c1062c810bf43b399ed6`
-- Implementation PR: pending
-- Candidate SHA / merge SHA: pending
+- Initial branch base SHA: `8e58812be52a0a5d4ad5c1062c810bf43b399ed6`
+- PR compare base SHA after rebase: `90c2615de26d11d8bb6ea882b6f2c9287161ffac`
+- Initial implementation commit: `02aab78`; PR #36 includes the follow-up error-diagnostic and documented preview-format clarification. The exact current head is available from the PR.
+- Implementation PR: #36 open; required checks are being evaluated
+- PR URL: https://github.com/Pratikn07/my-curated-haven-web/pull/36
+- Merge commit and official-domain result: follow the PR's final merge and deployment state; this file records pre-merge QA.
 - Hosting deployment ID / official-domain result: pending
 - The earlier plan was merged as PR #33. This implementation is tracked independently and is not Phase 13.
+- Following the source review, the approved visual default was clarified: version 1 uses semantic HTML illustrations for feature previews and retains raster/image metadata requirements only for raster variants. See the dated amendment in `PREVIEW-ASSETS.md`.
 
 ## Verification performed
 
 - Lint, TypeScript, homepage state-contract tests, Phase 10 unit tests, and production build passed.
 - Public route check passed on the local production build.
 - Focused cross-browser suite: 92 passed, 10 skipped, one worker.
+- Homepage recipe errors emit only bounded internal categories for configuration, query, upstream and unexpected failures; empty/mismatched slot conditions have separate diagnostics. Raw provider messages are not logged.
 - Full 285-case E2E suite: inconclusive; the local server saturated CPU and timed out before a final suite report. No full-suite pass is claimed.
 - UI detector returned no findings. The independent screenshot review found no blocking visual issue.
 - See [case results](CASE-RESULTS.csv) and [mobile/performance evidence](MOBILE-AND-PERFORMANCE.md).
