@@ -52,7 +52,13 @@ export default function Support() {
         <div>
           <h2 className="text-2xl font-semibold">What this site offers now</h2>
           <p className="mt-2 text-text-muted">
-            You can read the public pages and send an email. Recipe pages, accounts, and payments are not available. There is no live chat.
+            You can read and print three free recipes without an account. There is no live chat.
+          </p>
+        </div>
+        <div>
+          <h2 className="text-2xl font-semibold">Signing in and saved recipes</h2>
+          <p className="mt-2 text-text-muted">
+            An account is optional. Sign in with a one-time code sent to your email to save recipes. If the code does not arrive, check your spam folder, wait a minute and request a new one. To close your account, email support from the address you sign in with.
           </p>
         </div>
         <div>
@@ -64,7 +70,7 @@ export default function Support() {
         <div>
           <h2 className="text-2xl font-semibold">Purchases</h2>
           <p className="mt-2 text-text-muted">
-            There is nothing to buy here yet. Refund terms for a future recipe collection are not published because that purchase does not exist.
+            There is nothing to buy on this website yet. If a recipe collection goes on sale, its page will state the price and refund terms before you pay.
           </p>
         </div>
       </section>

@@ -5,17 +5,18 @@ function isDesktop(projectName: string) {
   return projectName.includes("desktop");
 }
 
-test("[homepage-vision] preparation page introduces the brand without implying availability", async ({ page }) => {
+test("[homepage-vision] free-ready page points to free recipes without implying a sale", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "A little more support for everyday parenting.",
   );
-  await expect(page.getByText("We're starting with toddler recipes from Tiny Soho.")).toBeVisible();
-  const recipeActions = page.getByRole("link", { name: "See the recipe plan" });
+  await expect(page.getByText("brings together toddler recipes", { exact: false })).toBeVisible();
+  await expect(page.getByRole("link", { name: "See the recipe plan" })).toHaveCount(0);
+  const recipeActions = page.getByRole("link", { name: "Explore free recipes" });
   await expect(recipeActions).toHaveCount(2);
-  await expect(recipeActions.first()).toHaveAttribute("href", "#recipes");
-  await expect(recipeActions.last()).toHaveAttribute("href", "#recipes");
+  await expect(recipeActions.first()).toHaveAttribute("href", "/recipes");
+  await expect(recipeActions.last()).toHaveAttribute("href", "/recipes");
   await expect(page.getByRole("link", { name: "See what's ahead" })).toHaveAttribute(
     "href",
     "#whats-ahead",
@@ -23,8 +24,10 @@ test("[homepage-vision] preparation page introduces the brand without implying a
 
   const recipes = page.locator("#recipes");
   await expect(recipes).toContainText("Recipes by Tiny Soho, inside My Curated Haven.");
-  await expect(recipes).toContainText("We're preparing three complete free recipes");
-  await expect(recipes.locator("article")).toHaveCount(0);
+  await expect(recipes).toContainText("read or print it without an account");
+  await expect(recipes).not.toContainText("in preparation");
+  // Only approved production slugs render as cards; local fixtures use synthetic slugs.
+  expect(await recipes.locator("article").count()).toBeLessThanOrEqual(3);
   await expect(page.locator("#recipe-collection")).toHaveCount(0);
   await expect(page.locator("a[href*='checkout'], a[href*='buy'], a[href*='purchase']")).toHaveCount(0);
 });
@@ -64,7 +67,7 @@ test("[homepage-vision] four pillars and three static previews have visible stat
   expect(renderedCopy).not.toMatch(/\$\s?\d|expert-vetted|clinician-approved|buy now|limited time/i);
 });
 
-test("[homepage-vision] story and preparation FAQs use established facts", async ({ page }) => {
+test("[homepage-vision] story and free-ready FAQs use established facts", async ({ page }) => {
   await page.goto("/");
   const story = page.locator("#our-story");
   await expect(story.getByRole("heading", { name: "The story behind My Curated Haven and Tiny Soho" })).toBeVisible();
@@ -74,7 +77,8 @@ test("[homepage-vision] story and preparation FAQs use established facts", async
   const faq = page.locator("#questions");
   await expect(faq.getByRole("heading", { name: "Questions" })).toBeVisible();
   await expect(faq.getByText("These sections are sneak peeks", { exact: false })).toBeVisible();
-  await expect(faq.getByText("Nothing on this site is for sale today", { exact: false })).toBeVisible();
+  await expect(faq.getByText("The free recipe area is available from the Recipes page", { exact: false })).toBeVisible();
+  await expect(faq.getByText("No paid collection is being presented here", { exact: false })).toBeVisible();
   await expect(faq.getByRole("link", { name: "Support" })).toHaveAttribute("href", "/support");
 });
 

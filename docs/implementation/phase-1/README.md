@@ -2,7 +2,7 @@
 
 [All implementation plans](../README.md) · [Phase 2 foundation plan](../phase-2/README.md)
 
-Status: specification. Implementation evidence for branch `phase-1-site-foundation-k7m2` is in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md). Production is unchanged until that branch is reviewed and released.
+Status: implemented and deployed. PR #4 merged on 2026-09-23. The 2026-09-25 audit closed the remaining items, recorded in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-25).
 
 ## Outcome
 

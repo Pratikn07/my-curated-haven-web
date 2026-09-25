@@ -44,7 +44,9 @@ export default async function HomeRecipes() {
             </h2>
           </div>
           <p className="max-w-[65ch] text-lg text-text-muted">
-            Toddler recipes are the first part of the website we are preparing. They will be easy to find and read, with the details families need in one place.
+            {state.mode === "preparation"
+              ? "Toddler recipes are the first part of the website we are preparing. They will be easy to find and read, with the details families need in one place."
+              : "Toddler recipes are the first part of the website. Each free recipe has ingredients, clear steps and storage guidance in one place, and you can read or print it without an account."}
           </p>
         </div>
 

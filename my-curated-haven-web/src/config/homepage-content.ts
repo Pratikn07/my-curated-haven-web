@@ -141,7 +141,20 @@ export function projectHomepageRecipes<T extends { slug: string }>(
     .slice(0, MAX_APPROVED_RECIPE_SLUGS);
 }
 
-export const HOMEPAGE_RECIPE_STATE = resolveHomepageRecipeState();
+/**
+ * Owner decision 2026-09-25: the three free recipes in free_recipe_slots are live.
+ * Only these slugs may appear on the homepage. Remove a slug here before withdrawing its recipe.
+ */
+export const APPROVED_HOMEPAGE_RECIPE_STATE = {
+  mode: "free_ready",
+  approvedRecipeSlugs: [
+    "sweet-potato-and-spinach-frittata-fingers",
+    "soft-baked-blueberry-and-oat-bars",
+    "salmon-and-pea-fish-cakes",
+  ],
+} as const;
+
+export const HOMEPAGE_RECIPE_STATE = resolveHomepageRecipeState(APPROVED_HOMEPAGE_RECIPE_STATE);
 
 export const HOME_PILLARS = [
   { key: "recipes", label: "Recipes", href: "#recipes", description: "The first place to start." },

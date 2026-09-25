@@ -218,3 +218,31 @@ test("the site does not link to a purchase or mobile app store", async ({ page }
   await expect(page.getByRole("link", { name: /buy/i })).toHaveCount(0);
   await expect(page.locator("a[href*='checkout'], a[href*='apps.apple.com']")).toHaveCount(0);
 });
+
+// Phase 1 audit R1-03 to R1-06: these pages drifted when recipes and sign-in shipped.
+const staleAvailabilityCopy = [
+  /no recipe library/i,
+  /recipe pages, accounts, and payments are not available/i,
+  /recipe collection is in preparation/i,
+  /premium subscription/i,
+  /google play/i,
+  /free trial/i,
+  /username and password/i,
+  /AI-generated/i,
+  /\[your state/i,
+];
+
+test("about, support and legal pages describe the current site", async ({ page }) => {
+  for (const route of publicRoutes) {
+    await page.goto(route.path);
+    const text = await page.locator("main").innerText();
+    for (const pattern of staleAvailabilityCopy) {
+      expect(text, `${route.path} contains ${pattern}`).not.toMatch(pattern);
+    }
+  }
+  await page.goto("/about");
+  await expect(page.locator("main")).toContainText("three free recipes");
+  await expect(page.locator("main").getByRole("link", { name: "Recipes" })).toHaveAttribute("href", "/recipes");
+  await page.goto("/support");
+  await expect(page.locator("main")).toContainText("one-time code");
+});
