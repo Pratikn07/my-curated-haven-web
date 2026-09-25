@@ -31,7 +31,7 @@ Paths are relative to `my-curated-haven-web/`. Final structure should follow cur
 
 Use a discriminated presentation union such as preparation, free_ready and collection_ready. Each state requires valid copy/actions. Collection-ready additionally requires an approved collection reference and policy/content version. Reject invalid combinations during build/config validation rather than rendering a broken CTA.
 
-Each preview requires a fixed feature key (`chat`, `shop`, `bloom`), heading, summary, image reference, alt text, provenance caption, planned-web label and anchor. No preview action accepts an arbitrary URL, retail destination or input submission callback.
+Each preview requires a fixed feature key (`chat`, `shop`, `bloom`), heading, summary, visual representation, provenance caption, planned-web label and anchor. A raster representation uses a local image reference and alt text. The version 1 representation is a semantic HTML `<figure>` with a visible `<figcaption>`; its illustration text stays in HTML and decorative icons are hidden from assistive technology. This choice and rationale are recorded in [preview assets](PREVIEW-ASSETS.md). No preview action accepts an arbitrary URL, retail destination or input submission callback.
 
 Keep the source version and approver/date in internal content records, not product-facing UI. Product copy should explain availability without surfacing implementation flags, migration IDs or engineering terminology.
 

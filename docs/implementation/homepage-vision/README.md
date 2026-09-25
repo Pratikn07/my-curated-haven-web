@@ -1,6 +1,6 @@
 # Homepage vision and feature previews
 
-Status: detailed implementation plan. Homepage development, asset production, validation and release are pending.
+Status: implementation candidate built for the preparation presentation state. Candidate verification, merge and any resulting deployment are recorded in the evidence package below. This remains a separate effort, outside Phases 1–12.
 
 This is a **separate effort**, outside Phases 1–12. The goal is to introduce the broader My Curated Haven vision while giving visitors a clear recipe starting point. Chat, Curated Shop and Bloom receive labelled sneak peeks. Their underlying features are not implemented through this effort.
 
@@ -45,6 +45,6 @@ The preparation version of the homepage is allowed before recipes launch. The fr
 
 ## Completion meaning
 
-The implementation is complete when visitors understand the broader brand, distinguish available recipes from future previews, reach working destinations, and pass the documented mobile, content, privacy and release checks. Merging this plan completes documentation only.
+The implementation candidate introduces the broader brand, distinguishes preparation from static future previews, and provides working navigation. Its current case results and explicit release limitations are in [implementation evidence](evidence/homepage-vision-implementation-v1/RELEASE-RECORD.md). A main-branch merge does not by itself complete the separate asset-rights, comprehension, manual-accessibility, performance-baseline or release-owner checks.
 
 Source baseline: web `de47ca0d828af3457170d2b201fdebebe68701a9`, native `5e5caa73f5a5d0705572739dd881a96abe9be23b`, reviewed 2026-09-24.

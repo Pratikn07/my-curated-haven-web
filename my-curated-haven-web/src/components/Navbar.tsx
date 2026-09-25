@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { headerLinks } from "@/config/site-navigation";
 import { createClient } from "@/lib/supabase/browser";
+import { HOMEPAGE_CONTENT_VERSION, HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const pathname = usePathname();
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -44,7 +48,7 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    const desktop = window.matchMedia("(min-width: 768px)");
+    const desktop = window.matchMedia("(min-width: 1024px)");
     const closeOnDesktop = () => {
       if (desktop.matches) setMobileMenuOpen(false);
     };
@@ -52,7 +56,52 @@ export default function Navbar() {
     return () => desktop.removeEventListener("change", closeOnDesktop);
   }, []);
 
+  useEffect(() => {
+    const focusPreviewTarget = () => {
+      if (window.location.pathname !== "/" || window.location.hash !== "#whats-ahead") return;
+      window.requestAnimationFrame(() => {
+        const target = document.getElementById("whats-ahead");
+        if (!target) return;
+        target.scrollIntoView({
+          block: "start",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        });
+        target.focus({ preventScroll: true });
+      });
+    };
+
+    focusPreviewTarget();
+    window.addEventListener("hashchange", focusPreviewTarget);
+    window.addEventListener("popstate", focusPreviewTarget);
+    return () => {
+      window.removeEventListener("hashchange", focusPreviewTarget);
+      window.removeEventListener("popstate", focusPreviewTarget);
+    };
+  }, [pathname]);
+
   const closeMenu = () => setMobileMenuOpen(false);
+  const handleNavigation = (href: string) => {
+    if (href !== "/#whats-ahead" || pathname !== "/") return;
+    void trackAnalyticsEvent(
+      "homepage_cta_clicked",
+      {
+        placement: "overview",
+        destination: "previews",
+        presentation_state: HOMEPAGE_RECIPE_STATE.mode,
+        content_version: HOMEPAGE_CONTENT_VERSION,
+      },
+      "home",
+    );
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById("whats-ahead");
+      if (!target) return;
+      target.scrollIntoView({
+        block: "start",
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
+      target.focus({ preventScroll: true });
+    });
+  };
 
   return (
     <header className="sticky top-0 z-[var(--z-header)] border-b border-border bg-canvas">
@@ -63,9 +112,9 @@ export default function Navbar() {
           <span> Haven</span>
         </Link>
 
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-5 lg:flex">
           {headerLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="font-semibold text-foreground">
+            <Link key={link.href} href={link.href} className="font-semibold text-foreground" onClick={() => handleNavigation(link.href)}>
               {link.label}
             </Link>
           ))}
@@ -80,7 +129,7 @@ export default function Navbar() {
         <button
           ref={buttonRef}
           type="button"
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border-control md:hidden"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border-control lg:hidden"
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileMenuOpen}
           aria-controls={menuId}
@@ -91,13 +140,16 @@ export default function Navbar() {
       </nav>
 
       {mobileMenuOpen ? (
-        <div id={menuId} className="border-t border-border bg-canvas px-4 py-2 md:hidden">
+        <div id={menuId} className="border-t border-border bg-canvas px-4 py-2 lg:hidden">
           {headerLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className="flex min-h-12 items-center font-semibold"
-              onClick={closeMenu}
+              onClick={() => {
+                handleNavigation(link.href);
+                closeMenu();
+              }}
             >
               {link.label}
             </Link>

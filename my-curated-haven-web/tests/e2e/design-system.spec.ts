@@ -19,7 +19,9 @@ test("homepage copy stays visible with reduced motion", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(
-    page.getByText("Recipes by Tiny Soho, inside My Curated Haven", { exact: true }),
+    page
+      .getByRole("contentinfo")
+      .getByText("Recipes by Tiny Soho, inside My Curated Haven.", { exact: true }),
   ).toBeVisible();
 });
 

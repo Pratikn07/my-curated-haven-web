@@ -6,6 +6,12 @@ Use three static product previews, one each for Parenting Chat, Curated Shop and
 
 The default format is a still image with an HTML heading, description and availability label outside the image. No embedded application, prerecorded fake-live chat, autoplay video or interaction required to understand the preview.
 
+## Implementation format amendment (2026-09-24)
+
+For this implementation, Chat, Shop and Bloom use semantic HTML mockups rather than separate screenshot files. The native app content is only a source of visual direction; no approved capture was available. Keeping sample words and status labels in HTML preserves readable text, responsive layout and clear separation from a live feature. These markup illustrations are the selected static preview assets for version 1, and each stays a `<figure>` with a visible `<figcaption>` plus nearby heading, status, description and provenance caption. Decorative icons are hidden from assistive technology. The hero remains a raster photo and is tracked separately in the implementation asset manifest.
+
+This is a documented adjustment to the still-image default, not a change to preview scope: the previews remain illustrative, noninteractive and isolated from app services. If a later revision exports a raster UI capture, it needs a local asset reference, meaningful alt text, mobile-crop review and the same visible status outside the image.
+
 ## Source map
 
 Native repository: `Pratikn07/parenting-app`, reviewed commit `5e5caa73f5a5d0705572739dd881a96abe9be23b`.
@@ -50,7 +56,7 @@ Choose the truthful label for each asset. Do not call generated/reconstructed UI
 
 1. Choose a source screen and document the commit/path.
 2. Create synthetic content without opening private production accounts.
-3. Capture from an isolated native environment or build a static mockup. If native capture is unavailable, use the labelled concept route.
+3. Capture from an isolated native environment, build a labelled static image mockup, or select the semantic HTML mockup route documented above.
 4. Remove account names, emails, IDs, photos, notifications, personal timestamps and backend URLs. Recheck the source before export.
 5. Export a mobile crop and desktop crop only when the composition needs different framing.
 6. Inspect at actual mobile display size. Read the label without zooming.
@@ -61,7 +67,7 @@ No image creation is part of this documentation PR. During implementation, use t
 
 ## Asset manifest
 
-Proposed location: `docs/implementation/homepage-vision/evidence/<release>/ASSET-MANIFEST.md`. Each row records asset ID, repository path, source/provenance, rights/permission, dimensions, bytes, crop, alt text, caption, reviewer, approval date and replacement conditions.
+Proposed location: `docs/implementation/homepage-vision/evidence/<release>/ASSET-MANIFEST.md`. Each row records asset ID, repository path or markup component, source/provenance, rights/permission, dimensions/bytes when raster, crop/alt text when applicable, caption, reviewer, approval date and replacement conditions.
 
 Proposed public path: `my-curated-haven-web/public/images/homepage/`. Use clear versioned filenames without personal information. Keep source design files in the approved asset workflow. Do not commit raw private screenshots merely to preserve history.
 

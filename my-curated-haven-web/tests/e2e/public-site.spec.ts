@@ -40,7 +40,7 @@ test("[QA-J01:partial] homepage shows the brand and recipe promise", async ({ pa
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("navigation")).toContainText("My Curated Haven");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Simple toddler recipes",
+    "A little more support for everyday parenting",
   );
 });
 

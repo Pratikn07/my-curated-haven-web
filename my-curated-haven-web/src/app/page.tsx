@@ -1,34 +1,55 @@
 import type { Metadata } from "next";
 import Hero from "@/components/Hero";
-import Container from "@/components/layout/Container";
-import ButtonLink from "@/components/ui/ButtonLink";
+import BrandStory from "@/components/home/BrandStory";
+import CollectionSummary from "@/components/home/CollectionSummary";
+import FinalHomepageAction from "@/components/home/FinalHomepageAction";
+import HomeFaq from "@/components/home/HomeFaq";
+import HomeRecipes from "@/components/home/HomeRecipes";
+import HomepagePreviewTracker from "@/components/home/HomepagePreviewTracker";
+import PillarOverview from "@/components/home/PillarOverview";
+import { WhatsAhead } from "@/components/home/FeaturePreview";
+import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
+import { SITE_ORIGIN } from "@/config/site-navigation";
+
+const pageTitle = "My Curated Haven | Recipes and a glimpse of what's ahead";
+const pageDescription =
+  "A parenting companion starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.";
+const socialImageAlt =
+  "My Curated Haven is starting with recipes by Tiny Soho, with clearly labelled previews of what may be ahead.";
 
 export const metadata: Metadata = {
-  title: {
-    absolute: "My Curated Haven | Simple toddler recipes for busy families",
+  title: { absolute: pageTitle },
+  description: pageDescription,
+  alternates: { canonical: `${SITE_ORIGIN}/` },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: `${SITE_ORIGIN}/`,
+    siteName: "My Curated Haven",
+    title: pageTitle,
+    description: pageDescription,
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: socialImageAlt }],
   },
-  description:
-    "Simple toddler recipes for busy families. Recipes by Tiny Soho, inside My Curated Haven. The recipe collection is in preparation.",
-  alternates: { canonical: "/" },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: [{ url: "/opengraph-image", alt: socialImageAlt }],
+  },
 };
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <section className="pb-12">
-        <Container reading>
-          <h2 className="text-2xl font-semibold sm:text-3xl">What you can do today</h2>
-          <p className="mt-3 text-lg text-text-muted">
-            Recipe pages, accounts, and checkout are not available yet. If you have a question, email support. We will not ask you to buy anything from this site until a collection and its terms are ready.
-          </p>
-          <div className="mt-6">
-            <ButtonLink href="/support" variant="secondary">
-              Go to support
-            </ButtonLink>
-          </div>
-        </Container>
-      </section>
+      <PillarOverview />
+      <HomeRecipes />
+      <CollectionSummary state={HOMEPAGE_RECIPE_STATE} />
+      <WhatsAhead />
+      <HomepagePreviewTracker />
+      <BrandStory />
+      <HomeFaq state={HOMEPAGE_RECIPE_STATE} />
+      <FinalHomepageAction />
     </>
   );
 }

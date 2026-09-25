@@ -1,7 +1,7 @@
 const base = process.env.BASE_URL ?? "http://127.0.0.1:3000";
 
 const publicPages = [
-  { path: "/", marker: "Simple toddler recipes for busy families" },
+  { path: "/", marker: "A little more support for everyday parenting." },
   { path: "/about", marker: "Recipes by Tiny Soho, inside My Curated Haven" },
   { path: "/support", marker: "support@mycuratedhaven.com" },
   { path: "/privacy", marker: "Privacy Policy" },
@@ -101,6 +101,7 @@ if (sitemap.response.status !== 200) {
 }
 const expectedUrls = [
   "https://mycuratedhaven.com/",
+  "https://mycuratedhaven.com/recipes",
   "https://mycuratedhaven.com/about",
   "https://mycuratedhaven.com/support",
   "https://mycuratedhaven.com/privacy",
@@ -111,7 +112,7 @@ for (const url of expectedUrls) {
     fail(`sitemap missing ${url}`);
   }
 }
-for (const blocked of ["/features", "/resources", "/careers", "/contact", "/recipes", "/account"]) {
+for (const blocked of ["/features", "/resources", "/careers", "/contact", "/account"]) {
   if (sitemap.text.includes(`mycuratedhaven.com${blocked}`)) {
     fail(`sitemap includes ${blocked}`);
   }

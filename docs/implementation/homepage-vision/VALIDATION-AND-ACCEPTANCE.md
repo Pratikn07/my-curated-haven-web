@@ -40,7 +40,7 @@ Use deterministic fixtures for preparation, free_ready, collection_ready, recipe
 | HV-A04 | Inspect Chat preview | Illustrative routine example, no diagnostic/live-service claim |
 | HV-A05 | Inspect Shop preview | Categories/products only, no expert booking or working retailer/cart action |
 | HV-A06 | Inspect Bloom preview | Synthetic milestones/tips, no unfinished mood/photo logging claim |
-| HV-A07 | Break preview image request | Heading, status and description still readable |
+| HV-A07 | Fail the candidate's responsive hero-image request; keep preview mockups available as HTML | Headings, preview status and descriptions remain readable; a later raster preview must be tested separately |
 | HV-A08 | View phone crop and social asset | Preview label survives crop and text remains legible |
 
 ## Navigation and scope
