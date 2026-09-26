@@ -8,10 +8,23 @@ import { getFreeRecipeSlots } from "@/lib/data/recipes";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
 import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
-import { Clock, Printer, ShieldCheck, Sparkles, Check } from "lucide-react";
+import { Clock, Printer, Sparkles, Check } from "lucide-react";
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
+}
+
+/**
+ * The offer lives in the commerce database, which isn't deployed until launch.
+ * Treat an unavailable database as "no offer" so the page 404s instead of crashing (R8-05).
+ */
+async function loadOffer(slug: string, userId?: string | null) {
+  try {
+    return await getCollectionOfferDetails(slug, userId);
+  } catch (error) {
+    console.error("[collections] offer unavailable", error instanceof Error ? error.message : error);
+    return null;
+  }
 }
 
 export async function generateMetadata({
@@ -19,7 +32,7 @@ export async function generateMetadata({
 }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
   const user = await getCurrentUser();
-  const offer = await getCollectionOfferDetails(slug, user?.id);
+  const offer = await loadOffer(slug, user?.id);
 
   if (!offer) {
     return {
@@ -51,7 +64,7 @@ export async function generateMetadata({
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
   const user = await getCurrentUser();
-  const offer = await getCollectionOfferDetails(slug, user?.id);
+  const offer = await loadOffer(slug, user?.id);
 
   if (!offer) {
     notFound();
@@ -110,7 +123,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             </div>
 
             <p className="mt-2 text-sm text-text-muted">
-              Lifetime recipe access bound to your account. No recurring fees or subscriptions.
+              Pay once. No recurring fees or subscriptions.
             </p>
 
             <ul className="mt-6 space-y-3 text-sm text-foreground">
@@ -124,11 +137,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
               </li>
               <li className="flex items-center gap-2.5">
                 <Sparkles className="h-4 w-4 shrink-0 text-action" aria-hidden="true" />
-                <span>Reviewed allergen notes, storage guidance, and tips</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ShieldCheck className="h-4 w-4 shrink-0 text-action" aria-hidden="true" />
-                <span>14-day satisfaction refund guarantee</span>
+                <span>Allergen notes, storage guidance, and tips</span>
               </li>
             </ul>
           </div>
@@ -266,9 +275,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       <footer className="rounded-xl border border-border bg-surface-muted p-4 sm:p-6 text-xs leading-relaxed text-text-muted">
         <h3 className="font-bold text-foreground">Commercial & Access Policy</h3>
         <p className="mt-1">
-          Purchasing this collection grants permanent reading and printing rights for this release to your verified My Curated Haven account.
-          If you have questions or require support, please reach out to <a href="mailto:support@mycuratedhaven.com" className="underline hover:text-foreground">support@mycuratedhaven.com</a>.
-          Full refunds are available within 14 days of purchase.
+          Purchasing this collection gives your My Curated Haven account reading and printing access to this release.
+          How long access lasts and the refund terms will be stated here before this collection goes on sale.
+          If you have questions, email <a href="mailto:support@mycuratedhaven.com" className="underline hover:text-foreground">support@mycuratedhaven.com</a>.
         </p>
       </footer>
     </div>

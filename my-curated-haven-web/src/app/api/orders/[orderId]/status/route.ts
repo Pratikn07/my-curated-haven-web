@@ -59,7 +59,8 @@ export async function GET(
       isEntitled: Boolean(r.is_entitled),
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Error fetching order status";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log the detail; never echo database or provider errors to the caller (Phase 8 audit R8-04).
+    console.error("[orders/status] failed", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Error fetching order status" }, { status: 500 });
   }
 }

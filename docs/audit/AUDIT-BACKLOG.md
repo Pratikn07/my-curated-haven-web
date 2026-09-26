@@ -5,6 +5,7 @@
 | M5-02 | Decide whether to disclose AI-assisted recipes and illustrative AI images |
 | M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
 | M7-01 | Create a free Cloudflare Turnstile site key (for sign-in CAPTCHA), alongside M1-03 |
+| R8-06 | Decide the paid collection terms C01–C14 (recipes, price, refunds, access duration, seller and tax, receipts) before checkout opens |
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
@@ -273,6 +274,48 @@ Verified as done (no action):
 
 ---
 
+## Phase 8: one-time checkout and purchased access
+
+Plan: `docs/implementation/phase-8/IMPLEMENTATION-PLAN.md` (PR #16). Built in `e150671` (PR #18). Remediation plan PR #26 (reviewer), implemented in PR #31 (`39a7121`); PR #35 (`90c2615`) made `COMMERCE_DATABASE_URL` mandatory on Vercel. Audited 2026-09-26 against `main` at `4dda146`, the live site, Vercel settings and project `ccrgvammglkvdlaojgzv`.
+
+**Nothing can be sold today.** Production has no Stripe keys, no `CHECKOUT_ENABLED`, no commerce tables (`private.purchase_orders` and friends are absent; migrations `20260923200000` and `20260924174355` are unapplied), and 0 collections, releases or entitlements.
+
+Verified as done (no action):
+- **R2**: deployed checkout requires `CHECKOUT_ENABLED=true` plus a real Stripe key (`config.ts:17-20`); the mock grant runs only locally. Live signed-out `POST /api/checkout` → 401.
+- **R3**: a payment grants access only when amount, currency and live/test mode match the order snapshot, in the app (`guardrails.ts`) and in SQL (`20260924174355`).
+- **R4**: an existing Stripe Checkout URL is reused on retry.
+- **R5**: sale stayed off, with no production commerce migration.
+- **C11, native rights**: the iOS app has no purchase code (no RevenueCat, StoreKit or IAP library), and its Subscription screen's button does nothing (`SubscriptionView.tsx:20`, `onPress={() => {}}`). No existing purchases to carry over.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R8-01 | P0 when sale opens | Anyone can forge a "payment completed" webhook (remediation R1 incomplete) | ✅ fixed | `config.ts:14` falls back to `whsec_mock_dummy_webhook_secret`, which is in the public repo. On any deployed environment the route verifies against it. **Live probe 2026-09-26**: no signature → 400; random secret → 400; the repo's dummy secret → **passed**, then 500 `getaddrinfo ENOTFOUND HOST`. Only the broken database URL stops a forged `checkout.session.completed` from granting paid recipes. Fix: no fallback; on Vercel a missing `STRIPE_WEBHOOK_SECRET` returns 503 and grants nothing. Test the route, not just `constructWebhookEvent` |
+| R8-02 | P1 | Refunds by webhook never remove access (V34/V36) | ✅ fixed | Two independent causes. (1) `checkout.session.completed` carries `payment_intent` as an id, so `charge_id` is saved null (`fulfilment.ts:171-190`), and the SQL `ON CONFLICT` never fills it in. `charge.refunded` looks payments up by `charge_id` (`:203-206`) and finds nothing. (2) Stripe changelog 2022-11-15: "The `Charges` object no longer auto-expands refunds by default", and the code pins `2025-02-24.acacia`, so `obj.refunds.data` is empty. Fix: find the payment by `payment_intent` and list the refunds from Stripe (or handle `refund.created`/`refund.updated`). Add a route-level refund test |
+| R8-03 | P1 | Invented refund and access terms (C05, C09 undecided) | ✅ fixed | `collections/[slug]/page.tsx:131` "14-day satisfaction refund guarantee" and `:271` "Full refunds are available within 14 days of purchase." The owner never decided refund terms. Not visible today (no collections), but it would show the moment a collection is published. Removed: the 14-day guarantee, "Full refunds are available within 14 days", "Lifetime recipe access", "permanent reading and printing rights", "permanently unlocked", and "Reviewed allergen notes" (nothing is reviewed). The page now says access duration and refund terms will be stated before the collection goes on sale |
+| R8-04 | P1 | Error text leaks to callers (remediation R1.4), in the webhook and 3 more routes (checkout, order refresh, order status) | ✅ fixed | The probe's 500 body was `{"error":"getaddrinfo ENOTFOUND HOST"}` (`route.ts:74-75` returns `err.message`). Return a fixed message and log the detail |
+| R8-05 | P2 | `/collections/[slug]` returns 500 instead of 404 | ✅ fixed | Live `/collections/test` → 500. The page queries the commerce database, which is unreachable, and throws. Return the not-found page when there's no offer or the commerce database is unavailable |
+| R8-06 | P1 👤 | Commercial decisions C01–C14 all open | ⏳ | Which recipes, price and currency, seller identity and tax, refund terms, access duration, receipts. C11 is now answered (no native purchases). Checkout can't open until these are decided |
+| R8-07 | P1 | Commerce schema not in production | ⏳ Phase 10/11 | Apply `20260923200000` then `20260924174355` only at launch, after staging, one at a time (Phase 4 migration rules). Correct as is today |
+| R8-08 | P2 | Evidence overstates tests | ⏳ | `IMPLEMENTATION-EVIDENCE.md` marks V23, V30, V34 "Automated", but the signed-route and refund-route tests skip without `COMMERCE_DATABASE_URL` or cover only helpers |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M8-01 | P1 | Vercel's `COMMERCE_DATABASE_URL` is a template | ⏳ | Production logs show `getaddrinfo ENOTFOUND HOST`: someone saved a placeholder such as `postgresql://USER:PASS@HOST:5432/DB`. It's the reason `/collections/*` returns 500. **Don't set a real value until R8-01 is fixed**: the real value turns the forgeable webhook into free paid access. Until launch, remove the variable and let pages show "not available" |
+| M8-02 | P1 | Stripe webhook endpoint and keys don't exist yet | ⏳ 👤 | At launch: a Stripe account, a live webhook endpoint for `https://mycuratedhaven.com/api/stripe/webhook` with `checkout.session.completed` and the refund events, and `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_EXPECTED_ACCOUNT_ID` in Vercel production. Rehearse in Stripe test mode on staging first (Phase 10) |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G8-01 | P2 | Let Stripe send receipts, and turn on Stripe Tax if selling across states or countries | Covers C04 and C14 with no custom email code |
+| G8-02 | P2 | Test a refund in Stripe test mode end to end before launch, including partial refunds | The refund path had two silent bugs that no test caught |
+
+---
+
 ## Phase 4: backend security and data foundation
 
 Plan: `docs/implementation/phase-4/IMPLEMENTATION-PLAN.md` (PR #8). Built in `72471a9`, `94e890f`, `0d47e07`, `4ce43da`, `d6eddff` (PR #11, merged 2026-09-22). PR #11 applied the schema straight to production, with no staging rehearsal.
@@ -398,5 +441,4 @@ Verified as done (no action):
 | Phase | Item |
 | --- | --- |
 | 7 | "Free or purchased only" save rule enforced only in the server action, not by RLS. Save-access tests use a mocked client. See also M1-02 to M1-04 |
-| 8 | Webhook falls back to the public `whsec_mock_dummy_webhook_secret` when `STRIPE_WEBHOOK_SECRET` is unset (`src/lib/payments/config.ts:14`). Webhook refunds never revoke access. Commerce schema not in production. Vercel `COMMERCE_DATABASE_URL` is a template value (logs show host `HOST`), so `/collections/*` returns 500. The collection page shows a "14-day satisfaction refund guarantee" that the owner never decided (O3) |
 | 9 | Never reviewed. The consent dialog claims "90-day retention", which the code doesn't enforce |

@@ -11,7 +11,9 @@ export interface StripeConfig {
 
 export function getStripeConfig(): StripeConfig {
   const secretKey = process.env.STRIPE_SECRET_KEY || "sk_test_mock_dummy_key_for_development";
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "whsec_mock_dummy_webhook_secret";
+  // No fallback: a default secret is published with the source, so anyone could sign
+  // events with it (Phase 8 audit R8-01). An empty value means webhooks are refused.
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? "";
   const expectedAccountId = process.env.STRIPE_EXPECTED_ACCOUNT_ID;
   const isLiveMode = process.env.STRIPE_EXPECTED_LIVEMODE === "true";
   const isDeployedEnvironment = process.env.VERCEL_ENV !== undefined;

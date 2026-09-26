@@ -112,7 +112,8 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal checkout error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log the detail; never echo database or provider errors to the caller (Phase 8 audit R8-04).
+    console.error("[checkout] failed", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Internal checkout error" }, { status: 500 });
   }
 }

@@ -26,6 +26,10 @@ export async function POST(request: Request) {
       !stripeConfigured && process.env.VERCEL_ENV === undefined;
 
     if (!allowUnsignedFixture) {
+      if (!config.webhookSecret) {
+        console.error("[stripe-webhook] STRIPE_WEBHOOK_SECRET is not set; refusing event");
+        return NextResponse.json({ error: "webhooks not configured" }, { status: 503 });
+      }
       if (!signature) {
         return NextResponse.json({ error: "invalid signature" }, { status: 400 });
       }
@@ -71,7 +75,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Webhook processing error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log the detail; never echo database or provider errors to the caller (R8-04).
+    console.error("[stripe-webhook] processing failed", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "webhook processing failed" }, { status: 500 });
   }
 }

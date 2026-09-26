@@ -136,8 +136,45 @@ test.describe("Payment remediation guardrails", () => {
         })
       );
 
-      expect(response.status).toBe(400);
-      expect(await response.json()).toEqual({ error: "invalid signature" });
+      // No webhook secret on a deployed server: refused before any signature or database work.
+      expect(response.status).toBe(503);
+      expect(await response.json()).toEqual({ error: "webhooks not configured" });
+    });
+  });
+
+  // Phase 8 audit R8-01: a live probe showed an event signed with the repository's old
+  // fallback secret passed verification in production. It must be refused.
+  test("P8-R1: an event signed with the old public fallback secret is refused when deployed", async () => {
+    const payload = JSON.stringify({
+      id: "evt_test_forged_fixture",
+      object: "event",
+      type: "checkout.session.completed",
+      livemode: false,
+      data: { object: { id: "cs_test_forged", payment_status: "paid", amount_total: 1500, currency: "usd" } },
+    });
+    const forged = new Stripe("sk_test_signature_fixture").webhooks.generateTestHeaderString({
+      payload,
+      secret: "whsec_mock_dummy_webhook_secret",
+    });
+    for (const env of [
+      { VERCEL_ENV: "production" },
+      { VERCEL_ENV: "production", STRIPE_SECRET_KEY: "sk_test_signature_fixture" },
+      { VERCEL_ENV: "preview", STRIPE_SECRET_KEY: "sk_test_signature_fixture" },
+    ]) {
+      await withEnvironment(env, async () => {
+        const response = await stripeWebhookPost(
+          new Request("http://localhost/api/stripe/webhook", {
+            method: "POST",
+            headers: { "content-type": "application/json", "stripe-signature": forged },
+            body: payload,
+          })
+        );
+        expect(response.status, JSON.stringify(env)).toBe(503);
+        expect(await response.json()).toEqual({ error: "webhooks not configured" });
+      });
+    }
+    await withEnvironment({}, () => {
+      expect(getStripeConfig().webhookSecret).toBe("");
     });
   });
 
@@ -335,6 +372,101 @@ test.describe("Payment remediation guardrails", () => {
             await pool.query(`DELETE FROM private.provider_payments WHERE order_id = ANY($1::uuid[])`, [orderIds]);
             await pool.query(`DELETE FROM private.commerce_outbox WHERE order_id = ANY($1::uuid[])`, [orderIds]);
             await pool.query(`DELETE FROM private.purchase_orders WHERE id = ANY($1::uuid[])`, [orderIds]);
+          }
+        }
+      }
+    );
+  });
+
+  // Phase 8 audit R8-02: refunds arriving by webhook never removed access. The payment was
+  // stored with charge_id null, and Charges no longer include refunds unless expanded.
+  test("[QA-S09:partial] P8-R2 audit: a signed refund.created event records the refund against the payment", async () => {
+    test.skip(!process.env.COMMERCE_DATABASE_URL, "Requires the disposable local Supabase database.");
+
+    await withEnvironment(
+      {
+        VERCEL_ENV: undefined,
+        STRIPE_SECRET_KEY: "sk_test_signature_fixture",
+        STRIPE_WEBHOOK_SECRET: "whsec_valid_signature_fixture",
+      },
+      async () => {
+        const pool = getCommercePool();
+        const stripe = new Stripe("sk_test_signature_fixture");
+        const sessionId = `cs_test_refund_${randomUUID()}`;
+        const paymentIntentId = `pi_refund_${randomUUID()}`;
+        const refundId = `re_test_${randomUUID()}`;
+        const eventIds = [
+          `evt_test_paid_${randomUUID()}`,
+          `evt_test_charge_refunded_${randomUUID()}`,
+          `evt_test_refund_${randomUUID()}`,
+        ];
+        let orderId: string | null = null;
+
+        const send = async (eventId: string, type: string, object: Record<string, unknown>) => {
+          const payload = JSON.stringify({ id: eventId, object: "event", type, livemode: false, data: { object } });
+          const signature = stripe.webhooks.generateTestHeaderString({ payload, secret: "whsec_valid_signature_fixture" });
+          return stripeWebhookPost(
+            new Request("http://localhost/api/stripe/webhook", {
+              method: "POST",
+              headers: { "content-type": "application/json", "stripe-signature": signature },
+              body: payload,
+            })
+          );
+        };
+
+        try {
+          orderId = await createWebhookOrder(pool, sessionId);
+          // Stripe sends payment_intent as a plain id here, so charge_id is stored as null.
+          const paid = await send(eventIds[0], "checkout.session.completed", {
+            id: sessionId,
+            object: "checkout.session",
+            client_reference_id: orderId,
+            payment_status: "paid",
+            amount_total: 1500,
+            currency: "usd",
+            payment_intent: paymentIntentId,
+          });
+          expect(paid.status).toBe(200);
+          const payment = await pool.query(
+            `SELECT id, charge_id FROM private.provider_payments WHERE order_id = $1`,
+            [orderId]
+          );
+          expect(payment.rows).toHaveLength(1);
+          expect(payment.rows[0].charge_id).toBeNull();
+
+          // A current-API charge.refunded event: no refunds list. Must not fail.
+          const chargeRefunded = await send(eventIds[1], "charge.refunded", {
+            id: `ch_${randomUUID()}`,
+            object: "charge",
+            payment_intent: paymentIntentId,
+            amount_refunded: 1500,
+          });
+          expect(chargeRefunded.status).toBe(200);
+
+          const refunded = await send(eventIds[2], "refund.created", {
+            id: refundId,
+            object: "refund",
+            amount: 1500,
+            currency: "usd",
+            status: "succeeded",
+            payment_intent: paymentIntentId,
+            charge: `ch_${randomUUID()}`,
+            created: Math.floor(Date.now() / 1000),
+          });
+          expect(refunded.status).toBe(200);
+
+          const refunds = await pool.query(
+            `SELECT payment_id, amount, status FROM private.payment_refunds WHERE provider_refund_id = $1`,
+            [refundId]
+          );
+          expect(refunds.rows).toEqual([{ payment_id: payment.rows[0].id, amount: 1500, status: "succeeded" }]);
+        } finally {
+          await pool.query(`DELETE FROM private.payment_events WHERE event_id = ANY($1::text[])`, [eventIds]);
+          if (orderId) {
+            await pool.query(`DELETE FROM private.payment_refunds WHERE order_id = $1`, [orderId]);
+            await pool.query(`DELETE FROM private.provider_payments WHERE order_id = $1`, [orderId]);
+            await pool.query(`DELETE FROM private.commerce_outbox WHERE order_id = $1`, [orderId]);
+            await pool.query(`DELETE FROM private.purchase_orders WHERE id = $1`, [orderId]);
           }
         }
       }
