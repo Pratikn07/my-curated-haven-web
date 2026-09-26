@@ -17,8 +17,9 @@
     "test:homepage:unit": "node --experimental-strip-types --test tests/homepage/*.test.mjs",
     "test:phase10:unit": "node --test tests/phase10/target-guard.test.mjs tests/phase10/results.test.mjs",
     "report:phase10": "node scripts/phase10-results.mjs",
-    "verify": "npm run lint && npm run typecheck && npm run test:phase10:unit && npm run build && npm run test:e2e",
-    "check:routes": "node scripts/check-public-routes.mjs"
+    "verify": "npm run lint && npm run typecheck && npm run test:phase10:unit && npm run test:homepage:unit && npm run build && npm run test:e2e",
+    "check:routes": "node scripts/check-public-routes.mjs",
+    "smoke:production": "node scripts/production-smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -12,6 +12,15 @@ Each phase has three lists:
 Priority: **P0** = visitors affected now. **P1** = fix before launch. **P2** = cleanup.
 Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decision.
 
+## Waiting on the owner
+
+| ID | Decision or action |
+| --- | --- |
+| M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
+| M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
+| R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
+| R1-09 | Tick the content-register checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` |
+
 ---
 
 ## Phase 1: preserve the website and prepare the recipe launch
@@ -103,6 +112,51 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 | G1-03 | P2 | Keep a short change log under Privacy and Terms | Readers can see what changed, not only the date |
 | G1-04 | P2 | Log or alert when the sitemap's recipe query fails instead of quietly returning static routes | During the outage the sitemap returned 200 with no recipe URLs |
 | G1-05 | P2 | Add `/.well-known/security.txt` pointing to the support address | Returns 404 today |
+
+---
+
+## Phase 2: development and release foundation
+
+Plan: `docs/implementation/phase-2/IMPLEMENTATION-PLAN.md` (PR #2). Built in `f3643e9`, `7f82282`, `572a1ad` (PR #5, merged 2026-09-23). Deliberate-failure drill: PR #6 (closed, blocked as expected).
+Remediation plan: none was written. No fix PR targets Phase 2. Later phases edited CI: Phase 4 (`72471a9`, `d6eddff`), Phase 6 (`910f252`), Phase 7 (`1c78e41`), Phase 10 (`a0150c0`, `556b893`).
+
+Verified as done (no action):
+- **Runtime**: Node `24.5.0` in `.nvmrc`, `packageManager: npm@11.5.1`, engines `>=24 <25`. Vercel uses Node `24.x` with root directory `my-curated-haven-web`.
+- **CI**: `web-quality` runs on pull requests and pushes to `main`. It has `contents: read`, a 20-minute timeout and stale-run cancellation, and fails when no tests are found.
+- **Branch rules**: ruleset `23852646` requires a PR, the `web-quality` check and an up-to-date branch. It blocks force-push and deletion, and has no bypass actors.
+- **Preview protection**: `ssoProtection: all_except_custom_domains`. An anonymous request to the latest preview gets a 302 to Vercel SSO with `x-robots-tag: noindex`. The production domain stays public.
+- **Security**: `next@16.3.6` (newest 16.x). `npm audit --omit=dev` finds 0 production vulnerabilities.
+- **Merge block**: PR #6 was blocked while its check failed.
+- **PR template**: `.github/pull_request_template.md` exists.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R2-01 | P1 | README setup instructions are wrong, so a clean checkout can't run the tests (P2-02, P2-03 acceptance) | ⏳ | `my-curated-haven-web/README.md` says "No environment variables are required" and never mentions `supabase start`. Since Phase 4 the tests need a local Supabase and three variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `COMMERCE_DATABASE_URL`). Rewrite setup to match CI: Docker, `supabase start`, `supabase db reset`, the three local values |
+| R2-02 | P1 | CI builds a different bundle from production | ⏳ | Phase 7 (`1c78e41`) changed CI to `npm run build -- --webpack` "to avoid turbopack font error". Vercel production builds with Next 16's default (Turbopack), so CI no longer tests what ships. A local Turbopack build passes. Remove `--webpack` from both jobs and fix the font failure at its cause, likely the build-time Google Fonts download |
+| R2-03 | P1 | Some tests never run in CI or `npm run verify` | ⏳ | `test:homepage:unit` (7 tests in `tests/homepage/`, including the approved-slug guard from PR #38) is not called by `web-ci.yml` or `verify`. Add it to both |
+| R2-04 | P2 | One CI action is not pinned to a commit SHA (CI spec: "Pin third-party actions to verified full commit SHAs") | ⏳ | `supabase/setup-cli@v1` in both jobs. Pin it to a full SHA with a version comment |
+| R2-05 | P2 | Rollback never rehearsed (P2-09.4) | ⏳ | No drill or walkthrough is recorded in `IMPLEMENTATION-EVIDENCE.md`. This audit has two real production rollback targets (`dpl_3rxFT36wbT6FToggQJQLbty1tVy6`, `dpl_DjWtdCdddiX29H4ZC3XyEZTJG3RQ`). Record a reviewed walkthrough: `vercel rollback <deployment>` or dashboard "Instant Rollback", then the smoke checks |
+| R2-06 | P2 | Release runbook's evidence record never filled in | ⏳ | `PREVIEW-AND-RELEASE.md` has 10 fields still "Pending" |
+| R2-07 | P2 | Phase 2 status docs are stale | ⏳ | `README.md` says "implementation plan only". `IMPLEMENTATION-HANDOFF.md` checklist is all unchecked, although P2-01 to P2-08 have evidence |
+| R2-08 | P2 | Signed-in preview review never done (P2-07.5) | ⏳ | The evidence admits it. Previews now have no Supabase variables by design, so recipe pages can't be reviewed on a preview at all. Staging is planned in Phase 10 (`CI-AND-ENVIRONMENT-RELIABILITY.md`); close this there |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M2-01 | P1 | `backend-quality` is not a required check | ⏳ | The ruleset requires only `web-quality`. Phase 4 added `backend-quality`, which covers migration replay, pgTAP access tests, type drift and data-access tests, but never made it required. A PR that breaks database security can still merge. Add `backend-quality` to ruleset `23852646` |
+| M2-02 | P1 | Production smoke checks are manual and weren't run | ⏳ | Answer to M1-06: the Phase 2 runbook lists production smoke checks, but only as a manual step. Phase 11 has one manual read-only smoke at launch. Nothing ran them after the Phase 4 to 9 deploys, which is how the recipe outage went unnoticed. Implement M1-06 as the automated version |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G2-01 | P2 | Redirect `my-curated-haven-web.vercel.app` to `https://mycuratedhaven.com` | It serves production publicly (HTTP 200) as a second copy of the site. The canonical tags point to the real domain, so this is tidy-up, not urgent |
+| G2-02 | P2 | Update the development tools behind the 9 `npm audit` findings (6 high: `brace-expansion`, `minimatch`, `picomatch` and others) | They don't ship to visitors, but they run on developer machines and CI |
+| G2-03 | P2 | Add Dependabot or Renovate for npm and GitHub Actions | Next.js had critical advisories before Phase 2 patched it. Automated update PRs catch the next one |
+| G2-04 | P2 | Run the Phase 1 `check:routes` script in CI, or remove it | `npm run check:routes` exists, but Playwright now covers the same checks |
 
 ---
 

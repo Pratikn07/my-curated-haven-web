@@ -1,6 +1,6 @@
 # Phase 2 implementation evidence
 
-Status: setup implemented, CI passed, and the main ruleset blocks a failing check. Production is not changed by this branch. A signed-in preview review is still a human step.
+Status: implemented and merged (PR #5, 2026-09-23). The original record below describes that branch. See [the 2026-09-25 audit](#audit-2026-09-25) for later drift and fixes.
 
 ## Source
 
@@ -81,3 +81,29 @@ The failing pull request was closed and its branch deleted. It was not merged.
 - Signed-in review of the preview pages. Anonymous access is already denied.
 - No Stripe, Supabase, recipe data, or design-system replacement.
 - Production deployment. Merging this pull request to `main` would deploy it.
+
+## Audit 2026-09-25
+
+Audited against `main` at `3a7a575`. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-2-development-and-release-foundation).
+
+### Still true
+
+- Node `24.5.0`, npm `11.5.1`, engines `>=24 <25`. Vercel uses Node `24.x`, root directory `my-curated-haven-web`, production branch `main`.
+- `ssoProtection: all_except_custom_domains`. An anonymous request to the latest preview returned 302 to Vercel SSO with `noindex`.
+- `next@16.3.6`. `npm audit --omit=dev` reports 0 vulnerabilities. Development tooling still has 9 findings.
+
+### Drift from later phases, fixed
+
+| Item | Fix |
+| --- | --- |
+| README said no environment variables were needed and never mentioned Supabase, so a clean checkout couldn't run the tests | Setup rewritten to match CI |
+| Phase 7 (`1c78e41`) switched CI to `npm run build -- --webpack`, while Vercel builds with Turbopack | `--webpack` removed from both jobs, so CI builds what production ships |
+| `test:homepage:unit` ran nowhere | Added to `web-quality` and `npm run verify` |
+| `supabase/setup-cli@v1` was not pinned | Pinned to `1dedf2c611547ede7232d26866dd3c56ab903bbb` (the `v1.7.3` release that `v1` pointed to) |
+| `backend-quality` was not a required check | Added to ruleset `23852646` |
+| Production smoke checks were manual and not run after the Phase 4 to 9 deploys | `.github/workflows/production-smoke.yml` runs them after each production deploy and hourly |
+| Rollback never rehearsed; evidence record all "Pending" | Walkthrough and evidence record added to [PREVIEW-AND-RELEASE.md](PREVIEW-AND-RELEASE.md) |
+
+### Still open
+
+- Signed-in preview review: needs the Phase 10 staging environment, because previews have no Supabase variables.

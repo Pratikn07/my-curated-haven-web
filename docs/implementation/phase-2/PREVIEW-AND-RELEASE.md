@@ -96,19 +96,52 @@ Do not reset or force-push shared main. Do not disable access protection or merg
 
 Managed hosting rollback behaviour must be verified against the actual account. A safe preview drill or reviewed walkthrough is sufficient for Phase 2. No artificial production outage is required.
 
+## Automated production smoke check
+
+`.github/workflows/production-smoke.yml` runs `my-curated-haven-web/scripts/production-smoke.mjs` after every successful Vercel production deployment and every hour at minute 17. It is read-only. It checks:
+
+- `/`, `/recipes`, `/about`, `/support`, `/privacy`, `/terms`, `/sign-in` return 200 without the "Temporarily Unavailable" state.
+- `/features` returns 404.
+- `/sitemap.xml` lists at least 3 recipe URLs, and each one returns 200.
+- `https://www.mycuratedhaven.com/` redirects permanently to the apex domain, keeping path and query.
+
+A failed run emails the GitHub account that owns the workflow. Run it by hand with `npm run smoke:production` or the workflow's "Run workflow" button. The manual checklist above still applies to the header, mobile menu and anything the script cannot see.
+
+## Rollback walkthrough (reviewed 2026-09-25)
+
+Reviewed against the live project without rolling back production. Source: [Vercel Instant Rollback](https://vercel.com/docs/instant-rollback).
+
+Facts about this project that change the procedure:
+
+- **Plan: Hobby.** Instant Rollback can return only to the immediately previous production deployment. For an older target, use `vercel promote <deployment-id>`.
+- **A rollback turns off automatic production deploys.** After it, merges to `main` build but do not go live until someone promotes a deployment. The dashboard shows **Undo Rollback**; the CLI equivalent is `vercel promote <deployment-id>`.
+- **A rollback restores the old build with the environment values it was built with.** `NEXT_PUBLIC_*` values are compiled in. Deployments built before 2026-09-25 16:34 PDT lack the Supabase variables and serve broken recipe pages, so never roll back to them. The earliest safe target is `dpl_DjWtdCdddiX29H4ZC3XyEZTJG3RQ`.
+
+Steps:
+
+1. Find the current production deployment: `vercel ls my-curated-haven-web --environment production`, or the dashboard's Production Deployment tile.
+2. Pick the target. It must be a production deployment built on or after `dpl_DjWtdCdddiX29H4ZC3XyEZTJG3RQ` (2026-09-25 16:34 PDT) that passed the smoke check.
+3. Previous deployment: dashboard → **Instant Rollback**, or `vercel rollback <deployment-id>`. Older deployment: `vercel promote <deployment-id>`.
+4. Run `npm run smoke:production`, or the "Production smoke" workflow by hand.
+5. Revert the faulty commit on `main` through a normal PR.
+6. After the revert deploys, run **Undo Rollback** (or `vercel promote` on the new deployment) so automatic production deploys resume. Confirm with `vercel ls` that the newest production deployment holds the domain.
+7. Record the cause, target, and follow-up owner in the PR.
+
 ## Deployment evidence record
 
-| Field | Value at execution |
+Filled in by the 2026-09-25 audit.
+
+| Field | Value |
 | --- | --- |
-| Implementation PR and SHA | Pending |
-| Required CI run | Pending |
-| Preview URL and SHA | Pending |
-| Anonymous access result | Pending |
-| Authorized review result | Pending |
-| Ruleset/check identity | Pending |
-| Production branch and trigger | Pending |
-| Production deployment | Pending |
-| Smoke-check result | Pending |
-| Known-good rollback target | Pending |
+| Implementation PR and SHA | PR #5, merged as `95cf6cd` on 2026-09-23 |
+| Required CI run | `web-quality` passed on `7f82282`: https://github.com/Pratikn07/my-curated-haven-web/actions/runs/35801270099 |
+| Preview URL and SHA | https://my-curated-haven-web-git-ph-8aaf86-pratik-r-nandoskars-projects.vercel.app (PR #5) |
+| Anonymous access result | HTTP 302 to Vercel SSO with `x-robots-tag: noindex`, rechecked 2026-09-25 on the latest preview. Project setting `ssoProtection: all_except_custom_domains` |
+| Authorized review result | Not done. Previews have no Supabase variables by design, so recipe pages need the Phase 10 staging environment |
+| Ruleset/check identity | Ruleset `23852646` on `main`: PR, up-to-date branch, `web-quality` and `backend-quality` required, no force-push or deletion, no bypass |
+| Production branch and trigger | `main`. A merge to `main` creates a Vercel production deployment |
+| Production deployment | Checked by the audit on 2026-09-25: `dpl_8HaQjnUFVFjumatpYfURbSUHe4YB` (source `3a7a575`) |
+| Smoke-check result | `npm run smoke:production` passed 13/13 against https://mycuratedhaven.com on 2026-09-25 |
+| Known-good rollback target | `dpl_GikaQfWv3LRS1HvD6zwJg23csstt` (source `46e546d`). Earliest safe target: `dpl_DjWtdCdddiX29H4ZC3XyEZTJG3RQ` |
 
 See [Vercel Git deployment guidance](https://vercel.com/docs/git) for the integration model. Recheck provider instructions before changing host settings.
