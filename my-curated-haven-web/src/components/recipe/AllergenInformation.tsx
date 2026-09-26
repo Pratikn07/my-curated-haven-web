@@ -33,6 +33,18 @@ export default function AllergenInformation({
               ))}
             </div>
           </div>
+        ) : display.kind === "unknown" && display.allergens.length > 0 ? (
+          <div>
+            <p className="font-semibold text-foreground">Listed in this recipe, not yet reviewed:</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {display.allergens.map((allergen) => (
+                <Badge key={allergen} variant="collection">
+                  {allergen}
+                </Badge>
+              ))}
+            </div>
+            <p className="mt-3 text-text-muted">{display.message}</p>
+          </div>
         ) : (
           <p
             className={

@@ -2,7 +2,10 @@
 
 [Phase 5 overview](README.md) · [Implementation plan](IMPLEMENTATION-PLAN.md) · [Phase 6 overview](../phase-6/README.md)
 
-## Status: Complete & Verified
+## Status: ingestion complete, editorial review not done
+
+> **Correction (2026-09-25 audit).** All 70 recipes were written by an LLM (`scripts/RECIPE_PROMPT.md` in `Pratikn07/parenting-app`) and imported without human review. Their images are AI-generated. No editorial review has happened. Where this package says "verified", "reviewed" or "approved", treat it as not done. The owner review is prepared in [FREE-RECIPE-REVIEW.md](FREE-RECIPE-REVIEW.md), and all allergen states are `unknown` until it happens. Details: [audit backlog](../../audit/AUDIT-BACKLOG.md#phase-5-recipe-structure-and-editorial-review).
+
 
 Phase 5 has resolved the content audit, editorial review, mapping rules, and database ingestion pipeline, successfully unlocking the data needed for Phase 6 (**Free Recipe Experience**).
 
@@ -41,7 +44,7 @@ Phase 6 implements the public recipe browsing and detail views. It should consum
 - Resolve slug to recipe using `getRecipeBySlug(slug)`.
 - Enforce access boundary via server component calling `checkRecipeAccess(recipeId)`.
 - Render:
-  - Hero image with verified alt text.
+  - Hero image with alt text (none exists yet; drafts in FREE-RECIPE-REVIEW.md).
   - Prep and total time metadata.
   - Ingredients list with amounts and units.
   - Step-by-step instructions.

@@ -246,3 +246,21 @@ test("about, support and legal pages describe the current site", async ({ page }
   await page.goto("/support");
   await expect(page.locator("main")).toContainText("one-time code");
 });
+
+// Phase 5 audit: nine pages repeated the brand ("… | My Curated Haven | My Curated Haven").
+test("page titles name the brand once", async ({ page }) => {
+  for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/about", "/support", "/sign-in"]) {
+    await page.goto(path);
+    const title = await page.title();
+    expect(title.split("My Curated Haven").length - 1, `${path}: ${title}`).toBe(1);
+  }
+});
+
+// Phase 5 audit M5-01: the recipes were never tested or verified, so the copy must not say so.
+test("recipe pages make no tested or verified claims", async ({ page }) => {
+  for (const path of ["/recipes", "/recipes/synth-free-oat-bake"]) {
+    await page.goto(path);
+    const text = `${await page.title()} ${await page.locator('meta[name="description"]').getAttribute("content")} ${await page.locator("main").innerText()}`;
+    expect(text, path).not.toMatch(/\btested\b|\bverified\b|expert|nutritionist/i);
+  }
+});

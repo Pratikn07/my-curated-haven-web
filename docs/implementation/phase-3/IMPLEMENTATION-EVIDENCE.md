@@ -77,6 +77,12 @@ Also aligned: the consent dialog no longer claims "90-day retention", which the 
 
 Token contrast, server-component primitives, no page overflow at 320, 390 and 1280px, reduced motion, print of every ingredient and step on A4 and Letter (3 pages each), lab LCP 1.08 to 1.62 s with CLS 0, `/design-review` returning 404 in production.
 
+### After deploy (2026-09-25, `8d7dc36`)
+
+Re-ran the live audit on production: no overflow at 320, 390 or 1280px or at 200% text; axe found no violations on 8 pages; Inter and Cormorant Garamond load; CLS 0.062 on a slow first visit at 390px and 0 to 0.041 otherwise; the skip link is the first focus stop; the dialog traps focus and returns it.
+
+Before and after screenshots (consent dismissed): [audit-2026-09-25/](evidence/audit-2026-09-25/). Compare `before-home-390.png` with `after-home-390.png`: the wordmark renders in Cormorant Garamond and the text in Inter.
+
 ### Still open
 
 - R3-06: screen-reader (VoiceOver) pass and a real iPhone Safari check need a person.

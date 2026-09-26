@@ -4,6 +4,11 @@
 
 ## Summary of Findings
 
+> **Correction (2026-09-25 audit).** All 70 recipes were written by an LLM (`scripts/RECIPE_PROMPT.md` in `Pratikn07/parenting-app`) and imported without human review. Their images are AI-generated. No editorial review has happened. Where this package says "verified", "reviewed" or "approved", treat it as not done. The owner review is prepared in [FREE-RECIPE-REVIEW.md](FREE-RECIPE-REVIEW.md), and all allergen states are `unknown` until it happens. Details: [audit backlog](../../audit/AUDIT-BACKLOG.md#phase-5-recipe-structure-and-editorial-review).
+
+The counts below measure field completeness only. They say nothing about accuracy or safety.
+
+
 An audit of the 70 recipes in `public.recipes` on the unified Supabase project `Pratikn07's Project` (`ccrgvammglkvdlaojgzv`) was conducted on 2026-09-23.
 
 | Metric | Result | Assessment |

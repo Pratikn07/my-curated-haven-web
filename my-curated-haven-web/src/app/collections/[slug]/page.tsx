@@ -23,7 +23,7 @@ export async function generateMetadata({
 
   if (!offer) {
     return {
-      title: "Collection Not Found | My Curated Haven",
+      title: "Collection Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -33,7 +33,8 @@ export async function generateMetadata({
   const canonicalUrl = `${SITE_ORIGIN}/collections/${offer.collectionSlug}`;
 
   return {
-    title,
+    // absolute: the full branded title is already built, so skip the layout template.
+    title: { absolute: title },
     description,
     alternates: {
       canonical: canonicalUrl,

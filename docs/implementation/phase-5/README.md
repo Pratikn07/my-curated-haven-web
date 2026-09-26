@@ -2,7 +2,11 @@
 
 [All implementation plans](../README.md)
 
-Status: implemented and verified. This package establishes the catalog audit, editorial mapping, selection of the three free recipes, and the database ingestion pipeline from the unified product catalog into the Phase 4 schema.
+Status: ingestion implemented; editorial review not done.
+
+> **Correction (2026-09-25 audit).** All 70 recipes were written by an LLM (`scripts/RECIPE_PROMPT.md` in `Pratikn07/parenting-app`) and imported without human review. Their images are AI-generated. No editorial review has happened. Where this package says "verified", "reviewed" or "approved", treat it as not done. The owner review is prepared in [FREE-RECIPE-REVIEW.md](FREE-RECIPE-REVIEW.md), and all allergen states are `unknown` until it happens. Details: [audit backlog](../../audit/AUDIT-BACKLOG.md#phase-5-recipe-structure-and-editorial-review).
+
+Original summary: this package establishes the catalog audit, editorial mapping, selection of the three free recipes, and the database ingestion pipeline from the unified product catalog into the Phase 4 schema.
 
 ## Outcome
 

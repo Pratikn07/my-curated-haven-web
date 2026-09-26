@@ -43,7 +43,7 @@ export async function generateMetadata({
 
   if (result.status === "not_found" || result.status === "error") {
     return {
-      title: "Recipe Not Found | My Curated Haven",
+      title: "Recipe Not Found",
       robots: { index: false, follow: false },
     };
   }
@@ -54,7 +54,8 @@ export async function generateMetadata({
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
 
   return {
-    title,
+    // absolute: the full branded title is already built, so skip the layout template.
+    title: { absolute: title },
     description,
     alternates: {
       canonical: canonicalUrl,
