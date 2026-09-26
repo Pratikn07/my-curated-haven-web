@@ -1,293 +1,146 @@
+import Link from "next/link";
+import { SUPPORT_EMAIL } from "@/config/site-navigation";
+
+const h2 = "text-3xl font-bold text-foreground mb-4 font-heading";
+const list = "list-disc pl-6 space-y-2 my-4";
+
 export default function Terms() {
     return (
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Terms of Service</h1>
-                    <p className="text-foreground/60 mb-6">Last updated: December 3, 2025</p>
-                    <p className="leading-relaxed mb-12 rounded-2xl bg-accent px-4 py-3 text-foreground">
-                        Note added September 22, 2026: these terms still describe the earlier mobile app as well as the website. The public website does not currently sell a recipe collection or any other product. Purchase terms, including refunds, will be added before any sale.
-                    </p>
+                    <p className="text-foreground/60 mb-12">Last updated: September 25, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">1. Agreement to Terms</h2>
+                            <h2 className={h2}>1. Agreement</h2>
                             <p className="leading-relaxed">
-                                These Terms of Service (&quot;Terms&quot;) constitute a legally binding agreement between you and My Curated Haven (&quot;Company,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) concerning your access to and use of the My Curated Haven mobile application and website (collectively, the &quot;Service&quot;).
-                            </p>
-                            <p className="leading-relaxed">
-                                By accessing or using the Service, you agree that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, you are not authorized to access or use the Service and should not use the Service.
-                            </p>
-                            <p className="leading-relaxed">
-                                <strong>IMPORTANT:</strong> These Terms include a mandatory arbitration agreement and class action waiver (Section 15), which affect your legal rights. Please read them carefully.
+                                These terms apply to your use of mycuratedhaven.com (the &quot;website&quot;), run by My Curated Haven (&quot;we&quot;, &quot;us&quot;). By using the website you agree to them. If you do not agree, please do not use the website.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">2. Changes to Terms</h2>
+                            <h2 className={h2}>2. Who can use the website</h2>
                             <p className="leading-relaxed">
-                                We reserve the right to modify these Terms at any time. We will provide notice of material changes by updating the &quot;Last updated&quot; date at the top of these Terms and, in some cases, we may provide additional notice such as adding a statement to our homepage or sending you a notification.
-                            </p>
-                            <p className="leading-relaxed">
-                                Your continued use of the Service following the posting of revised Terms means that you accept and agree to the changes. You are expected to check this page frequently to be aware of any changes.
+                                The website is for adults. You must be at least 18 years old to create an account or buy anything.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">3. Eligibility</h2>
+                            <h2 className={h2}>3. What the website offers</h2>
                             <p className="leading-relaxed">
-                                You must be at least 18 years of age to use the Service. By using the Service, you represent and warrant that you:
+                                The website offers toddler recipes by Tiny Soho, including free recipes that anyone can read and print without an account. An optional account lets you save recipes. Other parenting features shown on the homepage are previews and are not available on the website.
                             </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>Are at least 18 years of age</li>
-                                <li>Have the legal capacity to enter into these Terms</li>
-                                <li>Are not barred from using the Service under applicable law</li>
-                                <li>Will comply with these Terms and all applicable local, state, national, and international laws</li>
+                        </section>
+
+                        <section>
+                            <h2 className={h2}>4. Accounts</h2>
+                            <ul className={list}>
+                                <li>You sign in with a one-time code sent to your email address. Keep access to that email account secure, because anyone who can read it can sign in as you.</li>
+                                <li>Your account may also work in the My Curated Haven parenting app, which uses the same account system.</li>
+                                <li>To close your account, email <a className="font-semibold text-action underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> from the address you sign in with.</li>
+                                <li>We may suspend or close an account that breaks these terms.</li>
                             </ul>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">4. User Accounts</h2>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">4.1 Account Creation</h3>
+                            <h2 className={h2}>5. Recipes and food safety</h2>
                             <p className="leading-relaxed">
-                                To access certain features of the Service, you may be required to create an account. You agree to:
+                                Recipes are general information for families. They are not medical, nutritional or allergy advice, and they do not replace advice from your child&apos;s doctor.
                             </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>Provide accurate, current, and complete information during registration</li>
-                                <li>Maintain and promptly update your account information</li>
-                                <li>Maintain the security of your account credentials</li>
-                                <li>Accept responsibility for all activities that occur under your account</li>
-                                <li>Notify us immediately of any unauthorized access or use of your account</li>
+                            <ul className={list}>
+                                <li>Check every ingredient against your child&apos;s allergies and dietary needs. Allergen information on a recipe describes its listed ingredients. It cannot account for brands you buy or cross-contact in your kitchen.</li>
+                                <li>Prepare food in a size and texture suitable for your child&apos;s age and eating skills to reduce choking risk, and stay with your child while they eat.</li>
+                                <li>Follow the cooking, cooling and storage guidance, and use your own judgment about whether food is safe to serve.</li>
                             </ul>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">4.2 Account Termination</h3>
                             <p className="leading-relaxed">
-                                We reserve the right to suspend or terminate your account at any time, with or without notice, for any violation of these Terms or for any other reason. You may delete your account at any time from within the app settings.
+                                In an emergency, call your local emergency number immediately.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">5. Subscription and Payments</h2>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">5.1 Subscription Plans</h3>
+                            <h2 className={h2}>6. Purchases</h2>
                             <p className="leading-relaxed">
-                                The Service offers both free and premium subscription plans. Premium features require a paid subscription, which will be billed automatically on a recurring basis until cancelled.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">5.2 Billing</h3>
-                            <p className="leading-relaxed">
-                                By subscribing to a premium plan, you authorize us to charge your chosen payment method. All payments are processed through the Apple App Store or Google Play Store, subject to their respective terms and conditions. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">5.3 Refunds</h3>
-                            <p className="leading-relaxed">
-                                Refunds are handled according to the Apple App Store or Google Play Store refund policies. We do not provide direct refunds for subscriptions purchased through these platforms. Contact Apple or Google for refund requests.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">5.4 Free Trials</h3>
-                            <p className="leading-relaxed">
-                                We may offer free trial periods. You must cancel before the trial period ends to avoid being charged. Trials are available only once per user.
+                                Nothing is for sale on this website yet. If we offer a recipe collection, its page will state the price, what is included, how long you have access and the refund terms before you pay. Those terms will apply to that purchase along with these terms. Stripe processes payments.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">6. User Content</h2>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">6.1 Your Content</h3>
+                            <h2 className={h2}>7. Using our content</h2>
                             <p className="leading-relaxed">
-                                You may be able to post, upload, or share content through the Service, including photos, milestone entries, forum posts, and messages (&quot;User Content&quot;). You retain all ownership rights to your User Content. However, by posting User Content, you grant us a non-exclusive, worldwide, royalty-free license to use, store, display, and distribute your User Content as necessary to provide the Service.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">6.2 Content Restrictions</h3>
-                            <p className="leading-relaxed">
-                                You agree not to post User Content that:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>Is illegal, harmful, threatening, abusive, harassing, defamatory, or invasive of privacy</li>
-                                <li>Infringes on intellectual property rights</li>
-                                <li>Contains viruses or malicious code</li>
-                                <li>Is spam or commercial advertising</li>
-                                <li>Impersonates another person or entity</li>
-                                <li>Contains explicit or inappropriate content</li>
-                            </ul>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">6.3 Content Moderation</h3>
-                            <p className="leading-relaxed">
-                                We reserve the right to remove any User Content that violates these Terms or is otherwise objectionable, at our sole discretion, with or without notice.
+                                Recipes, photos, text and design on the website belong to My Curated Haven or its licensors. You may read, print and cook from recipes for your own household. You may not copy, republish, sell or distribute our content, remove copyright notices, or use automated tools to scrape the website without our written permission.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">7. Intellectual Property Rights</h2>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">7.1 Our Content</h3>
-                            <p className="leading-relaxed">
-                                The Service and its original content (excluding User Content), features, and functionality are owned by My Curated Haven and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">7.2 Limited License</h3>
-                            <p className="leading-relaxed">
-                                We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service for your personal, non-commercial use, subject to these Terms.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">7.3 Restrictions</h3>
-                            <p className="leading-relaxed">
-                                You may not:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>Copy, modify, or create derivative works of the Service</li>
-                                <li>Reverse engineer, decompile, or disassemble the Service</li>
-                                <li>Remove copyright or proprietary notices</li>
-                                <li>Use the Service for commercial purposes without authorization</li>
-                                <li>Use automated systems or bots to access the Service</li>
+                            <h2 className={h2}>8. Acceptable use</h2>
+                            <p className="leading-relaxed">You agree not to:</p>
+                            <ul className={list}>
+                                <li>Use the website for anything unlawful.</li>
+                                <li>Try to access another person&apos;s account or data.</li>
+                                <li>Interfere with or disrupt the website, or attempt to bypass its security or access controls.</li>
+                                <li>Upload or send viruses or other harmful code.</li>
                             </ul>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">8. Prohibited Uses</h2>
+                            <h2 className={h2}>9. Other websites and services</h2>
                             <p className="leading-relaxed">
-                                You may not use the Service:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>For any unlawful purpose or to violate any laws</li>
-                                <li>To harm, threaten, or harass others</li>
-                                <li>To impersonate or attempt to impersonate the Company or other users</li>
-                                <li>To interfere with or disrupt the Service or servers</li>
-                                <li>To transmit viruses, malware, or other malicious code</li>
-                                <li>To collect or track personal information of others</li>
-                                <li>To engage in data mining, scraping, or similar data gathering</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">9. Medical Disclaimer</h2>
-                            <p className="leading-relaxed">
-                                <strong>IMPORTANT:</strong> The Service provides general parenting information and support. It is NOT a substitute for professional medical advice, diagnosis, or treatment.
-                            </p>
-                            <p className="leading-relaxed">
-                                The content provided through the Service, including AI-generated responses, should not be relied upon for medical decisions. Always seek the advice of your pediatrician or other qualified health provider with questions regarding your child&apos;s health or medical condition.
-                            </p>
-                            <p className="leading-relaxed">
-                                In case of a medical emergency, call 911 or your local emergency number immediately. Do not rely on the Service for emergency medical assistance.
+                                The website may link to or rely on other websites and services, such as Stripe for payments. We are not responsible for their content or practices.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">10. Third-Party Services</h2>
+                            <h2 className={h2}>10. Disclaimer of warranties</h2>
                             <p className="leading-relaxed">
-                                The Service may contain links to third-party websites or services, or allow you to connect with third-party experts. We are not responsible for the content, privacy policies, or practices of any third-party sites or services. You acknowledge and agree that we shall not be liable for any damage or loss caused by use of any third-party content or services.
+                                THE WEBSITE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. We do not promise that the website will always be available or free of errors.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">11. Disclaimer of Warranties</h2>
+                            <h2 className={h2}>11. Limitation of liability</h2>
                             <p className="leading-relaxed">
-                                THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+                                TO THE MAXIMUM EXTENT PERMITTED BY LAW, MY CURATED HAVEN AND ITS AFFILIATES, DIRECTORS, EMPLOYEES AND AGENTS ARE NOT LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS OR LOST DATA, ARISING FROM YOUR USE OF OR INABILITY TO USE THE WEBSITE. OUR TOTAL LIABILITY WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS BEFORE THE CLAIM OR ONE HUNDRED US DOLLARS ($100).
                             </p>
                             <p className="leading-relaxed">
-                                We do not warrant that:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>The Service will be uninterrupted, secure, or error-free</li>
-                                <li>The results obtained from the Service will be accurate or reliable</li>
-                                <li>Any errors in the Service will be corrected</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">12. Limitation of Liability</h2>
-                            <p className="leading-relaxed">
-                                TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL MY CURATED HAVEN, ITS AFFILIATES, DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, LOST DATA, OR OTHER INTANGIBLE LOSSES ARISING FROM:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>Your use or inability to use the Service</li>
-                                <li>Any unauthorized access to or use of our servers</li>
-                                <li>Any bugs, viruses, or other harmful code transmitted through the Service</li>
-                                <li>Any content or conduct of third parties</li>
-                            </ul>
-                            <p className="leading-relaxed">
-                                IN NO EVENT SHALL OUR TOTAL LIABILITY EXCEED THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS PRIOR TO THE EVENT GIVING RISE TO LIABILITY, OR ONE HUNDRED DOLLARS ($100), WHICHEVER IS GREATER.
+                                Some places do not allow these limits, so they may not apply to you. Nothing in these terms limits liability that cannot be limited by law.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">13. Indemnification</h2>
+                            <h2 className={h2}>12. Indemnification</h2>
                             <p className="leading-relaxed">
-                                You agree to defend, indemnify, and hold harmless My Curated Haven and its affiliates from any claims, damages, losses, liabilities, and expenses (including attorneys&apos; fees) arising from:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2 my-4">
-                                <li>Your use of the Service</li>
-                                <li>Your violation of these Terms</li>
-                                <li>Your violation of any rights of another party</li>
-                                <li>Your User Content</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">14. Privacy</h2>
-                            <p className="leading-relaxed">
-                                Your use of the Service is also governed by our Privacy Policy, which is incorporated into these Terms by reference. Please review our Privacy Policy to understand our practices regarding your personal information.
+                                You agree to defend, indemnify and hold harmless My Curated Haven and its affiliates from claims, damages, losses and expenses (including attorneys&apos; fees) arising from your violation of these terms or of another person&apos;s rights.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">15. Dispute Resolution and Arbitration</h2>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">15.1 Informal Resolution</h3>
+                            <h2 className={h2}>13. Disputes</h2>
                             <p className="leading-relaxed">
-                                Before initiating arbitration, you agree to first contact us at legal@mycuratedhaven.com to attempt to resolve any dispute informally.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">15.2 Binding Arbitration</h3>
-                            <p className="leading-relaxed">
-                                If informal resolution is unsuccessful, any dispute arising from these Terms or your use of the Service will be resolved through binding arbitration in accordance with the American Arbitration Association&apos;s rules. The arbitration will take place in [Your State/Country], and judgment on the award may be entered in any court having jurisdiction.
-                            </p>
-
-                            <h3 className="text-2xl font-bold text-foreground mt-6 mb-3">15.3 Class Action Waiver</h3>
-                            <p className="leading-relaxed">
-                                YOU AGREE THAT DISPUTES WILL BE RESOLVED ON AN INDIVIDUAL BASIS AND NOT AS PART OF A CLASS, CONSOLIDATED, OR REPRESENTATIVE ACTION.
+                                If you have a problem with the website, please email <a className="font-semibold text-action underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> first so we can try to resolve it informally.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">16. Governing Law</h2>
+                            <h2 className={h2}>14. Changes to these terms</h2>
                             <p className="leading-relaxed">
-                                These Terms shall be governed by and construed in accordance with the laws of [Your State/Country], without regard to conflict of law provisions.
+                                We may update these terms. When we do, we change the date at the top of this page. If you keep using the website after a change, the updated terms apply.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">17. Severability</h2>
+                            <h2 className={h2}>15. General</h2>
                             <p className="leading-relaxed">
-                                If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions will continue in full force and effect.
+                                If any part of these terms is found unenforceable, the rest stays in effect. These terms and our <Link href="/privacy" className="font-semibold text-action underline">Privacy Policy</Link> are the entire agreement between you and us about the website.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">18. Entire Agreement</h2>
+                            <h2 className={h2}>16. Contact</h2>
                             <p className="leading-relaxed">
-                                These Terms, together with our Privacy Policy, constitute the entire agreement between you and My Curated Haven regarding the Service and supersede all prior agreements and understandings.
+                                Questions about these terms: <a className="font-semibold text-action underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
                             </p>
                         </section>
-
-                        <section>
-                            <h2 className="text-3xl font-bold text-foreground mb-4 font-heading">19. Contact Information</h2>
-                            <p className="leading-relaxed">
-                                If you have any questions about these Terms, please contact us:
-                            </p>
-                            <div className="bg-background/50 p-6 rounded-lg mt-4">
-                                <p className="font-semibold mb-2">My Curated Haven</p>
-                                <p>Email: legal@mycuratedhaven.com</p>
-                                <p>Support: support@mycuratedhaven.com</p>
-                            </div>
-                        </section>
-
-                        <div className="bg-primary/10 border-l-4 border-primary p-6 rounded-lg mt-12">
-                            <p className="font-semibold text-foreground mb-2">Acknowledgment</p>
-                            <p className="leading-relaxed">
-                                BY USING THE SERVICE, YOU ACKNOWLEDGE THAT YOU HAVE READ THESE TERMS OF SERVICE AND AGREE TO BE BOUND BY THEM.
-                            </p>
-                        </div>
                     </div>
                 </div>
         </div>

@@ -12,7 +12,7 @@ export default function About() {
         My Curated Haven is the product. It began as a parenting companion. Tiny Soho grew from that work as the place parents find toddler food ideas.
       </p>
       <p className="mt-4 text-lg text-text-muted">
-        This website is the home for those recipes: simple toddler recipes for busy families. The recipe collection is in preparation. Parenting tools, accounts, and purchases are not part of the site yet.
+        This website is the home for those recipes: simple toddler recipes for busy families. It starts with three complete free recipes. Other parenting tools are not part of the website yet.
       </p>
       <div className="mt-8 grid gap-4">
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
@@ -24,13 +24,17 @@ export default function About() {
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
           <h2 className="text-2xl font-semibold">The recipes</h2>
           <p className="mt-2 text-text-muted">
-            Tiny Soho is the content brand. Recipe pages will live here, inside My Curated Haven, when they are ready to publish.
+            Tiny Soho is the content brand. Its recipes live here, inside My Curated Haven, on the{" "}
+            <Link href="/recipes" className="font-semibold text-action">
+              Recipes
+            </Link>{" "}
+            page.
           </p>
         </section>
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
           <h2 className="text-2xl font-semibold">What is public now</h2>
           <p className="mt-2 text-text-muted">
-            You can read this site and email support. There is no recipe library, no checkout, and no live chat.
+            You can read and print three free recipes without an account. You can sign in with an email code to save recipes. Nothing is for sale on this website yet, and there is no live chat.
           </p>
         </section>
       </div>
@@ -47,7 +51,7 @@ export default function About() {
         <Link href="/terms" className="font-semibold text-action">
           Terms
         </Link>{" "}
-        remain available and still need a review before any new account or payment data is collected.
+        explain how the website handles your information and what applies when you use it.
       </p>
     </Container>
   );

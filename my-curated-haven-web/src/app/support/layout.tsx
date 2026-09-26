@@ -3,7 +3,7 @@ import { pageMetadata } from "@/config/page-metadata";
 
 export const metadata: Metadata = pageMetadata(
   "Support",
-  "Email support@mycuratedhaven.com. This website does not offer live chat, accounts, or purchases yet.",
+  "Email support@mycuratedhaven.com for help with free recipes, signing in and saved recipes. There is no live chat.",
   "/support",
 );
 

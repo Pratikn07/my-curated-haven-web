@@ -3,7 +3,7 @@ import { pageMetadata } from "@/config/page-metadata";
 
 export const metadata: Metadata = pageMetadata(
   "Terms of Service",
-  "Terms of Service for My Curated Haven. No recipe purchase is offered on this website yet.",
+  "Terms for using My Curated Haven, including free recipes, optional accounts and food safety.",
   "/terms",
 );
 

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  APPROVED_HOMEPAGE_RECIPE_STATE,
   DEFAULT_HOMEPAGE_RECIPE_STATE,
+  HOMEPAGE_RECIPE_STATE,
   projectHomepageRecipes,
   resolveHomepageRecipeState,
 } from "../../src/config/homepage-content.ts";
@@ -89,4 +91,13 @@ test("preparation state never projects recipe cards", () => {
     ]),
     [],
   );
+});
+
+test("the live homepage state is free_ready with the three approved slugs", () => {
+  assert.equal(HOMEPAGE_RECIPE_STATE.mode, "free_ready");
+  assert.deepEqual(HOMEPAGE_RECIPE_STATE, {
+    mode: "free_ready",
+    approvedRecipeSlugs: [...APPROVED_HOMEPAGE_RECIPE_STATE.approvedRecipeSlugs],
+  });
+  assert.equal(HOMEPAGE_RECIPE_STATE.approvedRecipeSlugs.length, 3);
 });

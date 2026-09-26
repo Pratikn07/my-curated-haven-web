@@ -1,6 +1,6 @@
 # Phase 1 implementation evidence
 
-Status: code complete and checked on a local production server. Not deployed to https://mycuratedhaven.com/.
+Status: deployed. PR #4 merged to `main` on 2026-09-23 and is live on https://mycuratedhaven.com/. The original record below describes the branch before release. See [the 2026-09-25 audit](#audit-2026-09-25) for current results.
 
 ## Source
 
@@ -106,3 +106,46 @@ Screenshots from that run:
 ## Release
 
 Do not merge this branch to `main` until the wording is accepted. A merge to `main` deploys to production on the current Vercel setup. Rollback is the production deployment of `4dabbaa`.
+
+## Audit 2026-09-25
+
+Audited against `main` at `a496ce6` and the live site. Full findings are in [the audit backlog](../../audit/AUDIT-BACKLOG.md).
+
+### Verified on the live site
+
+| Check | Result |
+| --- | --- |
+| A02 main routes | `/`, `/about`, `/support`, `/privacy`, `/terms` return 200 |
+| A03, A04 deferred routes | `/features`, `/resources`, `/careers`, `/contact` return 404 with `noindex` and `no-store`. Trailing slash redirects (308) to the same 404. Query strings return 404 |
+| A05 delivery boundary | Deferred page text absent from homepage HTML and all 10 loaded JS bundles |
+| A01 source preservation | `src/legacy/pages/*.tsx` match baseline `eb5d5b7` apart from lint fixes |
+| A09 support | `mailto:support@mycuratedhaven.com`, no ticket form or live chat |
+| C15 footer year | Rendered year (2026) |
+
+### Fixed during the audit
+
+| Item | Fix |
+| --- | --- |
+| Header and sitemap linked to a broken `/recipes` (A06, A08) | Vercel production had no `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Added both (production only) and redeployed `a496ce6`. Recipe pages and the sitemap's recipe URLs now load. Rollback target: `dpl_3rxFT36wbT6FToggQJQLbty1tVy6` |
+| `www.mycuratedhaven.com` failed TLS | Added the domain to the Vercel project with a 308 redirect to the apex domain |
+| Sign-in emails had no code | Added `{{ .Token }}` to the Supabase magic-link and signup-confirmation templates. Original templates are saved in `docs/audit/rollback/` |
+| About, Support and homepage said recipes were "in preparation" | Owner decision 2026-09-25: the three free recipes are live. Homepage set to `free_ready` with the three slot slugs. About and Support describe free recipes, optional email-code sign-in and no purchases |
+| Privacy and Terms contradicted the site and each other (C13) | Rewritten from the site's actual data handling. **Needs owner review before merge**, see the pull request's open questions |
+| Copy drift had no test | `tests/e2e/public-site.spec.ts` fails if About, Support, Privacy or Terms return to stale availability claims |
+
+### Owner decisions still open
+
+- O7: confirm that `support@mycuratedhaven.com` is monitored.
+- Governing law and dispute resolution for the Terms. The previous text had `[Your State/Country]` placeholders.
+
+### Resolved by the owner
+
+- O8 (2026-09-25): the native app has no users. No separate app privacy policy is needed.
+
+### New must-do items
+
+M1-03 (custom email sender), M1-04 (production auth URLs), M1-05 (Terms jurisdiction) and M1-06 (post-deploy production check) are described in [the audit backlog](../../audit/AUDIT-BACKLOG.md#m1-03-custom-email-sender).
+
+### Closed as superseded
+
+- A16 signed-in preview review: replaced by the live-site checks above.
