@@ -1,6 +1,6 @@
 # Phase 7: accounts and saved recipes
 
-Status: implementation plan. This documentation does not deliver account features or change live user data.
+Status: implemented and live (PR #15; remediation PR #28). The 2026-09-26 audit record is in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-26).
 
 ## Outcome
 

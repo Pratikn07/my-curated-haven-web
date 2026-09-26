@@ -905,7 +905,7 @@ export type Database = {
             foreignKeyName: "saved_recipes_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipes"
+            referencedRelation: "recipe_catalog"
             referencedColumns: ["id"]
           },
         ]

@@ -1,6 +1,6 @@
 # Phase 7 implementation evidence
 
-Status: The PR #25 remediation was implemented on `codex/phase-7-remediation`, merged in PR #28, and deployed to production. The dedicated staging OTP and native password/Google compatibility check remains unverified because no staging project or test inbox was available. No shared Auth settings or email templates were changed.
+Status: The PR #25 remediation was implemented on `codex/phase-7-remediation`, merged in PR #28, and deployed to production. The dedicated staging OTP and native password/Google compatibility check remains unverified because no staging project or test inbox was available. No shared Auth settings or email templates were changed by this work. (The 2026-09-25 audit later changed them: sign-in code in the templates, production `site_url`, 1-hour code expiry. See the Phase 1 and Phase 4 audit records.)
 
 ---
 
@@ -205,3 +205,29 @@ The checks below cover the remediation in `REMEDIATION-PLAN.md`, implemented fro
 - `npm run lint`, `npm run typecheck`, `npm run build`, the focused Playwright checks, and the local saved-recipes pgTAP suite passed. GitHub `web-quality` and `backend-quality` also passed on PR #28.
 - Vercel reported the Production deployment for merge SHA `6d43d8f1cf75510d82fda00105998ff1875b954d` as successful. The canonical `/sign-in` and `/recipes` routes returned HTTP 200; the live sign-in page contained the new account-creation disclosure.
 - Staging OTP delivery and native password/Google compatibility remain unverified: no staging project or designated test inbox was available. Local Auth/Mailpit testing used a synthetic account; no real email was sent and no shared Auth setting or template was changed.
+
+## Audit 2026-09-26
+
+Audited against `main` at `79d3ec3`, the live site and project `ccrgvammglkvdlaojgzv`. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-7-optional-accounts-and-saved-recipes).
+
+### Verified
+
+- Owner-only `saved_recipes` policies; `anon` has no access; no UPDATE grant.
+- `/account` pages redirect to `/sign-in?returnTo=…` with `no-store, private`; `returnTo` rejects absolute and protocol-relative URLs (tested live).
+- Email confirmation required, refresh-token rotation on, codes expire after 1 hour.
+
+### Fixed (migration `20260926150820_phase7_audit_saved_recipes_access_and_catalog_fk.sql`)
+
+| Item | Before | After | Test |
+| --- | --- | --- | --- |
+| R7-01 direct saves | A signed-in user could insert any recipe id through the Data API (shown locally with a draft) | The INSERT policy also requires that the caller can read the recipe body, reusing the free-slot and entitlement rule from `recipe_bodies` | `09_phase7_save_access`: free saves allowed; draft, withdrawn, non-buyer paid and expired-entitlement saves rejected; buyer allowed |
+| R7-02 foreign key | `saved_recipes.recipe_id` referenced the iOS table `public.recipes` | References `recipe_catalog` | `09`: constraint target |
+| M7-02 closure | Deleting a user failed: `profiles.id` referenced `auth.users` with NO ACTION | Cascades, so deleting the user removes the profile and everything under it | `09`: delete succeeds, profile and saves gone |
+
+Runbook: [ops/ACCOUNT-CLOSURE.md](../../../ops/ACCOUNT-CLOSURE.md).
+
+### Still open
+
+- R7-03 email delivery to a real inbox: after the custom sender (backlog M1-03).
+- M7-01 sign-in abuse: custom sender plus Cloudflare Turnstile.
+- R7-04 cross-device and Auth-outage browser tests.
