@@ -16,6 +16,8 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 
 | ID | Decision or action |
 | --- | --- |
+| M4-04 | Schedule the Postgres security upgrade (a few minutes of database restart) |
+| R4-02 | Decide on Supabase Pro for daily backups (the free plan has none) |
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
@@ -52,7 +54,7 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 | M1-03 | P1 | Sign-in emails capped at 2 per hour for the whole project | ⏳ 👤 | See [M1-03](#m1-03-custom-email-sender) |
 | M1-04 | P1 | Supabase `site_url` is a dev address | ✅ | Done 2026-09-25. See [M1-04](#m1-04-production-auth-urls) |
 | M1-05 | P1 | Terms have no governing law or dispute resolution | ⏳ 👤 | See [M1-05](#m1-05-terms-jurisdiction) |
-| M1-06 | P1 | No production check after deploy | ⏳ | See [M1-06](#m1-06-post-deploy-production-check) |
+| M1-06 | P1 | No production check after deploy | ✅ PR #41 | See [M1-06](#m1-06-post-deploy-production-check) |
 
 #### M1-03: custom email sender
 
@@ -118,7 +120,7 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 ## Phase 2: development and release foundation
 
 Plan: `docs/implementation/phase-2/IMPLEMENTATION-PLAN.md` (PR #2). Built in `f3643e9`, `7f82282`, `572a1ad` (PR #5, merged 2026-09-23). Deliberate-failure drill: PR #6 (closed, blocked as expected).
-Remediation plan: none was written. No fix PR targets Phase 2. Later phases edited CI: Phase 4 (`72471a9`, `d6eddff`), Phase 6 (`910f252`), Phase 7 (`1c78e41`), Phase 10 (`a0150c0`, `556b893`).
+Remediation plan: none was written. Audit fixes merged in PR #41 (`f6c39cd`); `backend-quality` added to ruleset `23852646` on 2026-09-25 (previous rule: `docs/audit/rollback/ruleset-23852646-before-m2-01.json`). Later phases edited CI: Phase 4 (`72471a9`, `d6eddff`), Phase 6 (`910f252`), Phase 7 (`1c78e41`), Phase 10 (`a0150c0`, `556b893`).
 
 Verified as done (no action):
 - **Runtime**: Node `24.5.0` in `.nvmrc`, `packageManager: npm@11.5.1`, engines `>=24 <25`. Vercel uses Node `24.x` with root directory `my-curated-haven-web`.
@@ -133,21 +135,21 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| R2-01 | P1 | README setup instructions are wrong, so a clean checkout can't run the tests (P2-02, P2-03 acceptance) | ⏳ | `my-curated-haven-web/README.md` says "No environment variables are required" and never mentions `supabase start`. Since Phase 4 the tests need a local Supabase and three variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `COMMERCE_DATABASE_URL`). Rewrite setup to match CI: Docker, `supabase start`, `supabase db reset`, the three local values |
-| R2-02 | P1 | CI builds a different bundle from production | ⏳ | Phase 7 (`1c78e41`) changed CI to `npm run build -- --webpack` "to avoid turbopack font error". Vercel production builds with Next 16's default (Turbopack), so CI no longer tests what ships. A local Turbopack build passes. Remove `--webpack` from both jobs and fix the font failure at its cause, likely the build-time Google Fonts download |
-| R2-03 | P1 | Some tests never run in CI or `npm run verify` | ⏳ | `test:homepage:unit` (7 tests in `tests/homepage/`, including the approved-slug guard from PR #38) is not called by `web-ci.yml` or `verify`. Add it to both |
-| R2-04 | P2 | One CI action is not pinned to a commit SHA (CI spec: "Pin third-party actions to verified full commit SHAs") | ⏳ | `supabase/setup-cli@v1` in both jobs. Pin it to a full SHA with a version comment |
-| R2-05 | P2 | Rollback never rehearsed (P2-09.4) | ⏳ | No drill or walkthrough is recorded in `IMPLEMENTATION-EVIDENCE.md`. This audit has two real production rollback targets (`dpl_3rxFT36wbT6FToggQJQLbty1tVy6`, `dpl_DjWtdCdddiX29H4ZC3XyEZTJG3RQ`). Record a reviewed walkthrough: `vercel rollback <deployment>` or dashboard "Instant Rollback", then the smoke checks |
-| R2-06 | P2 | Release runbook's evidence record never filled in | ⏳ | `PREVIEW-AND-RELEASE.md` has 10 fields still "Pending" |
-| R2-07 | P2 | Phase 2 status docs are stale | ⏳ | `README.md` says "implementation plan only". `IMPLEMENTATION-HANDOFF.md` checklist is all unchecked, although P2-01 to P2-08 have evidence |
-| R2-08 | P2 | Signed-in preview review never done (P2-07.5) | ⏳ | The evidence admits it. Previews now have no Supabase variables by design, so recipe pages can't be reviewed on a preview at all. Staging is planned in Phase 10 (`CI-AND-ENVIRONMENT-RELIABILITY.md`); close this there |
+| R2-01 | P1 | README setup instructions are wrong, so a clean checkout can't run the tests (P2-02, P2-03 acceptance) | ✅ PR #41 | `my-curated-haven-web/README.md` says "No environment variables are required" and never mentions `supabase start`. Since Phase 4 the tests need a local Supabase and three variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `COMMERCE_DATABASE_URL`). Rewrite setup to match CI: Docker, `supabase start`, `supabase db reset`, the three local values |
+| R2-02 | P1 | CI builds a different bundle from production | ✅ PR #41 | Phase 7 (`1c78e41`) changed CI to `npm run build -- --webpack` "to avoid turbopack font error". Vercel production builds with Next 16's default (Turbopack), so CI no longer tests what ships. A local Turbopack build passes. Remove `--webpack` from both jobs and fix the font failure at its cause, likely the build-time Google Fonts download |
+| R2-03 | P1 | Some tests never run in CI or `npm run verify` | ✅ PR #41 | `test:homepage:unit` (7 tests in `tests/homepage/`, including the approved-slug guard from PR #38) is not called by `web-ci.yml` or `verify`. Add it to both |
+| R2-04 | P2 | One CI action is not pinned to a commit SHA (CI spec: "Pin third-party actions to verified full commit SHAs") | ✅ PR #41 | `supabase/setup-cli@v1` in both jobs. Pin it to a full SHA with a version comment |
+| R2-05 | P2 | Rollback never rehearsed (P2-09.4) | ✅ PR #41 | No drill or walkthrough is recorded in `IMPLEMENTATION-EVIDENCE.md`. This audit has two real production rollback targets (`dpl_3rxFT36wbT6FToggQJQLbty1tVy6`, `dpl_DjWtdCdddiX29H4ZC3XyEZTJG3RQ`). Record a reviewed walkthrough: `vercel rollback <deployment>` or dashboard "Instant Rollback", then the smoke checks |
+| R2-06 | P2 | Release runbook's evidence record never filled in | ✅ PR #41 | `PREVIEW-AND-RELEASE.md` has 10 fields still "Pending" |
+| R2-07 | P2 | Phase 2 status docs are stale | ✅ PR #41 | `README.md` says "implementation plan only". `IMPLEMENTATION-HANDOFF.md` checklist is all unchecked, although P2-01 to P2-08 have evidence |
+| R2-08 | P2 | Signed-in preview review never done (P2-07.5) | ⏳ Phase 10 | The evidence admits it. Previews now have no Supabase variables by design, so recipe pages can't be reviewed on a preview at all. Staging is planned in Phase 10 (`CI-AND-ENVIRONMENT-RELIABILITY.md`); close this there |
 
 ### Must do, not in any plan
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M2-01 | P1 | `backend-quality` is not a required check | ⏳ | The ruleset requires only `web-quality`. Phase 4 added `backend-quality`, which covers migration replay, pgTAP access tests, type drift and data-access tests, but never made it required. A PR that breaks database security can still merge. Add `backend-quality` to ruleset `23852646` |
-| M2-02 | P1 | Production smoke checks are manual and weren't run | ⏳ | Answer to M1-06: the Phase 2 runbook lists production smoke checks, but only as a manual step. Phase 11 has one manual read-only smoke at launch. Nothing ran them after the Phase 4 to 9 deploys, which is how the recipe outage went unnoticed. Implement M1-06 as the automated version |
+| M2-01 | P1 | `backend-quality` is not a required check | ✅ ruleset | The ruleset requires only `web-quality`. Phase 4 added `backend-quality`, which covers migration replay, pgTAP access tests, type drift and data-access tests, but never made it required. A PR that breaks database security can still merge. Add `backend-quality` to ruleset `23852646` |
+| M2-02 | P1 | Production smoke checks are manual and weren't run | ✅ PR #41 | Answer to M1-06: the Phase 2 runbook lists production smoke checks, but only as a manual step. Phase 11 has one manual read-only smoke at launch. Nothing ran them after the Phase 4 to 9 deploys, which is how the recipe outage went unnoticed. Implement M1-06 as the automated version |
 
 ### Good to have
 
@@ -160,11 +162,56 @@ Verified as done (no action):
 
 ---
 
+## Phase 4: backend security and data foundation
+
+Plan: `docs/implementation/phase-4/IMPLEMENTATION-PLAN.md` (PR #8). Built in `72471a9`, `94e890f`, `0d47e07`, `4ce43da`, `d6eddff` (PR #11, merged 2026-09-22). PR #11 applied the schema straight to production, with no staging rehearsal.
+Remediation plan: none was written. Reviewer fix PRs: #19 (`e58cbb7`, access hardening; applied to production by this audit) and #21 (`fca003c`, keep public pages up when Supabase env is missing, deployed). Audit changes applied to production on 2026-09-25 are listed in `docs/implementation/phase-4/IMPLEMENTATION-EVIDENCE.md#audit-2026-09-25`.
+
+Verified as done (no action):
+- `recipe_catalog`, `recipe_bodies`, `free_recipe_slots`, `recipe_collections`, `collection_releases`, `collection_recipes` and `access_entitlements` exist in production, all with RLS.
+- A live anonymous API read on 2026-09-25 returned 3 rows from `recipe_catalog` and 3 from `recipe_bodies`: the free recipes only.
+- Personal tables (`children`, `profiles`, `chat_messages`, `chat_sessions`, `conversation_summaries`, `onboarding_responses`, `milestones`, `user_activity_log`, `access_entitlements`) returned 0 rows to an anonymous caller.
+- `recipe-protected` bucket is private, and its read policy follows the free-slot and entitlement rules. `recipe-previews` is public read-only.
+- pgTAP suites `01_access_matrix` and `05_phase4_hardening` run in `backend-quality` and cover scenarios S01 to S15 and S17 to S20.
+- The Supabase security advisor reports no ERROR-level findings.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R4-01 | P0 | Legacy `public.recipes` is readable by anyone | ✅ applied | Anonymous REST read returned all 70 recipes. For example, the draft "Banana Avocado Breakfast Purée with Yogurt" came back with 4 ingredients and 11 steps. Policy `Recipes are viewable by everyone` (`USING true`). The fix exists, `20260924120000_phase4_access_hardening.sql` (PR #19), but was held back for the native app, which has no users (owner, 2026-09-25). Its `handle_new_user` body matches production except for a pinned `search_path`. Apply it and record it with `supabase migration repair` |
+| R4-02 | P1 | No backup or restore evidence (P4-08.7, P4-10.2) | ⏳ 👤 dump taken | Free plan: `pitr_enabled: false`, 0 backups listed. Nothing restores the database if a migration goes wrong. Take a logical dump before each production migration and store it outside the repo, because it contains personal data. Owner decision: upgrade to Pro for daily backups |
+| R4-03 | P1 | Production migration history has diverged from the repo | ✅ documented | Production has `20260923042735`, `20260923053000`, `20260923180000`. Six later migrations are unapplied (Phase 8 commerce schema, Phase 9 x2, Phase 4 hardening, Phase 8 guards, Phase 5 guard). A plain `supabase db push` would apply all six at once, including the Phase 8 commerce schema. Apply one at a time on purpose, and document "no blind `db push`" |
+| R4-04 | P2 | The "prove CI catches a leak" drill was never done (P4-09.5) | ⏳ | Only PR #6 (a web test) was a deliberate failure. Run one disposable PR that weakens a body policy and confirm `backend-quality` fails and blocks the merge |
+| R4-05 | P2 | Staging rehearsal skipped (P4-10.3) | ⏳ Phase 10 | Changes went straight to production. Covered by the Phase 10 staging plan |
+| R4-06 | P2 | Evidence doc is wrong | ✅ corrected | `IMPLEMENTATION-EVIDENCE.md` says "This does not connect or modify the separate production database", but PR #11 applied the schema to production |
+| R4-07 | P2 | S16 (backend error → typed failure) has no test | ⏳ | No pgTAP or data-access test maps to S16 |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M4-01 | P0 | Native `chat` Edge Function trusts a caller-supplied user ID | ✅ deleted | `parenting-app/supabase/functions/chat/index.ts:1230-1234`: uses `SUPABASE_SERVICE_ROLE_KEY`, then reads `userId` from the request body and loads that user's profile, children and conversation history. It only checks that an `Authorization` header exists, and `verify_jwt` accepts the public anon key. Anyone with the site's public key can act as any user and run DeepSeek/OpenAI calls at the owner's cost. Production has 4 accounts, 4 child profiles and 40 chat messages. The native app has no users, so delete the `chat` and `generate-tip` functions (the source stays in `parenting-app`) |
+| M4-02 | P0 | Anyone can upload files to the public `recipe-images` bucket | ✅ migration | Storage policy `Allow public upload to recipe-images` (INSERT, role `public`, bucket check only). That bucket serves the live site's recipe photos. Drop the policy; only trusted tooling should upload |
+| M4-03 | P1 | Sign-in codes stay valid for 24 hours | ✅ applied | `mailer_otp_exp: 86400`. The advisor recommends under 1 hour. Set it to 3600 or less. Update the "24 hours" line in the email template to match |
+| M4-04 | P1 | Postgres has outstanding security patches | ⏳ 👤 | Advisor: `supabase-postgres-17.4.1.074` has security patches. Upgrading restarts the database for a few minutes. Owner schedules it |
+| M4-05 | P1 | Privileged functions callable by anonymous visitors | ✅ migration | Advisor: `handle_new_user()` and `increment_shop_click(uuid)` are `SECURITY DEFINER` and executable by `anon` and `authenticated` via `/rest/v1/rpc/`. `increment_shop_click` lets anyone inflate native shop click counts. Revoke EXECUTE from `anon` and `authenticated` on both. The trigger still works |
+| M4-06 | P2 | 9 functions have a mutable `search_path` | ⏳ | Advisor `function_search_path_mutable`. R4-01 fixes `handle_new_user` and `check_release_sealed_mutation`, and the Phase 5 guard fixes `private.slugify`. Six native functions remain |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G4-01 | P2 | Drop or archive the empty legacy buckets `recipe-steps`, `recipe-thumbnails` and `chat-images` | They're empty, and fewer public buckets means less to secure |
+| G4-02 | P2 | Run the Supabase security advisor in CI or on a schedule | This audit found M4-05 and M4-06 only by running it by hand |
+| G4-03 | P2 | Decide what to do with native-only tables (`children`, `chat_*`, `milestones`, `shop_*`) now that the app has no users | They hold test personal data and widen the attack surface. Archive them, or drop them after an owner-approved export |
+
+---
+
 ## Noticed in other phases (confirm during their audits)
 
 | Phase | Item |
 | --- | --- |
-| 4 | `20260924120000_phase4_access_hardening.sql` not applied in production. `public.recipes` is readable by `anon` (`USING true`), exposing all 70 full recipes, including the 67 drafts meant to be paid. It was held back because the native app reads the table. The owner confirmed 2026-09-25 that the app has no users, so that blocker is gone. Apply it during the Phase 4 audit |
 | 5 | `20260925100000_phase5_allergen_review_guard.sql` not applied: 22 recipes show `reviewed_no_allergens`, only 1 is reviewed. `FREE-RECIPES-SELECTION.md` "Reviewed Notes" differ from the database (the salmon recipe's bone check is in its steps, so it does reach readers). `image_description` (alt text) is empty for all 70 recipes |
 | 6 | R3 content test always skips. R4 print check not done. Evidence doc names wrong columns. `/recipes` title repeats the brand |
 | 7 | "Free or purchased only" save rule enforced only in the server action, not by RLS. Save-access tests use a mocked client. See also M1-02 to M1-04 |

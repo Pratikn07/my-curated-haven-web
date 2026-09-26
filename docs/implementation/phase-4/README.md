@@ -2,7 +2,7 @@
 
 [All implementation plans](../README.md)
 
-Status: detailed implementation plan. This documentation change does not create a Supabase project, apply migrations, copy production data, change access policies or enable sales.
+Status: implemented. The schema is in production on `ccrgvammglkvdlaojgzv` (PR #11, 2026-09-22). The 2026-09-25 audit closed the legacy access holes; see [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-25) and the production migration rules in [MIGRATION-AND-ROLLOUT.md](MIGRATION-AND-ROLLOUT.md#production-migration-state-and-rules).
 
 ## Outcome
 
