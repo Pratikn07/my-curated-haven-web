@@ -8,7 +8,7 @@ import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
 import { Bookmark, ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Saved Recipes | My Curated Haven",
+  title: "Saved Recipes",
   description: "View and manage your private bookmarked recipes.",
   robots: {
     index: false,

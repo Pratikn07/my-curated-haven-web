@@ -6,7 +6,7 @@ import SignOutButton from "@/components/account/SignOutButton";
 import { Bookmark, ShoppingBag, Mail, HelpCircle, AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Account | My Curated Haven",
+  title: "Account",
   description: "Manage your My Curated Haven account, view saved recipes, and access support.",
   robots: {
     index: false,

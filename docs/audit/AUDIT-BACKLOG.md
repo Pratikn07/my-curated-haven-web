@@ -16,6 +16,9 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 
 | ID | Decision or action |
 | --- | --- |
+| R5-03 | Review the 3 free recipes with the checklist (allergens, steps, yield, time, choking and texture, alt text) |
+| M5-02 | Decide whether to disclose AI-assisted recipes and illustrative AI images |
+| M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
@@ -253,12 +256,54 @@ Verified as done (no action):
 
 ---
 
+## Phase 5: recipe structure and editorial review
+
+Plan: `docs/implementation/phase-5/IMPLEMENTATION-PLAN.md`, written by the implementing agent in the same commit as the work (`234ec99`, PR #12). The shared index had said "Not written in this package". The contract other phases relied on is the "Required Phase 5 handoff" in `docs/implementation/phase-6/EXISTING-RECIPE-REUSE.md`.
+Remediation: no plan. Reviewer fix PR #22 (`82eff91`, `20260925100000_phase5_allergen_review_guard.sql`) is **not applied to production**.
+
+**Where the content came from (iOS repo `Pratikn07/parenting-app` at `5e5caa7`)**: all 70 recipes were written by an LLM from `scripts/RECIPE_PROMPT.md` ("paste it into ChatGPT or Claude", persona "a pediatric nutritionist", 7 categories × 10). They were loaded by `scripts/importRecipes.ts`, whose only check is skipping duplicate titles, and it hardcodes `rating: 4.5`. Images are FLUX Pro output via Replicate (`scripts/generateAllImages.ts`). The repo shows **no human review, source attribution or image-licence record**. The iOS app never claimed a review: it hides the allergen section when the list is empty (`AllergensSection.tsx:12`).
+
+Verified as done (no action):
+- 70 rows each in `recipe_catalog` and `recipe_bodies`, 3 published, 3 free slots. IDs preserved from `public.recipes`. Slugs unique.
+- The 3 free recipes' allergen lists match their ingredients: Frittata eggs and milk; Oat Bars none; Fish Cakes fish and wheat. An ingredient keyword scan of all 70 flagged 12 recipes, **all drafts**.
+- Salmon Fish Cakes step 9 includes "SAFETY REMINDER: Double check for bones".
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R5-01 | P0 | Every allergen label claims a review that never happened | ⏳ | 48 bodies are `reviewed_listed` and 22 `reviewed_no_allergens`. The live Fish Cakes page says "Contains reviewed allergens: fish wheat". The Phase 5 ingest derived "reviewed" from whether the LLM's array was empty. PR #22 only fixed the empty-array case and still kept Oat Bars as reviewed, based on an AI-written selection doc. Set all 70 to `unknown` until a person reviews each recipe |
+| R5-02 | P0 | The `unknown` display drops the allergen list | ✅ code | `getAllergenDisplay` now returns the listed allergens for `unknown`, and the page shows "Listed in this recipe, not yet reviewed: …" with a check-the-labels note. Test: `unreviewed allergens stay visible and are labelled as not reviewed` |
+| R5-03 | P1 | Owner review of the 3 free recipes | ⏳ 👤 checklist ready | Checklist with source content, audit notes and draft alt text: `docs/implementation/phase-5/FREE-RECIPE-REVIEW.md`. It found that the Frittata Fingers image shows round fritters next to pasta, not the rectangular strips the recipe makes |
+| R5-04 | P1 | No alt text on any recipe image | ⏳ 👤 drafts ready | Draft alt text for the 3 images is in the checklist. Current alt is acceptable meanwhile: cards use `alt=""` next to the visible title, and detail pages use the recipe title. Add a catalog alt-text field once the wording is approved |
+| R5-05 | P1 | `FREE-RECIPES-SELECTION.md` contains invented content | ✅ docs | Notes differ from the database (Oat Bars "ground oats", Fish Cakes "pin bones"), and the doc adds unsourced timings ("Active 10m, Bake 20m", "~16 strips") and meal labels. It presents AI content as "Verified". Correct it to match the source and state the true review status |
+| R5-06 | P1 | Phase 5 docs call the work "implemented and verified" editorial review | ✅ docs | Rewrite the status: ingestion done; editorial review not done; content is AI-generated |
+| R5-07 | P2 | PR #22's migration is still unapplied, so repo and production history differ | ⏳ | Superseded by R5-01, but it also creates `private.merge_publication_state` and `clear_unreviewed_allergen_claims`. Apply it for history parity before the R5-01 reset |
+| R5-08 | P2 | Two AI errors in draft recipes | ⏳ | "Onigiri Rice Triangles" lists eggs but is tagged `egg-free`. "Soft Tofu Veggie Stir Fry with Rice" uses sesame oil without listing sesame. Fix both in source and bodies; both are drafts |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M5-01 | P0 | The live recipes page claims the recipes are "tested" | ✅ copy | Meta description and hero no longer say "tested" or "verified ingredients". Test: `recipe pages make no tested or verified claims`. The same change fixed the doubled brand in 9 page titles (test: `page titles name the brand once`) |
+| M5-02 | P1 | No record that the content is AI-generated | ⏳ 👤 | Owner decides whether the site discloses AI-assisted recipes and illustrative AI images. At minimum, don't imply real photos of cooked dishes |
+| M5-03 | P1 | Image rights unknown | ⏳ 👤 | FLUX Pro output via Replicate. The owner confirms their account terms allow commercial use, and records it (Phase 6 handoff asked for "image source, usage permission") |
+| M5-04 | P1 | No gate stops an unreviewed recipe being published | ✅ migration | `20260926052702_phase5_audit_publish_requires_review.sql`: triggers block publishing, taking a free slot or joining a collection unless the body is reviewed. pgTAP `08_phase5_publish_gate` (7 tests). Inserting a brand-new row directly as published is not gated |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G5-01 | P2 | Keep a review record per recipe (reviewer, date, checklist result, content version) in a private table | Phase 6 and 8 handoffs both ask for approver and timestamp; docs are easy to lose |
+| G5-02 | P2 | Before any paid launch, review all 67 drafts with the same checklist, starting with the 12 the keyword scan flagged | The scan is rough (false positives on "sunflower seed butter", "coconut milk", "chickpea flour") but it caught both real errors |
+
+---
+
 ## Noticed in other phases (confirm during their audits)
 
 | Phase | Item |
 | --- | --- |
-| 5 | `20260925100000_phase5_allergen_review_guard.sql` not applied: 22 recipes show `reviewed_no_allergens`, only 1 is reviewed. `FREE-RECIPES-SELECTION.md` "Reviewed Notes" differ from the database (the salmon recipe's bone check is in its steps, so it does reach readers). `image_description` (alt text) is empty for all 70 recipes |
-| 6 | R3 content test always skips. R4 print check not done. Evidence doc names wrong columns. `/recipes` title repeats the brand |
+| 6 | Flaky: `recipes.spec.ts` "search input updates URL state and filters recipes" failed 1 of 15 runs on WebKit (URL not updated within 10 s). R3 content test always skips. R4 print check not done. Evidence doc names wrong columns. `/recipes` title repeats the brand |
 | 7 | "Free or purchased only" save rule enforced only in the server action, not by RLS. Save-access tests use a mocked client. See also M1-02 to M1-04 |
 | 8 | Webhook falls back to the public `whsec_mock_dummy_webhook_secret` when `STRIPE_WEBHOOK_SECRET` is unset (`src/lib/payments/config.ts:14`). Webhook refunds never revoke access. Commerce schema not in production. Vercel `COMMERCE_DATABASE_URL` is a template value (logs show host `HOST`), so `/collections/*` returns 500. The collection page shows a "14-day satisfaction refund guarantee" that the owner never decided (O3) |
 | 9 | Never reviewed. The consent dialog claims "90-day retention", which the code doesn't enforce |

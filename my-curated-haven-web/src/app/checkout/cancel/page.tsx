@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Checkout Cancelled | My Curated Haven",
+  title: "Checkout Cancelled",
   robots: { index: false, follow: false },
 };
 

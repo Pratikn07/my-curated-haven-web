@@ -21,9 +21,9 @@ export async function generateMetadata({
   const hasParams = Object.keys(resolvedParams).length > 0;
 
   return {
-    title: "Toddler Recipes | My Curated Haven",
+    title: "Toddler Recipes",
     description:
-      "Simple, nourishing toddler recipes tested for tiny hands and busy families. Recipes by Tiny Soho, inside My Curated Haven.",
+      "Simple toddler recipes for busy families, with ingredients, steps and storage guidance. Recipes by Tiny Soho, inside My Curated Haven.",
     alternates: {
       canonical: `${SITE_ORIGIN}/recipes`,
     },
@@ -126,9 +126,9 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
           Simple Toddler Recipes
         </h1>
         <p className="mt-3 max-w-3xl text-lg text-text-muted">
-          Tested, wholesome toddler recipes crafted for busy families. Every free recipe
-          comes complete with verified ingredients, step-by-step instructions, and storage
-          guidance — no sign-up or paywall required.
+          Simple toddler recipes for busy families. Every free recipe includes its
+          ingredients, step-by-step instructions and storage guidance, with no sign-up
+          or paywall.
         </p>
       </header>
 

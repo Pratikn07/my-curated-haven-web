@@ -7,7 +7,7 @@ import Badge from "@/components/ui/Badge";
 import { BookOpen, ShoppingBag, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "My Recipe Collections | My Curated Haven",
+  title: "My Recipe Collections",
   robots: { index: false, follow: false },
 };
 

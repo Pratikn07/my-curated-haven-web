@@ -5,7 +5,7 @@ import { reconcileAndFulfillSession } from "@/lib/payments/fulfilment";
 import { CheckCircle2, Clock, AlertCircle, ShoppingBag } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Checkout Status | My Curated Haven",
+  title: "Checkout Status",
   robots: { index: false, follow: false },
 };
 

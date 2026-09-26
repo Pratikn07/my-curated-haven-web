@@ -5,7 +5,7 @@ import { sanitizeReturnTo } from "@/lib/auth/redirects";
 import SignInForm from "@/components/auth/SignInForm";
 
 export const metadata: Metadata = {
-  title: "Sign In | My Curated Haven",
+  title: "Sign In",
   description: "Sign in to save recipes and manage your toddler recipe collection.",
   robots: {
     index: false,
