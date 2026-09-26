@@ -136,8 +136,15 @@ Audited against `main` at `a496ce6` and the live site. Full findings are in [the
 ### Owner decisions still open
 
 - O7: confirm that `support@mycuratedhaven.com` is monitored.
-- O8: confirm whether native app users or subscriptions exist, and whether the app needs its own privacy policy.
 - Governing law and dispute resolution for the Terms. The previous text had `[Your State/Country]` placeholders.
+
+### Resolved by the owner
+
+- O8 (2026-09-25): the native app has no users. No separate app privacy policy is needed.
+
+### New must-do items
+
+M1-03 (custom email sender), M1-04 (production auth URLs), M1-05 (Terms jurisdiction) and M1-06 (post-deploy production check) are described in [the audit backlog](../../audit/AUDIT-BACKLOG.md#m1-03-custom-email-sender).
 
 ### Closed as superseded
 
