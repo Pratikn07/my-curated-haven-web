@@ -52,7 +52,9 @@ What this deletes, in one step (verified by `supabase/tests/database/09_phase7_s
 
 Before 2026-09-26 this step failed with `violates foreign key constraint "users_id_fkey" on table "profiles"`. If you see that error, the Phase 7 audit migration hasn't been applied to the database you're using.
 
-Analytics (PostHog, only if the person accepted analytics) uses a random browser id, not the account, so there is nothing to delete there by account. If they ask, their browser id can be cleared by withdrawing consent in the footer.
+## 4b. Delete their analytics
+
+Signed-in visits are linked to the account in PostHog (person id = the Supabase user id, with their email). PostHog → **People** → search the email or user id → the person → **Delete person**, and tick the option to also delete their events and recordings. Visits from before they signed in stay anonymous and aren't linked to them.
 
 ## 5. Confirm
 

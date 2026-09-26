@@ -3,17 +3,19 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseAndRecordCampaign } from "@/lib/analytics/campaigns";
-import { useAnalytics } from "./AnalyticsProvider";
+import { isPostHogActive, posthog } from "@/lib/analytics/posthog";
 
 export default function CampaignCapture() {
-  const { consentStatus } = useAnalytics();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (consentStatus === "accepted" && searchParams) {
-      parseAndRecordCampaign(searchParams);
+    if (!searchParams) return;
+    const campaign = parseAndRecordCampaign(searchParams);
+    // Tag every later event in this visit with the registered campaign.
+    if (campaign && isPostHogActive()) {
+      posthog.register({ campaign_code: campaign.utm_campaign });
     }
-  }, [consentStatus, searchParams]);
+  }, [searchParams]);
 
   return null;
 }
