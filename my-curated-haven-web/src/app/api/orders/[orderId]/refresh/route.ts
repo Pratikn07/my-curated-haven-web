@@ -28,7 +28,8 @@ export async function POST(
     const summary = await reconcileAndFulfillSession(rows[0].session_id, user.id);
     return NextResponse.json(summary || { status: "not_found" });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Error refreshing order";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log the detail; never echo database or provider errors to the caller (Phase 8 audit R8-04).
+    console.error("[orders/refresh] failed", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Error refreshing order" }, { status: 500 });
   }
 }

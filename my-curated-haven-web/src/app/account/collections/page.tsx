@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getUserPurchasedCollections } from "@/lib/payments/repository";
 import Badge from "@/components/ui/Badge";
+import StatePanel from "@/components/ui/StatePanel";
 import { BookOpen, ShoppingBag, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -18,7 +19,15 @@ export default async function AccountCollectionsPage() {
     redirect("/sign-in?returnTo=/account/collections");
   }
 
-  const collections = await getUserPurchasedCollections(user.id);
+  let collections: Awaited<ReturnType<typeof getUserPurchasedCollections>> = [];
+  let unavailable = false;
+  try {
+    collections = await getUserPurchasedCollections(user.id);
+  } catch (error) {
+    // Don't show "no purchases" when we simply couldn't check (R8-05).
+    unavailable = true;
+    console.error("[account/collections] purchases unavailable", error instanceof Error ? error.message : error);
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -42,12 +51,16 @@ export default async function AccountCollectionsPage() {
           My Recipe Collections
         </h1>
         <p className="mt-2 text-base text-text-muted">
-          Your permanently unlocked recipe collections and printable views.
+          Your purchased recipe collections and printable views.
         </p>
       </header>
 
       {/* Purchased Collections Listing */}
-      {collections.length === 0 ? (
+      {unavailable ? (
+        <StatePanel title="Purchases are unavailable right now">
+          We couldn&apos;t load your recipe collections. Please try again later, or email support@mycuratedhaven.com.
+        </StatePanel>
+      ) : collections.length === 0 ? (
         <div className="rounded-2xl border border-border bg-surface p-8 text-center sm:p-12">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-surface-muted">
             <BookOpen className="h-7 w-7 text-text-muted" aria-hidden="true" />

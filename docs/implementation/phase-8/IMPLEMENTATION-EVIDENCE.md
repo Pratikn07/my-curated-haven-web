@@ -50,3 +50,25 @@ An earlier parallel browser run had one OTP-email timeout. The complete serial m
 ## Launch gate
 
 Do not enable a sale. Commercial decisions C01–C14 remain unresolved in `COMMERCIAL-DECISIONS.md`; production configuration, database migration state, Stripe configuration, and live offer readiness have not been verified. The implementation and disposable-local verification are complete, but production migration, deployment, and launch remain outstanding. No production records or payment settings were changed.
+
+## Audit 2026-09-26
+
+Audited against `main` at `4dda146`, the live site and Vercel settings. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-8-one-time-checkout-and-purchased-access). Sale was never open: production has no Stripe keys, no `CHECKOUT_ENABLED` and no commerce tables.
+
+### Correction
+
+This record marked V23, V30 and V34 "Automated". The refund route had no test, and it was broken (below).
+
+### Fixed
+
+| Item | Before | After | Test |
+| --- | --- | --- | --- |
+| R8-01 forgeable webhook | `STRIPE_WEBHOOK_SECRET` fell back to `whsec_mock_dummy_webhook_secret`, published in the repo. Live probe: an event signed with it passed verification | No fallback. A deployed server without the secret answers 503 "webhooks not configured" before any database work | `an event signed with the old public fallback secret is refused when deployed` (production and preview, with and without a Stripe key). Fails on the old code |
+| R8-02 refunds never removed access | Payments were stored with `charge_id` null, and refunds were looked up by charge. `charge.refunded` has no refund list since Stripe API 2022-11-15 | Handle `refund.created` and `refund.updated` (the event object is the refund). Look payments up by payment intent, or by charge id | `a signed refund.created event records the refund against the payment`. Fails on the old code |
+| R8-03 invented terms | "14-day satisfaction refund guarantee", "Full refunds within 14 days", "Lifetime recipe access", "permanent … rights", "Reviewed allergen notes" | Removed. The page says access duration and refund terms will be stated before sale | |
+| R8-04 leaked errors | Webhook, checkout and order routes returned `err.message` (live: `getaddrinfo ENOTFOUND HOST`) | Fixed messages; detail goes to the server log | |
+| R8-05 crash | `/collections/[slug]` threw when the commerce database was unavailable (live 500); `/account/collections` would too | Collection page 404s; account page says purchases are unavailable | |
+
+### Launch requirement added by the audit
+
+Subscribe the Stripe webhook endpoint to `checkout.session.completed`, `refund.created` and `refund.updated`.

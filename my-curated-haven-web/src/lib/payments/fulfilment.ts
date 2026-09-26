@@ -195,29 +195,16 @@ export async function processStripeWebhookEvent(event: {
         }
       }
     }
+  } else if (event.type === "refund.created" || event.type === "refund.updated") {
+    // The event object is the Refund itself, so no expansion or extra API call is needed.
+    await recordStripeRefund(pool, obj, null, null);
   } else if (event.type === "charge.refunded") {
-    const chargeId = obj.id as string;
-    const refunds = (obj.refunds as { data: Array<{ id: string; amount: number; currency: string; status: string }> })?.data || [];
-
-    for (const ref of refunds) {
-      const payRes = await pool.query(
-        `SELECT id, order_id FROM private.provider_payments WHERE charge_id = $1 LIMIT 1`,
-        [chargeId]
-      );
-
-      if (payRes.rows.length > 0) {
-        const pay = payRes.rows[0];
-        await recordRefundAndRecomputeAccess({
-          orderId: pay.order_id,
-          providerRefundId: ref.id,
-          paymentId: pay.id,
-          amount: ref.amount,
-          currency: ref.currency,
-          status: ref.status,
-          reason: "customer_requested",
-          occurredAt: new Date(),
-        });
-      }
+    // Since Stripe API 2022-11-15 a Charge no longer includes its refunds unless expanded,
+    // so this list is usually empty; refund.created/updated carry the refunds (Phase 8 audit R8-02).
+    const refundList = (obj.refunds as { data?: Array<Record<string, unknown>> } | undefined)?.data ?? [];
+    const chargePaymentIntent = stripeObjectId(obj.payment_intent);
+    for (const refund of refundList) {
+      await recordStripeRefund(pool, refund, chargePaymentIntent, obj.id as string);
     }
   }
 
@@ -226,4 +213,50 @@ export async function processStripeWebhookEvent(event: {
   } catch {
     // Optional export never blocks payment or access.
   }
+}
+
+/** A Stripe expandable field is either an id string or an object with an id. */
+function stripeObjectId(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "id" in value) return String((value as { id: unknown }).id);
+  return null;
+}
+
+/**
+ * Record one Stripe refund against its payment and recompute access.
+ * Payments are found by payment intent: the checkout webhook stores charge_id as null
+ * when Stripe sends payment_intent as an id, so a charge-id lookup alone found nothing.
+ */
+async function recordStripeRefund(
+  pool: ReturnType<typeof getCommercePool>,
+  refund: Record<string, unknown>,
+  fallbackPaymentIntentId: string | null,
+  fallbackChargeId: string | null
+): Promise<void> {
+  const refundId = refund.id as string | undefined;
+  if (!refundId) return;
+  const paymentIntentId = stripeObjectId(refund.payment_intent) ?? fallbackPaymentIntentId;
+  const chargeId = stripeObjectId(refund.charge) ?? fallbackChargeId;
+  if (!paymentIntentId && !chargeId) return;
+
+  const payRes = await pool.query(
+    `SELECT id, order_id FROM private.provider_payments
+     WHERE ($1::text IS NOT NULL AND payment_intent_id = $1)
+        OR ($2::text IS NOT NULL AND charge_id = $2)
+     LIMIT 1`,
+    [paymentIntentId, chargeId]
+  );
+  if (payRes.rows.length === 0) return;
+
+  const pay = payRes.rows[0];
+  await recordRefundAndRecomputeAccess({
+    orderId: pay.order_id,
+    providerRefundId: refundId,
+    paymentId: pay.id,
+    amount: refund.amount as number,
+    currency: refund.currency as string,
+    status: refund.status as string,
+    reason: typeof refund.reason === "string" ? refund.reason : "customer_requested",
+    occurredAt: typeof refund.created === "number" ? new Date(refund.created * 1000) : new Date(),
+  });
 }
