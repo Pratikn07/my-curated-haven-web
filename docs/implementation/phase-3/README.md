@@ -2,7 +2,7 @@
 
 [All implementation plans](../README.md)
 
-Status: detailed plan only. Publishing these documents does not restyle the website, create recipe routes or implement payment.
+Status: implemented and deployed (PR #7, 2026-09-22). The 2026-09-25 audit fixed the font, contrast, focus and reflow defects; see [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-25).
 
 ## Outcome
 

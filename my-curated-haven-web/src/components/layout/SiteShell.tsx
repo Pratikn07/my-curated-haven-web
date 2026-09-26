@@ -6,20 +6,23 @@ import CampaignCapture from "@/components/analytics/CampaignCapture";
 
 export default function SiteShell({ children }: { children: ReactNode }) {
   return (
-    <AnalyticsProvider>
-      <div className="flex min-h-screen flex-col">
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
-        <Navbar />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </div>
-      <Suspense fallback={null}>
-        <CampaignCapture />
-      </Suspense>
-    </AnalyticsProvider>
+    <>
+      {/* First focus stop on every page, ahead of the consent banner the provider renders. */}
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
+      <AnalyticsProvider>
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <main id="main" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </div>
+        <Suspense fallback={null}>
+          <CampaignCapture />
+        </Suspense>
+      </AnalyticsProvider>
+    </>
   );
 }

@@ -14,17 +14,51 @@ export default function ConsentPreferencesModal() {
   } = useAnalytics();
 
   const modalRef = useRef<HTMLDivElement>(null);
-
-  // Close on Escape key
+  // The provider passes a new closePreferences each render; read the latest one so
+  // the focus effect below runs only when the dialog opens and closes.
+  const closeRef = useRef(closePreferences);
   useEffect(() => {
+    closeRef.current = closePreferences;
+  }, [closePreferences]);
+
+  // Dialog focus contract (Phase 3 D09): focus moves in on open, Tab stays inside,
+  // Escape closes, and focus returns to the control that opened the dialog.
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focusable = () =>
+      Array.from(
+        modalRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+
+    focusable()[0]?.focus();
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        closePreferences();
+        closeRef.current();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const inside = modalRef.current?.contains(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault();
+        first.focus();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closePreferences]);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, []);
 
   return (
     <div
@@ -87,7 +121,7 @@ export default function ConsentPreferencesModal() {
                 </h3>
                 <p className="mt-1 text-xs">
                   Helps us know if recipes are easy to cook and if collection printables are useful.
-                  Uses a random pseudonymous identifier with 90-day retention. No advertising pixels, no child health profiling, and no session recordings.
+                  Uses a random identifier stored in your browser until you withdraw consent or clear your browser data. No advertising pixels, no child health profiling, and no session recordings.
                 </p>
               </div>
               <span className="shrink-0 rounded-full border border-border bg-surface-muted px-2 py-0.5 text-xs font-semibold capitalize text-foreground">

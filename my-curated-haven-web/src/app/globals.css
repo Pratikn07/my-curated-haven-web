@@ -47,6 +47,8 @@ h6 {
   font-family: var(--font-heading);
   line-height: 1.2;
   scroll-margin-top: var(--header-offset);
+  /* At 200% text a single long word can exceed a phone screen; break it only when it can't fit (D06). */
+  overflow-wrap: anywhere;
 }
 
 .skip-link {

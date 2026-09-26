@@ -9,7 +9,7 @@ export default function Terms() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Terms of Service</h1>
-                    <p className="text-foreground/60 mb-12">Last updated: September 25, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: September 25, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
