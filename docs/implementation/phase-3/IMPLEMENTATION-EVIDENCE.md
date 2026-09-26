@@ -68,6 +68,11 @@ The two keyboard tests skip WebKit: Safari's Tab key skips links and buttons unl
 
 Also aligned: the consent dialog no longer claims "90-day retention", which the code doesn't enforce. It now matches the Privacy Policy.
 
+### Follow-ups found after the first deploy
+
+- **Stale CSS from the Vercel build cache (M3-01)**: the first deploy restored a cached build and served the old stylesheet, so the reflow rule never shipped. Production now sets `VERCEL_FORCE_NO_BUILD_CACHE=1`, and a clean rebuild served the new stylesheet with the rule.
+- **Layout shift from font swap (M3-02)**: with the real fonts loading, the in-flow consent banner rewrapped and pushed the page (CLS 0.233 on a slow first visit). The banner is now a fixed bottom bar and the page reserves its height. Test: `consent banner floats at the bottom without hiding the footer`.
+
 ### Verified, no change needed
 
 Token contrast, server-component primitives, no page overflow at 320, 390 and 1280px, reduced motion, print of every ingredient and step on A4 and Letter (3 pages each), lab LCP 1.08 to 1.62 s with CLS 0, `/design-review` returning 404 in production.

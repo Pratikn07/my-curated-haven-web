@@ -192,7 +192,10 @@ Verified as done (no action):
 
 ### Must do, not in any plan
 
-None beyond the items above. Every Phase 3 defect maps to an existing acceptance check.
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M3-01 | P1 | Vercel's build cache shipped stale CSS | ✅ env var | PR #46 changed `globals.css`, but production (`dpl_9oqbmV3rgRN97RRQx9tzgygNdtPj`) logged `Restored build cache from previous deployment` and served the old stylesheet `07ym34__ird41.css` without the new rule. Checked with `vercel curl` against the deployment itself, bypassing the CDN. A local build of the same commit had the rule. Set `VERCEL_FORCE_NO_BUILD_CACHE=1` for production and redeployed: the log shows `Skipping build cache`, and the new stylesheet `1uq11_dz3p1bg.css` has the rule. Builds take about 1 minute either way |
+| M3-02 | P1 | Rendering the real fonts caused layout shift on slow phones | ✅ fixed | After R3-01, a slow first visit at 390px measured CLS 0.233 (target ≤ 0.1). The in-flow consent banner rewrapped when Inter replaced the fallback font and pushed the page down 52px. The banner is now fixed to the bottom, and the page reserves its height (`--consent-banner-height`) so it never covers the footer or a focused control. Local slow first visit: 0.062 |
 
 ### Good to have
 

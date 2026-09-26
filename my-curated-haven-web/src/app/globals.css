@@ -31,6 +31,7 @@
 }
 
 body {
+  padding-bottom: var(--consent-banner-height, 0px);
   background-color: var(--canvas);
   color: var(--text);
   font-family: var(--font-body);
@@ -71,6 +72,11 @@ h6 {
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 3px;
+}
+
+/* Keep focused controls clear of the fixed consent banner while it is shown. */
+html {
+  scroll-padding-bottom: var(--consent-banner-height, 0px);
 }
 
 @media (prefers-reduced-motion: reduce) {
