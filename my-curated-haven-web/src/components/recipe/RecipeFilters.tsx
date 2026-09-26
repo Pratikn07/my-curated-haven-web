@@ -38,14 +38,9 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
 
   const currentFilters = parseFilterParams(searchParams);
 
-  // Search input state
-  const [prevQ, setPrevQ] = useState(currentFilters.q);
-  const [searchInput, setSearchInput] = useState(currentFilters.q);
-
-  if (prevQ !== currentFilters.q) {
-    setPrevQ(currentFilters.q);
-    setSearchInput(currentFilters.q);
-  }
+  // Uncontrolled search input: text typed before hydration survives, and the
+  // key below resets it whenever the URL's q changes (Phase 6 audit R6-05).
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Draft state for modal
   const [draftMeals, setDraftMeals] = useState<string[]>(currentFilters.meals);
@@ -72,7 +67,8 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateFilters({ q: searchInput.trim().slice(0, 120) });
+    const q = String(new FormData(e.currentTarget as HTMLFormElement).get("q") ?? "");
+    updateFilters({ q: q.trim().slice(0, 120) });
     trackAnalyticsEvent(
       "recipe_search_submit",
       {
@@ -115,7 +111,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   };
 
   const clearAllFilters = () => {
-    setSearchInput("");
+    if (searchInputRef.current) searchInputRef.current.value = "";
     setDraftMeals([]);
     setDraftDiets([]);
     setDraftMaxTime(null);
@@ -146,8 +142,9 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
             <input
               type="search"
               name="q"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              key={currentFilters.q}
+              ref={searchInputRef}
+              defaultValue={currentFilters.q}
               placeholder="Search recipes (e.g. spinach, frittata, oats)..."
               maxLength={120}
               className="w-full rounded-xl border border-border-control bg-surface px-4 py-3 text-base text-foreground placeholder:text-text-muted focus:border-action focus:outline-none focus:ring-2 focus:ring-action/20"
@@ -175,7 +172,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
             <button
               type="button"
               onClick={() => {
-                setSearchInput("");
+                if (searchInputRef.current) searchInputRef.current.value = "";
                 updateFilters({ q: "" });
               }}
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-foreground hover:bg-surface-muted focus-visible:outline-2"

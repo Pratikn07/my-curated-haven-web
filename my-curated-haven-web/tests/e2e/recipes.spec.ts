@@ -250,4 +250,35 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await page.waitForLoadState("domcontentloaded");
     expect(await overflow(page)).toBeLessThanOrEqual(1);
   });
+  // Phase 6 audit R6-05: the search box was a controlled input, so text typed before
+  // hydration was wiped and Search submitted nothing (the WebKit flake, and a real
+  // loss for visitors on slow phones).
+  test("search text typed before hydration survives and submits", async ({ page }) => {
+    let release: () => void = () => {};
+    const scriptsHeld = new Promise<void>((resolve) => (release = resolve));
+    await page.route("**/_next/static/**/*.js", async (route) => {
+      await scriptsHeld;
+      await route.continue();
+    });
+
+    await page.goto("/recipes", { waitUntil: "domcontentloaded" });
+    const searchInput = page.getByPlaceholder(/search recipes/i);
+    await searchInput.fill("Frittata");
+
+    release();
+    await page.waitForLoadState("networkidle");
+    await expect(searchInput).toHaveValue("Frittata");
+
+    await page.getByRole("button", { name: "Search" }).click();
+    await expect(page).toHaveURL(/q=Frittata/);
+  });
+
+  // Phase 6 audit R6-02: "Finger Foods" is a feeding type, so as a meal filter it never matched.
+  test("meal filters offer only real meal types", async ({ page }) => {
+    await page.goto("/recipes");
+    await page.getByRole("button", { name: /^Filters/ }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByText("Breakfast", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("Finger Foods", { exact: true })).toHaveCount(0);
+  });
 });
