@@ -2,6 +2,9 @@
 
 Status: Phase 6 ("The Free Recipe Experience") fully implemented on branch `phase-6-free-recipes`. All unit, lint, typecheck, production build, and end-to-end Playwright tests verified and passing (88 passed, 0 failed, 17 skipped).
 
+> **Correction (2026-09-25 audit).** Parts of this record overstate what was verified. "Verified and live in production" was not true of the site: until 2026-09-25 every recipe page failed in production, because Vercel lacked the Supabase variables. Print was claimed to avoid page-break clipping before any print check. It was first checked in the audit, on A4 and Letter, and passed. The columns `is_free` and `publication_status` don't exist: access is `free_recipe_slots` plus `recipe_catalog.publication_state`. The recipe content is AI-generated and unreviewed (Phase 5 audit). See [the audit](#audit-2026-09-25).
+
+
 ---
 
 ## Source & Branch Details
@@ -217,3 +220,26 @@ git diff --check   passed
 A prior full local Playwright run completed with 169 passed, 32 skipped, and 0 failures. During release preparation, after resetting the local Supabase database and running `CI=true npm run verify`, lint, typecheck, and build passed, but the browser suite reported 162 passed, 32 skipped, and 3 failures (4 tests did not run): the saved-recipes OTP test timed out while setting up a browser context; a WebKit analytics-consent click timed out waiting for a stable footer button; and the existing WebKit recipe-search test did not update the URL. The new Phase 6 catalog and allergen checks passed on Chromium desktop; the approved-live-recipe check skipped because its rows are absent locally. These failures did not reproduce in the prior full run. GitHub `web-quality` and `backend-quality` checks are the release gates.
 
 The browser runs emitted non-failing Next.js server messages stating “The destination stream closed early.” All local browser checks used local Supabase fixtures; they do not establish current production data behavior.
+
+## Audit 2026-09-25
+
+Audited against `main` at `ab2463d` and the live site. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-6-free-recipe-experience).
+
+### Verified
+
+- R1: listing, sitemap and sibling cards use the free slots only, in slot order.
+- R2: no blanket allergen clearance (superseded by Phase 5's "not yet reviewed" wording).
+- R4: print on A4 and Letter has every ingredient and step, the source URL and the Tiny Soho credit.
+- No ratings, Buy links or invented structured-data fields.
+
+### Fixed
+
+| Item | Fix | Test |
+| --- | --- | --- |
+| R6-02 "Finger Foods" never matched | Removed from `AVAILABLE_MEALS`: it's a feeding type in the source data, not a meal | `meal filters offer only real meal types` |
+| R6-05 flaky search, and a real bug | The search box was a controlled input, so text typed before hydration was wiped and Search submitted nothing. Now uncontrolled (`defaultValue`, keyed to the URL's `q`); Search reads the form value | `search text typed before hydration survives and submits`: fails in all 3 browsers on the old code, and passed 45 of 45 runs with the fix |
+| R6-04 the live-recipe test never ran | `npm run smoke:production` now checks every sitemap recipe page for at least one ingredient, one step and the allergen section, after each deploy and hourly | Fails on a locked paid page ("no ingredients listed"), passes on the 3 free recipes |
+
+### Waiting on the AI recipe review
+
+- R6-01 dietary filters rest on unreviewed tags, and R6-03 some options never change the result. Both are decided once the review of all 70 recipes returns.

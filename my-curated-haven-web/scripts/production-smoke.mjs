@@ -61,6 +61,22 @@ function page(expectedStatus = 200) {
   };
 }
 
+/** A free recipe page must show its content, not just return 200 (Phase 6 audit R6-04). */
+function recipePage() {
+  const base = page();
+  return (result) => {
+    const problem = base(result);
+    if (problem) return problem;
+    const html = result.body.replace(/<script[\s\S]*?<\/script>/g, "");
+    const section = (id) => html.match(new RegExp(`<section[^>]*aria-labelledby="${id}"[\\s\\S]*?</section>`))?.[0] ?? "";
+    const items = (id) => (section(id).match(/<li\b/g) ?? []).length;
+    if (items("ingredients-heading") < 1) return "no ingredients listed";
+    if (items("instructions-heading") < 1) return "no method steps listed";
+    if (!section("allergens-heading")) return "allergen section missing";
+    return "";
+  };
+}
+
 const failures = [];
 
 console.log(`Production smoke check against ${origin}`);
@@ -83,7 +99,7 @@ if (sitemap) {
   const recipeUrls = [...sitemap.body.matchAll(/<loc>([^<]*\/recipes\/[^<]+)<\/loc>/g)].map((match) => match[1]);
   for (const url of recipeUrls) {
     const path = new URL(url).pathname;
-    await check(`GET ${path}`, `${origin}${path}`, page());
+    await check(`GET ${path} (ingredients, steps, allergens)`, `${origin}${path}`, recipePage());
   }
 }
 

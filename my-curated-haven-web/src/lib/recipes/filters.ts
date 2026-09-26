@@ -1,4 +1,5 @@
-export const AVAILABLE_MEALS = ["Breakfast", "Lunch", "Dinner", "Snack", "Finger Foods"];
+// "Finger Foods" is a feeding type in the source data, not a meal, so it never matched (Phase 6 audit R6-02).
+export const AVAILABLE_MEALS = ["Breakfast", "Lunch", "Dinner", "Snack"];
 export const AVAILABLE_DIETS = [
   "Vegetarian",
   "Dairy-Free",

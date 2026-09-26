@@ -51,3 +51,10 @@ Phase 6 implements the public recipe browsing and detail views. It should consum
   - Reviewed allergen tags and safety notes.
   - Storage & freezing advice.
   - Print-friendly layout adhering to Phase 3 design tokens.
+
+## Audit 2026-09-25: production state
+
+- All 70 `recipe_bodies.allergen_review_state` values are `unknown` (`20260926052700`). The live pages show listed allergens as "not yet reviewed".
+- Publishing, free slots and collection membership now require a reviewed body (`20260926052702`).
+- The PR #22 guard (`20260925100000`) is applied.
+- Owner review of the 3 free recipes: [FREE-RECIPE-REVIEW.md](FREE-RECIPE-REVIEW.md). Once approved, record reviewer and date, then set each body's `allergen_review_state`.

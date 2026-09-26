@@ -1,6 +1,6 @@
 # Phase 6: the free recipe experience
 
-Status: implementation plan. Application changes are not delivered by this documentation PR.
+Status: implemented and live (PR #14; remediation PR #27). The 2026-09-25 audit record is in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-25).
 
 ## Outcome
 

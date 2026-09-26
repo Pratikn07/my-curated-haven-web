@@ -155,9 +155,11 @@ Recorded by the 2026-09-25 audit. Production (`ccrgvammglkvdlaojgzv`) history:
 | `20260924010000_phase9_measurement` | **No** |
 | `20260924120000_phase4_access_hardening` | Yes (2026-09-25 audit) |
 | `20260924174355_phase8_remediation_guards` | **No** |
-| `20260925100000_phase5_allergen_review_guard` | **No** |
+| `20260925100000_phase5_allergen_review_guard` | Yes (2026-09-25 audit) |
 | `20260926020339_phase4_audit_storage_and_rpc_hardening` | Yes (2026-09-25 audit) |
 | `20260926031344_phase4_audit_pin_function_search_path` | Yes (2026-09-25 audit) |
+| `20260926052700_phase5_audit_reset_allergen_review_and_fix_drafts` | Yes (2026-09-25 audit) |
+| `20260926052702_phase5_audit_publish_requires_review` | Yes (2026-09-25 audit) |
 
 Rules:
 
