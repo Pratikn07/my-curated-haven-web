@@ -16,8 +16,6 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 
 | ID | Decision or action |
 | --- | --- |
-| M4-04 | Schedule the Postgres security upgrade (a few minutes of database restart) |
-| R4-02 | Decide on Supabase Pro for daily backups (the free plan has none) |
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
@@ -180,7 +178,7 @@ Verified as done (no action):
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
 | R4-01 | P0 | Legacy `public.recipes` is readable by anyone | ✅ applied | Anonymous REST read returned all 70 recipes. For example, the draft "Banana Avocado Breakfast Purée with Yogurt" came back with 4 ingredients and 11 steps. Policy `Recipes are viewable by everyone` (`USING true`). The fix exists, `20260924120000_phase4_access_hardening.sql` (PR #19), but was held back for the native app, which has no users (owner, 2026-09-25). Its `handle_new_user` body matches production except for a pinned `search_path`. Apply it and record it with `supabase migration repair` |
-| R4-02 | P1 | No backup or restore evidence (P4-08.7, P4-10.2) | ⏳ 👤 dump taken | Free plan: `pitr_enabled: false`, 0 backups listed. Nothing restores the database if a migration goes wrong. Take a logical dump before each production migration and store it outside the repo, because it contains personal data. Owner decision: upgrade to Pro for daily backups |
+| R4-02 | P1 | No backup or restore evidence (P4-08.7, P4-10.2) | ✅ free | Owner chose free (2026-09-25). `ops/backup-production.sh` runs daily at 03:30 on the owner Mac via launchd (`com.mycuratedhaven.backup`): logical dump plus a mirror of the `recipe-images` bucket, 14 days kept, stored in `~/MyCuratedHavenBackups` (mode 700). Restore rehearsed into an empty local stack; all app rows and policies matched production. See `ops/README.md`. Limit: no backup on days the Mac is off; no point-in-time recovery |
 | R4-03 | P1 | Production migration history has diverged from the repo | ✅ documented | Production has `20260923042735`, `20260923053000`, `20260923180000`. Six later migrations are unapplied (Phase 8 commerce schema, Phase 9 x2, Phase 4 hardening, Phase 8 guards, Phase 5 guard). A plain `supabase db push` would apply all six at once, including the Phase 8 commerce schema. Apply one at a time on purpose, and document "no blind `db push`" |
 | R4-04 | P2 | The "prove CI catches a leak" drill was never done (P4-09.5) | ⏳ | Only PR #6 (a web test) was a deliberate failure. Run one disposable PR that weakens a body policy and confirm `backend-quality` fails and blocks the merge |
 | R4-05 | P2 | Staging rehearsal skipped (P4-10.3) | ⏳ Phase 10 | Changes went straight to production. Covered by the Phase 10 staging plan |
@@ -194,7 +192,7 @@ Verified as done (no action):
 | M4-01 | P0 | Native `chat` Edge Function trusts a caller-supplied user ID | ✅ deleted | `parenting-app/supabase/functions/chat/index.ts:1230-1234`: uses `SUPABASE_SERVICE_ROLE_KEY`, then reads `userId` from the request body and loads that user's profile, children and conversation history. It only checks that an `Authorization` header exists, and `verify_jwt` accepts the public anon key. Anyone with the site's public key can act as any user and run DeepSeek/OpenAI calls at the owner's cost. Production has 4 accounts, 4 child profiles and 40 chat messages. The native app has no users, so delete the `chat` and `generate-tip` functions (the source stays in `parenting-app`) |
 | M4-02 | P0 | Anyone can upload files to the public `recipe-images` bucket | ✅ migration | Storage policy `Allow public upload to recipe-images` (INSERT, role `public`, bucket check only). That bucket serves the live site's recipe photos. Drop the policy; only trusted tooling should upload |
 | M4-03 | P1 | Sign-in codes stay valid for 24 hours | ✅ applied | `mailer_otp_exp: 86400`. The advisor recommends under 1 hour. Set it to 3600 or less. Update the "24 hours" line in the email template to match |
-| M4-04 | P1 | Postgres has outstanding security patches | ⏳ 👤 | Advisor: `supabase-postgres-17.4.1.074` has security patches. Upgrading restarts the database for a few minutes. Owner schedules it |
+| M4-04 | P1 | Postgres has outstanding security patches | ✅ upgraded | Upgraded 2026-09-25 19:31 to 19:40 PDT: `17.4.1.074` → `17.6.1.166` (GA). Fresh dump taken first. Afterwards the collation version moved 153.120 → 153.121: reindexed `public` and `private`, ran `ALTER DATABASE postgres REFRESH COLLATION VERSION`. `auth` and `storage` indexes are Supabase-owned and were not rebuilt; the risk is low for a .001 bump. Smoke 13/13, access checks unchanged, advisor warning gone |
 | M4-05 | P1 | Privileged functions callable by anonymous visitors | ✅ migration | Advisor: `handle_new_user()` and `increment_shop_click(uuid)` are `SECURITY DEFINER` and executable by `anon` and `authenticated` via `/rest/v1/rpc/`. `increment_shop_click` lets anyone inflate native shop click counts. Revoke EXECUTE from `anon` and `authenticated` on both. The trigger still works |
 | M4-06 | P2 | 9 functions have a mutable `search_path` | ⏳ | Advisor `function_search_path_mutable`. R4-01 fixes `handle_new_user` and `check_release_sealed_mutation`, and the Phase 5 guard fixes `private.slugify`. Six native functions remain |
 
@@ -204,6 +202,7 @@ Verified as done (no action):
 | --- | --- | --- | --- |
 | G4-01 | P2 | Drop or archive the empty legacy buckets `recipe-steps`, `recipe-thumbnails` and `chat-images` | They're empty, and fewer public buckets means less to secure |
 | G4-02 | P2 | Run the Supabase security advisor in CI or on a schedule | This audit found M4-05 and M4-06 only by running it by hand |
+| G4-04 | P2 | Check `~/MyCuratedHavenBackups/backup.log` weekly, or add a failure notification to the backup script | launchd failures are silent unless someone reads the log |
 | G4-03 | P2 | Decide what to do with native-only tables (`children`, `chat_*`, `milestones`, `shop_*`) now that the app has no users | They hold test personal data and widen the attack surface. Archive them, or drop them after an owner-approved export |
 
 ---
