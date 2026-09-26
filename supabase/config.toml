@@ -154,6 +154,9 @@ max_indexes = 5
 
 [auth]
 enabled = true
+# Local development only. Do not run `supabase config push` against production: it would replace the
+# hosted site_url (https://mycuratedhaven.com), redirect list and code-only email templates.
+# See docs/audit/AUDIT-BACKLOG.md, M1-04.
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
 site_url = "http://127.0.0.1:3000"

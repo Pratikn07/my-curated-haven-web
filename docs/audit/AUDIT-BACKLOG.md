@@ -41,7 +41,7 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 | M1-01 | P0 | `www.mycuratedhaven.com` showed a certificate warning. DNS pointed to Vercel, but the domain was not on the project | ✅ | Added to Vercel with a 308 redirect to `https://mycuratedhaven.com`, keeping path and query |
 | M1-02 | P0 | Sign-in emails had no code. The website asks for a 6-digit code, but the Supabase templates only contained a link to `site_url`, which is `http://localhost:8081` | ✅ | Added `{{ .Token }}` to the magic-link and confirm-signup templates. Link kept for the native app. Backup: `docs/audit/rollback/auth-templates-backup-2026-09-25.json` |
 | M1-03 | P1 | Sign-in emails capped at 2 per hour for the whole project | ⏳ 👤 | See [M1-03](#m1-03-custom-email-sender) |
-| M1-04 | P1 | Supabase `site_url` is a dev address | ⏳ | See [M1-04](#m1-04-production-auth-urls) |
+| M1-04 | P1 | Supabase `site_url` is a dev address | ✅ | Done 2026-09-25. See [M1-04](#m1-04-production-auth-urls) |
 | M1-05 | P1 | Terms have no governing law or dispute resolution | ⏳ 👤 | See [M1-05](#m1-05-terms-jurisdiction) |
 | M1-06 | P1 | No production check after deploy | ⏳ | See [M1-06](#m1-06-post-deploy-production-check) |
 
@@ -67,6 +67,13 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
   2. Add `https://mycuratedhaven.com/**` to the redirect allow-list. Keep the `localhost` entries for local development. Remove the `exp://10.168.203.140:8081` entries (a private dev IP).
   3. Decide whether the magic link should stay in the emails. The website only uses the code. Removing the link avoids a second sign-in path that the website doesn't handle.
 - **Done when**: `site_url` is the production domain and a test sign-in email contains no `localhost` link.
+- **Done 2026-09-25**:
+  - `site_url` → `https://mycuratedhaven.com`.
+  - Added `https://mycuratedhaven.com/**` to the redirect allow-list. Removed `exp://10.168.203.140:8081` and `exp://10.168.203.140:8081/--/auth/*`. Kept `localhost` and app-scheme entries.
+  - Removed the link from both email templates. The website has no magic-link handler (no `exchangeCodeForSession`, `token_hash` or `/auth/callback` route), so a click signed nobody in. Emails now show only the 6-digit code. Subject for both: "Your My Curated Haven sign-in code".
+  - Backup of the previous values: `docs/audit/rollback/auth-urls-and-templates-before-m1-04.json`.
+  - `supabase/config.toml` now warns against `supabase config push`, which would overwrite these hosted settings with local values.
+  - **Still to verify**: the owner signs in once with a real address and confirms the email shows a code and no link. Not sent by the audit because the project allows only 2 auth emails per hour (M1-03).
 
 #### M1-05: Terms jurisdiction
 
