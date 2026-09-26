@@ -1,6 +1,6 @@
 #\g<1>✅ docs\2| ID | Decision or action |
 | --- | --- |
-| R5-03a | Run the external AI review of all 70 recipes: `~/Documents/working/mch/recipe-review/REVIEW-PROMPT-ALL-70.md`, with an AI that can run commands (Claude Code, Cursor or Codex). Results go to `review-result-batch-1..7.json` in that folder |
+| ~~R5-03a~~ | Done 2026-09-26 by OpenAI GPT-6 (Codex): 0 approve, 34 approve with changes, 36 reject, 53 blockers. Results stay outside the repo because they contain the paid drafts: `~/Documents/working/mch/recipe-review/`. Was: run the external AI review of all 70 recipes: `~/Documents/working/mch/recipe-review/REVIEW-PROMPT-ALL-70.md`, with an AI that can run commands (Claude Code, Cursor or Codex). Results go to `review-result-batch-1..7.json` in that folder |
 | R5-03 | Review the 3 free recipes with the checklist (allergens, steps, yield, time, choking and texture, alt text), including each card summary's health claims (M6-01) |
 | M5-02 | Decide whether to disclose AI-assisted recipes and illustrative AI images |
 | M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
@@ -353,6 +353,21 @@ Verified as done (no action):
 | M5-03 | P1 | Image rights unknown | ⏳ 👤 | FLUX Pro output via Replicate. The owner confirms their account terms allow commercial use, and records it (Phase 6 handoff asked for "image source, usage permission") |
 | M5-04 | P1 | No gate stops an unreviewed recipe being published | ✅ applied | Applied to production. In a rolled-back transaction, publishing the unreviewed Onigiri draft failed: "recipe 7c7a9197-… has not been editorially reviewed". The 3 free recipes stay published. pgTAP `08_phase5_publish_gate`, 7 tests. A brand-new row inserted directly as published is not gated |
 
+#### AI review results (2026-09-26)
+
+- Reviewer: OpenAI GPT-6 via Codex, through the temporary read-only view. 70 recipes, 69 images inspected (the "Mild Vegetable Curry with Rice" image was blocked in its browser).
+- Verdicts: live free recipes 1 approve-with-changes (Frittata) and 2 reject (Oat Bars: whole blueberries in the image; Fish Cakes: partly intact peas). Drafts: 33 approve-with-changes, 34 reject.
+- Blockers by type: 23 choking, 18 image, 3 allergen, 3 age-inappropriate ingredient, 3 food safety, 2 diet tag, 1 clarity.
+- Spot check against production: 5 of 5 sampled claims confirmed. Ghee in a "dairy-free, vegan" purée; no rice in "Mild Vegetable Curry with Rice"; soy sauce without wheat declared; a 4-month starting age; added sugar at 12 months.
+- Applied to the 3 live recipes, after a backup (`~/MyCuratedHavenBackups/2026-09-26-before-ai-review-fixes/`), via `20260926144356_phase5_ai_review_fix_live_free_recipes.sql`: peas cooked soft and flattened; blueberries flattened or quartered, with a safety note for all ages; salmon to 145°F; olive oil and wheat flour named; times include cooling (40, 40, 45 min); refrigerated storage for the oat bars; summaries without unsupported nutrition claims. `allergen_review_state` stays `unknown`, because an AI check is not a human review.
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R5-10 | P1 | Live recipe images contradict the safety fixes | ⏳ 👤 | Oat Bars image shows whole blueberries (review blocker). Fish Cakes shows whole peas. Frittata shows round bites beside pasta, not strips. Regenerate these 3, or show a neutral placeholder until new ones exist |
+| R5-11 | P1 | 34 rejected drafts and 18 image blockers must be fixed before any paid launch | ⏳ | The publishing gate already blocks them. Many review fixes are guidance rather than exact text, so the drafts need a rewrite pass that applies each issue, then a spot check |
+| R5-12 | P1 | 4 items need a human expert | ⏳ 👤 | Frozen yogurt pops at 12 months, date-almond bites at 24 months, peanut-butter oat discs at 18 months (texture and portion), and the curry image (not seen by the reviewer) |
+| R5-13 | P1 | How to label AI-checked recipes | ⏳ 👤 | Keep "not yet reviewed" (current), or add an "AI-checked" state with honest wording ("Allergens checked against the ingredients by an automated review, not by a person"). This decides when Dietary Options return (R6-01) |
+
 #### Temporary access for the AI review (created 2026-09-25)
 
 - Role `recipe_reviewer`: `LOGIN`, `VALID UNTIL '2026-10-10'`, `CONNECTION LIMIT 3`, `default_transaction_read_only = on`, `statement_timeout = 30s`. Its only grants are `USAGE` on schema `review` and `SELECT` on view `review.recipes_for_review` (all 70 recipes).
@@ -366,7 +381,7 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| R5-09 | P1 | Remove the temporary `recipe_reviewer` role and `review` schema | ⏳ | After the AI review, or by 2026-10-10, when the password stops working anyway |
+| R5-09 | P1 | Remove the temporary `recipe_reviewer` role and `review` schema | ✅ removed | Dropped 2026-09-26 after the review: role `recipe_reviewer`, view and schema `review`, and the local connection-URL file. Verified 0 roles and 0 schemas remain |
 
 ### Good to have
 
