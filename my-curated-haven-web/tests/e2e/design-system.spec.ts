@@ -148,3 +148,18 @@ test("public pages reflow at 200% text size", async ({ page }) => {
     expect(width.scroll, path).toBeLessThanOrEqual(width.client);
   }
 });
+
+// Phase 3 audit follow-up: the banner is fixed at the bottom (no layout shift when fonts
+// load) and the page reserves its height, so it never hides the footer.
+test("consent banner floats at the bottom without hiding the footer", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const banner = page.getByRole("complementary", { name: "Privacy and cookie choices" });
+  await expect(banner).toBeVisible();
+  expect(await banner.evaluate((el) => getComputedStyle(el).position)).toBe("fixed");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const lastFooterLink = page.locator("footer a").last();
+  const linkBox = await lastFooterLink.boundingBox();
+  const bannerBox = await banner.boundingBox();
+  expect(linkBox && bannerBox && linkBox.y + linkBox.height <= bannerBox.y + 1).toBe(true);
+});
