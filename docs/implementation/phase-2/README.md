@@ -2,7 +2,7 @@
 
 [All implementation plans](../README.md)
 
-Status: implementation plan only. This documentation merge does not install CI, change hosting settings, configure secrets or deploy new application behaviour.
+Status: implemented. Setup merged in PR #5 on 2026-09-23. The 2026-09-25 audit fixed drift from later phases; see [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-25).
 
 ## Goal
 

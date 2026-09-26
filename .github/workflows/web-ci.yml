@@ -37,7 +37,7 @@ jobs:
           submodules: false
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           version: 2.104.0
 
@@ -76,6 +76,9 @@ jobs:
       - name: Phase 10 target and result accounting unit tests
         run: npm run test:phase10:unit
 
+      - name: Homepage content unit tests
+        run: npm run test:homepage:unit
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -83,7 +86,7 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Build
-        run: npm run build -- --webpack
+        run: npm run build
 
       - name: Browser tests
         run: |
@@ -131,7 +134,7 @@ jobs:
           submodules: false
 
       - name: Set up Supabase CLI
-        uses: supabase/setup-cli@v1
+        uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
         with:
           version: 2.104.0
 
@@ -173,7 +176,7 @@ jobs:
 
       - name: Build Next.js
         working-directory: my-curated-haven-web
-        run: npm run build -- --webpack
+        run: npm run build
 
       - name: Run data access integration tests
         working-directory: my-curated-haven-web

@@ -10,15 +10,15 @@ Read Phase 1 scope and route inventory, then this phase's detailed plan, environ
 
 ## Work checklist
 
-- [ ] P2-01: verify current source, commands, host and production relationship.
-- [ ] P2-02: pin a tested supported runtime and clean-install contract.
-- [ ] P2-03: document environment boundaries and safe example file.
-- [ ] P2-04: add explicit typecheck and browser verification commands.
-- [ ] P2-05: add focused tests for currently working behaviour.
-- [ ] P2-06: add and verify the stable web-quality Actions job.
-- [ ] P2-07: verify protected preview access.
-- [ ] P2-08: configure main requirements and verify failure blocking.
-- [ ] P2-09: record release, rollback and Phase 1 handoff evidence.
+- [x] P2-01: verify current source, commands, host and production relationship. (PR #5 evidence)
+- [x] P2-02: pin a tested supported runtime and clean-install contract. (Node 24.5.0, npm 11.5.1)
+- [x] P2-03: document environment boundaries and safe example file. (README rewritten in the 2026-09-25 audit)
+- [x] P2-04: add explicit typecheck and browser verification commands.
+- [x] P2-05: add focused tests for currently working behaviour.
+- [x] P2-06: add and verify the stable web-quality Actions job.
+- [x] P2-07: verify protected preview access. (Anonymous access denied. Signed-in review moves to Phase 10 staging)
+- [x] P2-08: configure main requirements and verify failure blocking. (PR #6 blocked)
+- [x] P2-09: record release, rollback and Phase 1 handoff evidence. (Rollback walkthrough and evidence record, 2026-09-25)
 
 Check a task only after the specified evidence exists. “File added” is not enough for CI, preview or merge enforcement.
 

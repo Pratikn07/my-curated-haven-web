@@ -1,0 +1,46 @@
+name: Production smoke
+
+# Read-only checks against https://mycuratedhaven.com after each production deploy and every hour.
+# CI tests a local database, so this is what catches production-only failures such as missing
+# environment variables. Audit items M1-06 and M2-02.
+
+on:
+  deployment_status:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-smoke
+  cancel-in-progress: false
+
+jobs:
+  production-smoke:
+    name: production-smoke
+    # Vercel reports deployments to GitHub. Run only when a production deployment succeeds.
+    if: >-
+      github.event_name != 'deployment_status' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: false
+          # Cone mode also brings files directly in my-curated-haven-web/, including .nvmrc.
+          sparse-checkout: my-curated-haven-web/scripts
+
+      - name: Set up Node from .nvmrc
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: my-curated-haven-web/.nvmrc
+
+      - name: Check production
+        working-directory: my-curated-haven-web
+        run: node scripts/production-smoke.mjs
