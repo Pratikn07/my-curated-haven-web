@@ -12,7 +12,7 @@ function PreviewIllustration({ feature }: { feature: Feature }) {
   if (feature.key === "chat") {
     return (
       <figure className="rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
-        <figcaption className="flex items-center justify-between gap-3 border-b border-border pb-3 text-sm font-semibold">
+        <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 text-sm font-semibold">
           <span className="inline-flex items-center gap-2"><MessageCircle aria-hidden="true" size={18} /> Sample conversation</span>
           <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-accent-strong">Static example</span>
         </figcaption>
@@ -37,7 +37,7 @@ function PreviewIllustration({ feature }: { feature: Feature }) {
     ];
     return (
       <figure className="rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
-        <figcaption className="flex items-center justify-between gap-3 border-b border-border pb-3 text-sm font-semibold">
+        <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 text-sm font-semibold">
           <span className="inline-flex items-center gap-2"><ShoppingBasket aria-hidden="true" size={18} /> Illustrative categories</span>
           <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-accent-strong">No products for sale</span>
         </figcaption>
@@ -56,7 +56,7 @@ function PreviewIllustration({ feature }: { feature: Feature }) {
 
   return (
     <figure className="rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
-      <figcaption className="flex items-center justify-between gap-3 border-b border-border pb-3 text-sm font-semibold">
+      <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3 text-sm font-semibold">
         <span className="inline-flex items-center gap-2"><Sprout aria-hidden="true" size={18} /> Sample milestone</span>
         <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-accent-strong">Synthetic example</span>
       </figcaption>
@@ -84,7 +84,7 @@ function PreviewSection({ feature }: { feature: Feature }) {
       className="scroll-mt-28 border-t border-border py-12 sm:py-16"
     >
       <Container className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-14">
-        <div className={feature.key === "shop" ? "lg:order-2" : ""}>
+        <div className={feature.key === "shop" ? "min-w-0 lg:order-2" : "min-w-0"}>
           <p className="inline-flex rounded-full bg-surface-muted px-3 py-1 text-sm font-semibold text-accent-strong">
             Planned for the web
           </p>
@@ -101,7 +101,7 @@ function PreviewSection({ feature }: { feature: Feature }) {
             Back to recipes
           </TrackedHomepageLink>
         </div>
-        <div className={feature.key === "shop" ? "lg:order-1" : ""}>
+        <div className={feature.key === "shop" ? "min-w-0 lg:order-1" : "min-w-0"}>
           <PreviewIllustration feature={feature} />
         </div>
       </Container>

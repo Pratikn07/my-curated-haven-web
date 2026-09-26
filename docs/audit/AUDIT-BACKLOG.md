@@ -19,6 +19,8 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
+| R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in, the cookie dialog |
+| R3-07 | Approve the design direction (palette, Inter + Cormorant, card style) from the after-fix screenshots |
 | R1-09 | Tick the content-register checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` |
 
 ---
@@ -157,6 +159,47 @@ Verified as done (no action):
 | G2-02 | P2 | Update the development tools behind the 9 `npm audit` findings (6 high: `brace-expansion`, `minimatch`, `picomatch` and others) | They don't ship to visitors, but they run on developer machines and CI |
 | G2-03 | P2 | Add Dependabot or Renovate for npm and GitHub Actions | Next.js had critical advisories before Phase 2 patched it. Automated update PRs catch the next one |
 | G2-04 | P2 | Run the Phase 1 `check:routes` script in CI, or remove it | `npm run check:routes` exists, but Playwright now covers the same checks |
+
+---
+
+## Phase 3: mobile-first design system
+
+Plan: `docs/implementation/phase-3/IMPLEMENTATION-PLAN.md` (PR #3). Built in `b30027a` (PR #7, merged 2026-09-22, co-authored by Cursor).
+Remediation plan: none was written. Audit fixes: `fix/phase-3` PR (fonts, contrast, skip link, dialog focus, reflow). Audited 2026-09-25 against `main` at `4b8c3c2` and the live site, using a read-only Playwright and axe run on 8 pages at 320, 390 and 1280px.
+
+Verified as done (no action):
+- **Tokens pass WCAG contrast**: body text 9.82:1, muted text 5.53:1 (5.00:1 on muted surfaces), button text 5.62:1, action links 5.47:1 (4.94:1 on muted surfaces), control borders 4.48:1, focus ring 9.82:1. Brand terracotta (2.87:1) and sage (2.54:1) are decorative only.
+- **Primitives work without JavaScript**: `Badge`, `Button`, `ButtonLink`, `Card`, `Field`, `Section`, `StatePanel` are server components. No `framer-motion` in `src/` outside `legacy/`. A `prefers-reduced-motion` rule exists.
+- **No page-level horizontal overflow** at 320, 390 or 1280px on `/`, `/recipes`, a recipe page, `/about`, `/support`, `/privacy`, `/terms`, `/sign-in`.
+- **Reduced motion**: 0 hidden text and 0 running animations on Home, Recipes and a recipe page.
+- **Print (D15)**: on `/recipes/salmon-and-pea-fish-cakes`, all 5 ingredients and 9 steps print, and the header, footer, breadcrumbs and buttons are hidden. A4 and Letter are 3 pages each. This also covers Phase 6's open print check (R4).
+- **Performance (D16)**, lab run on 390px, 4× CPU and ~1.6 Mbps: LCP 1.62 s (Home), 1.08 s (Recipes), 1.29 s (recipe page). CLS 0. About 225 KB JS per page.
+- **`/design-review`** returns 404 in production (D13).
+- **Keyboard**: visible 2px focus outline.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R3-01 | P1 | Inter and Cormorant never render: the whole site uses the system font (D04) | ✅ fixed | Computed `font-family` on body, h1 and the wordmark is `ui-sans-serif, system-ui…`, and `--font-body` computes empty. `next/font` puts its variables (`--font-inter-source`, `--font-cormorant-source`) on `<body>` (`src/app/layout.tsx:37`), but `tokens.css` reads them on `:root`, so the chain is invalid. The two font files still download for nothing. Put the font variable classes on `<html>`, and add a browser test asserting the computed families |
+| R3-02 | P1 | Contrast failure on `/privacy` and `/terms` (D03) | ✅ fixed | axe `color-contrast` (serious): the "Last updated" line uses `text-foreground/60`, which is `#8a8b9a` on `#fdfcf8` = 3.27:1. Use `text-text-muted`. Extend the axe scan to every public page (the Phase 3 scan covered only `/`, `/about`, `/support`) |
+| R3-03 | P1 | The skip link isn't the first focus stop (D08) | ✅ fixed | The first Tab lands on the cookie banner's "privacy notice" link. `AnalyticsProvider` renders the banner before its children, which include the skip link (`SiteShell.tsx:9-11`). Render the skip link first |
+| R3-04 | P1 | Cookie preferences dialog has no focus management (D09) | ✅ fixed | It has `aria-modal="true"` and a label, and Escape closes it. But focus doesn't move into the dialog on open, Tab leaves it, and focus doesn't return to the opener on close. `ConsentPreferencesModal.tsx` only handles Escape. Move focus in, trap Tab, restore focus to the trigger |
+| R3-05 | P2 | Homepage scrolls sideways at 200% text size (D06) | ✅ fixed | At 390px with 200% text, content is 459px wide. The Parenting Chat preview heading (`FeaturePreview.tsx`, homepage-vision work) grows to 427px because its grid column won't shrink. Add `min-w-0` to the preview grid items |
+| R3-06 | P2 | No screen-reader pass and no real iPhone Safari check | ⏳ 👤 | The evidence admits both. They need a person with VoiceOver on an iPhone. Checklist: Home, a recipe page, sign-in, the cookie dialog |
+| R3-07 | P2 | Design direction never recorded as approved (P3-02.6-7) | ⏳ 👤 | Owner confirms the palette, Inter/Cormorant pairing and card style (once R3-01 makes the fonts render) |
+| R3-08 | P2 | Phase 3 status docs are stale | ✅ fixed | `README.md` says "detailed plan only". `IMPLEMENTATION-EVIDENCE.md` says "Not deployed" |
+
+### Must do, not in any plan
+
+None beyond the items above. Every Phase 3 defect maps to an existing acceptance check.
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G3-01 | P2 | Make the header wordmark link and recipe-card title links at least 44px tall | They measure 201×24 and ~210×21 at 390px. That meets WCAG 2.2's 24px minimum, but not the plan's 44px product target (D07) |
+| G3-02 | P2 | Record the lab performance numbers above as the baseline, and re-run after each UI phase | Phase 3 never recorded one (D16), so later regressions had nothing to compare against |
 
 ---
 

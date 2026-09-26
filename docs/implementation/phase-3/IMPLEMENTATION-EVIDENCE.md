@@ -1,6 +1,6 @@
 # Phase 3 implementation evidence
 
-Status: design system implemented on a branch. Not deployed. This is not a public recipe launch.
+Status: deployed (PR #7, merged 2026-09-22). The record below describes the branch before release. **Correction (2026-09-25 audit):** the line "Inter for body and headings. Cormorant Garamond for the wordmark only" was never true in the browser. Every page rendered the system font until the audit fix. See [the audit](#audit-2026-09-25).
 
 ## Source
 
@@ -49,3 +49,30 @@ Screenshots:
 - No lab LCP number. The public shell dropped the Outfit font request and the animated card/section client code.
 - Price, refund terms, and the paid recipe list are still undecided and are not shown as an offer.
 - Merging to `main` deploys to production. Rollback target before that merge is source `95cf6cd`.
+
+## Audit 2026-09-25
+
+Live browser audit of `main` at `4b8c3c2`: 8 pages at 320, 390 and 1280px, with axe (WCAG 2.2 AA tags), keyboard, reduced motion, 200% text, print (A4, Letter) and a throttled lab run. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-3-mobile-first-design-system).
+
+### Fixed
+
+| Item | Cause | Fix | Regression test |
+| --- | --- | --- | --- |
+| R3-01 fonts never rendered (D04) | `next/font` variables were on `<body>`, but `tokens.css` reads them on `:root`, so `--font-body` computed empty | Font variable classes moved to `<html>` in `src/app/layout.tsx` | `brand fonts are the computed fonts`. With the old layout it fails with the exact system-font string production served |
+| R3-02 contrast on `/privacy`, `/terms` (D03) | "Last updated" used `text-foreground/60` (3.27:1) | `text-text-muted` (5.53:1) | The axe scan now covers `/`, `/recipes`, a recipe page, `/about`, `/support`, `/privacy`, `/terms`, `/sign-in` |
+| R3-03 skip link not first (D08) | The consent banner rendered before the skip link | Skip link moved ahead of `AnalyticsProvider` in `SiteShell.tsx` | `the skip link is the first focus stop` |
+| R3-04 dialog focus (D09) | `ConsentPreferencesModal` handled only Escape | Focus moves in on open, Tab and Shift+Tab stay inside, Escape closes, focus returns to the opener | `cookie preferences dialog manages focus` |
+| R3-05 reflow at 200% text (D06) | Grid columns in the hero and feature previews couldn't shrink, and one word at 80px was wider than the screen | `min-w-0` on the grid items, `flex-wrap` on preview captions, `overflow-wrap: anywhere` on headings | `public pages reflow at 200% text size` |
+
+The two keyboard tests skip WebKit: Safari's Tab key skips links and buttons unless the user turns on full keyboard access. That is a browser setting, not a site defect.
+
+Also aligned: the consent dialog no longer claims "90-day retention", which the code doesn't enforce. It now matches the Privacy Policy.
+
+### Verified, no change needed
+
+Token contrast, server-component primitives, no page overflow at 320, 390 and 1280px, reduced motion, print of every ingredient and step on A4 and Letter (3 pages each), lab LCP 1.08 to 1.62 s with CLS 0, `/design-review` returning 404 in production.
+
+### Still open
+
+- R3-06: screen-reader (VoiceOver) pass and a real iPhone Safari check need a person.
+- R3-07: owner approval of the design direction, now that the real fonts render.

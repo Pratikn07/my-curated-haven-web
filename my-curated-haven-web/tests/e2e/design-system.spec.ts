@@ -70,13 +70,81 @@ test("[QA-M09:partial] print layout keeps the sample recipe and hides navigation
   await expect(page.getByText("Allergen information not reviewed")).toBeVisible();
 });
 
-test("[QA-M08:partial] touched public pages have no serious accessibility violations", async ({ page }) => {
-  for (const path of ["/", "/about", "/support"]) {
+// Phase 3 audit R3-02: the original scan covered three pages and missed a contrast failure on the legal pages.
+const publicPages = [
+  "/",
+  "/recipes",
+  "/recipes/synth-free-oat-bake",
+  "/about",
+  "/support",
+  "/privacy",
+  "/terms",
+  "/sign-in",
+];
+
+test("[QA-M08:partial] public pages have no serious accessibility violations", async ({ page }) => {
+  for (const path of publicPages) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).analyze();
     const serious = results.violations.filter((violation) =>
       ["serious", "critical"].includes(violation.impact ?? ""),
     );
     expect(serious, path).toEqual([]);
+  }
+});
+
+// Phase 3 audit R3-01: next/font variables must reach :root, or every page falls back to the system font.
+test("brand fonts are the computed fonts", async ({ page }) => {
+  await page.goto("/");
+  const fonts = await page.evaluate(() => ({
+    body: getComputedStyle(document.body).fontFamily,
+    heading: getComputedStyle(document.querySelector("h1")!).fontFamily,
+    wordmark: getComputedStyle(document.querySelector("header a[href='/']")!).fontFamily,
+  }));
+  expect(fonts.body).toMatch(/Inter/);
+  expect(fonts.heading).toMatch(/Inter/);
+  expect(fonts.wordmark).toMatch(/Cormorant/);
+});
+
+// Phase 3 audit R3-03: the consent banner used to take the first focus stop.
+test("the skip link is the first focus stop", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "Safari's Tab key skips links unless the user enables full keyboard access");
+  await page.goto("/");
+  await page.keyboard.press("Tab");
+  await expect(page.locator(":focus")).toHaveText("Skip to content");
+});
+
+// Phase 3 audit R3-04: dialog focus moves in, stays in, and returns to the opener.
+test("cookie preferences dialog manages focus", async ({ page, browserName }) => {
+  test.skip(browserName === "webkit", "Safari's Tab key skips buttons unless the user enables full keyboard access");
+  await page.goto("/");
+  const opener = page.getByRole("button", { name: "Cookie & Analytics Preferences" });
+  await opener.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Privacy & Cookie Preferences" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator(":focus")).toHaveCount(1);
+  for (let i = 0; i < 12; i++) {
+    await page.keyboard.press("Tab");
+    await expect(dialog.locator(":focus")).toHaveCount(1);
+  }
+  await page.keyboard.press("Shift+Tab");
+  await expect(dialog.locator(":focus")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});
+
+// Phase 3 audit R3-05: D06 text scaling. The homepage previews used to push the page to 459px.
+test("public pages reflow at 200% text size", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/support"]) {
+    await page.goto(path);
+    await page.addStyleTag({ content: "html { font-size: 200% !important; }" });
+    const width = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      client: document.documentElement.clientWidth,
+    }));
+    expect(width.scroll, path).toBeLessThanOrEqual(width.client);
   }
 });

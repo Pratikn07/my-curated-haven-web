@@ -8,7 +8,7 @@ export default function Hero() {
 
   return (
     <Container className="grid items-center gap-8 py-8 sm:py-12 lg:grid-cols-2 lg:gap-12 lg:py-16">
-      <div className="grid gap-4">
+      <div className="grid min-w-0 gap-4">
         <h1 className="max-w-[14ch] text-[2.5rem] font-semibold leading-[1.08] sm:text-5xl">
           A little more support for everyday parenting.
         </h1>
@@ -44,7 +44,7 @@ export default function Hero() {
           </TrackedHomepageLink>
         </div>
       </div>
-      <div className="relative aspect-[4/5] max-h-[30rem] overflow-hidden rounded-[var(--radius-card)] bg-surface-muted lg:max-h-[36rem]">
+      <div className="relative min-w-0 aspect-[4/5] max-h-[30rem] overflow-hidden rounded-[var(--radius-card)] bg-surface-muted lg:max-h-[36rem]">
         <Image
           src="/images/homepage/homepage-hero.webp"
           alt="Parent and child together"

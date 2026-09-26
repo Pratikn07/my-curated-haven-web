@@ -33,8 +33,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${cormorant.variable} antialiased`}>
+    // Font variables sit on <html> because tokens.css reads them on :root.
+    <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
+      <body className="antialiased">
         <SiteShell>{children}</SiteShell>
       </body>
     </html>
