@@ -36,6 +36,7 @@ Don't run `supabase config push`. `supabase/config.toml` is local-only and would
 | `npm run typecheck` | Generate route types, then `tsc --noEmit` |
 | `npm run test:phase10:unit` | Phase 10 target-guard and result-accounting unit tests |
 | `npm run test:homepage:unit` | Homepage content and readiness unit tests |
+| `npm run test:data:unit` | Data-layer tests: backend errors return typed failures, never empty success |
 | `npm run build` | Production build (Turbopack, same as Vercel) |
 | `npm run start` | Serve the production build |
 | `npm run test:e2e` | Playwright against the production server. Needs the local Supabase stack |

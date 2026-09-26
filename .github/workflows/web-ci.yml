@@ -79,6 +79,9 @@ jobs:
       - name: Homepage content unit tests
         run: npm run test:homepage:unit
 
+      - name: Data access error-handling unit tests
+        run: npm run test:data:unit
+
       - name: Typecheck
         run: npm run typecheck
 

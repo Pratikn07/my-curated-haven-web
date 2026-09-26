@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(8);
+SELECT plan(9);
 
 -- R4-01: the legacy recipe and search tables are closed to client roles.
 SELECT ok(
@@ -59,6 +59,20 @@ SELECT is(
   (SELECT name FROM public.profiles WHERE id = '70000000-0000-0000-0000-000000000007'),
   'Audit Signup',
   'signup trigger copies the display name'
+);
+
+-- M4-06: every function in public and private pins its search_path.
+SELECT is_empty(
+  $$ SELECT p.oid::regprocedure::text
+     FROM pg_proc p
+     JOIN pg_namespace n ON n.oid = p.pronamespace
+     LEFT JOIN pg_depend d ON d.objid = p.oid AND d.deptype = 'e'
+     WHERE n.nspname IN ('public', 'private')
+       AND d.objid IS NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM unnest(coalesce(p.proconfig, '{}')) c WHERE c LIKE 'search_path=%'
+       ) $$,
+  'no public or private function has a mutable search_path'
 );
 
 SELECT * FROM finish();
