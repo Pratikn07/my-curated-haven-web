@@ -139,6 +139,7 @@ Verified as done (no action):
 | --- | --- | --- | --- | --- |
 | M2-01 | P1 | `backend-quality` is not a required check | ✅ ruleset | The ruleset requires only `web-quality`. Phase 4 added `backend-quality`, which covers migration replay, pgTAP access tests, type drift and data-access tests, but never made it required. A PR that breaks database security can still merge. Add `backend-quality` to ruleset `23852646` |
 | M2-02 | P1 | Production smoke checks are manual and weren't run | ✅ PR #41 | Answer to M1-06: the Phase 2 runbook lists production smoke checks, but only as a manual step. Phase 11 has one manual read-only smoke at launch. Nothing ran them after the Phase 4 to 9 deploys, which is how the recipe outage went unnoticed. Implement M1-06 as the automated version |
+| M2-03 | P1 | Builds depend on downloading Google Fonts | ⏳ | PR #51's `web-quality` failed at Build with `Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'`: Turbopack couldn't fetch the files from `fonts.gstatic.com`. A rerun passed. The same fetch runs on every Vercel production build, so a Google hiccup fails a deploy (the old version stays live). It's the same failure Phase 7 hid with `--webpack`. Self-host Inter and Cormorant Garamond (both SIL Open Font License) with `next/font/local`, and keep the Phase 3 font test |
 
 ### Good to have
 

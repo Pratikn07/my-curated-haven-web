@@ -161,6 +161,7 @@ Recorded by the 2026-09-25 audit. Production (`ccrgvammglkvdlaojgzv`) history:
 | `20260926052700_phase5_audit_reset_allergen_review_and_fix_drafts` | Yes (2026-09-25 audit) |
 | `20260926052702_phase5_audit_publish_requires_review` | Yes (2026-09-25 audit) |
 | `20260926144356_phase5_ai_review_fix_live_free_recipes` | Yes (2026-09-26) |
+| `20260926150820_phase7_audit_saved_recipes_access_and_catalog_fk` | Yes (2026-09-26 audit) |
 
 Rules:
 
