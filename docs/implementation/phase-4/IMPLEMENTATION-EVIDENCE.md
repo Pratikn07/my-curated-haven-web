@@ -87,8 +87,11 @@ A logical dump (`schema.sql`, `data.sql`, `roles.sql`) and the deployed Edge Fun
 
 After the changes, the security advisor dropped from 16 warnings to 10 (plus 2 expected INFO notes for the now-closed legacy tables). `npm run smoke:production` passed 13/13.
 
-### Still open
+### Backups and upgrade (2026-09-25, later the same evening)
 
-- R4-02 backups (owner: plan decision), M4-04 Postgres security upgrade (owner: schedule).
+- **R4-02, free backups**: `ops/backup-production.sh`, scheduled daily at 03:30 by launchd. Restore rehearsed into an empty local Supabase stack: 70 recipes, 70 catalog rows (3 published), 70 bodies, 3 free slots, 4 profiles, 4 auth users and 69 public policies restored, and an anonymous caller saw only the 3 free recipes. This satisfies P4-08.7. Procedure and caveats: `ops/README.md`.
+- **M4-04, Postgres upgrade**: `17.4.1.074` → `17.6.1.166` in about 9 minutes. Collation version refreshed after reindexing `public` and `private`. Advisor warning `vulnerable_postgres_version` cleared.
+
+### Still open
 - R4-04 deliberate backend-regression drill, R4-07 S16 test, M4-06 remaining `search_path` warnings.
 - R4-05 staging rehearsal: Phase 10.

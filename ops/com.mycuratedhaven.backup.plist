@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Daily production backup at 03:30 local time (audit R4-02).
+  Install: see ops/README.md. launchd runs a missed job when the Mac next wakes,
+  but not while it is shut down.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mycuratedhaven.backup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>BACKUP_SCRIPT_PATH</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>BACKUP_ROOT_PATH/backup.log</string>
+  <key>StandardErrorPath</key>
+  <string>BACKUP_ROOT_PATH/backup.log</string>
+</dict>
+</plist>
