@@ -8,7 +8,7 @@ import {
   BROWSER_ID_STORAGE_KEY,
   SESSION_ID_STORAGE_KEY,
 } from "./consent";
-import { getSessionCampaign } from "./campaigns";
+import { parseAndRecordCampaign } from "./campaigns";
 import { buildAnalyticsEnvelope } from "./sanitize";
 import { getAnalyticsProvider } from "./provider";
 
@@ -75,7 +75,6 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
   payload: AnalyticsEventMap[T],
   routeKey?: CanonicalRouteKey
 ): Promise<void> {
-  // 1. Strict privacy check: zero tracking unless explicitly consented
   if (!isAnalyticsPermitted() || typeof window === "undefined") {
     return;
   }
@@ -85,7 +84,8 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
   try {
     const browserId = getOrCreateBrowserId();
     const sessionId = getOrCreateSessionId();
-    const campaign = getSessionCampaign();
+    // Read the URL too, so the very first event of a campaign visit is tagged.
+    const campaign = parseAndRecordCampaign(new URLSearchParams(window.location.search));
 
     const envelope = buildAnalyticsEnvelope({
       eventName,

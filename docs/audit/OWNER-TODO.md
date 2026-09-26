@@ -4,7 +4,7 @@ Everything only you (the owner) can do, collected from the 2026-09-25/26 audit. 
 
 When you finish an item, tell the assistant the ID. It will do its part, verify, and tick the item here.
 
-Last updated: 2026-09-26, after Phase 9.
+Last updated: 2026-09-26, after Phase 9 and the PostHog switch.
 
 ---
 
@@ -66,12 +66,15 @@ Last updated: 2026-09-26, after Phase 9.
 - **Why**: the Terms have no "governing law" or dispute clause. The old text had `[Your State/Country]` placeholders, so they were removed rather than published unfinished.
 - **Steps**: tell the assistant your legal business name and the state or country whose law applies. Ideally a lawyer confirms whether to include arbitration.
 
-### A10. Analytics: switch on or hide the banner (R9-01)
+### A10. PostHog settings (R9-01, M9-01, M9-02)
 
-- **Now**: the cookie banner asks visitors to accept analytics, but analytics isn't set up, so accepting does nothing.
-- **Choose one**:
-  1. **Set it up**: create a free PostHog account (EU or US region), then send the assistant the project key and region. It adds them to Vercel and checks that nothing is sent before consent.
-  2. **Hide the banner until later**: tell the assistant. Nothing is tracked either way.
+- **Done**: banner removed, PostHog chosen, project key added to Vercel (2026-09-26).
+- **You**:
+  1. PostHog → **Settings → Session replay** → turn on **Record user sessions**. Without this, no recordings arrive even though the site sends them.
+  2. Same page: check **Mask all inputs** is on (the site also masks them) and pick how long recordings are kept.
+  3. PostHog → **Settings → Project → Authorized URLs**: add `https://mycuratedhaven.com` so the toolbar and heatmaps work.
+  4. Optional: **Google Search Console** (search.google.com/search-console) → add `mycuratedhaven.com` as a Domain property and add the TXT record it shows. It's free and shows which Google searches bring people in, which PostHog can't.
+- **Before you promote in the EU or UK**: add the consent platform (OneTrust or similar). Today analytics and recordings run for everyone without asking, which EU/UK law requires consent for (M9-01).
 
 ### A11. Register your real Instagram campaigns (R9-04)
 
@@ -125,7 +128,7 @@ Checkout stays off until these are decided. The collection page will show your r
 | ID | What | How |
 | --- | --- | --- |
 | R3-07 | Approve the design | Compare `docs/implementation/phase-3/evidence/audit-2026-09-25/before-home-390.png` and `after-home-390.png`. Reply "approved" or say what to change |
-| R3-06 | Screen reader check | On your iPhone: Settings → Accessibility → VoiceOver on. Visit Home, a recipe page, sign-in and the cookie dialog. Note anything confusing |
+| R3-06 | Screen reader check | On your iPhone: Settings → Accessibility → VoiceOver on. Visit Home, a recipe page and sign-in. Note anything confusing |
 | R1-09 | Content register sign-off | Tick the checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` (or tell the assistant "approved") |
 | R5-03, R5-04 | Recipe checklist and alt text | Only if you want a human sign-off beyond the AI review: `docs/implementation/phase-5/FREE-RECIPE-REVIEW.md` |
 

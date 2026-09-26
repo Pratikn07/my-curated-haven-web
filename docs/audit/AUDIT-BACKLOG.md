@@ -320,6 +320,8 @@ Verified as done (no action):
 
 Plan: `docs/implementation/phase-9/IMPLEMENTATION-PLAN.md` (PR #13). Built in `098139f` (WIP) and `ccf314c` (PR #20). **No review or remediation plan ever covered Phase 9.** Audited 2026-09-26 against `main` at `d0be9ee`, with a live browser test on production.
 
+**Update 2026-09-26, owner decision: consent removed, PostHog on for every visitor.** The owner chose to drop the cookie banner, the preferences link and dialog, and the consent gate for all visitors in every country, and to add a consent platform (OneTrust) later. The site now uses the `posthog-js` SDK (pinned 1.434.15): automatic page views and clicks, registered campaign tags from the first page, signed-in users identified by account id and email, and session recordings with every input masked. Recording is stopped on `/sign-in`, `/account*` and `/checkout*`, and those routes sit inside a `ph-no-capture` wrapper so the moment before the stop is blanked too. The Privacy Policy describes this. It stays inactive until the four `NEXT_PUBLIC_*` analytics variables are set in Vercel. The findings below describe the consent-era build.
+
 **Analytics is built but switched off.** No PostHog project, no `NEXT_PUBLIC_POSTHOG_*`, `NEXT_PUBLIC_APP_ENV` or `NEXT_PUBLIC_ANALYTICS_ENABLED` in Vercel, and neither Phase 9 migration is in production. Accepting analytics today stores two random IDs and sends nothing anywhere.
 
 Verified as done (no action), live on 2026-09-26:
@@ -333,17 +335,20 @@ Verified as done (no action), live on 2026-09-26:
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| R9-01 | P2 | The consent banner asks permission for analytics that doesn't run | ⏳ 👤 | Every first visit shows the banner, but accepting sends nothing. Owner chooses: set up PostHog (free tier) so the data is useful, or hide the banner until analytics is provisioned. Hiding it removes friction and asks for nothing |
+| R9-01 | P2 | The consent banner asks permission for analytics that doesn't run | ✅ superseded | Banner removed and PostHog set up (owner decision, 2026-09-26). Original note: | Every first visit shows the banner, but accepting sends nothing. Owner chooses: set up PostHog (free tier) so the data is useful, or hide the banner until analytics is provisioned. Hiding it removes friction and asks for nothing |
 | R9-02 | P2 | `20260924000000_phase9_analytics_security` is unrecorded in production | ⏳ | Its statements (drop `search_analytics` policies, revoke client access) were already applied by `20260924120000`. Apply it (idempotent) and record it, for history parity |
 | R9-03 | P1 when launching | `20260924010000_phase9_measurement` depends on the commerce tables | ⏳ | Alters `private.purchase_orders`, so it can only follow `20260923200000`. Launch order: `20260923200000` → `20260924010000` → `20260924174355` |
 | R9-04 | P2 👤 | Campaign registry holds placeholder names | ⏳ | `ALLOWED_CAMPAIGNS` includes `sample_reel_001`, `sample_reel_002`, `sample_reel_003`, `feed_post_001`. Links on real Instagram posts only count if their `utm_campaign` is on this list. Owner lists the real campaigns; the assistant updates the registry and writes the links |
-| R9-05 | P2 | Campaign lost if the visitor browses before accepting | ⏳ | Live: landing on `/?utm_…` then accepting on `/recipes` kept no campaign. Accepting on the landing page works. Keep the landing campaign in memory (not storage) until the visitor chooses, then persist it only on Accept |
+| R9-05 | P2 | Campaign lost if the visitor browses before accepting | ✅ moot | No consent step now. Every event also reads the URL, so the first event of a campaign visit is tagged (`analytics.spec.ts`). Original note: | Live: landing on `/?utm_…` then accepting on `/recipes` kept no campaign. Accepting on the landing page works. Keep the landing campaign in memory (not storage) until the visitor chooses, then persist it only on Accept |
 | R9-06 | P2 | No founder reporting yet (P9-09) | ⏳ | The plan's four private views don't exist. The evidence maps them to `private.founder_commerce_totals` and the PostHog funnel, and neither is in production. Build them when analytics and checkout go live |
 | R9-07 | P2 | Docs stale | ⏳ | `README.md` says "detailed implementation plan"; evidence doesn't say analytics is off in production |
 
 ### Must do, not in any plan
 
-None. The consent gate is the privacy-critical part, and it works.
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M9-01 | P1 👤 | Analytics and session recordings run without consent, including for EU and UK visitors | ⏳ accepted risk | Owner decision, 2026-09-26. Under GDPR/ePrivacy (EU) and PECR (UK), non-essential cookies and session replay need opt-in consent. Some US states (for example California, via the Global Privacy Control signal) expect an opt-out. Risk: regulator complaints or fines if the site gets EU/UK traffic. Fix: add the consent platform (OneTrust or similar) before any EU/UK promotion. PostHog has `opt_out_capturing()` and `opt_in_capturing()` for it to call |
+| M9-02 | P2 👤 | Session replay must be switched on in the PostHog project | ⏳ | The code starts recordings, but PostHog only accepts them if the project has "Record user sessions" on (PostHog → Settings → Session replay). Also pick retention there |
 
 ### Good to have
 

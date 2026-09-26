@@ -8,7 +8,7 @@ export default function Privacy() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-text-muted mb-12">Last updated: September 25, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: September 26, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
@@ -24,7 +24,7 @@ export default function Privacy() {
                                 <li><strong>Your email address, if you sign in.</strong> An account is optional. We send a one-time code to your email to sign you in. There is no password.</li>
                                 <li><strong>Recipes you save.</strong> If you save a recipe, we store which recipe you saved and when.</li>
                                 <li><strong>Emails you send us.</strong> If you email support, we keep the message and your address so we can reply.</li>
-                                <li><strong>Optional analytics, only if you accept.</strong> See section 4.</li>
+                                <li><strong>How you use the website.</strong> Pages you visit, what you click, and recordings of your visits. See section 4.</li>
                                 <li><strong>Purchase records, only if you buy something.</strong> Nothing is for sale on this website yet. See section 5.</li>
                                 <li><strong>Basic request data.</strong> Like any website, each request sends your IP address and browser type to our hosting provider, which uses them to deliver the site and protect it from abuse.</li>
                             </ul>
@@ -38,7 +38,7 @@ export default function Privacy() {
                             <ul className={list}>
                                 <li>To sign you in and keep your saved recipes private to you.</li>
                                 <li>To answer support requests.</li>
-                                <li>If you accept analytics, to understand in aggregate which recipes are read and printed, so we can improve them.</li>
+                                <li>To understand how people find and use the website, for example which recipes are read, saved and printed and where visitors get stuck, so we can improve it.</li>
                                 <li>To keep the website secure and working.</li>
                             </ul>
                             <p className="leading-relaxed">
@@ -50,11 +50,13 @@ export default function Privacy() {
                             <h2 className={h2}>4. Cookies, browser storage and analytics</h2>
                             <ul className={list}>
                                 <li><strong>Sign-in cookies.</strong> If you sign in, our authentication provider sets cookies that keep you signed in. The website needs them for accounts and saved recipes.</li>
-                                <li><strong>Your consent choice.</strong> We store your analytics choice in your browser (<code>mch_analytics_consent</code>).</li>
                                 <li>
-                                    <strong>Optional analytics.</strong> Analytics is off until you select &quot;Accept&quot; on the consent banner. If you accept, we store a random browser identifier (<code>mch_browser_id</code>) and a session identifier (<code>mch_session_id</code>), and we send page and recipe events to our analytics provider, PostHog. We may also keep the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>). Events do not include your email address, your account ID or the text you search for.
+                                    <strong>Analytics.</strong> We use PostHog to measure how the website is used. It stores a random identifier in a cookie and in your browser storage, and records the pages you visit, the links and buttons you click, the website that sent you, and your device and browser type. Our own code also stores a browser and session identifier (<code>mch_browser_id</code>, <code>mch_session_id</code>) and the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>).
                                 </li>
-                                <li><strong>Changing your mind.</strong> Select &quot;Cookie &amp; Analytics Preferences&quot; in the footer at any time. Withdrawing consent stops analytics and deletes the browser and session identifiers from your browser.</li>
+                                <li>
+                                    <strong>Session recordings.</strong> PostHog records how pages look and respond while you use them, so we can see where the website is confusing. Anything you type is hidden in the recording. We do not record the sign-in, account or checkout pages.
+                                </li>
+                                <li><strong>If you sign in.</strong> Your analytics are linked to your account and email address, so we can understand how signed-in parents use saved recipes. Signing out unlinks the browser.</li>
                             </ul>
                         </section>
 
@@ -73,7 +75,7 @@ export default function Privacy() {
                             <ul className={list}>
                                 <li><strong>Vercel</strong>: hosting.</li>
                                 <li><strong>Supabase</strong>: sign-in, sign-in emails, database and recipe images.</li>
-                                <li><strong>PostHog</strong>: analytics, only if you accept it.</li>
+                                <li><strong>PostHog</strong>: analytics and session recordings.</li>
                                 <li><strong>Stripe</strong>: payments, only if you buy something.</li>
                             </ul>
                             <p className="leading-relaxed">
@@ -91,15 +93,16 @@ export default function Privacy() {
                         <section>
                             <h2 className={h2}>8. How long we keep information</h2>
                             <p className="leading-relaxed">
-                                We keep your account and saved recipes until you ask us to close your account. Browser identifiers stay in your browser until you withdraw consent or clear your browser data. Support emails and purchase records are kept as long as we need them to help you and to meet legal and accounting obligations.
+                                We keep your account and saved recipes until you ask us to close your account. Browser identifiers stay in your browser until you clear your browser data. PostHog keeps analytics and recordings for a limited period set by its retention rules, then deletes them. Support emails and purchase records are kept as long as we need them to help you and to meet legal and accounting obligations.
                             </p>
                         </section>
 
                         <section>
                             <h2 className={h2}>9. Your choices and rights</h2>
                             <ul className={list}>
-                                <li>Use the free recipes without signing in or accepting analytics.</li>
-                                <li>Change your analytics choice at any time from the footer.</li>
+                                <li>Use the free recipes without signing in.</li>
+                                <li>Ask us to delete the analytics linked to your account or email address.</li>
+                                <li>Block analytics with your browser&apos;s privacy or content-blocking settings.</li>
                                 <li>Ask us for a copy of your information, to correct it, or to delete it and close your account.</li>
                             </ul>
                             <p className="leading-relaxed">
