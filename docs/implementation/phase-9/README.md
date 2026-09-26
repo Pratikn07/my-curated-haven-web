@@ -1,6 +1,6 @@
 # Phase 9: analytics and recipe funnel measurement
 
-Status: detailed implementation plan. No tracking, database migration, provider account or production dashboard is enabled by this package.
+Status: implemented (PR #20) but not switched on. No PostHog project, no analytics settings in Vercel and no Phase 9 migrations in production, so accepting analytics sends nothing. The 2026-09-26 audit record is in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-26).
 
 ## Outcome
 

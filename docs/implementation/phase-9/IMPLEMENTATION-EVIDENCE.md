@@ -47,3 +47,11 @@ Owners for the weekly read: founder for the product decision, engineering for ex
 - Scheduled Instagram read. The website does not call Instagram.
 - A named paging route for paid-without-access older than five minutes. The count exists on `founder_commerce_totals`.
 - Mobile Safari and Instagram in-app browser payload inspection. CI covers Chromium and WebKit automated browsers only.
+
+## Audit 2026-09-26
+
+First review of Phase 9. Audited against `main` at `d0be9ee` with a live browser test on production. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-9-analytics-and-tiny-soho-attribution).
+
+- **Consent verified live**: nothing stored or sent before a choice; Accept stores only `mch_analytics_consent`, `mch_browser_id`, `mch_session_id`; Withdraw removes the IDs; no third-party scripts.
+- **Not switched on**: no PostHog project or `NEXT_PUBLIC_POSTHOG_*` settings, and neither `20260924000000` nor `20260924010000` is recorded in production. `20260924010000` must follow the commerce schema (`20260923200000`).
+- **Gaps**: the campaign registry holds placeholder names (`sample_reel_001`…); a campaign is lost if the visitor browses before accepting; the founder reporting views (P9-09) don't exist yet.
