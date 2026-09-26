@@ -1,25 +1,10 @@
-# Phase audit backlog
-
-Phase-by-phase audit of My Curated Haven web, started 2026-09-25.
-Baseline: `origin/main` at `a496ce6`, live site https://mycuratedhaven.com, Supabase project `ccrgvammglkvdlaojgzv`.
-
-Each phase has three lists:
-
-- **Remaining**: work the phase plan required that is not done, or that a later phase broke.
-- **Must do, not in any plan**: gaps the plans missed that have to be fixed. These are not optional.
-- **Good to have**: improvements to come back to later.
-
-Priority: **P0** = visitors affected now. **P1** = fix before launch. **P2** = cleanup.
-Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decision.
-
-## Waiting on the owner
-
-| ID | Decision or action |
+#\g<1>✅ docs\2| ID | Decision or action |
 | --- | --- |
 | R5-03a | Run the external AI review of all 70 recipes: `~/Documents/working/mch/recipe-review/REVIEW-PROMPT-ALL-70.md`, with an AI that can run commands (Claude Code, Cursor or Codex). Results go to `review-result-batch-1..7.json` in that folder |
 | R5-03 | Review the 3 free recipes with the checklist (allergens, steps, yield, time, choking and texture, alt text), including each card summary's health claims (M6-01) |
 | M5-02 | Decide whether to disclose AI-assisted recipes and illustrative AI images |
 | M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
+| M7-01 | Create a free Cloudflare Turnstile site key (for sign-in CAPTCHA), alongside M1-03 |
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
@@ -246,6 +231,44 @@ Verified as done (no action):
 | --- | --- | --- | --- |
 | G6-01 | P2 | Show the age range the source gives (Fish Cakes 9+ months, the others 6+ months) once reviewed | The plan keeps it private until approved, but the recipes are for babies and toddlers and the safety notes depend on age |
 | G6-02 | P2 | A feeding-type filter (finger foods, purées) once more recipes are published | That's how the iOS app groups recipes |
+
+---
+
+## Phase 7: optional accounts and saved recipes
+
+Plan: `docs/implementation/phase-7/IMPLEMENTATION-PLAN.md` (PR #10). Built in `1c78e41` (PR #15). Remediation plan PR #25 (reviewer), implemented in PR #28 (`1697ff0`), evidence PR #29. Audit fixes: migration `20260926150820` and `ops/ACCOUNT-CLOSURE.md`. Audited 2026-09-26 against `main` at `79d3ec3`, the live site and project `ccrgvammglkvdlaojgzv`.
+
+Verified as done (no action):
+- **Owner-only rows**: `saved_recipes` policies are SELECT, INSERT and DELETE, all `auth.uid() = user_id`, for `authenticated` only; `anon` has no access; no UPDATE grant. Unique `(user_id, recipe_id)`.
+- **Private pages**: `/account` and `/account/saved-recipes` return 307 to `/sign-in?returnTo=…` with `Cache-Control: no-store, private`. `/sign-in` is `private, no-store`.
+- **Safe redirects**: `sanitizeReturnTo` rejects absolute URLs, `//host`, `/\`, control characters and sign-in loops, and allows only recipe, account, collection and checkout paths. Live `?returnTo=https://evil.example` and `?returnTo=//evil.example` are ignored.
+- **Save checks in the app**: `saveRecipe` runs `checkRecipeAccess` first and returns typed errors (denied, not found, unavailable); removal needs no access check (R2).
+- **Sign-in settings**: email confirmation required (`mailer_autoconfirm: false`); refresh-token rotation on; anonymous and phone sign-in off; codes expire after 1 hour (Phase 4 audit).
+- **Remediation R1 to R4**: done in code, per the earlier audit of PR #28.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R7-01 | P2 | The database doesn't enforce "free or purchased only" on saves (remediation Verification 3) | ⏳ | Locally, as a signed-in user, `insert into saved_recipes` with a draft recipe id succeeded. The INSERT policy checks only `auth.uid() = user_id`. No content leaks (the saved list joins published catalog rows only), but anyone can bypass the app. Add to `WITH CHECK`: the recipe is in `free_recipe_slots`, or in a release the caller holds an active entitlement for |
+| R7-02 | P1 | Saved recipes reference the legacy table | ⏳ | `saved_recipes_recipe_id_fkey` references `public.recipes(id)` (the iOS table), not `recipe_catalog`. A web-only recipe with no legacy row, such as a new paid recipe, can't be saved, and deleting a legacy row deletes users' saves. Re-point the foreign key to `recipe_catalog(id)`; all 3 existing rows have catalog rows |
+| R7-03 | P1 | Email delivery never verified (P7-04 acceptance) | ⏳ 👤 | No staging project or test inbox (evidence admits it). Blocked on M1-03 (custom sender). The owner signs in once afterwards to confirm the code arrives |
+| R7-04 | P2 | Tests don't prove the database rules | ⏳ | The save-access tests use a fake client. Nothing tests saving on one device and seeing it on another, or free pages staying up when Auth is down. The R7-01 fix should come with a pgTAP test |
+| R7-05 | P2 | Docs are stale | ⏳ | `README.md` says "implementation plan". Evidence says "No shared Auth settings or email templates were changed", but the audit changed both (M1-02, M1-04, M4-03). Handoff still lists P7-08 as pending |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M7-01 | P1 | Anyone can block sign-in for everyone | ⏳ 👤 | The whole project can send 2 auth emails per hour (`rate_limit_email_sent: 2`), and the sign-in form has no CAPTCHA (`security_captcha_enabled: false`). Two requests an hour, from the form or straight to the public Supabase endpoint, use up the quota, and no real visitor gets a code. Fix: M1-03 (custom sender, higher limit), plus CAPTCHA on sign-in. Cloudflare Turnstile is free and Supabase supports it natively |
+| M7-02 | P1 | No account-closure procedure, and deleting a user failed (`profiles` FK was NO ACTION) | ⏳ | The account page says "email support to close your account", and the Privacy Policy promises deletion on request, but no runbook exists (Phase 7 validation lists "Account-closure runbook reference" as required evidence). Write one: verify the request comes from the account's address, check for purchases (Phase 8 must keep financial records), delete the user in Supabase Auth (cascades `saved_recipes` and `profiles`), and confirm by email |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G7-01 | P2 | Turn off the Google and Apple sign-in providers and password sign-ups, which only the iOS app used | The web uses email codes only, and the app has no users. Fewer ways in, less to secure |
+| G7-02 | P2 | A self-service "Delete my account" button | Removes the manual support step in M7-02 |
 
 ---
 

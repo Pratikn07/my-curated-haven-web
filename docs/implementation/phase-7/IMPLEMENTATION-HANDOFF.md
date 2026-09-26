@@ -17,7 +17,7 @@ The task is optional accounts and saved recipes. Preserve anonymous access to al
 | P7-05 | Pending | Owner-only persistence and idempotency checks |
 | P7-06 | Pending | Confirmed Save/Remove, failure and expiry behaviour |
 | P7-07 | Pending | Private list, cross-device refresh and unavailable items |
-| P7-08 | Pending | Account page, local sign-out and closure procedure |
+| P7-08 | Done (2026-09-26 audit) | Account page, local sign-out, and closure procedure: [ops/ACCOUNT-CLOSURE.md](../../../ops/ACCOUNT-CLOSURE.md) |
 | P7-09 | Pending | Navigation, indexing and privacy regression checks |
 | P7-10 | Pending | Required CI, release evidence and rollback reference |
 
