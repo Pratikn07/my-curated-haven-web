@@ -1,0 +1,5 @@
+{
+ "mailer_otp_exp": 86400,
+ "mailer_templates_magic_link_content": "<h2>Your sign-in code</h2>\n<p>Enter this code on mycuratedhaven.com to sign in:</p>\n<p style=\"font-size:28px;font-weight:bold;letter-spacing:4px\">{{ .Token }}</p>\n<p>The code expires in 24 hours. If you did not ask to sign in, you can ignore this email.</p>\n<p>My Curated Haven</p>",
+ "mailer_templates_confirmation_content": "<h2>Your sign-in code</h2>\n<p>Enter this code on mycuratedhaven.com to sign in:</p>\n<p style=\"font-size:28px;font-weight:bold;letter-spacing:4px\">{{ .Token }}</p>\n<p>The code expires in 24 hours. If you did not ask to sign in, you can ignore this email.</p>\n<p>My Curated Haven</p>"
+}

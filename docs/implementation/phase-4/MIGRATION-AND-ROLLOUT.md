@@ -140,3 +140,29 @@ Rate-limit future auth, mutation and signed-link delivery endpoints according to
 - Production authorization and deployment, if any:
 - Rollback reference:
 - Remaining blockers and owners:
+
+## Production migration state and rules
+
+Recorded by the 2026-09-25 audit. Production (`ccrgvammglkvdlaojgzv`) history:
+
+| Version | Applied |
+| --- | --- |
+| `20260923042735_phase4_schema` | Yes (PR #11) |
+| `20260923053000_phase5_recipe_ingestion` | Yes |
+| `20260923180000_phase7_saved_recipes_policies` | Yes (Phase 7 remediation) |
+| `20260923200000_phase8_commerce_schema` | **No** |
+| `20260924000000_phase9_analytics_security` | **No** |
+| `20260924010000_phase9_measurement` | **No** |
+| `20260924120000_phase4_access_hardening` | Yes (2026-09-25 audit) |
+| `20260924174355_phase8_remediation_guards` | **No** |
+| `20260925100000_phase5_allergen_review_guard` | **No** |
+| `20260926020339_phase4_audit_storage_and_rpc_hardening` | Yes (2026-09-25 audit) |
+
+Rules:
+
+1. **Never run a plain `supabase db push` against production.** It would apply every unapplied file at once, including the Phase 8 commerce schema, and history is now out of order.
+2. Take a logical dump first (`supabase db dump --linked`, plus `--data-only`), and store it outside the repository.
+3. Apply one reviewed migration at a time inside a transaction: wrap the file in `BEGIN; … COMMIT;` and run `supabase db query --linked -f <file>` from the repository root.
+4. Record it: `supabase migration repair --status applied <version> --linked`.
+5. Verify as a real caller (anonymous REST request or signed-in synthetic user), not as `service_role`. Then run `npm run smoke:production`.
+6. Never run `supabase config push`. `supabase/config.toml` is local-only.

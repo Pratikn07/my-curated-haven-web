@@ -1,6 +1,6 @@
 # Phase 4 implementation evidence
 
-Status: backend security and data foundation implemented on a branch. Disposable local verification complete. This does not connect or modify the separate production database for the parenting app.
+Status: implemented. **Correction (2026-09-25 audit):** the original line said this work did not modify the production database. It did. PR #11 applied `20260923042735_phase4_schema.sql` to the shared product database `ccrgvammglkvdlaojgzv`, with no staging rehearsal. The record below describes the branch; see [the audit](#audit-2026-09-25) for production state.
 
 ## Source
 
@@ -67,3 +67,28 @@ Local verification run on Node 24.5.0:
 - No public recipe navigation, browsing, or detail pages exposed (reserved for Phase 6).
 - No customer authentication or saved recipes UI (reserved for Phase 7).
 - No Stripe webhook handlers or real payment-derived grants (reserved for Phase 8).
+
+## Audit 2026-09-25
+
+Audited against `main` at `f6c39cd` and the live project `ccrgvammglkvdlaojgzv`. Full findings: [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-4-backend-security-and-data-foundation).
+
+### Backup taken first
+
+A logical dump (`schema.sql`, `data.sql`, `roles.sql`) and the deployed Edge Function bundles were saved outside the repository before any change, because they contain personal data. The project is on the free plan with no platform backups (R4-02).
+
+### Changes applied to production
+
+| Item | Change | Verified |
+| --- | --- | --- |
+| M4-01 | Deleted Edge Functions `chat` (v28) and `generate-tip` (v8). `chat` used the service-role key and trusted a `userId` from the request body, so the public key was enough to read any user's child context. Source stays in `Pratikn07/parenting-app`. The deployed `chat` differed from that repo's `main`; the deployed bundle is kept with the backup | `POST /functions/v1/chat` with the public key → 404. No functions remain |
+| R4-01 | Applied `20260924120000_phase4_access_hardening.sql` (PR #19) in one transaction, then `supabase migration repair --status applied` | Anonymous `GET /rest/v1/recipes` → 401 `permission denied` (was 70 full recipes). `search_analytics` → 401. `recipe_catalog`, `recipe_bodies`, `free_recipe_slots` still return the 3 free recipes |
+| M4-02, M4-05 | New migration `20260926020339_phase4_audit_storage_and_rpc_hardening.sql`: drops the anonymous upload policy on `recipe-images`, removes client `EXECUTE` on `handle_new_user()` and `increment_shop_click(uuid)` | Storage keeps only read policies. Function ACLs: `postgres`, `service_role` (+ `supabase_auth_admin` for the signup trigger). pgTAP `07_phase4_audit_hardening` 8/8 locally; a real local OTP signup still creates its profile |
+| M4-03 | Auth `mailer_otp_exp` 86400 → 3600; email copy "expires in 1 hour" | Read back from the Management API |
+
+After the changes, the security advisor dropped from 16 warnings to 10 (plus 2 expected INFO notes for the now-closed legacy tables). `npm run smoke:production` passed 13/13.
+
+### Still open
+
+- R4-02 backups (owner: plan decision), M4-04 Postgres security upgrade (owner: schedule).
+- R4-04 deliberate backend-regression drill, R4-07 S16 test, M4-06 remaining `search_path` warnings.
+- R4-05 staging rehearsal: Phase 10.
