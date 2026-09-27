@@ -552,6 +552,7 @@ Verified as done (no action):
 - Blockers by type: 23 choking, 18 image, 3 allergen, 3 age-inappropriate ingredient, 3 food safety, 2 diet tag, 1 clarity.
 - Spot check against production: 5 of 5 sampled claims confirmed. Ghee in a "dairy-free, vegan" purée; no rice in "Mild Vegetable Curry with Rice"; soy sauce without wheat declared; a 4-month starting age; added sugar at 12 months.
 - Applied to the 3 live recipes, after a backup (`~/MyCuratedHavenBackups/2026-09-26-before-ai-review-fixes/`), via `20260926144356_phase5_ai_review_fix_live_free_recipes.sql`: peas cooked soft and flattened; blueberries flattened or quartered, with a safety note for all ages; salmon to 145°F; olive oil and wheat flour named; times include cooling (40, 40, 45 min); refrigerated storage for the oat bars; summaries without unsupported nutrition claims. `allergen_review_state` stays `unknown`, because an AI check is not a human review.
+- Draft recipe fixes applied privately on 2026-09-26; backup `2026-09-26-before-draft-fixes`.
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
