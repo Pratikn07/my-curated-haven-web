@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
+import { otpRequestErrorMessage } from "@/lib/auth/otp-errors";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -26,7 +27,7 @@ export async function requestOtpAction(email: string): Promise<AuthActionResult>
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: otpRequestErrorMessage(error) };
     }
 
     return { success: true };

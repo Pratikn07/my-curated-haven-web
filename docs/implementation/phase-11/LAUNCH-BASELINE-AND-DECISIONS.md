@@ -28,7 +28,19 @@ This is a source review. No fresh production database, Stripe dashboard, mail pr
 
 These are attributed repository records, not a fresh production audit by this planning task. Reconcile their timestamps and deployed state during P11-01.
 
-## Outstanding source findings
+## Status of B01–B07, 2026-09-26 audit
+
+| Finding | Status | Evidence |
+| --- | --- | --- |
+| B01 | ✅ fixed | `webhook/route.ts`: 503 when webhooks aren't configured, 400 without a valid `stripe-signature` (`constructWebhookEvent`). Live probe returns 503 |
+| B02 | ✅ fixed | `canUseMockCheckout()` is false whenever `VERCEL_ENV` is set; deployed checkout needs `CHECKOUT_ENABLED=true` and Stripe configured |
+| B03 | ✅ fixed | `fulfilment.ts` requires `payment_status === "paid"` and records the real charge, amount, currency and `livemode`; synthetic charge ids only on the local mock path |
+| B04 | ⏳ open | Fulfilment still runs inside the webhook and the customer refresh route; no scheduled reconciliation. Build with checkout (a scheduled GitHub Action or Vercel Cron that re-reads paid sessions) |
+| B05 | ✅ fixed | `database-config.ts`: deployed environments require `COMMERCE_DATABASE_URL` and reject loopback hosts (PR #35). A restricted commerce role is still to be created with checkout |
+| B06 | 🔶 partial | Hourly production smoke check emails the owner. Commerce alerts come with checkout. PostHog is live |
+| B07 | ✅ | The $15 offer exists only in `supabase/seed.sql` and tests; production has no commerce tables |
+
+## Outstanding source findings (as found on 2026-09-24)
 
 Paths below are relative to `my-curated-haven-web/` unless specified otherwise. Revalidate before fixing. Record a resolved finding only with a commit and boundary test.
 

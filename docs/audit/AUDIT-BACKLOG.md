@@ -27,6 +27,9 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
 | R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in (the cookie dialog was removed) |
 | R3-07 | Approve the design direction (palette, Inter + Cormorant, card style) from the after-fix screenshots |
+| M11-03 | Set up mail for `support@mycuratedhaven.com` (the domain has no MX records) |
+| M11-02 | Upgrade Vercel to Pro before checkout opens |
+| R11-01 | Invited buyers first, or open checkout to everyone at once |
 | R10-01 | Confirm you are the owner for every Phase 10 release gate (release, QA, editorial, commerce, support, operations) |
 | R1-09 | Tick the content-register checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` |
 
@@ -409,7 +412,7 @@ Verified as done (no action):
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
 | D10-01 | P1 | Printed recipes had no title, summary, time or yield | ✅ fixed | A4 and US Letter PDFs of all 3 live free recipes started with the photo. `recipe-print.css` hid every `header` under `body:has(.recipe-print-root)`, which included the recipe's own header. The 16:9 frame also stayed full size around a 2.2 in image, so a 5-ingredient recipe took 3 pages. The selector now excludes `.recipe-print-root header`, and the frame shrinks to 2.2 in. Regression test `printed recipes keep the title and details` fails on the old CSS |
-| D10-02 | P2 | Homepage preloads compete with the hero image | ✅ fixed | Lighthouse mobile: Home performance 78–92, LCP 2.7–5.1 s across runs; the hero spent 1.7 s in "load delay". The page preloaded the hero plus the first home recipe card, which is below the fold. Removed `priority` from the home recipe cards |
+| D10-02 | P2 | Homepage preloads compete with the hero image | 🔶 partly | After deploy: only the hero preloads, but the median of 3 runs is still LCP 3.3 s (load delay 1.3–1.5 s, was 1.7 s). Next: G10-02, G10-03, fixed-size hero. Original note: | Lighthouse mobile: Home performance 78–92, LCP 2.7–5.1 s across runs; the hero spent 1.7 s in "load delay". The page preloaded the hero plus the first home recipe card, which is below the fold. Removed `priority` from the home recipe cards |
 | D10-03 | P3 | `/recipes` heading order | ✅ fixed | On mobile the "Filter Recipes" `h2` is hidden, so the page went `h1` → `h3`. Added a screen-reader `h2` "Recipes" over the results |
 
 ### Good to have
@@ -419,6 +422,45 @@ Verified as done (no action):
 | G10-01 | P2 | Run Lighthouse against production in the hourly smoke workflow and alert on LCP over 4 s | Lab results vary ±2 s per run; a trend catches regressions a single run can't |
 | G10-02 | P2 | Trim PostHog's optional scripts (surveys, dead-click, web-vitals) if unused | PostHog adds about 120 KB and 70 ms of main-thread time on first load |
 | G10-03 | P2 | Self-host fonts (M2-03) | Removes the Google Fonts dependency from builds and the first page load |
+
+---
+
+## Phase 11: staged launch and operations
+
+Plan: `docs/implementation/phase-11/IMPLEMENTATION-PLAN.md` (PR #23, 18 tasks). **Nothing was built**: the phase is a plan and depends on Phase 10 passing. No review or remediation plan covered it. Audited 2026-09-26 against `main` at `be1446e`, with provider settings read from Vercel, Supabase and DNS.
+
+Phase 11 opens sales in steps (a few invited buyers, then everyone) and runs the first 30 days. It can't start until checkout exists (R8-06, M8-02). The audit found three problems that affect launch, one of them live today.
+
+Verified as done (no action):
+- **B01, B02, B03, B05, B07 fixed** in source; see `LAUNCH-BASELINE-AND-DECISIONS.md`.
+- **Checkout stop switch**: removing `CHECKOUT_ENABLED` and redeploying stops new sales.
+- **Rollback, domain, TLS, www redirect**: Phases 1, 8 and 10.
+- **Backup and restore** rehearsed (R4-02); limited to days the owner's Mac is on.
+- **Supabase won't pause**: the hourly smoke check reads recipes.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R11-01 | P1 👤 | No server-side invite list for a first cohort (P11-07) | ⏳ | Owner decides: invited buyers first (build a private eligibility table checked in `/api/checkout` before the Stripe session) or open to everyone |
+| R11-02 | P1 | No scheduled payment reconciliation (B04, P11-06) | ⏳ | Build with checkout: a scheduled job that re-reads paid Stripe sessions and grants missing access. Stripe retries failed webhooks for 3 days, which covers short outages |
+| R11-03 | P2 | Production settings existed only in memory (P11-03) | ✅ recorded | `ops/PRODUCTION-CONFIG.md`: every service, setting name, owner and check, no secrets |
+| R11-04 | P2 👤 | Domain renewal | ⏳ | Hostinger, expires 2027-01-28. Confirm auto-renew |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| M11-01 | P0 👤 | No one outside the Supabase team can sign in | ⏳ (message ✅) | Auth config: `smtp_host` empty (built-in sender), team has 1 member. Supabase docs: the built-in sender "will refuse to deliver messages to addresses that are not part of the project's team" ("Email address not authorized"). Parents saw that raw text. The sign-in page now explains that free recipes need no account (`src/lib/auth/otp-errors.ts`). Real fix: A1 / M1-03 |
+| M11-02 | P1 👤 | Vercel Hobby forbids selling | ⏳ | Vercel fair-use guidelines: Hobby is "restricted to non-commercial personal use only", including "any method of requesting or processing payment" and "advertising the sale of a product". Upgrade to Pro ($20/month) before checkout. Hobby also caps image optimisation at 5,000 transformations a month |
+| M11-03 | P0 👤 | `support@mycuratedhaven.com` can't receive mail | ⏳ | `dig MX mycuratedhaven.com` is empty on 1.1.1.1 and 8.8.8.8. The address is on 9 pages, including the Privacy Policy and account deletion. Add mail forwarding (for example ImprovMX, free) to an inbox you read |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G11-01 | P2 | Move backups off the Mac (a scheduled GitHub Action writing an encrypted dump to private storage), or Supabase Pro's daily backups | Today no backup runs on days the Mac is off |
+| G11-02 | P2 | Add an MX and SPF check to the smoke workflow once mail is set up | Catches a DNS change that silently breaks support mail or sign-in email |
 
 ---
 
