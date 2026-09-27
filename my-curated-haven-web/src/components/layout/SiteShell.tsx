@@ -7,7 +7,7 @@ import CampaignCapture from "@/components/analytics/CampaignCapture";
 export default function SiteShell({ children }: { children: ReactNode }) {
   return (
     <>
-      {/* First focus stop on every page, ahead of the consent banner the provider renders. */}
+      {/* First focus stop on every page. */}
       <a className="skip-link" href="#main">
         Skip to content
       </a>

@@ -106,33 +106,12 @@ test("brand fonts are the computed fonts", async ({ page }) => {
   expect(fonts.wordmark).toMatch(/Cormorant/);
 });
 
-// Phase 3 audit R3-03: the consent banner used to take the first focus stop.
+// Phase 3 audit R3-03: the skip link must be the first focus stop.
 test("the skip link is the first focus stop", async ({ page, browserName }) => {
   test.skip(browserName === "webkit", "Safari's Tab key skips links unless the user enables full keyboard access");
   await page.goto("/");
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toHaveText("Skip to content");
-});
-
-// Phase 3 audit R3-04: dialog focus moves in, stays in, and returns to the opener.
-test("cookie preferences dialog manages focus", async ({ page, browserName }) => {
-  test.skip(browserName === "webkit", "Safari's Tab key skips buttons unless the user enables full keyboard access");
-  await page.goto("/");
-  const opener = page.getByRole("button", { name: "Cookie & Analytics Preferences" });
-  await opener.focus();
-  await page.keyboard.press("Enter");
-  const dialog = page.getByRole("dialog", { name: "Privacy & Cookie Preferences" });
-  await expect(dialog).toBeVisible();
-  await expect(dialog.locator(":focus")).toHaveCount(1);
-  for (let i = 0; i < 12; i++) {
-    await page.keyboard.press("Tab");
-    await expect(dialog.locator(":focus")).toHaveCount(1);
-  }
-  await page.keyboard.press("Shift+Tab");
-  await expect(dialog.locator(":focus")).toHaveCount(1);
-  await page.keyboard.press("Escape");
-  await expect(dialog).toHaveCount(0);
-  await expect(opener).toBeFocused();
 });
 
 // Phase 3 audit R3-05: D06 text scaling. The homepage previews used to push the page to 459px.
@@ -149,17 +128,10 @@ test("public pages reflow at 200% text size", async ({ page }) => {
   }
 });
 
-// Phase 3 audit follow-up: the banner is fixed at the bottom (no layout shift when fonts
-// load) and the page reserves its height, so it never hides the footer.
-test("consent banner floats at the bottom without hiding the footer", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+// 2026-09-26: the consent banner and preferences dialog were removed (owner decision).
+test("no cookie banner or preferences link is shown", async ({ page }) => {
   await page.goto("/");
-  const banner = page.getByRole("complementary", { name: "Privacy and cookie choices" });
-  await expect(banner).toBeVisible();
-  expect(await banner.evaluate((el) => getComputedStyle(el).position)).toBe("fixed");
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const lastFooterLink = page.locator("footer a").last();
-  const linkBox = await lastFooterLink.boundingBox();
-  const bannerBox = await banner.boundingBox();
-  expect(linkBox && bannerBox && linkBox.y + linkBox.height <= bannerBox.y + 1).toBe(true);
+  await expect(page.getByRole("complementary", { name: "Privacy and cookie choices" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Cookie & Analytics Preferences" })).toHaveCount(0);
+  expect(await page.evaluate(() => getComputedStyle(document.body).paddingBottom)).toBe("0px");
 });
