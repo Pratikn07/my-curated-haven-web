@@ -336,26 +336,27 @@ Verified as done (no action), live on 2026-09-26:
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
 | R9-01 | P2 | The consent banner asks permission for analytics that doesn't run | ✅ superseded | Banner removed and PostHog set up (owner decision, 2026-09-26). Original note: | Every first visit shows the banner, but accepting sends nothing. Owner chooses: set up PostHog (free tier) so the data is useful, or hide the banner until analytics is provisioned. Hiding it removes friction and asks for nothing |
-| R9-02 | P2 | `20260924000000_phase9_analytics_security` is unrecorded in production | ⏳ | Its statements (drop `search_analytics` policies, revoke client access) were already applied by `20260924120000`. Apply it (idempotent) and record it, for history parity |
+| R9-02 | P2 | `20260924000000_phase9_analytics_security` is unrecorded in production | ✅ applied | Applied and recorded 2026-09-26 after a fresh backup; still 0 policies and no client access. Original note: | Its statements (drop `search_analytics` policies, revoke client access) were already applied by `20260924120000`. Apply it (idempotent) and record it, for history parity |
 | R9-03 | P1 when launching | `20260924010000_phase9_measurement` depends on the commerce tables | ⏳ | Alters `private.purchase_orders`, so it can only follow `20260923200000`. Launch order: `20260923200000` → `20260924010000` → `20260924174355` |
-| R9-04 | P2 👤 | Campaign registry holds placeholder names | ⏳ | `ALLOWED_CAMPAIGNS` includes `sample_reel_001`, `sample_reel_002`, `sample_reel_003`, `feed_post_001`. Links on real Instagram posts only count if their `utm_campaign` is on this list. Owner lists the real campaigns; the assistant updates the registry and writes the links |
+| R9-04 | P2 👤 | Campaign registry holds placeholder names | ✅ replaced | Owner: Instagram bio, Stories and DMs only. Registry is now `bio_link`, `story_link`, `instagram_dm`; `utm_content` takes a date or short label. Original note: | `ALLOWED_CAMPAIGNS` includes `sample_reel_001`, `sample_reel_002`, `sample_reel_003`, `feed_post_001`. Links on real Instagram posts only count if their `utm_campaign` is on this list. Owner lists the real campaigns; the assistant updates the registry and writes the links |
 | R9-05 | P2 | Campaign lost if the visitor browses before accepting | ✅ moot | No consent step now. Every event also reads the URL, so the first event of a campaign visit is tagged (`analytics.spec.ts`). Original note: | Live: landing on `/?utm_…` then accepting on `/recipes` kept no campaign. Accepting on the landing page works. Keep the landing campaign in memory (not storage) until the visitor chooses, then persist it only on Accept |
 | R9-06 | P2 | No founder reporting yet (P9-09) | ⏳ | The plan's four private views don't exist. The evidence maps them to `private.founder_commerce_totals` and the PostHog funnel, and neither is in production. Build them when analytics and checkout go live |
-| R9-07 | P2 | Docs stale | ⏳ | `README.md` says "detailed implementation plan"; evidence doesn't say analytics is off in production |
+| R9-07 | P2 | Docs stale | ✅ updated | Phase 9 README, evidence and attribution doc now say what's live. Original note: | `README.md` says "detailed implementation plan"; evidence doesn't say analytics is off in production |
 
 ### Must do, not in any plan
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
 | M9-01 | P1 👤 | Analytics and session recordings run without consent, including for EU and UK visitors | ⏳ accepted risk | Owner decision, 2026-09-26. Under GDPR/ePrivacy (EU) and PECR (UK), non-essential cookies and session replay need opt-in consent. Some US states (for example California, via the Global Privacy Control signal) expect an opt-out. Risk: regulator complaints or fines if the site gets EU/UK traffic. Fix: add the consent platform (OneTrust or similar) before any EU/UK promotion. PostHog has `opt_out_capturing()` and `opt_in_capturing()` for it to call |
-| M9-02 | P2 👤 | Session replay must be switched on in the PostHog project | ⏳ | The code starts recordings, but PostHog only accepts them if the project has "Record user sessions" on (PostHog → Settings → Session replay). Also pick retention there |
+| M9-03 | P1 | Signed-in users were never linked in PostHog | ✅ fixed | Owner test 2026-09-26: signed in and saved a recipe, but Persons showed 0. Sign-in completes in a server action, so the browser Supabase client fires no auth event. `AnalyticsProvider` now re-reads the session on every page and calls `identify`. Verified locally: `$identify` with user id, email and the prior anonymous id |
+| M9-02 | P2 👤 | Session replay must be switched on in the PostHog project | ✅ already on | Live check 2026-09-26: PostHog loaded the recorder and accepted `/s/` uploads. Original note: | The code starts recordings, but PostHog only accepts them if the project has "Record user sessions" on (PostHog → Settings → Session replay). Also pick retention there |
 
 ### Good to have
 
 | ID | Pri | Suggestion | Why |
 | --- | --- | --- | --- |
-| G9-01 | P2 | Before any analytics, count recipe views server-side with no identifiers (a daily page-view count per recipe) | Answers "are the free recipes opened?" without consent or cookies |
-| G9-02 | P2 | A one-page guide for making tracked Instagram links | So new posts use registered campaign values |
+| G9-01 | P2 | Before any analytics, count recipe views server-side with no identifiers (a daily page-view count per recipe) | Moot: PostHog now answers this |
+| G9-02 | P2 | A one-page guide for making tracked Instagram links | ✅ `docs/INSTAGRAM-LINKS.md` |
 
 ---
 

@@ -1,5 +1,7 @@
 # Tiny Soho attribution and separate Instagram reporting
 
+> Update 2026-09-26: the registry now holds `bio_link`, `story_link` and `instagram_dm`, and `utm_content` accepts a date or short lowercase label. Ready-made links: [docs/INSTAGRAM-LINKS.md](../../INSTAGRAM-LINKS.md). Consent no longer gates attribution. The example link below is the original plan.
+
 ## Campaign links
 
 Create a versioned campaign registry, initially a small reviewed configuration file. Each entry maps a neutral campaign code to a Tiny Soho post or placement, target route and publication date. Never include a follower handle, child's name or customer identifier in a campaign code.

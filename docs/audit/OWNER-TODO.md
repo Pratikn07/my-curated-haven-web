@@ -30,7 +30,7 @@ Last updated: 2026-09-26, after Phase 9 and the PostHog switch.
   3. Send the assistant the **site key** (it's public).
 - **Done when**: sign-in works for you, and the assistant's test confirms requests without the check are refused.
 
-### A3. Confirm a sign-in email arrives (R7-03)
+### A3. Confirm a sign-in email arrives (R7-03) ✅ (owner received the code, 2026-09-26)
 
 - **After A1.** Sign in once at mycuratedhaven.com/sign-in with your own email. Check the code arrives in your inbox (not spam) within a minute and that it signs you in.
 
@@ -70,16 +70,15 @@ Last updated: 2026-09-26, after Phase 9 and the PostHog switch.
 
 - **Done**: banner removed, PostHog chosen, project key added to Vercel (2026-09-26).
 - **You**:
-  1. PostHog → **Settings → Session replay** → turn on **Record user sessions**. Without this, no recordings arrive even though the site sends them.
-  2. Same page: check **Mask all inputs** is on (the site also masks them) and pick how long recordings are kept.
+  1. ~~Turn on session replay~~: already on (recordings arrive).
+  2. PostHog → **Settings → Session replay**: check **Mask all inputs** is on (the site also masks them) and pick how long recordings are kept.
   3. PostHog → **Settings → Project → Authorized URLs**: add `https://mycuratedhaven.com` so the toolbar and heatmaps work.
   4. Optional: **Google Search Console** (search.google.com/search-console) → add `mycuratedhaven.com` as a Domain property and add the TXT record it shows. It's free and shows which Google searches bring people in, which PostHog can't.
 - **Before you promote in the EU or UK**: add the consent platform (OneTrust or similar). Today analytics and recordings run for everyone without asking, which EU/UK law requires consent for (M9-01).
 
-### A11. Register your real Instagram campaigns (R9-04)
+### A11. Instagram links (R9-04) ✅
 
-- Only links whose campaign name is on the site's list are counted. The list still has placeholders like `sample_reel_001`.
-- Send the assistant the names you'll use (for example `bio_link`, `reel_first_recipe`). It updates the list and gives you ready-made links.
+- Done 2026-09-26: bio, Stories and DMs. Copy links from `docs/INSTAGRAM-LINKS.md`. Tell the assistant if you start sharing links anywhere else.
 
 ---
 

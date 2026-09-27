@@ -1,18 +1,15 @@
 import { CAMPAIGN_STORAGE_KEY, isAnalyticsPermitted } from "./consent";
 
-export const ALLOWED_CAMPAIGNS = [
-  "toddler_recipes_launch",
-  "sample_reel_001",
-  "sample_reel_002",
-  "sample_reel_003",
-  "stories_launch",
-  "bio_link",
-  "feed_post_001",
-] as const;
+/**
+ * One campaign per clickable Instagram placement (owner, 2026-09-26).
+ * Links for each are in docs/INSTAGRAM-LINKS.md.
+ */
+export const ALLOWED_CAMPAIGNS = ["bio_link", "story_link", "instagram_dm"] as const;
 
 export const ALLOWED_SOURCES = ["instagram"] as const;
 export const ALLOWED_MEDIUMS = ["organic_social"] as const;
-export const ALLOWED_CONTENT = ["reel_001", "reel_002", "reel_003", "stories", "bio", "feed"] as const;
+/** Optional label for one post: a date (2026-10-01) or a short lowercase word (oat_bars). */
+const CONTENT_PATTERN = /^[a-z0-9][a-z0-9_-]{0,39}$/;
 
 export type RegisteredCampaign = (typeof ALLOWED_CAMPAIGNS)[number];
 
@@ -65,7 +62,7 @@ export function acceptCampaignInput(input: CampaignInput): Omit<CampaignAttribut
   if (!(ALLOWED_MEDIUMS as readonly string[]).includes(medium)) return null;
   if (!isAllowedCampaign(campaign)) return null;
   if (input.utm_content && content === undefined) return null;
-  if (content && !(ALLOWED_CONTENT as readonly string[]).includes(content)) return null;
+  if (content && !CONTENT_PATTERN.test(content)) return null;
 
   return {
     utm_source: source,

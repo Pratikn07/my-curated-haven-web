@@ -1,6 +1,6 @@
 # Phase 9: analytics and recipe funnel measurement
 
-Status: implemented (PR #20) but not switched on. No PostHog project, no analytics settings in Vercel and no Phase 9 migrations in production, so accepting analytics sends nothing. The 2026-09-26 audit record is in [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-26).
+Status: live since 2026-09-26. The owner replaced the consent design below: there is no cookie banner, and PostHog (`posthog-js`) records page views, clicks, identified signed-in users and session recordings (inputs masked, none on sign-in, account or checkout) for every visitor (PR #54). A consent platform is planned; until then this is an accepted risk for EU/UK visitors (backlog M9-01). The consent, "no session recordings" and "optional analytics" statements in this package describe the original plan. Campaign links: [docs/INSTAGRAM-LINKS.md](../../INSTAGRAM-LINKS.md). Audit record: [IMPLEMENTATION-EVIDENCE.md](IMPLEMENTATION-EVIDENCE.md#audit-2026-09-26).
 
 ## Outcome
 
