@@ -4,6 +4,8 @@
 
 **Reviewed:** 2026-09-24
 
+> **2026-09-26 audit update:** PostHog is now provisioned and live without consent; the native `chat` and `generate-tip` functions were deleted from production; the web repository no longer carries the `parenting_app` gitlink; production configuration is in `ops/PRODUCTION-CONFIG.md`. See the Phase 12 README.
+
 ## Source revisions
 
 | Source | Revision inspected | Scope |

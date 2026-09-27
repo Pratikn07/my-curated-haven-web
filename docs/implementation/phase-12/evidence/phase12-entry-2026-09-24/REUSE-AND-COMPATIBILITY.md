@@ -1,5 +1,7 @@
 # Phase 12 source reuse and compatibility review
 
+> **2026-09-26 audit update:** the native `chat` and `generate-tip` Edge Functions are no longer deployed (backlog M4-01). Treat chat and generated tips as source to re-review, not as running services. Analytics is live without consent (backlog M9-01).
+
 **Status:** source inventory only. No feature charter or database change is approved.
 
 **Revisions:** web monorepo `8e58812be52a0a5d4ad5c1062c810bf43b399ed6`; standalone native `main` `5e5caa73f5a5d0705572739dd881a96abe9be23b`. The web repository pins its `parenting_app` gitlink to `b92605d473595d6057663d1ac824a11112eedb0d`; production deployment versions remain unknown. See [the baseline](BASELINE.md).

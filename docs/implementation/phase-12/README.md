@@ -2,6 +2,17 @@
 
 Status: source review and proposed research plan recorded on 2026-09-24. Research execution, feature selection, implementation and pilot release are pending. No expansion feature, customer demand result or production approval is established by merging this package.
 
+## Audit 2026-09-26
+
+Audited against `main` at `5efb34d`: see [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-12-evidence-led-parenting-expansion). No expansion code exists, as intended. Facts that changed since the entry review:
+
+- **Analytics is live** (PostHog, since 2026-09-26) for every visitor, with no consent step, and signed-in parents are identified by account and email. Metrics below that say "consented" now mean "tracked"; the EU/UK consent risk (backlog M9-01) applies to any pilot.
+- **The native `chat` and `generate-tip` Edge Functions were deleted from production** (backlog M4-01: `chat` trusted a caller-supplied user id with the service-role key). Their source remains in `parenting-app`; do not redeploy either as a reuse shortcut.
+- **The native app has no users** (owner, 2026-09-25), which lowers the shared-database compatibility risk but does not remove the checks.
+- **Production configuration is recorded** in [ops/PRODUCTION-CONFIG.md](../../../ops/PRODUCTION-CONFIG.md).
+- **The `parenting_app` gitlink was removed** from the web repository. It pinned `b92605d` (2025-08-20) while `parenting-app` `main` is `5e5caa7`, and nothing built or cloned it. Use the standalone repository as the native source of truth.
+- Phase 10 is still NO-GO and Phase 11 has not started, so P12-17/18 remain blocked. P12-02 can start on free-recipe data after about 30 days of PostHog collection.
+
 ## Outcome
 
 Use evidence from the recipe launch to choose the next useful step for My Curated Haven. Preserve the mobile-first recipe experience, existing purchases and parenting-app source. Build one small extension only after the problem, scope, data access and operating cost pass review.
