@@ -49,15 +49,19 @@ jobs:
         env:
           SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: |
-          # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded".
-          # Skip containers the tests don't use (about 4.6 GB of images), then
-          # retry with a pause; layers already pulled are reused.
+          # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded"
+          # for long stretches. Skip containers the tests don't use (about 4.6 GB),
+          # and fall back to the same images on Docker Hub for later attempts.
           for attempt in 1 2 3; do
+            if [ "$attempt" -gt 1 ]; then
+              export SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io
+              echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io" >> "$GITHUB_ENV"
+            fi
+            echo "supabase start attempt $attempt from $SUPABASE_INTERNAL_IMAGE_REGISTRY"
             if supabase start -x studio,analytics,vector,edge-runtime,imgproxy,realtime; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
-            echo "supabase start failed (attempt $attempt); retrying in $((attempt * 45))s"
             supabase stop --no-backup || true
-            sleep $((attempt * 45))
+            sleep $((attempt * 30))
           done
           supabase db reset
 
@@ -157,23 +161,25 @@ jobs:
         env:
           SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: |
-          # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded".
-          # Skip containers the tests don't use (about 4.6 GB of images), then
-          # retry with a pause; layers already pulled are reused.
+          # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded"
+          # for long stretches. Skip containers the tests don't use (about 4.6 GB),
+          # and fall back to the same images on Docker Hub for later attempts.
           for attempt in 1 2 3; do
+            if [ "$attempt" -gt 1 ]; then
+              export SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io
+              echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io" >> "$GITHUB_ENV"
+            fi
+            echo "supabase start attempt $attempt from $SUPABASE_INTERNAL_IMAGE_REGISTRY"
             if supabase start -x studio,analytics,vector,edge-runtime,imgproxy,realtime; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
-            echo "supabase start failed (attempt $attempt); retrying in $((attempt * 45))s"
             supabase stop --no-backup || true
-            sleep $((attempt * 45))
+            sleep $((attempt * 30))
           done
 
       - name: Verify clean migration replay
         run: supabase db reset
 
       - name: Run database access matrix tests (pgTAP)
-        env:
-          SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: supabase test db
 
       - name: Verify generated TypeScript types drift
