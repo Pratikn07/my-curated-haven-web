@@ -4,7 +4,7 @@ Everything only you (the owner) can do, collected from the 2026-09-25/26 audit. 
 
 When you finish an item, tell the assistant the ID. It will do its part, verify, and tick the item here.
 
-Last updated: 2026-09-26, after Phase 9 and the PostHog switch.
+Last updated: 2026-09-26, after Phase 10.
 
 ---
 
@@ -111,6 +111,11 @@ Checkout stays off until these are decided. The collection page will show your r
 2. Stripe Dashboard → Developers → **Webhooks** → add endpoint `https://mycuratedhaven.com/api/stripe/webhook` with events `checkout.session.completed`, `refund.created`, `refund.updated`.
 3. Put these in Vercel → Settings → Environment Variables (Production) yourself, not in chat: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (from the endpoint), `STRIPE_EXPECTED_ACCOUNT_ID`.
 4. Tell the assistant. It then sets up the checkout database connection (`COMMERCE_DATABASE_URL`) and applies the checkout database changes, staging first.
+
+### B0. Name yourself as gate owner, and decide on staging (R10-01, R10-03)
+
+- **Gate owners**: Phase 10 has 6 sign-off roles (release, QA, editorial, commerce, support, operations). Reply "I own all Phase 10 gates" and the assistant records it.
+- **Staging**: when you're ready to test checkout, say so. The assistant creates a free Supabase staging project (your org has room for one more) and points Vercel preview deployments at it. Nothing to do until then.
 
 ### B3. Test purchase and refund (Phase 10)
 

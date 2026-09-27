@@ -1,4 +1,20 @@
-#\g<1>✅ docs\2| ID | Decision or action |
+# Phase audit backlog
+
+Phase-by-phase audit of My Curated Haven web, started 2026-09-25.
+Baseline: `origin/main` at `a496ce6`, live site https://mycuratedhaven.com, Supabase project `ccrgvammglkvdlaojgzv`.
+
+Each phase has three lists:
+
+- **Remaining**: work the phase plan required that is not done, or that a later phase broke.
+- **Must do, not in any plan**: gaps the plans missed that have to be fixed. These are not optional.
+- **Good to have**: improvements to come back to later.
+
+Priority: **P0** = visitors affected now. **P1** = fix before launch. **P2** = cleanup.
+Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decision.
+
+## Waiting on the owner
+
+| ID | Decision or action |
 | --- | --- |
 | ~~R5-03a~~ | Done 2026-09-26 by OpenAI GPT-6 (Codex): 0 approve, 34 approve with changes, 36 reject, 53 blockers. Results stay outside the repo because they contain the paid drafts: `~/Documents/working/mch/recipe-review/`. Was: run the external AI review of all 70 recipes: `~/Documents/working/mch/recipe-review/REVIEW-PROMPT-ALL-70.md`, with an AI that can run commands (Claude Code, Cursor or Codex). Results go to `review-result-batch-1..7.json` in that folder |
 | R5-03 | Review the 3 free recipes with the checklist (allergens, steps, yield, time, choking and texture, alt text), including each card summary's health claims (M6-01) |
@@ -9,8 +25,9 @@
 | M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
-| R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in, the cookie dialog |
+| R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in (the cookie dialog was removed) |
 | R3-07 | Approve the design direction (palette, Inter + Cormorant, card style) from the after-fix screenshots |
+| R10-01 | Confirm you are the owner for every Phase 10 release gate (release, QA, editorial, commerce, support, operations) |
 | R1-09 | Tick the content-register checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` |
 
 ---
@@ -357,6 +374,51 @@ Verified as done (no action), live on 2026-09-26:
 | --- | --- | --- | --- |
 | G9-01 | P2 | Before any analytics, count recipe views server-side with no identifiers (a daily page-view count per recipe) | Moot: PostHog now answers this |
 | G9-02 | P2 | A one-page guide for making tracked Instagram links | ✅ `docs/INSTAGRAM-LINKS.md` |
+
+---
+
+## Phase 10: launch QA
+
+Plan: `docs/implementation/phase-10/IMPLEMENTATION-PLAN.md` (PR #17, 16 tasks). Built: QA harness and evidence records (PR #32, `a0150c0`, `9ccdbb3`). **No review or remediation plan covered Phase 10.** Audited 2026-09-26 against `main` at `d3a7560`, with lab measurements and print output from production.
+
+Phase 10 is the pre-sale test pass; it ends in a go/no-go decision. The recorded decision, **NO-GO for a paid release**, is still correct: most gates need the commercial decisions (R8-06), Stripe (M8-02) and a staging copy.
+
+Verified as done (no action):
+- **Production guard**: `PLAYWRIGHT_BASE_URL=https://mycuratedhaven.com npx playwright test --list` stops with "Phase 10 tests refuse a known production origin".
+- **Skips are legitimate**: all 50 are platform or run-once-on-desktop skips with reasons; required data suites fail, not skip, without a database.
+- **Case register**: CI uploads `phase10-database-scenarios` and the web results artifacts on every run.
+- **Checkout stays off in production**: `checkoutEnabled` needs `CHECKOUT_ENABLED=true` and Stripe configured in a deployed environment (`src/lib/payments/config.ts:20`); neither is set.
+- **SEO basics**: `robots.txt` allows crawling and points to the sitemap; the sitemap lists the 6 public pages and 3 free recipes; canonical URLs use the apex domain; recipe pages carry one Recipe JSON-LD block; unknown recipes return 404; `/sign-in` and `/collections` are `noindex`.
+- **Accessibility (lab)**: Lighthouse 100 on Home, a recipe page and sign-in; 98 on `/recipes` (fixed below).
+- **Layout stability**: CLS 0 on every measured page.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R10-01 | P1 👤 | Gate owners not named (P10-01) | ⏳ | Every gate row says "not named". The owner is the only person; confirm them as owner of every gate |
+| R10-02 | P1 | Rollback target in the release record is weeks old | ✅ corrected | `RELEASE-RECORD.md` named deployment `6647364838` (`5239345`). Rolling back to it would undo every audit fix (webhook signatures, account deletion, allergen reset, PostHog). Replaced with "Vercel Instant Rollback to the previous production deployment", and a note to check that deployment's commit first |
+| R10-03 | P1 👤 | No staging copy (P10-02, P10-06, P10-13) | ⏳ | Needed before the Stripe test purchase. The `My curated Haven` Supabase org has 1 active project and 1 paused (`Compass`), so a free staging project fits. Vercel preview deployments can serve as the staging website |
+| R10-04 | P2 | CI image-pull failures had no retry (P10-03) | ✅ retry | `toomanyrequests: Data limit exceeded` from `public.ecr.aws` failed `web-quality` twice on 2026-09-26 (reruns: 3 of the last 60 runs). `supabase start` now retries up to 3 times with 45 s and 90 s pauses in both jobs |
+| R10-05 | P2 | Evidence records stale | ✅ updated | Restore rehearsal (done in the Phase 4 audit, `ops/README.md`), measurement (PostHog live, consent cases obsolete), performance and print now have evidence |
+| R10-06 | P1 👤 | Real-device, VoiceOver and TalkBack checks (P10-09) | ⏳ | Same as R3-06. Only the owner can run them |
+| R10-07 | P1 👤 | Payment gates G05, G11 (P10-06, P10-07, P10-13) | ⏳ | Blocked on R8-06, M8-02 and R10-03 |
+
+### Must do, not in any plan
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| D10-01 | P1 | Printed recipes had no title, summary, time or yield | ✅ fixed | A4 and US Letter PDFs of all 3 live free recipes started with the photo. `recipe-print.css` hid every `header` under `body:has(.recipe-print-root)`, which included the recipe's own header. The 16:9 frame also stayed full size around a 2.2 in image, so a 5-ingredient recipe took 3 pages. The selector now excludes `.recipe-print-root header`, and the frame shrinks to 2.2 in. Regression test `printed recipes keep the title and details` fails on the old CSS |
+| D10-02 | P2 | Homepage preloads compete with the hero image | ✅ fixed | Lighthouse mobile: Home performance 78–92, LCP 2.7–5.1 s across runs; the hero spent 1.7 s in "load delay". The page preloaded the hero plus the first home recipe card, which is below the fold. Removed `priority` from the home recipe cards |
+| D10-03 | P3 | `/recipes` heading order | ✅ fixed | On mobile the "Filter Recipes" `h2` is hidden, so the page went `h1` → `h3`. Added a screen-reader `h2` "Recipes" over the results |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G10-01 | P2 | Run Lighthouse against production in the hourly smoke workflow and alert on LCP over 4 s | Lab results vary ±2 s per run; a trend catches regressions a single run can't |
+| G10-02 | P2 | Trim PostHog's optional scripts (surveys, dead-click, web-vitals) if unused | PostHog adds about 120 KB and 70 ms of main-thread time on first load |
+| G10-03 | P2 | Self-host fonts (M2-03) | Removes the Google Fonts dependency from builds and the first page load |
 
 ---
 

@@ -287,7 +287,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
 
       {/* Hero Image */}
       {catalog.previewImagePath ? (
-        <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface-muted">
+        <div className="recipe-print-figure relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface-muted">
           <Image
             src={catalog.previewImagePath}
             alt={catalog.title}
