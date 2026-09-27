@@ -1,5 +1,7 @@
 # Operations scripts
 
+All production settings (names, owners, checks): [PRODUCTION-CONFIG.md](PRODUCTION-CONFIG.md).
+
 ## Production backup (free plan)
 
 The Supabase project `ccrgvammglkvdlaojgzv` is on the free plan, which keeps no platform backups. `backup-production.sh` makes one every day on the owner's Mac:

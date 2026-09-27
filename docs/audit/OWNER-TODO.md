@@ -4,15 +4,26 @@ Everything only you (the owner) can do, collected from the 2026-09-25/26 audit. 
 
 When you finish an item, tell the assistant the ID. It will do its part, verify, and tick the item here.
 
-Last updated: 2026-09-26, after Phase 10.
+Last updated: 2026-09-26, after Phase 11.
 
 ---
 
 ## A. Before you promote the site
 
-### A1. Custom email sender for sign-in codes (M1-03)
+> **Most urgent, 2026-09-26:** A1 and A0 below. Today no parent except you can sign in (Supabase's built-in sender only emails your Supabase team), and mail to `support@mycuratedhaven.com` bounces (the domain has no mail records).
 
-- **Why**: Supabase's built-in sender allows **2 sign-in emails per hour for the whole site**. The third visitor that hour gets no code. Its mail also lands in spam more often.
+### A0. Make support@mycuratedhaven.com receive mail (M11-03)
+
+- **Why**: the site, the Privacy Policy and the account-deletion steps all send people to this address, but the domain has no mail (MX) records, so every message bounces.
+- **Steps** (free option):
+  1. Sign up at **ImprovMX** (improvmx.com) with `mycuratedhaven.com`. Set `support@` to forward to the inbox you read.
+  2. In Hostinger → DNS for `mycuratedhaven.com`, add the 2 MX records and the SPF TXT record ImprovMX shows.
+  3. When you set up A1, merge the two SPF records into one (`v=spf1 include:... include:... ~all`). Ask the assistant if unsure.
+- **Done when**: an email from another account to `support@mycuratedhaven.com` arrives in your inbox. Then do A4.
+
+### A1. Custom email sender for sign-in codes (M1-03, M11-01) — urgent
+
+- **Why**: Supabase's built-in sender **only delivers to members of your Supabase team** (just you), so every other parent gets "We can't send sign-in codes to new email addresses yet". It also allows only 2 emails an hour for the whole site.
 - **Steps**:
   1. Sign up for **Resend** (free tier: 3,000 emails a month) or **Postmark**.
   2. Add `mycuratedhaven.com` as a sending domain. The provider shows DNS records (SPF, DKIM, DMARC); add them where you bought the domain.
@@ -83,6 +94,19 @@ Last updated: 2026-09-26, after Phase 10.
 ---
 
 ## B. Before you sell anything
+
+### B5. Upgrade Vercel to Pro (M11-02)
+
+- **Why**: Vercel's free Hobby plan is for non-commercial use only; taking payments or advertising a product for sale needs Pro ($20/month). Pro also lifts the 5,000-a-month image limit.
+- **Steps**: Vercel → Settings → Billing → upgrade the team to Pro, before `CHECKOUT_ENABLED` is turned on.
+
+### B6. Invite-only first, or open to everyone? (R11-01)
+
+- **Choose**: (1) a small invited group first (the assistant builds a server-side invite list), or (2) open checkout to everyone at once. The Phase 11 plan recommends (1).
+
+### B7. Domain renewal (R11-04)
+
+- Hostinger → Domains → `mycuratedhaven.com`: turn on **auto-renew**. It expires 2027-01-28.
 
 ### B1. The 14 commercial decisions (R8-06)
 

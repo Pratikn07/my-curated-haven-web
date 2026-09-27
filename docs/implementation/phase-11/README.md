@@ -1,6 +1,6 @@
 # Phase 11: staged launch and operations
 
-Status: detailed implementation plan. Production preparation, launch execution and operational sign-off are pending.
+Status: detailed implementation plan; not started. Audited 2026-09-26: see [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-11-staged-launch-and-operations). The production configuration record (P11-03) is [ops/PRODUCTION-CONFIG.md](../../../ops/PRODUCTION-CONFIG.md). Production preparation, launch execution and operational sign-off are pending.
 
 Phase 10 establishes whether a named release candidate meets the product's QA gates. Phase 11 takes the approved candidate into production, exposes paid checkout gradually, keeps purchases and recipe access reliable, and turns early customer experience into a measured operating routine.
 
