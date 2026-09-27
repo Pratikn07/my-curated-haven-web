@@ -50,9 +50,10 @@ jobs:
           SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: |
           # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded".
-          # Retry with a pause; layers already pulled are reused.
+          # Skip containers the tests don't use (about 4.6 GB of images), then
+          # retry with a pause; layers already pulled are reused.
           for attempt in 1 2 3; do
-            if supabase start; then break; fi
+            if supabase start -x studio,analytics,vector,edge-runtime,imgproxy,realtime; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
             echo "supabase start failed (attempt $attempt); retrying in $((attempt * 45))s"
             supabase stop --no-backup || true
@@ -157,9 +158,10 @@ jobs:
           SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
         run: |
           # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded".
-          # Retry with a pause; layers already pulled are reused.
+          # Skip containers the tests don't use (about 4.6 GB of images), then
+          # retry with a pause; layers already pulled are reused.
           for attempt in 1 2 3; do
-            if supabase start; then break; fi
+            if supabase start -x studio,analytics,vector,edge-runtime,imgproxy,realtime; then break; fi
             if [ "$attempt" = 3 ]; then exit 1; fi
             echo "supabase start failed (attempt $attempt); retrying in $((attempt * 45))s"
             supabase stop --no-backup || true
