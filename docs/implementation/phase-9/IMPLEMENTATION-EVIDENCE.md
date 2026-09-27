@@ -55,3 +55,10 @@ First review of Phase 9. Audited against `main` at `d0be9ee` with a live browser
 - **Consent verified live**: nothing stored or sent before a choice; Accept stores only `mch_analytics_consent`, `mch_browser_id`, `mch_session_id`; Withdraw removes the IDs; no third-party scripts.
 - **Not switched on**: no PostHog project or `NEXT_PUBLIC_POSTHOG_*` settings, and neither `20260924000000` nor `20260924010000` is recorded in production. `20260924010000` must follow the commerce schema (`20260923200000`).
 - **Gaps**: the campaign registry holds placeholder names (`sample_reel_001`…); a campaign is lost if the visitor browses before accepting; the founder reporting views (P9-09) don't exist yet.
+
+### Follow-up, same day
+
+- **Consent removed, PostHog live** (PR #54, `7b3f407`). Live check: events and recordings accepted by `us.i.posthog.com`; no recording requests on `/sign-in`; no banner.
+- **Sign-ins now linked** (this PR). Sign-in finishes in a server action, so the browser never saw an auth event and PostHog showed 0 persons after the owner signed in. The provider now re-reads the session on each page. Local check with a test key: after sign-in, `$identify` carried the user id, the email and the earlier anonymous id.
+- **Campaign registry**: placeholders replaced with `bio_link`, `story_link`, `instagram_dm`.
+- **`20260924000000` recorded in production** after a fresh backup. Its statements were already in effect (0 policies on `search_analytics`, no `anon`/`authenticated` access), and still are.

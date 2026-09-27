@@ -109,7 +109,7 @@ test("a registered Instagram campaign is kept from the first page", async ({ pag
 
 test("an unknown campaign is not stored", async ({ page }) => {
   await page.goto(
-    "/recipes?utm_source=instagram&utm_medium=organic_social&utm_campaign=not_registered&utm_content=reel_001"
+    "/recipes?utm_source=instagram&utm_medium=organic_social&utm_campaign=not_registered&utm_content=bio"
   );
   await page.waitForLoadState("networkidle");
   const stored = await page.evaluate(() => sessionStorage.getItem("mch_campaign_attribution"));

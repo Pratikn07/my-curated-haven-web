@@ -84,28 +84,32 @@ test("[homepage-vision] accepts bounded preview events and rejects raw destinati
 });
 
 test("keeps only registered campaign values", () => {
-  expect(
+  const link = (campaign: string, content?: string) =>
     acceptCampaignInput({
       utm_source: "instagram",
       utm_medium: "organic_social",
-      utm_campaign: "toddler_recipes_launch",
-      utm_content: "reel_001",
-    })?.utm_campaign
-  ).toBe("toddler_recipes_launch");
+      utm_campaign: campaign,
+      utm_content: content,
+    });
 
-  expect(
-    acceptCampaignInput({
-      utm_source: "instagram",
-      utm_medium: "organic_social",
-      utm_campaign: "not_registered",
-    })
-  ).toBeNull();
+  for (const campaign of ["bio_link", "story_link", "instagram_dm"]) {
+    expect(link(campaign)?.utm_campaign, campaign).toBe(campaign);
+  }
+  expect(link("story_link", "2026-10-01")?.utm_content).toBe("2026-10-01");
+  expect(link("story_link", "oat_bars")?.utm_content).toBe("oat_bars");
+
+  expect(link("not_registered")).toBeNull();
+  expect(link("sample_reel_001")).toBeNull();
+  // A label that could carry personal data or a URL drops the whole campaign.
+  for (const content of ["parent@example.com", "https://x.test", "two words", "a.b", "../x"]) {
+    expect(link("story_link", content), content).toBeNull();
+  }
 
   expect(
     acceptCampaignInput({
       utm_source: "parent@example.com",
       utm_medium: "organic_social",
-      utm_campaign: "toddler_recipes_launch",
+      utm_campaign: "bio_link",
     })
   ).toBeNull();
 });
