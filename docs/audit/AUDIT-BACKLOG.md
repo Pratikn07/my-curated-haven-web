@@ -30,6 +30,7 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 | M11-03 | Set up mail for `support@mycuratedhaven.com` (the domain has no MX records) |
 | M11-02 | Upgrade Vercel to Pro before checkout opens |
 | R11-01 | Invited buyers first, or open checkout to everyone at once |
+| R12-02 | About 2026-10-27: run the 30-day free-recipe review in PostHog (steps in the Phase 12 section) |
 | R10-01 | Confirm you are the owner for every Phase 10 release gate (release, QA, editorial, commerce, support, operations) |
 | R1-09 | Tick the content-register checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` |
 
@@ -461,6 +462,34 @@ Verified as done (no action):
 | --- | --- | --- | --- |
 | G11-01 | P2 | Move backups off the Mac (a scheduled GitHub Action writing an encrypted dump to private storage), or Supabase Pro's daily backups | Today no backup runs on days the Mac is off |
 | G11-02 | P2 | Add an MX and SPF check to the smoke workflow once mail is set up | Catches a DNS change that silently breaks support mail or sign-in email |
+
+---
+
+## Phase 12: evidence-led parenting expansion
+
+Plan: `docs/implementation/phase-12/IMPLEMENTATION-PLAN.md` (PR #30, 20 tasks); entry review and research plan (PR #34, `ef7a6c4`). **Nothing built, as intended**: the phase waits for launch evidence. No review or remediation plan covered it. Audited 2026-09-26 against `main` at `5efb34d`.
+
+Phase 12 picks the next thing to build from real use: better recipes, a simple weekly planner, or reviewed feeding resources, then pilots only the winner. Holding is a valid outcome.
+
+Verified as done (no action):
+- **No premature code**: no planner route, service, table or migration in the web or native trees (`grep -ri planner` over `src` and `supabase/migrations`).
+- **Its security warning was right**: `NATIVE-REUSE-AND-COMPATIBILITY.md:34` flagged the native chat handler using the service-role key with a body `userId`; the audit deleted it (M4-01). Production has 0 Edge Functions deployed (Management API, 2026-09-26).
+- **Honest status**: all 20 tasks pending, no invented demand, pilot blocked on Phases 10 and 11.
+
+### Remaining
+
+| ID | Pri | Item | Status | Evidence and fix |
+| --- | --- | --- | --- | --- |
+| R12-01 | P2 | Entry evidence stale | ✅ updated | README, `BASELINE.md` and `REUSE-AND-COMPATIBILITY.md` now note: PostHog live without consent and with identified users; `chat` and `generate-tip` deleted; native app has no users; production config recorded |
+| R12-02 | P2 👤 | 30-day free-recipe review (P12-02) | ⏳ due about 2026-10-27 | Recipe-improvement evidence doesn't need checkout. In PostHog, over the last 30 days: (1) **Web analytics**: visitors, top pages, channels and the `bio_link` / `story_link` / `instagram_dm` campaigns; (2) **Trends** on `recipe_open`, `recipe_save_changed`, `recipe_print_requested` broken down by recipe; (3) a **Funnel** `$pageview` on `/` → `recipe_list_view` → `recipe_open` → `recipe_print_requested`; (4) **Session replay** filtered to visits that opened a recipe but didn't print, watching 10; (5) **People** count. Bring the numbers to the assistant; Phase 12's P12-05 compares options from them |
+| R12-03 | P1 👤 | Research needs an owner-approved recruitment plan (P12-04) | ⏳ | `evidence/phase12-entry-2026-09-24/RESEARCH-PLAN.md`: purpose, channel, invitation, consent scope and retention need approval before contacting any parent |
+
+### Good to have
+
+| ID | Pri | Suggestion | Why |
+| --- | --- | --- | --- |
+| G12-01 | P2 | ✅ Removed the unused `parenting_app` and `SuperClaude_Framework` gitlinks and `.gitmodules` | `parenting_app` pinned `b92605d` (2025-08-20) while `parenting-app` `main` is `5e5caa7`; CI checked out with `submodules: false`, so neither was ever used |
+| G12-02 | P2 | Save the R12-02 charts as a PostHog dashboard | The monthly review then takes minutes |
 
 ---
 

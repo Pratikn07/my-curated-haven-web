@@ -4,7 +4,7 @@ Everything only you (the owner) can do, collected from the 2026-09-25/26 audit. 
 
 When you finish an item, tell the assistant the ID. It will do its part, verify, and tick the item here.
 
-Last updated: 2026-09-26, after Phase 11.
+Last updated: 2026-09-27, after Phase 12 (audit complete).
 
 ---
 
@@ -163,6 +163,8 @@ Checkout stays off until these are decided. The collection page will show your r
 ---
 
 ## D. Ongoing
+
+- **About 2026-10-27, 30-day recipe review (R12-02)**: in PostHog, look at the last 30 days: visitors and campaigns (Web analytics), recipe opens, saves and prints by recipe (Trends), the Home → recipes → recipe → print funnel, and 10 recordings of visits that opened a recipe but didn't print. Share the numbers with the assistant to decide what to improve next (Phase 12).
 
 - **Backups**: glance at `~/MyCuratedHavenBackups/backup.log` weekly. You should see a `done:` line each day your Mac was on.
 - **Production checks**: GitHub emails you if the hourly production smoke check fails. If you get one, tell the assistant.
