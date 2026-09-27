@@ -160,18 +160,23 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 
           {/* Recipe Grid or No Matches State */}
           {filteredRecipes.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredRecipes.map((recipe, index) => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  priority={index === 0}
-                  isSaved={savedIds.has(recipe.id)}
-                  isAuthenticated={Boolean(user)}
-                  showSaveButton={true}
-                />
-              ))}
-            </div>
+            <section aria-labelledby="recipe-results-heading">
+              <h2 id="recipe-results-heading" className="sr-only">
+                Recipes
+              </h2>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredRecipes.map((recipe, index) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    priority={index === 0}
+                    isSaved={savedIds.has(recipe.id)}
+                    isAuthenticated={Boolean(user)}
+                    showSaveButton={true}
+                  />
+                ))}
+              </div>
+            </section>
           ) : (
             <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center">
               <h2 className="text-xl font-bold text-foreground">

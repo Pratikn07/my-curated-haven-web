@@ -70,8 +70,8 @@ export default async function HomeRecipes() {
           </div>
         ) : recipes.length > 0 ? (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {recipes.map((recipe, index) => (
-              <RecipeCard key={recipe.id} recipe={recipe} priority={index === 0} showSaveButton={false} />
+            {recipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} showSaveButton={false} />
             ))}
           </div>
         ) : (

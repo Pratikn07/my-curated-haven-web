@@ -3,10 +3,11 @@
     margin: 1.5cm;
   }
 
-  /* Hide navigation, global headers/footers, dialogs, and non-printable elements */
-  body:has(.recipe-print-root) header,
-  body:has(.recipe-print-root) footer,
-  body:has(.recipe-print-root) nav,
+  /* Hide the site's navigation, header and footer, dialogs and non-printable
+     elements. The recipe's own header (title, time, yield) must still print. */
+  body:has(.recipe-print-root) header:not(.recipe-print-root header),
+  body:has(.recipe-print-root) footer:not(.recipe-print-root footer),
+  body:has(.recipe-print-root) nav:not(.recipe-print-root nav),
   body:has(.recipe-print-root) dialog,
   body:has(.recipe-print-root) .skip-link,
   body:has(.recipe-print-root) .no-print,
@@ -48,12 +49,18 @@
     page-break-inside: avoid;
   }
 
-  .recipe-print-image {
-    max-height: 2.2in;
-    width: auto;
-    object-fit: contain;
+  /* The on-screen 16:9 frame would leave a large empty box around a short image. */
+  .recipe-print-figure {
+    aspect-ratio: auto !important;
+    height: 2.2in !important;
+    border: 0 !important;
+    background: none !important;
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+
+  .recipe-print-image {
+    object-fit: contain !important;
   }
 
   /* Make links visible without underlines and remove anchor URLs clutter */

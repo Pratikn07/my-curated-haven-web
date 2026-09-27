@@ -1,6 +1,6 @@
 # Phase 10: launch QA
 
-This change implements the QA harness and evidence handoff. The paid-release recommendation remains **NO-GO** until candidate-specific staging, commercial, editorial, real-device and operations evidence is complete. See [execution status](evidence/phase10-qa/TASK-STATUS.md) and the [release decision](evidence/phase10-qa/RELEASE-DECISION.md).
+Audited 2026-09-26: see [the audit backlog](../../audit/AUDIT-BACKLOG.md#phase-10-launch-qa). This change implements the QA harness and evidence handoff. The paid-release recommendation remains **NO-GO** until candidate-specific staging, commercial, editorial, real-device and operations evidence is complete. See [execution status](evidence/phase10-qa/TASK-STATUS.md) and the [release decision](evidence/phase10-qa/RELEASE-DECISION.md).
 
 Phase 10 proves whether the recipe product is ready for parents to use and buy. A parent should arrive from Tiny Soho, read three complete free recipes, find a clearly described collection, pay once, recover access on another device and print usable recipe pages. The same release must protect private data, existing parenting-app rights and paid content when providers fail or messages arrive twice.
 

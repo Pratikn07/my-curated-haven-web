@@ -6,7 +6,7 @@ Status: **NO-GO for a paid release**. This record tracks the QA implementation c
 | --- | --- |
 | Candidate ID | `phase10-qa-2026-09-24` |
 | QA source SHA | See the `sourceSha` value in the sanitized JSON scenario artifact attached to this PR's `web-quality` run |
-| Build/deployment ID and URL | No named staging deployment was supplied or exercised. The last known-good production rollback target is Vercel deployment `6647364838` from main SHA `52393454d3388be7c5a6954996a9eda54e767ed4` ([deployment](https://my-curated-haven-c4g25koj1-pratik-r-nandoskars-projects.vercel.app)); a PR preview is a source preview, not a production/staging sign-off |
+| Build/deployment ID and URL | No named staging deployment was supplied or exercised. **Rollback (corrected 2026-09-26 audit, R10-02):** use Vercel → Deployments → the previous production deployment → **Instant Rollback**. First check that deployment's commit is newer than every database migration applied since (`supabase migration list --linked`); if not, roll forward with a fix instead. The deployment this row used to name (`6647364838`, `5239345`) predates the audit fixes and must not be used. A PR preview is a source preview, not a production/staging sign-off |
 | Environment | Local/CI synthetic fixtures only; no production data or live payment was used |
 | Product database reference and migration head | CI starts a fresh local Supabase project from this repository. The candidate has not been bound to a named hosted product project |
 | Runtime and tools | Node 24, npm 11.5.1, Supabase CLI 2.104.0; browser and database results are in the corresponding CI run |

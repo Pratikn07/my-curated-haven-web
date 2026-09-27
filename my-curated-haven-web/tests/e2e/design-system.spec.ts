@@ -70,6 +70,24 @@ test("[QA-M09:partial] print layout keeps the sample recipe and hides navigation
   await expect(page.getByText("Allergen information not reviewed")).toBeVisible();
 });
 
+// Phase 10 audit D10-01: hiding every <header> in print also hid the recipe's own
+// title, summary, time and yield, and the 16:9 frame left a large empty box.
+test("printed recipes keep the title and details, with a compact photo", async ({ page }) => {
+  await page.goto("/recipes/synth-free-oat-bake");
+  await page.emulateMedia({ media: "print" });
+  const main = page.locator(".recipe-print-root");
+  await expect(main.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(main.getByText("Total Time")).toBeVisible();
+  await expect(main.getByText("Yield")).toBeVisible();
+  await expect(page.locator("body > header, header:not(.recipe-print-root header)").first()).toBeHidden();
+  const figure = page.locator(".recipe-print-figure");
+  if (await figure.count()) {
+    const box = await figure.boundingBox();
+    // 2.2in at 96 CSS px per inch.
+    expect(box && box.height).toBeLessThanOrEqual(2.2 * 96 + 1);
+  }
+});
+
 // Phase 3 audit R3-02: the original scan covered three pages and missed a contrast failure on the legal pages.
 const publicPages = [
   "/",
