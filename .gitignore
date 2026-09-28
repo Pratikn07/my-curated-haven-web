@@ -1,0 +1,28 @@
+# Repository root. The Next app and the Supabase stack keep their own rules in
+# my-curated-haven-web/.gitignore and supabase/.gitignore; this file covers
+# everything that lands beside them.
+
+# macOS / Windows file manager junk
+.DS_Store
+._*
+Thumbs.db
+
+# Local agent and AI tooling. These are per-machine installs, not project
+# source: ~130 MB combined, rebuilt on demand, and different on every machine.
+.agents/
+.claude/
+graphify-out/
+.unlazy/
+
+# Installed-skill lockfile. Ignored because the skills themselves are ignored
+# above. Delete this line if you ever want to pin skill versions for anyone
+# else working on the repo.
+skills-lock.json
+
+# Dependencies installed at the root rather than inside the app
+/node_modules/
+
+# Secrets. The app and supabase directories already ignore their own.
+.env
+.env.*
+!.env.example
