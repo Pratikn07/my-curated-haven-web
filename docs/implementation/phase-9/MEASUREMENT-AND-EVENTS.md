@@ -21,7 +21,7 @@ Allowed common dimensions: registered campaign code, canonical route category, c
 | `recipe_filter_apply` | Browser, changed filters applied and results available | `active_filter_count`, `result_count_bucket` |
 | `recipe_print_requested` | Browser, explicit print control activated | `recipe_id`, `access_kind` |
 | `sign_in_started` | Browser, sign-in flow opened | `entry_point` |
-| `sign_in_completed` | Browser, verified server success response | `entry_point` |
+| `sign_in_completed` | Browser, verified server success response | `entry_point`, `method` (`email_code` \| `google`) |
 | `recipe_save_changed` | Browser, successful server mutation response | `recipe_id`, `action=saved/removed` |
 | `collection_view` | Browser, actual saleable collection detail rendered | `collection_release_id` |
 | `checkout_clicked` | Browser, explicit buy action | `collection_release_id`, `entry_point` |

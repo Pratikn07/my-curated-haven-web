@@ -70,6 +70,7 @@ export async function proxy(request: NextRequest) {
   const isAccountRoute = pathname === "/account" || pathname.startsWith("/account/");
   const isSignInRoute = pathname === "/sign-in";
   const isCheckoutReturn = pathname === "/checkout/return";
+  const isAuthCallback = pathname === "/auth/callback";
 
   if ((isAccountRoute || isCheckoutReturn) && !user) {
     const returnTarget = pathname + (request.nextUrl.search || "");
@@ -85,7 +86,7 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  if (isAccountRoute || isSignInRoute || isCheckoutReturn) {
+  if (isAccountRoute || isSignInRoute || isCheckoutReturn || isAuthCallback) {
     supabaseResponse.headers.set("Cache-Control", "no-store, private");
   }
 

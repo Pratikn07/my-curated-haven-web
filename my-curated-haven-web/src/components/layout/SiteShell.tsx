@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import CampaignCapture from "@/components/analytics/CampaignCapture";
+import SignInCompletionTracker from "@/components/auth/SignInCompletionTracker";
 
 export default function SiteShell({ children }: { children: ReactNode }) {
   return (
@@ -22,6 +23,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
         <Suspense fallback={null}>
           <CampaignCapture />
         </Suspense>
+        <SignInCompletionTracker />
       </AnalyticsProvider>
     </>
   );

@@ -290,7 +290,7 @@ Verified as done (no action):
 
 | ID | Pri | Suggestion | Why |
 | --- | --- | --- | --- |
-| G7-01 | P2 | Turn off the Google and Apple sign-in providers and password sign-ups, which only the iOS app used | The web uses email codes only, and the app has no users. Fewer ways in, less to secure |
+| G7-01 | P2 → ⏳ 👤 | **Revised 2026-09-28**: keep Google and add it to the website; turn Apple and password sign-ups off | Email codes were the single way in, and the project can send 2 sign-in emails an hour with no CAPTCHA (M7-01), so two requests close sign-in for everyone. Google does not touch the email quota. Apple returns a Private Relay address, which would orphan a purchase made with an email code. **Built**: `/auth/callback` PKCE route, the Continue with Google button, `sign_in_completed.method`. **Owner**: OWNER-TODO A12 (Google Cloud Web client, Supabase provider keys and redirect URLs, disable Apple and passwords). **Before sale**: verify email-code and Google on one address resolve to one user, or a buyer loses their collection |
 | G7-02 | P2 | A self-service "Delete my account" button | Removes the manual support step in M7-02 |
 
 ---

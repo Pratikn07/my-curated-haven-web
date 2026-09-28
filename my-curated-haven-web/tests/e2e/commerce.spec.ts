@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { EMAIL_OTP_LENGTH } from "../../src/lib/auth/otp";
 
 const MAILPIT_URL = "http://127.0.0.1:54324";
 
@@ -9,7 +10,8 @@ async function overflow(page: Page) {
 }
 
 /**
- * Polls Mailpit API to retrieve the latest 6-digit OTP code sent to a specific email.
+ * Polls Mailpit API to retrieve the latest sign-in code sent to a specific email.
+ * The code length follows Supabase's `mailer_otp_length` via EMAIL_OTP_LENGTH.
  */
 async function getLatestOtp(email: string, timeoutMs = 20_000): Promise<string> {
   const start = Date.now();
@@ -32,7 +34,10 @@ async function getLatestOtp(email: string, timeoutMs = 20_000): Promise<string> 
           if (detailRes.ok) {
             const detail = await detailRes.json();
             const textContent = (detail.Text || "") + " " + (detail.HTML || "");
-            const otpMatch = textContent.match(/enter the code:\s*(\d{6})/i) || textContent.match(/\b(\d{6})\b/);
+            const digits = `\\d{${EMAIL_OTP_LENGTH}}`;
+            const otpMatch =
+              textContent.match(new RegExp(`enter the code:\\s*(${digits})`, "i")) ||
+              textContent.match(new RegExp(`\\b(${digits})\\b`));
             if (otpMatch) {
               return otpMatch[1];
             }
@@ -145,7 +150,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await submitEmailWithRetry(page);
 
     const otpCode = await getLatestOtp(testEmail);
-    const codeInput = page.getByLabel(/6-digit code/i);
+    const codeInput = page.getByLabel(/\d+-digit code/i);
     await codeInput.fill(otpCode);
     await page.getByRole("button", { name: /Verify & Sign In/i }).click();
 
