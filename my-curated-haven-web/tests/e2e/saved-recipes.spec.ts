@@ -204,7 +204,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
 
     // Retrieve OTP from Mailpit
     const otp = await getLatestOtp("buyer-a@synthetic.test");
-    expect(otp).toHaveLength(6);
+    expect(otp).toHaveLength(EMAIL_OTP_LENGTH);
 
     // Enter code and submit
     const codeInput = page.getByLabel(/\d+-digit code/i);

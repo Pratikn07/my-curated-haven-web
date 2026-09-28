@@ -37,4 +37,12 @@ test("the code field length is not hard-coded away from Supabase's setting", () 
   expect(form).not.toMatch(/maxLength=\{\d+\}/);
   expect(form).not.toMatch(/code\.length < \d+/);
   expect(form).not.toMatch(/\d+-digit code/);
+
+  // The OTP specs must follow the constant too: a literal here passed CI on a
+  // 6-digit project and then failed the moment production moved to 10.
+  for (const spec of ["saved-recipes.spec.ts", "commerce.spec.ts"]) {
+    const source = readFileSync(join(__dirname, spec), "utf8");
+    expect(source, spec).not.toMatch(/toHaveLength\(\d+\)/);
+    expect(source, spec).not.toMatch(/\\d\{\d+\}/);
+  }
 });
