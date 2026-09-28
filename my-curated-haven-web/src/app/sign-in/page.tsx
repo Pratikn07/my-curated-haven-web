@@ -14,11 +14,11 @@ export const metadata: Metadata = {
 };
 
 interface SignInPageProps {
-  searchParams: Promise<{ returnTo?: string }>;
+  searchParams: Promise<{ returnTo?: string; authError?: string }>;
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { returnTo } = await searchParams;
+  const { returnTo, authError } = await searchParams;
   const user = await getCurrentUser();
 
   if (user) {
@@ -27,7 +27,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
   return (
     <div className="flex min-h-[calc(100vh-16rem)] w-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <SignInForm returnTo={returnTo} />
+      <SignInForm returnTo={returnTo} authError={authError} />
     </div>
   );
 }

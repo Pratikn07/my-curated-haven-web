@@ -45,6 +45,7 @@ const ENTRY_POINTS = new Set([
   "collection_page",
 ]);
 const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
+const SIGN_IN_METHODS = new Set(["email_code", "google"]);
 const HOMEPAGE_FEATURE_KEYS = new Set(["chat", "shop", "bloom"]);
 const HOMEPAGE_PLACEMENTS = new Set(["hero", "overview", "preview", "footer", "final"]);
 const HOMEPAGE_DESTINATIONS = new Set([
@@ -102,6 +103,7 @@ function checkString(key: string, value: string): string | ValidationFailure {
   }
   if (key === "action" && value !== "saved" && value !== "removed") return fail("action");
   if (key === "entry_point" && !ENTRY_POINTS.has(value)) return fail("entry_point");
+  if (key === "method" && !SIGN_IN_METHODS.has(value)) return fail("method");
   if (key === "currency" && !CURRENCY_REGEX.test(value)) return fail("currency");
   if (key === "activation_delay_bucket" && !DELAY_BUCKETS.has(value)) {
     return fail("activation_delay_bucket");

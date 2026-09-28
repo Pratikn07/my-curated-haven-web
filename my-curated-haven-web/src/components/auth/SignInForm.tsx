@@ -5,16 +5,38 @@ import Link from "next/link";
 import { requestOtpAction, verifyOtpAction } from "@/app/sign-in/actions";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { coarseEntryPoint } from "@/lib/analytics/schema";
+import { createClient } from "@/lib/supabase/browser";
+import { oauthCallbackUrl } from "@/lib/auth/oauth";
+
+const CALLBACK_MESSAGES: Record<string, string> = {
+  cancelled: "Google sign-in was cancelled. You can try again or use your email instead.",
+  failed: "We couldn't finish signing you in with Google. Please try again, or use your email instead.",
+};
 
 interface SignInFormProps {
   returnTo?: string;
+  authError?: string;
 }
 
-export default function SignInForm({ returnTo }: SignInFormProps) {
+function GoogleMark() {
+  return (
+    <svg className="h-5 w-5 shrink-0" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.2 13.2 17.6 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.2-.4-4.6H24v9.1h12.4c-.5 2.9-2.2 5.3-4.6 7l7.6 5.9c4.4-4.1 6.7-10.1 6.7-17.4z" />
+      <path fill="#FBBC05" d="M10.4 28.7a14.6 14.6 0 0 1 0-9.4l-7.8-6.1a24 24 0 0 0 0 21.6l7.8-6.1z" />
+      <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.8 2.3-8.3 2.3-6.4 0-11.8-3.7-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z" />
+    </svg>
+  );
+}
+
+export default function SignInForm({ returnTo, authError }: SignInFormProps) {
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    authError ? (CALLBACK_MESSAGES[authError] ?? CALLBACK_MESSAGES.failed) : null
+  );
+  const [isGooglePending, setIsGooglePending] = useState(false);
   const [resendNotice, setResendNotice] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -54,13 +76,33 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
       if (res.success) {
         trackAnalyticsEvent(
           "sign_in_completed",
-          { entry_point: coarseEntryPoint(returnTo) },
+          { entry_point: coarseEntryPoint(returnTo), method: "email_code" },
           "sign_in"
         );
       } else {
         setError(res.error || "Invalid or expired verification code.");
       }
     });
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setResendNotice(null);
+    setIsGooglePending(true);
+
+    try {
+      const { error: oauthError } = await createClient().auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: oauthCallbackUrl(window.location.origin, returnTo),
+        },
+      });
+      if (oauthError) throw oauthError;
+      // The browser is navigating to Google; leave the button busy.
+    } catch {
+      setError("We couldn't open Google sign-in. Please use your email instead.");
+      setIsGooglePending(false);
+    }
   };
 
   const handleResend = () => {
@@ -138,6 +180,30 @@ export default function SignInForm({ returnTo }: SignInFormProps) {
             {isPending ? "Sending code..." : "Continue with Email"}
           </button>
 
+          <div className="flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+              or
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={isPending || isGooglePending}
+            aria-busy={isGooglePending}
+            className="inline-flex w-full min-h-12 items-center justify-center gap-3 rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors"
+          >
+            {isGooglePending ? (
+              <span>Opening Google...</span>
+            ) : (
+              <>
+                <GoogleMark />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </button>
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="space-y-6">
