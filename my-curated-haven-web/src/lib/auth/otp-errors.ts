@@ -16,5 +16,10 @@ export function otpRequestErrorMessage(error: { code?: string; message: string }
     return "We've sent too many sign-in emails in the last hour. Please try again later. The free recipes don't need an account.";
   }
 
+  // Turnstile rejected the token, or it was reused or had expired.
+  if (code === "captcha_failed" || message.includes("captcha")) {
+    return "That verification check didn't go through. Please try again, or use Continue with Google.";
+  }
+
   return error.message;
 }

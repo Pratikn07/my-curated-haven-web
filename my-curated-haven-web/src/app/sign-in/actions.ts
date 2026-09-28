@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
 import { otpRequestErrorMessage } from "@/lib/auth/otp-errors";
+import { isTurnstileEnabled } from "@/lib/auth/turnstile";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -11,10 +12,22 @@ export interface AuthActionResult {
   error?: string;
 }
 
-export async function requestOtpAction(email: string): Promise<AuthActionResult> {
+export async function requestOtpAction(
+  email: string,
+  captchaToken?: string
+): Promise<AuthActionResult> {
   const trimmedEmail = (email || "").trim().toLowerCase();
   if (!trimmedEmail || !trimmedEmail.includes("@")) {
     return { success: false, error: "Please enter a valid email address." };
+  }
+
+  // Fail before spending an email when the challenge was not completed.
+  // Supabase rejects it anyway; this keeps the quota and the message ours.
+  if (isTurnstileEnabled() && !captchaToken) {
+    return {
+      success: false,
+      error: "Please complete the verification check just below, then try again.",
+    };
   }
 
   try {
@@ -23,6 +36,7 @@ export async function requestOtpAction(email: string): Promise<AuthActionResult>
       email: trimmedEmail,
       options: {
         shouldCreateUser: true,
+        captchaToken,
       },
     });
 
