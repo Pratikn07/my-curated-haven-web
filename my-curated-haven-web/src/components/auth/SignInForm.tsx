@@ -7,6 +7,7 @@ import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { coarseEntryPoint } from "@/lib/analytics/schema";
 import { createClient } from "@/lib/supabase/browser";
 import { oauthCallbackUrl } from "@/lib/auth/oauth";
+import { EMAIL_OTP_LENGTH } from "@/lib/auth/otp";
 
 const CALLBACK_MESSAGES: Record<string, string> = {
   cancelled: "Google sign-in was cancelled. You can try again or use your email instead.",
@@ -212,7 +213,8 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
               Enter Verification Code
             </h1>
             <p className="mt-2 text-sm text-text-muted">
-              We sent a 6-digit code to <strong className="text-foreground">{email}</strong>.
+              We sent a {EMAIL_OTP_LENGTH}-digit code to{" "}
+              <strong className="text-foreground">{email}</strong>.
             </p>
           </div>
 
@@ -239,19 +241,19 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
               htmlFor="otp"
               className="block text-sm font-semibold text-foreground"
             >
-              6-digit code
+              {EMAIL_OTP_LENGTH}-digit code
             </label>
             <input
               id="otp"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              maxLength={6}
+              maxLength={EMAIL_OTP_LENGTH}
               autoComplete="one-time-code"
               required
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="123456"
+              placeholder={"1".repeat(EMAIL_OTP_LENGTH)}
               disabled={isPending}
               className="mt-2 block w-full min-h-12 tracking-widest text-center text-2xl font-bold rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-text-muted focus:border-action focus:outline-none focus:ring-2 focus:ring-action/20"
             />
@@ -259,7 +261,7 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
 
           <button
             type="submit"
-            disabled={isPending || code.length < 6}
+            disabled={isPending || code.length < EMAIL_OTP_LENGTH}
             className="w-full min-h-12 rounded-xl bg-action px-6 py-3 font-semibold text-action-foreground hover:bg-action-hover focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors"
           >
             {isPending ? "Verifying..." : "Verify & Sign In"}
