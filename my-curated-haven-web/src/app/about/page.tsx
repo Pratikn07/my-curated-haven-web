@@ -5,11 +5,11 @@ export default function About() {
   return (
     <Container reading className="py-8 sm:py-12">
       <p className="font-semibold text-text-muted">
-        Recipes by Tiny Soho, inside My Curated Haven
+        The company behind My Curated Haven and Tiny Soho
       </p>
-      <h1 className="mt-3 text-[2rem] font-semibold sm:text-5xl">My Curated Haven</h1>
+      <h1 className="mt-3 text-[2rem] font-semibold sm:text-5xl">Nibble &amp; Nurture</h1>
       <p className="mt-4 text-lg">
-        My Curated Haven is the product. It began as a parenting companion. Tiny Soho grew from that work as the place parents find toddler food ideas.
+        Nibble &amp; Nurture is the company behind My Curated Haven. My Curated Haven is our parenting product, and Tiny Soho is the recipe brand within it.
       </p>
       <p className="mt-4 text-lg text-text-muted">
         This website is the home for those recipes: simple toddler recipes for busy families. It starts with three complete free recipes. Other parenting tools are not part of the website yet.
@@ -18,7 +18,7 @@ export default function About() {
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
           <h2 className="text-2xl font-semibold">The product</h2>
           <p className="mt-2 text-text-muted">
-            My Curated Haven stays the name of the product and of mycuratedhaven.com.
+            My Curated Haven is the name of our parenting product and of mycuratedhaven.com.
           </p>
         </section>
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">

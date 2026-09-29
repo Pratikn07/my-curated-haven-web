@@ -9,13 +9,13 @@ export default function Terms() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Terms of Service</h1>
-                    <p className="text-text-muted mb-12">Last updated: September 25, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: September 28, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
                             <h2 className={h2}>1. Agreement</h2>
                             <p className="leading-relaxed">
-                                These terms apply to your use of mycuratedhaven.com (the &quot;website&quot;), run by My Curated Haven (&quot;we&quot;, &quot;us&quot;). By using the website you agree to them. If you do not agree, please do not use the website.
+                                These terms apply to your use of mycuratedhaven.com (the &quot;website&quot;), run by Nibble &amp; Nurture (&quot;we&quot;, &quot;us&quot;) as part of My Curated Haven. By using the website you agree to them. If you do not agree, please do not use the website.
                             </p>
                         </section>
 
@@ -68,7 +68,7 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>7. Using our content</h2>
                             <p className="leading-relaxed">
-                                Recipes, photos, text and design on the website belong to My Curated Haven or its licensors. You may read, print and cook from recipes for your own household. You may not copy, republish, sell or distribute our content, remove copyright notices, or use automated tools to scrape the website without our written permission.
+                                Recipes, photos, text and design on the website belong to Nibble &amp; Nurture or its licensors. You may read, print and cook from recipes for your own household. You may not copy, republish, sell or distribute our content, remove copyright notices, or use automated tools to scrape the website without our written permission.
                             </p>
                         </section>
 
@@ -100,7 +100,7 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>11. Limitation of liability</h2>
                             <p className="leading-relaxed">
-                                TO THE MAXIMUM EXTENT PERMITTED BY LAW, MY CURATED HAVEN AND ITS AFFILIATES, DIRECTORS, EMPLOYEES AND AGENTS ARE NOT LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS OR LOST DATA, ARISING FROM YOUR USE OF OR INABILITY TO USE THE WEBSITE. OUR TOTAL LIABILITY WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS BEFORE THE CLAIM OR ONE HUNDRED US DOLLARS ($100).
+                                TO THE MAXIMUM EXTENT PERMITTED BY LAW, NIBBLE &amp; NURTURE AND ITS AFFILIATES, DIRECTORS, EMPLOYEES AND AGENTS ARE NOT LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS OR LOST DATA, ARISING FROM YOUR USE OF OR INABILITY TO USE THE WEBSITE. OUR TOTAL LIABILITY WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID US IN THE TWELVE (12) MONTHS BEFORE THE CLAIM OR ONE HUNDRED US DOLLARS ($100).
                             </p>
                             <p className="leading-relaxed">
                                 Some places do not allow these limits, so they may not apply to you. Nothing in these terms limits liability that cannot be limited by law.
@@ -110,7 +110,7 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>12. Indemnification</h2>
                             <p className="leading-relaxed">
-                                You agree to defend, indemnify and hold harmless My Curated Haven and its affiliates from claims, damages, losses and expenses (including attorneys&apos; fees) arising from your violation of these terms or of another person&apos;s rights.
+                                You agree to defend, indemnify and hold harmless Nibble &amp; Nurture and its affiliates from claims, damages, losses and expenses (including attorneys&apos; fees) arising from your violation of these terms or of another person&apos;s rights.
                             </p>
                         </section>
 

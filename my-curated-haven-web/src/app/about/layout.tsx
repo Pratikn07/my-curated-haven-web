@@ -3,7 +3,7 @@ import { pageMetadata } from "@/config/page-metadata";
 
 export const metadata: Metadata = pageMetadata(
   "About",
-  "My Curated Haven is the product. Recipes by Tiny Soho, inside My Curated Haven, starting with three complete free toddler recipes.",
+  "Meet Nibble & Nurture, the company behind My Curated Haven and its Tiny Soho toddler recipes.",
   "/about",
 );
 

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const publicRoutes = [
-  { path: "/about", heading: "My Curated Haven" },
+  { path: "/about", heading: "Nibble & Nurture" },
   { path: "/support", heading: "Support" },
   { path: "/privacy", heading: "Privacy Policy" },
   { path: "/terms", heading: "Terms of Service" },
@@ -38,7 +38,7 @@ async function overflow(page: Page) {
 test("[QA-J01:partial] homepage shows the brand and recipe promise", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("navigation")).toContainText("My Curated Haven");
+  await expect(page.getByRole("navigation")).toContainText("Nibble & Nurture");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "A little more support for everyday parenting",
   );
@@ -54,7 +54,7 @@ test("public pages load", async ({ page }) => {
 
 test("brand link returns home", async ({ page }) => {
   await page.goto("/about");
-  await page.getByRole("navigation").getByRole("link", { name: "My Curated Haven" }).click();
+  await page.getByRole("navigation").getByRole("link", { name: "Nibble & Nurture" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
@@ -211,6 +211,48 @@ test("[QA-P04:partial] metadata uses the official origin", async ({ page }) => {
     "href",
     /^https:\/\/mycuratedhaven\.com\/?$/,
   );
+});
+
+test("company identity is visible while product and recipe brands remain clear", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("navigation").getByRole("link", { name: "Nibble & Nurture" })).toBeVisible();
+  await expect(page.locator("#our-story")).toContainText("Nibble & Nurture is the company behind My Curated Haven");
+  await expect(page.locator("#our-story")).toContainText("Tiny Soho");
+  await expect(page.locator("footer")).toContainText("The company behind My Curated Haven, with recipes by Tiny Soho.");
+  await expect(page.locator("footer")).toContainText(/© \d{4} Nibble & Nurture/);
+
+  await page.goto("/about");
+  await expect(page.getByRole("heading", { level: 1, name: "Nibble & Nurture" })).toBeVisible();
+  await expect(page.locator("main")).toContainText("My Curated Haven is our parenting product");
+  await expect(page.locator("main")).toContainText("Tiny Soho is the recipe brand");
+  await expect(page.locator("main")).toContainText("mycuratedhaven.com");
+});
+
+test("company metadata identifies Nibble & Nurture", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveTitle("My Curated Haven by Nibble & Nurture | Recipes and a glimpse of what's ahead");
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "Nibble & Nurture");
+  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /Nibble & Nurture presents My Curated Haven/);
+
+  await page.goto("/about");
+  await expect(page).toHaveTitle("About | My Curated Haven by Nibble & Nurture");
+
+  await page.goto("/recipes/synth-free-oat-bake");
+  const recipe = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "{}") as {
+    publisher?: { name?: string };
+  };
+  expect(recipe.publisher?.name).toBe("Nibble & Nurture");
+});
+
+test("company operator is named on support and legal pages", async ({ page }) => {
+  await page.goto("/support");
+  await expect(page.locator("main")).toContainText("Nibble & Nurture about My Curated Haven");
+  await page.goto("/privacy");
+  await expect(page.locator("main")).toContainText("Nibble & Nurture");
+  await expect(page.locator("main")).toContainText("mycuratedhaven.com");
+  await page.goto("/terms");
+  await expect(page.locator("main")).toContainText("run by Nibble & Nurture");
+  await expect(page.locator("main")).toContainText("mycuratedhaven.com");
 });
 
 test("the site does not link to a purchase or mobile app store", async ({ page }) => {

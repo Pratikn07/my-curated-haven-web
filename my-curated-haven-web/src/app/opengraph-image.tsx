@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const alt =
-  "My Curated Haven is starting with recipes by Tiny Soho, with clearly labelled previews of what may be ahead.";
+  "Nibble & Nurture presents My Curated Haven, starting with Tiny Soho recipes and previews of what may be ahead.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -23,7 +23,7 @@ export default function OpenGraphImage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, color: "#526849", fontSize: 26 }}>
           <div style={{ width: 48, height: 4, borderRadius: 4, backgroundColor: "#e07a5f" }} />
-          My Curated Haven
+          Nibble &amp; Nurture
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 22, maxWidth: 960 }}>
           <div style={{ fontSize: 68, lineHeight: 1.12, fontWeight: 600 }}>
