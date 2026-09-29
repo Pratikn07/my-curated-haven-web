@@ -21,7 +21,7 @@ test("homepage copy stays visible with reduced motion", async ({ page }) => {
   await expect(
     page
       .getByRole("contentinfo")
-      .getByText("Recipes by Tiny Soho, inside My Curated Haven.", { exact: true }),
+      .getByText("The company behind My Curated Haven, with recipes by Tiny Soho.", { exact: true }),
   ).toBeVisible();
 });
 
