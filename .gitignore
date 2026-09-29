@@ -26,3 +26,6 @@ skills-lock.json
 .env
 .env.*
 !.env.example
+
+# Vercel CLI project link and pulled env files
+.vercel
