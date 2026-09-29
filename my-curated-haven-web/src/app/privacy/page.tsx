@@ -8,13 +8,13 @@ export default function Privacy() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-text-muted mb-12">Last updated: September 26, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: September 28, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
                             <h2 className={h2}>1. About this policy</h2>
                             <p className="leading-relaxed">
-                                This policy explains what information My Curated Haven (&quot;we&quot;, &quot;us&quot;) collects through mycuratedhaven.com, why, and what choices you have. You can read and print our free recipes without giving us any personal information.
+                                This policy explains what information Nibble &amp; Nurture (&quot;we&quot;, &quot;us&quot;) collects through its My Curated Haven website at mycuratedhaven.com, why, and what choices you have. You can read and print our free recipes without giving us any personal information.
                             </p>
                         </section>
 

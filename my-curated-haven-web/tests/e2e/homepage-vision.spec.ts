@@ -70,8 +70,8 @@ test("[homepage-vision] four pillars and three static previews have visible stat
 test("[homepage-vision] story and free-ready FAQs use established facts", async ({ page }) => {
   await page.goto("/");
   const story = page.locator("#our-story");
-  await expect(story.getByRole("heading", { name: "The story behind My Curated Haven and Tiny Soho" })).toBeVisible();
-  await expect(story).toContainText("My Curated Haven is the product");
+  await expect(story.getByRole("heading", { name: "Meet Nibble & Nurture" })).toBeVisible();
+  await expect(story).toContainText("Nibble & Nurture is the company behind My Curated Haven");
   await expect(story).toContainText("Tiny Soho grew from that work");
 
   const faq = page.locator("#questions");
@@ -84,7 +84,7 @@ test("[homepage-vision] story and free-ready FAQs use established facts", async 
 
 test("[homepage-vision] metadata and social image match the preparation message", async ({ page, request }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("My Curated Haven | Recipes and a glimpse of what's ahead");
+  await expect(page).toHaveTitle("My Curated Haven by Nibble & Nurture | Recipes and a glimpse of what's ahead");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
     /starting with toddler recipes by Tiny Soho.*planned for the web/i,
@@ -95,7 +95,7 @@ test("[homepage-vision] metadata and social image match the preparation message"
   );
   await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
     "content",
-    /starting with recipes.*previews/i,
+    /Nibble & Nurture presents My Curated Haven.*previews/i,
   );
   const image = await request.get("/opengraph-image");
   expect(image.status()).toBe(200);

@@ -167,7 +167,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     },
     publisher: {
       "@type": "Organization",
-      name: "My Curated Haven",
+      name: "Nibble & Nurture",
       url: SITE_ORIGIN,
     },
     mainEntityOfPage: canonicalUrl,

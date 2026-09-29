@@ -19,11 +19,11 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL("https://mycuratedhaven.com"),
   title: {
-    default: "My Curated Haven | Parenting, recipes and thoughtful ideas",
-    template: "%s | My Curated Haven",
+    default: "My Curated Haven by Nibble & Nurture | Parenting, recipes and thoughtful ideas",
+    template: "%s | My Curated Haven by Nibble & Nurture",
   },
   description:
-    "A parenting companion starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.",
+    "My Curated Haven is a Nibble & Nurture parenting product starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.",
   robots: { index: true, follow: true },
 };
 

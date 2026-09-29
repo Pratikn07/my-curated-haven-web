@@ -11,11 +11,11 @@ import { WhatsAhead } from "@/components/home/FeaturePreview";
 import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
-const pageTitle = "My Curated Haven | Recipes and a glimpse of what's ahead";
+const pageTitle = "My Curated Haven by Nibble & Nurture | Recipes and a glimpse of what's ahead";
 const pageDescription =
-  "A parenting companion starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.";
+  "My Curated Haven is a Nibble & Nurture parenting product starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.";
 const socialImageAlt =
-  "My Curated Haven is starting with recipes by Tiny Soho, with clearly labelled previews of what may be ahead.";
+  "Nibble & Nurture presents My Curated Haven, starting with Tiny Soho recipes and previews of what may be ahead.";
 
 export const metadata: Metadata = {
   title: { absolute: pageTitle },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: `${SITE_ORIGIN}/`,
-    siteName: "My Curated Haven",
+    siteName: "Nibble & Nurture",
     title: pageTitle,
     description: pageDescription,
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: socialImageAlt }],

@@ -107,9 +107,9 @@ export default function Navbar() {
     <header className="sticky top-0 z-[var(--z-header)] border-b border-border bg-canvas">
       <nav aria-label="Primary" className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href="/" className="min-w-0 font-brand text-[1.5rem] leading-none font-semibold text-foreground sm:text-[1.75rem]">
-          <span>My </span>
-          <span className="text-action">Curated</span>
-          <span> Haven</span>
+          <span>Nibble </span>
+          <span className="text-action">&amp;</span>
+          <span> Nurture</span>
         </Link>
 
         <div className="hidden items-center gap-5 lg:flex">

@@ -21,7 +21,7 @@ export default function Support() {
     <Container reading className="py-8 sm:py-12">
       <h1 className="text-[2rem] font-semibold sm:text-5xl">Support</h1>
       <p className="mt-4 text-lg text-text-muted">
-        Email is the way to reach My Curated Haven. The button below opens your email app. This website does not store the message and does not create a support ticket.
+        Email is the way to reach Nibble &amp; Nurture about My Curated Haven. The button below opens your email app. This website does not store the message and does not create a support ticket.
       </p>
       <section className="mt-8 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
         <h2 className="text-2xl font-semibold">Email</h2>
