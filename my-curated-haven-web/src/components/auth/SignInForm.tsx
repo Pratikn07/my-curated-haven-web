@@ -8,7 +8,7 @@ import { coarseEntryPoint } from "@/lib/analytics/schema";
 import { createClient } from "@/lib/supabase/browser";
 import { oauthCallbackUrl } from "@/lib/auth/oauth";
 import { EMAIL_OTP_LENGTH } from "@/lib/auth/otp";
-import { isTurnstileEnabled } from "@/lib/auth/turnstile";
+import { emailSubmitBlocked, isTurnstileEnabled } from "@/lib/auth/turnstile";
 import TurnstileWidget from "@/components/auth/TurnstileWidget";
 
 const CALLBACK_MESSAGES: Record<string, string> = {
@@ -50,7 +50,11 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
     setCaptchaToken(null);
     setCaptchaResetSignal((n) => n + 1);
   };
-  const awaitingCaptcha = captchaRequired && !captchaToken && !captchaUnavailable;
+  const awaitingCaptcha = emailSubmitBlocked({
+    configured: captchaRequired,
+    token: captchaToken,
+    widgetFailed: captchaUnavailable,
+  });
   const [resendNotice, setResendNotice] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -313,14 +317,17 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
       )}
 
       <TurnstileWidget
-        onToken={setCaptchaToken}
+        onToken={(token) => {
+          setCaptchaToken(token);
+          if (token) setCaptchaUnavailable(false);
+        }}
         resetSignal={captchaResetSignal}
         onUnavailable={() => setCaptchaUnavailable(true)}
       />
 
       {captchaUnavailable && (
         <p className="mt-4 text-sm text-text-muted" role="status">
-          We couldn&apos;t load the human check, which usually means a browser
+          We couldn&apos;t run the human check, which usually means a browser
           extension blocked it. Continue with Google works without it.
         </p>
       )}

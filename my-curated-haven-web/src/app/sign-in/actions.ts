@@ -24,9 +24,12 @@ export async function requestOtpAction(
   // Fail before spending an email when the challenge was not completed.
   // Supabase rejects it anyway; this keeps the quota and the message ours.
   if (isTurnstileEnabled() && !captchaToken) {
+    // Covers both "still working on it" and "the widget never produced one",
+    // so a visitor whose challenge failed is pointed somewhere that works.
     return {
       success: false,
-      error: "Please complete the verification check just below, then try again.",
+      error:
+        "We couldn't verify you're human. Please try again, or use Continue with Google.",
     };
   }
 
