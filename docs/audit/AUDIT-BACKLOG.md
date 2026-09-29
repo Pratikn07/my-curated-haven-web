@@ -3,6 +3,8 @@
 Phase-by-phase audit of My Curated Haven web, started 2026-09-25.
 Baseline: `origin/main` at `a496ce6`, live site https://mycuratedhaven.com, Supabase project `ccrgvammglkvdlaojgzv`.
 
+Roll-up of what is done and what is left: [STATUS.md](STATUS.md).
+
 Each phase has three lists:
 
 - **Remaining**: work the phase plan required that is not done, or that a later phase broke.

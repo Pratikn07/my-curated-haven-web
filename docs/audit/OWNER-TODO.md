@@ -4,6 +4,8 @@ Everything only you (the owner) can do, collected from the 2026-09-25/26 audit. 
 
 When you finish an item, tell the assistant the ID. It will do its part, verify, and tick the item here.
 
+For the overall picture — what is finished and what is not — see [STATUS.md](STATUS.md).
+
 Last updated: 2026-09-28: added A12 (Google sign-in).
 
 ---
