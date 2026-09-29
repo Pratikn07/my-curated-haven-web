@@ -49,7 +49,7 @@ export async function generateMetadata({
   }
 
   const catalog = result.status === "ok" ? result.recipe.catalog : result.catalog;
-  const title = `${catalog.title} | Toddler Recipe | My Curated Haven`;
+  const title = `${catalog.title} | Toddler Recipe | Nibble & Nurture`;
   const description = catalog.publicSummary;
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
 
@@ -205,7 +205,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
       {/* Header and Hero Attribution */}
       <header className="mb-6">
         <p className="mb-2 text-xs font-bold uppercase tracking-wider text-action">
-          Recipes by Tiny Soho, inside My Curated Haven.
+          Recipes by Tiny Soho, from Nibble &amp; Nurture.
         </p>
         <h1 className="break-words text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
           {catalog.title}
@@ -395,8 +395,8 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
 
             {/* Print Footer Attribution (visible only in print) */}
             <div className="hidden border-t border-border pt-4 text-xs text-text-muted print:block">
-              <p>Recipe from My Curated Haven — {canonicalUrl}</p>
-              <p>Recipes by Tiny Soho, inside My Curated Haven.</p>
+              <p>Recipe from Nibble &amp; Nurture — {canonicalUrl}</p>
+              <p>Recipes by Tiny Soho, from Nibble &amp; Nurture.</p>
             </div>
           </>
         ) : null}

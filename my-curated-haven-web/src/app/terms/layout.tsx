@@ -3,7 +3,7 @@ import { pageMetadata } from "@/config/page-metadata";
 
 export const metadata: Metadata = pageMetadata(
   "Terms of Service",
-  "Terms for using My Curated Haven, including free recipes, optional accounts and food safety.",
+  "Terms for using the Nibble & Nurture website, including free recipes, optional accounts and food safety.",
   "/terms",
 );
 

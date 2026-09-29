@@ -23,7 +23,7 @@ test("[homepage-vision] free-ready page points to free recipes without implying 
   );
 
   const recipes = page.locator("#recipes");
-  await expect(recipes).toContainText("Recipes by Tiny Soho, inside My Curated Haven.");
+  await expect(recipes).toContainText("Recipes by Tiny Soho, from Nibble & Nurture.");
   await expect(recipes).toContainText("read or print it without an account");
   await expect(recipes).not.toContainText("in preparation");
   // Only approved production slugs render as cards; local fixtures use synthetic slugs.
@@ -35,7 +35,7 @@ test("[homepage-vision] free-ready page points to free recipes without implying 
 test("[homepage-vision] four pillars and three static previews have visible status", async ({ page }) => {
   await page.goto("/");
   const overview = page.locator("#explore-haven");
-  await expect(overview.getByRole("heading", { name: "Meet My Curated Haven" })).toBeVisible();
+  await expect(overview.getByRole("heading", { name: "Explore Nibble & Nurture" })).toBeVisible();
   for (const label of ["Recipes", "Parenting Chat", "Curated Shop", "Bloom"]) {
     await expect(overview.getByText(label, { exact: true })).toBeVisible();
   }
@@ -71,8 +71,8 @@ test("[homepage-vision] story and free-ready FAQs use established facts", async 
   await page.goto("/");
   const story = page.locator("#our-story");
   await expect(story.getByRole("heading", { name: "Meet Nibble & Nurture" })).toBeVisible();
-  await expect(story).toContainText("Nibble & Nurture is the company behind My Curated Haven");
-  await expect(story).toContainText("Tiny Soho grew from that work");
+  await expect(story).toContainText("Tiny Soho is our recipe brand");
+  await expect(page.locator("main")).not.toContainText("My Curated Haven");
 
   const faq = page.locator("#questions");
   await expect(faq.getByRole("heading", { name: "Questions" })).toBeVisible();
@@ -84,7 +84,7 @@ test("[homepage-vision] story and free-ready FAQs use established facts", async 
 
 test("[homepage-vision] metadata and social image match the preparation message", async ({ page, request }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("My Curated Haven by Nibble & Nurture | Recipes and a glimpse of what's ahead");
+  await expect(page).toHaveTitle("Nibble & Nurture | Recipes and a glimpse of what's ahead");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
     /starting with toddler recipes by Tiny Soho.*planned for the web/i,
@@ -95,7 +95,7 @@ test("[homepage-vision] metadata and social image match the preparation message"
   );
   await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
     "content",
-    /Nibble & Nurture presents My Curated Haven.*previews/i,
+    /Nibble & Nurture.*Tiny Soho recipes.*previews/i,
   );
   const image = await request.get("/opengraph-image");
   expect(image.status()).toBe(200);

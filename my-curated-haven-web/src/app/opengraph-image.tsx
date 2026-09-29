@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const alt =
-  "Nibble & Nurture presents My Curated Haven, starting with Tiny Soho recipes and previews of what may be ahead.";
+  "Nibble & Nurture, starting with Tiny Soho recipes and previews of what may be ahead.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

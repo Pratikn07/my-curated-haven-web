@@ -206,7 +206,7 @@ test("[QA-P05:partial] sitemap lists only the public pages", async ({ request })
 
 test("[QA-P04:partial] metadata uses the official origin", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/My Curated Haven/);
+  await expect(page).toHaveTitle(/Nibble & Nurture/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     /^https:\/\/mycuratedhaven\.com\/?$/,
@@ -216,9 +216,9 @@ test("[QA-P04:partial] metadata uses the official origin", async ({ page }) => {
 test("company identity is visible while product and recipe brands remain clear", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("navigation").getByRole("link", { name: "Nibble & Nurture" })).toBeVisible();
-  await expect(page.locator("#our-story")).toContainText("Nibble & Nurture is the company behind My Curated Haven");
+  await expect(page.locator("#our-story")).toContainText("Nibble & Nurture brings these parenting ideas together");
   await expect(page.locator("#our-story")).toContainText("Tiny Soho");
-  await expect(page.locator("footer")).toContainText("The company behind My Curated Haven, with recipes by Tiny Soho.");
+  await expect(page.locator("footer")).toContainText("Parenting ideas and toddler recipes by Tiny Soho.");
   await expect(page.locator("footer")).toContainText(/© \d{4} Nibble & Nurture/);
 
   await page.goto("/about");
@@ -230,12 +230,12 @@ test("company identity is visible while product and recipe brands remain clear",
 
 test("company metadata identifies Nibble & Nurture", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("My Curated Haven by Nibble & Nurture | Recipes and a glimpse of what's ahead");
+  await expect(page).toHaveTitle("Nibble & Nurture | Recipes and a glimpse of what's ahead");
   await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "Nibble & Nurture");
-  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /Nibble & Nurture presents My Curated Haven/);
+  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /Nibble & Nurture.*Tiny Soho recipes/);
 
   await page.goto("/about");
-  await expect(page).toHaveTitle("About | My Curated Haven by Nibble & Nurture");
+  await expect(page).toHaveTitle("About | Nibble & Nurture");
 
   await page.goto("/recipes/synth-free-oat-bake");
   const recipe = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "{}") as {
@@ -246,7 +246,7 @@ test("company metadata identifies Nibble & Nurture", async ({ page }) => {
 
 test("company operator is named on support and legal pages", async ({ page }) => {
   await page.goto("/support");
-  await expect(page.locator("main")).toContainText("Nibble & Nurture about My Curated Haven");
+  await expect(page.locator("main")).toContainText("Nibble & Nurture about this website");
   await page.goto("/privacy");
   await expect(page.locator("main")).toContainText("Nibble & Nurture");
   await expect(page.locator("main")).toContainText("mycuratedhaven.com");
@@ -289,12 +289,12 @@ test("about, support and legal pages describe the current site", async ({ page }
   await expect(page.locator("main")).toContainText("one-time code");
 });
 
-// Phase 5 audit: nine pages repeated the brand ("… | My Curated Haven | My Curated Haven").
+// Page titles identify the site brand once, including pages with absolute titles.
 test("page titles name the brand once", async ({ page }) => {
   for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/about", "/support", "/sign-in"]) {
     await page.goto(path);
     const title = await page.title();
-    expect(title.split("My Curated Haven").length - 1, `${path}: ${title}`).toBe(1);
+    expect(title.split("Nibble & Nurture").length - 1, `${path}: ${title}`).toBe(1);
   }
 });
 

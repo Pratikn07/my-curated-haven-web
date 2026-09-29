@@ -169,7 +169,7 @@ export const HOME_FEATURE_PREVIEWS = [
     id: "parenting-chat-preview",
     label: "Parenting Chat",
     heading: "Everyday questions deserve thoughtful support.",
-    summary: "A glimpse of the kind of parenting conversation My Curated Haven is exploring.",
+    summary: "A glimpse of the kind of parenting conversation Nibble & Nurture is exploring.",
     caption: "Illustrative preview based on our parenting app. The final web experience will differ.",
   },
   {

@@ -12,7 +12,7 @@ export default function BrandStory() {
         </div>
         <div className="max-w-[65ch]">
           <p className="text-xl leading-relaxed">
-            Nibble &amp; Nurture is the company behind My Curated Haven. My Curated Haven began as a parenting companion, and Tiny Soho grew from that work as a place for toddler food ideas.
+            Nibble &amp; Nurture brings these parenting ideas together. Tiny Soho is our recipe brand, starting with toddler food ideas for busy families.
           </p>
           <p className="mt-4 text-lg text-text-muted">
             The recipe collection is the first part being prepared for this website. The other areas here are ideas for the web, shown as static previews.

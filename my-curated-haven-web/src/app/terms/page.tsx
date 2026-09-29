@@ -15,7 +15,7 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>1. Agreement</h2>
                             <p className="leading-relaxed">
-                                These terms apply to your use of mycuratedhaven.com (the &quot;website&quot;), run by Nibble &amp; Nurture (&quot;we&quot;, &quot;us&quot;) as part of My Curated Haven. By using the website you agree to them. If you do not agree, please do not use the website.
+                                These terms apply to your use of mycuratedhaven.com (the &quot;website&quot;), run by Nibble &amp; Nurture (&quot;we&quot;, &quot;us&quot;). By using the website you agree to them. If you do not agree, please do not use the website.
                             </p>
                         </section>
 

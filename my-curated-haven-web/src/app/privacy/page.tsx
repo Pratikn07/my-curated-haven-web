@@ -14,7 +14,7 @@ export default function Privacy() {
                         <section>
                             <h2 className={h2}>1. About this policy</h2>
                             <p className="leading-relaxed">
-                                This policy explains what information Nibble &amp; Nurture (&quot;we&quot;, &quot;us&quot;) collects through its My Curated Haven website at mycuratedhaven.com, why, and what choices you have. You can read and print our free recipes without giving us any personal information.
+                                This policy explains what information Nibble &amp; Nurture (&quot;we&quot;, &quot;us&quot;) collects through this website at mycuratedhaven.com, why, and what choices you have. You can read and print our free recipes without giving us any personal information.
                             </p>
                         </section>
 

@@ -16,7 +16,7 @@ export default function PillarOverview() {
       <Container>
         <div className="max-w-2xl">
           <h2 id="explore-haven-title" className="text-3xl font-semibold sm:text-4xl">
-            Meet My Curated Haven
+            Explore Nibble &amp; Nurture
           </h2>
           <p className="mt-3 max-w-[65ch] text-lg text-text-muted">
             A parenting companion taking shape around food, everyday questions, thoughtful finds and the moments in between.

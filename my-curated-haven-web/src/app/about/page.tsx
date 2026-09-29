@@ -5,11 +5,11 @@ export default function About() {
   return (
     <Container reading className="py-8 sm:py-12">
       <p className="font-semibold text-text-muted">
-        The company behind My Curated Haven and Tiny Soho
+        About Nibble &amp; Nurture
       </p>
       <h1 className="mt-3 text-[2rem] font-semibold sm:text-5xl">Nibble &amp; Nurture</h1>
       <p className="mt-4 text-lg">
-        Nibble &amp; Nurture is the company behind My Curated Haven. My Curated Haven is our parenting product, and Tiny Soho is the recipe brand within it.
+        Nibble &amp; Nurture is the company behind the My Curated Haven parenting product and the Tiny Soho recipe brand.
       </p>
       <p className="mt-4 text-lg text-text-muted">
         This website is the home for those recipes: simple toddler recipes for busy families. It starts with three complete free recipes. Other parenting tools are not part of the website yet.
@@ -18,13 +18,13 @@ export default function About() {
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
           <h2 className="text-2xl font-semibold">The product</h2>
           <p className="mt-2 text-text-muted">
-            My Curated Haven is the name of our parenting product and of mycuratedhaven.com.
+            My Curated Haven is our parenting product. Its website address remains mycuratedhaven.com.
           </p>
         </section>
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
           <h2 className="text-2xl font-semibold">The recipes</h2>
           <p className="mt-2 text-text-muted">
-            Tiny Soho is the content brand. Its recipes live here, inside My Curated Haven, on the{" "}
+            Tiny Soho is the recipe brand. Its recipes live here on the{" "}
             <Link href="/recipes" className="font-semibold text-action">
               Recipes
             </Link>{" "}
