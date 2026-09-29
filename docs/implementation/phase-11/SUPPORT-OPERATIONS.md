@@ -2,7 +2,7 @@
 
 ## Support promise and staffing
 
-The site currently lists `support@mycuratedhaven.com`. Verify the mailbox, owner, backup and reply routing before invitations. A working link does not prove someone receives or answers mail.
+The site lists `support@mycuratedhaven.com`. **Receipt test passed 2026-09-29:** an owner-provided screenshot shows a message sent from a separate Gmail account to this address arrived in the receiving Gmail inbox. Gmail displayed a suspicious-message banner, but the message was delivered. DNS/MX configuration was not independently inspected. The inbox monitor, backup owner and reply timing still need approval before invitations; a working address does not prove someone answers mail.
 
 Propose acknowledgement within one staffed business day for ordinary cases, with payment/access problems escalated during the launch window. Approve the exact hours and wording before publication. Automated acknowledgement is not resolution.
 
