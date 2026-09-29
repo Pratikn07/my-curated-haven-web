@@ -118,6 +118,18 @@ Last updated: 2026-09-28: added A12 (Google sign-in).
 
 ---
 
+### A13. Turn on the sign-in human check (M7-01)
+
+- **Why**: asking for a sign-in code creates an unconfirmed account row *before* anyone proves they own the address, and spends both the hourly email quota and your Amazon SES sending reputation. The public anon key is in the page source, so a script can do that in bulk. The real deadline is the day SES production access is granted (M7-03): that is when the endpoint becomes worth abusing, and a burst of invalid addresses produces bounces that can get your SES sending suspended.
+- **The code is built and deployed.** It stays dormant until you do the two steps below: with no site key the form renders exactly as it does now, and Supabase only enforces the check once the secret is set. The two switch on together.
+- **Steps**:
+  1. **Cloudflare** → Turnstile → **Add widget**. Hostnames: `mycuratedhaven.com`. Widget mode: **Managed**. Copy the **Site key** and the **Secret key**.
+  2. **Vercel** → Settings → Environment Variables → add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (the *site* key, Production) and redeploy. The site key is public and belongs in the browser; the secret key never goes in Vercel.
+  3. **Supabase** → Authentication → **Attack Protection** → enable CAPTCHA protection, provider **Turnstile**, paste the **Secret key**, save.
+- **Do steps 2 and 3 close together.** Site key without the Supabase secret means visitors solve a challenge that is never checked; the Supabase secret without the site key means every email sign-in fails. Google sign-in is unaffected either way.
+- **Done when**: on the live site, `/sign-in` still sends you a code, and Supabase's Attack Protection page shows CAPTCHA enabled.
+
+
 ## B. Before you sell anything
 
 ### B5. Upgrade Vercel to Pro (M11-02)

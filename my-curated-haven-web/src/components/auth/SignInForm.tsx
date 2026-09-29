@@ -8,6 +8,8 @@ import { coarseEntryPoint } from "@/lib/analytics/schema";
 import { createClient } from "@/lib/supabase/browser";
 import { oauthCallbackUrl } from "@/lib/auth/oauth";
 import { EMAIL_OTP_LENGTH } from "@/lib/auth/otp";
+import { isTurnstileEnabled } from "@/lib/auth/turnstile";
+import TurnstileWidget from "@/components/auth/TurnstileWidget";
 
 const CALLBACK_MESSAGES: Record<string, string> = {
   cancelled: "Google sign-in was cancelled. You can try again or use your email instead.",
@@ -38,6 +40,17 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
     authError ? (CALLBACK_MESSAGES[authError] ?? CALLBACK_MESSAGES.failed) : null
   );
   const [isGooglePending, setIsGooglePending] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
+  const [captchaUnavailable, setCaptchaUnavailable] = useState(false);
+
+  const captchaRequired = isTurnstileEnabled();
+  // A token is spent by the request that uses it, so every send needs a new one.
+  const spendCaptchaToken = () => {
+    setCaptchaToken(null);
+    setCaptchaResetSignal((n) => n + 1);
+  };
+  const awaitingCaptcha = captchaRequired && !captchaToken && !captchaUnavailable;
   const [resendNotice, setResendNotice] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -59,7 +72,8 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
     setResendNotice(null);
 
     startTransition(async () => {
-      const res = await requestOtpAction(email);
+      const res = await requestOtpAction(email, captchaToken ?? undefined);
+      spendCaptchaToken();
       if (res.success) {
         setStep("code");
       } else {
@@ -111,7 +125,8 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
     setResendNotice(null);
 
     startTransition(async () => {
-      const res = await requestOtpAction(email);
+      const res = await requestOtpAction(email, captchaToken ?? undefined);
+      spendCaptchaToken();
       if (res.success) {
         setResendNotice("A fresh verification code has been sent.");
       } else {
@@ -175,10 +190,14 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || awaitingCaptcha}
             className="w-full min-h-12 rounded-xl bg-action px-6 py-3 font-semibold text-action-foreground hover:bg-action-hover focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors"
           >
-            {isPending ? "Sending code..." : "Continue with Email"}
+            {isPending
+              ? "Sending code..."
+              : awaitingCaptcha
+                ? "Checking you're human..."
+                : "Continue with Email"}
           </button>
 
           <div className="flex items-center gap-3" aria-hidden="true">
@@ -271,7 +290,7 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
             <button
               type="button"
               onClick={handleResend}
-              disabled={isPending}
+              disabled={isPending || awaitingCaptcha}
               className="hover:text-foreground underline min-h-11 inline-flex items-center"
             >
               Didn&apos;t receive a code? Resend
@@ -291,6 +310,19 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
             </button>
           </div>
         </form>
+      )}
+
+      <TurnstileWidget
+        onToken={setCaptchaToken}
+        resetSignal={captchaResetSignal}
+        onUnavailable={() => setCaptchaUnavailable(true)}
+      />
+
+      {captchaUnavailable && (
+        <p className="mt-4 text-sm text-text-muted" role="status">
+          We couldn&apos;t load the human check, which usually means a browser
+          extension blocked it. Continue with Google works without it.
+        </p>
       )}
     </div>
   );
