@@ -6,51 +6,51 @@ When you finish an item, tell the assistant the ID. It will do its part, verify,
 
 For the overall picture — what is finished and what is not — see [STATUS.md](STATUS.md).
 
-Last updated: 2026-09-28: added A12 (Google sign-in).
+Last updated: 2026-09-29: support-mail receipt verified; Google, GitHub, and Supabase 2FA verified from owner screenshots; SES remains pending Amazon review.
 
 ---
 
 ## A. Before you promote the site
 
-> **Most urgent, 2026-09-26:** A1 and A0 below. Today no parent except you can sign in (Supabase's built-in sender only emails your Supabase team), and mail to `support@mycuratedhaven.com` bounces (the domain has no mail records).
+> **Current state (2026-09-29):** SES production access is awaiting Amazon's response. A test email to `support@mycuratedhaven.com` arrived in the owner's Gmail inbox on 2026-09-29. Support ownership and reply timing still need a decision.
 
-### A0. Make support@mycuratedhaven.com receive mail (M11-03)
+### A0. Make support@mycuratedhaven.com receive mail (M11-03) ✅ (receipt verified 2026-09-29)
 
-- **Why**: the site, the Privacy Policy and the account-deletion steps all send people to this address, but the domain has no mail (MX) records, so every message bounces.
-- **Steps** (free option):
+- **Why**: the site, the Privacy Policy and the account-deletion steps all send people to this address.
+- **Original setup option** (already receiving mail; use only if routing needs repair):
   1. Sign up at **ImprovMX** (improvmx.com) with `mycuratedhaven.com`. Set `support@` to forward to the inbox you read.
   2. In Hostinger → DNS for `mycuratedhaven.com`, add the 2 MX records and the SPF TXT record ImprovMX shows.
   3. When you set up A1, merge the two SPF records into one (`v=spf1 include:... include:... ~all`). Ask the assistant if unsure.
-- **Done when**: an email from another account to `support@mycuratedhaven.com` arrives in your inbox. Then do A4.
+- **Done**: owner screenshots show a test sent from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox on 2026-09-29. The receiving message displayed a Gmail suspicious-message banner, but was delivered. Mail routing is verified; DNS/MX configuration was not independently inspected.
 
-### A1. Custom email sender for sign-in codes (M1-03, M11-01) — urgent
+### A1. Sign-in email delivery (M1-03, M7-03) — waiting on Amazon
 
-- **Why**: Supabase's built-in sender **only delivers to members of your Supabase team** (just you), so every other parent gets "We can't send sign-in codes to new email addresses yet". It also allows only 2 emails an hour for the whole site.
-- **Steps**:
+- **Current state (2026-09-29)**: Amazon SES production-access request is submitted and awaiting Amazon's response. Do not treat the earlier audit note saying the appeal was denied as current. If Amazon denies the request or the wait becomes unacceptable, choose a fallback sender then.
+
+- **Why**: the project uses Amazon SES, but SES is still in the sandbox. Only verified recipient addresses can receive sign-in codes until Amazon grants production access. The earlier built-in-sender limitation is stale.
+- **Fallback steps if selected** (not active while Amazon's request is pending):
   1. Sign up for **Resend** (free tier: 3,000 emails a month) or **Postmark**.
   2. Add `mycuratedhaven.com` as a sending domain. The provider shows DNS records (SPF, DKIM, DMARC); add them where you bought the domain.
   3. Wait until the provider shows the domain as verified.
   4. Tell the assistant, and keep the SMTP username and password ready to paste into Supabase yourself (Authentication → SMTP Settings). Don't paste them into chat.
-- **Assistant then**: raises the hourly limit, rebrands the email, tests.
+- **If a fallback sender is selected**: the assistant can update the hourly limit, rebrand the email, and test delivery.
 - **Done when**: 5 sign-ins in a row within an hour all receive a code from `mycuratedhaven.com`.
 
-### A2. Bot protection on sign-in (M7-01)
+### A2. Bot protection on sign-in (M7-01 CAPTCHA portion) ✅ (verified 2026-09-29)
 
-- **Why**: without it, a script can use up the email quota or create junk accounts. Do it together with A1.
-- **Steps**:
-  1. dash.cloudflare.com → **Turnstile** → **Add site**. Domain `mycuratedhaven.com`, mode **Managed**. It's free.
-  2. Copy the **secret key** into Supabase → Authentication → **Bot and Abuse Protection** → Turnstile.
-  3. Send the assistant the **site key** (it's public).
-- **Done when**: sign-in works for you, and the assistant's test confirms requests without the check are refused.
+- **Done**: Turnstile is enabled on the production sign-in form and Supabase enforcement is on. A live request without a valid CAPTCHA token was rejected (`captcha_failed`).
+- **Limit**: this confirms CAPTCHA enforcement only. It does not verify a successful email-code sign-in or remove SES sandbox restrictions; see A1 / M7-03.
 
-### A3. Confirm a sign-in email arrives (R7-03) ✅ (owner received the code, 2026-09-26)
+### A3. Confirm a sign-in email arrives (R7-03) 🔶 (verified owner address only)
 
-- **After A1.** Sign in once at mycuratedhaven.com/sign-in with your own email. Check the code arrives in your inbox (not spam) within a minute and that it signs you in.
+- **Done 2026-09-26**: the owner received and used a sign-in code for a verified address.
+- **Still unverified for the public**: SES remains in sandbox, so this does not prove delivery to an unverified parent's address. Recheck after Amazon grants production access or a fallback sender is configured.
 
 ### A4. Confirm the support inbox is read (R1-07)
 
 - **Why**: the site, the account page and the Privacy Policy all send people to `support@mycuratedhaven.com`, including for account deletion.
-- **Steps**: send a test email to it from another address and confirm you receive it. Decide who answers and how fast.
+- **Receipt test done 2026-09-29**: an email from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving inbox.
+- **Still needed**: decide who monitors the inbox and the expected reply time. The owner has not approved a response-time promise.
 
 ### A5. Replace 3 recipe images (R5-10)
 
@@ -93,9 +93,10 @@ Last updated: 2026-09-28: added A12 (Google sign-in).
 
 - Done 2026-09-26: bio, Stories and DMs. Copy links from `docs/INSTAGRAM-LINKS.md`. Tell the assistant if you start sharing links anywhere else.
 
-### A12. Turn on Google sign-in (G7-01)
+### A12. Google sign-in and same-address account check (G7-01 / M7-05)
 
-- **Why**: email codes are the only way in on the website today, and the sign-in form has no CAPTCHA (`security_captcha_enabled: false`, M7-01), so the hourly email quota is still a single point of failure for every sign-in. Google sign-in does not touch that quota. The button and the `/auth/callback` route are built and tested.
+- **Current state (2026-09-29)**: Google sign-in is configured and the button/callback are built. Email/Google same-address account linking and purchase preservation have not been verified.
+- **Owner choice**: the owner has deferred this test and paid-collection decisions. Keep it parked until the owner reopens it; complete the same-address check before the first sale.
 - **Checked live 2026-09-28 against project `ccrgvammglkvdlaojgzv`** (Supabase Management API, `/config/auth`). Most of this is already configured:
 
 | What | State | Action |
@@ -115,21 +116,13 @@ Last updated: 2026-09-28: added A12 (Google sign-in).
 > code and nobody can sign in — which is exactly what happened on 2026-09-28 when it went from 6 to
 > 10. If you want a different length, tell the assistant instead of only changing the dashboard.
 
-- **Done when**: on the live site, `/sign-in` → *Continue with Google* signs you in and lands you back where you started.
-- **Still untested, and it must be tested before any collection goes on sale.** No account has ever held both an email and a Google identity (5 users, 0 duplicate addresses, 0 linked accounts), so Supabase's same-address linking has never actually run here. Buy with an email code, then sign in with Google on that same address, and confirm it is the **same** user and the purchase is still in `/account/collections`. If a second user is created, the buyer sees "No Purchased Collections Yet" for a collection they paid for.
+- **Pre-sale acceptance check**: sign in with an email code and Google using the same address; confirm both methods resolve to the same user and that a test purchase remains in `/account/collections`.
 
 ---
 
-### A13. Turn on the sign-in human check (M7-01)
+### A13. Turnstile follow-up
 
-- **Why**: asking for a sign-in code creates an unconfirmed account row *before* anyone proves they own the address, and spends both the hourly email quota and your Amazon SES sending reputation. The public anon key is in the page source, so a script can do that in bulk. The real deadline is the day SES production access is granted (M7-03): that is when the endpoint becomes worth abusing, and a burst of invalid addresses produces bounces that can get your SES sending suspended.
-- **The code is built and deployed.** It stays dormant until you do the two steps below: with no site key the form renders exactly as it does now, and Supabase only enforces the check once the secret is set. The two switch on together.
-- **Steps**:
-  1. **Cloudflare** → Turnstile → **Add widget**. Hostnames: `mycuratedhaven.com`. Widget mode: **Managed**. Copy the **Site key** and the **Secret key**.
-  2. **Vercel** → Settings → Environment Variables → add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (the *site* key, Production) and redeploy. The site key is public and belongs in the browser; the secret key never goes in Vercel.
-  3. **Supabase** → Authentication → **Attack Protection** → enable CAPTCHA protection, provider **Turnstile**, paste the **Secret key**, save.
-- **Do steps 2 and 3 close together.** Site key without the Supabase secret means visitors solve a challenge that is never checked; the Supabase secret without the site key means every email sign-in fails. Google sign-in is unaffected either way.
-- **Done when**: on the live site, `/sign-in` still sends you a code, and Supabase's Attack Protection page shows CAPTCHA enabled.
+This duplicate checklist item is superseded by A2. No additional owner action is open here.
 
 
 ## B. Before you sell anything

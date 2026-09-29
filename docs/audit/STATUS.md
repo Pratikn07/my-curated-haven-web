@@ -2,7 +2,16 @@
 
 A single page answering two questions: what is finished, and what is not.
 
-Last updated: 2026-09-28.
+Last updated: 2026-09-29.
+
+## Current owner updates (2026-09-29)
+
+- **Amazon SES:** production-access request is pending Amazon's response. The older audit snapshot's “appeal denied” status is stale; sandbox restrictions still apply until Amazon responds.
+- **Support email:** an owner-provided screenshot confirms a test email sent from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox. Mail receipt is verified; who monitors it and the reply-time expectation remain undecided. DNS/MX records were not independently inspected.
+- **Turnstile:** site key is deployed and Supabase enforcement is enabled. A live request without a valid CAPTCHA token was rejected (`captcha_failed`). This does not prove successful email-code delivery/sign-in.
+- **Owner decision:** the owner declined rotating the Turnstile secret mentioned in the earlier transcript. Do not list rotation as an open task or ask again.
+- **Account 2FA:** owner screenshots show Google 2-Step Verification, GitHub authenticator-based 2FA, and Supabase MFA enabled. The owner declined adding a second Supabase authenticator; do not list that as an open task.
+- **Parked:** same-address email/Google account-linking test and paid-collection decisions are deferred by the owner. Do not present them as the next task unless the owner reopens them.
 
 ## Where the detail lives
 
@@ -17,26 +26,28 @@ ID prefixes: `R` = review finding, `M` = must-do found outside the plans, `G` = 
 
 ## The short version
 
-**157 audit items: 76 closed, 47 open, 34 of the open ones need the owner.**
+**157 audit items: 76 closed, 47 open, 34 of the open ones need the owner as counted in the 2026-09-28 baseline.** The current updates below supersede stale baseline statuses for SES, support mail, Turnstile, and 2FA; the total has not been recomputed.
 
 Two things gate everything else:
 
-1. **Almost nobody can sign in by email.** Amazon SES is in sandbox and the production-access appeal was **denied**, so only verified addresses receive a code (M7-03). Google sign-in, added today, is the working way in.
+1. **Email sign-in is still constrained.** Amazon SES is in sandbox and production access is awaiting Amazon's response, so only verified addresses receive a code (M7-03). Google sign-in is available, but end-to-end account-linking remains untested and is parked by the owner.
 2. **Nothing can be sold.** No Stripe account, no commerce tables in production, and all 14 commercial decisions are still open (R8-06, R8-07, M8-02).
 
 Neither is a code problem. Both are accounts and decisions.
 
 ## Done
 
-### Shipped today, 2026-09-28
+### Shipped through 2026-09-29
 
 | PR | What |
 | --- | --- |
 | [#60](https://github.com/Pratikn07/my-curated-haven-web/pull/60) | Google sign-in with a PKCE `/auth/callback`, and the emailed-code length read from one constant |
 | [#61](https://github.com/Pratikn07/my-curated-haven-web/pull/61) | Root `.gitignore`; `.DS_Store` untracked |
-| [#62](https://github.com/Pratikn07/my-curated-haven-web/pull/62) | Cloudflare Turnstile on the sign-in form, dormant until configured |
+| [#62](https://github.com/Pratikn07/my-curated-haven-web/pull/62) | Cloudflare Turnstile on the sign-in form; initially dormant, later enabled in production |
 | [#63](https://github.com/Pratikn07/my-curated-haven-web/pull/63) | The email-delivery findings recorded as M7-03/04/05 |
 | [#64](https://github.com/Pratikn07/my-curated-haven-web/pull/64) | A failed Turnstile challenge no longer blocks email sign-in |
+
+Turnstile was enabled in production on 2026-09-29; a live request without a valid token was rejected. Owner screenshots on 2026-09-29 show 2FA/MFA enabled for Google, GitHub, and Supabase. A support-mail test sent from a separate Gmail account reached the receiving Gmail inbox the same day.
 
 Supabase configuration changed the same day: Apple provider disabled, sign-in code expiry cut from 1 hour to 10 minutes, code length raised to 10 digits, redirect URLs fixed for `/auth/callback` on all three origins.
 
@@ -53,11 +64,10 @@ Supabase configuration changed the same day: Apple provider disabled, sign-in co
 
 | ID | Item | Who |
 | --- | --- | --- |
-| **M7-03** | **SES sandbox; production-access appeal denied (case 179061640900508).** Only verified addresses get a sign-in code | 👤 |
-| M11-03 | `support@mycuratedhaven.com` cannot receive mail — no MX records | 👤 |
-| A12 / G7-01 | Google sign-in: live in code, still needs the owner's final confirmation on a real browser | 👤 |
-| A13 / M7-01 | Turnstile: built and merged, needs the site key deployed and the secret set in Supabase | 👤 + assistant |
-| M7-05 | Account linking between an email code and Google is unproven, and now testable | assistant |
+| **M7-03** | **SES sandbox; production-access request pending Amazon response.** Only verified addresses get a sign-in code while pending | 👤 / Amazon |
+| R1-07 | Support-mail receipt verified; inbox monitor and response-time expectation still need an owner decision | 👤 |
+| A12 / G7-01 | Google sign-in is configured; same-address account/purchase check is unverified and parked until the owner reopens it; complete before first sale | 👤 (parked) |
+| M7-05 | Account linking between an email code and Google is unproven | 👤 (parked; pre-sale gate) |
 | M7-04 | A failed send still shows Supabase's raw error text | assistant |
 | M7-02 | No account-closure procedure | assistant |
 | R5-03, R5-04 | Owner review of the 3 free recipes; alt text on every recipe image | 👤 |
@@ -93,13 +103,12 @@ Supabase configuration changed the same day: Apple provider disabled, sign-in co
 | R12-02 | 30-day free-recipe review, due about 2026-10-27 |
 | G11-01 | Backups live only on one Mac |
 | R7-01, R7-02, R7-04 | Saved recipes: database rules not enforced or proven, legacy table still referenced |
-| — | 2FA on the Google, GitHub and Supabase accounts before Stripe keys exist |
 
 Plus 30-odd `G` suggestions, none blocking: security headers, Dependabot, self-hosted fonts, a security advisor in CI, a self-service delete-account button.
 
 ## What to do next
 
-1. **Reopen the SES case.** Nothing about email sign-in improves until that clears, and it is the slowest item because it waits on AWS.
-2. **Finish Turnstile** — site key deployed, secret in Supabase, confirmed on a real browser.
-3. **Make support mail work** (M11-03). The Privacy Policy and the account-closure route both point at an address that bounces.
-4. **Start the 14 commercial decisions.** They gate every other selling task and depend on nobody but you.
+1. **Decide support inbox ownership and reply timing** (R1-07); receipt is verified, staffing is not.
+2. **Replace the three recipe images** that conflict with the safety updates (A5 / R5-10).
+3. **Wait for Amazon's SES decision.** The request is pending; choose a fallback sender only if needed.
+4. **Keep account-linking and paid-collection decisions parked** until the owner reopens them.

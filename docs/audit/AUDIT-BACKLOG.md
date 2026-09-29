@@ -22,14 +22,14 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 | R5-03 | Review the 3 free recipes with the checklist (allergens, steps, yield, time, choking and texture, alt text), including each card summary's health claims (M6-01) |
 | M5-02 | Decide whether to disclose AI-assisted recipes and illustrative AI images |
 | M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
-| M7-01 | Create a free Cloudflare Turnstile site key (for sign-in CAPTCHA), alongside M1-03 |
+| ~~M7-01~~ | Done 2026-09-29: Turnstile enabled in production; live request without a valid CAPTCHA token was rejected (`captcha_failed`) |
 | R8-06 | Decide the paid collection terms C01–C14 (recipes, price, refunds, access duration, seller and tax, receipts) before checkout opens |
-| M1-03 | Pick an email provider for sign-in emails (Resend or Postmark), then add its DNS records |
+| M1-03 | SES production-access request is pending Amazon; choose/configure a fallback sender only if needed |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
 | R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in (the cookie dialog was removed) |
 | R3-07 | Approve the design direction (palette, Inter + Cormorant, card style) from the after-fix screenshots |
-| M11-03 | Set up mail for `support@mycuratedhaven.com` (the domain has no MX records) |
+| ~~M11-03~~ | Done 2026-09-29: owner screenshot confirms a test email to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox; DNS/MX was not independently inspected |
 | M11-02 | Upgrade Vercel to Pro before checkout opens |
 | R11-01 | Invited buyers first, or open checkout to everyone at once |
 | R12-02 | About 2026-10-27: run the 30-day free-recipe review in PostHog (steps in the Phase 12 section) |
@@ -52,7 +52,7 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 | R1-04 | P1 | Homepage said "in preparation" while the header linked to Recipes | ✅ PR #38 | `HOMEPAGE_RECIPE_STATE` set to `free_ready` with the three slot slugs |
 | R1-05 | P1 | Privacy and Terms contradicted each other (C13) | ✅ PR #38 | Rewritten from the site's real data handling. Owner approved the merge on 2026-09-25. Jurisdiction still open: M1-05 |
 | R1-06 | P1 | Privacy description said "no accounts"; body said "username and password" | ✅ PR #38 | Fixed in the rewrite |
-| R1-07 | P1 | Support mailbox never verified (O7) | 👤 | Owner confirms someone reads `support@mycuratedhaven.com` |
+| R1-07 | P1 | Support inbox monitoring and response expectation not confirmed (O7) | 👤 | Receipt test passed 2026-09-29 from a separate Gmail account. Owner still needs to choose who monitors the inbox and the expected reply time |
 | R1-08 | P1 | Native app users and subscriptions not resolved (O8) | ✅ | Owner confirmed 2026-09-25: the native app has no users. No separate app privacy policy is needed. See the effects on M1-04 and Phase 4 below |
 | R1-09 | P2 | Content register never signed off | 👤 | Owner ticks the checklist in `CONTENT-REGISTER.md` when approving the PR |
 | R1-10 | P2 | Phase 1 docs said "not deployed" | ✅ PR #38 | README and evidence updated, with an audit section |
@@ -285,8 +285,8 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M7-01 | P1 | Anyone can block sign-in for everyone | ⏳ 👤 | The whole project can send 2 auth emails per hour (`rate_limit_email_sent: 2`), and the sign-in form has no CAPTCHA (`security_captcha_enabled: false`). Two requests an hour, from the form or straight to the public Supabase endpoint, use up the quota, and no real visitor gets a code. Fix: M1-03 (custom sender, higher limit), plus CAPTCHA on sign-in. Cloudflare Turnstile is free and Supabase supports it natively |
-| M7-03 | P0 👤 | **Email sign-in reaches almost nobody: SES is in sandbox and the production-access appeal was DENIED** | ⏳ | Supersedes the A1/M11-01 framing — the project moved off Supabase's built-in sender to Amazon SES, so "only emails your Supabase team" is stale. Checked 2026-09-28 via `sesv2:GetAccount` on account `121573400164`: `ProductionAccessEnabled: false`, `ReviewDetails: {Status: DENIED, CaseId: 179061640900508}`, quota 200/day at 1/sec. Verified identities are only `mycuratedhaven.com` (domain) and `pratik.nandoskar07@gmail.com`. In sandbox SES delivers to verified recipients only, so every other address gets `554 Message rejected: Email address is not verified` and the parent sees a failure. Live proof in auth_logs for `anaika.nandoskar@gmail.com` (23:19) and `surbanholds@gmail.com` (20:10). Fix: reopen case `179061640900508` with a specific transactional use case (one-time sign-in codes, only to an address the person just typed, no marketing, bounce/complaint handling via SES notifications). To keep testing meanwhile, verify individual recipient addresses in SES. A separate `ses:SendRawEmail` IAM denial seen at 20:04-20:07 is already fixed |
+| M7-01 | P1 | Anyone can block sign-in for everyone | 🔶 CAPTCHA portion done (2026-09-29) | Turnstile site key is deployed and Supabase enforcement enabled. A live sign-in request without a valid CAPTCHA token was rejected (`captcha_failed`). Email delivery and SES sandbox limits remain tracked under M7-03; this does not prove successful email-code delivery/sign-in |
+| M7-03 | P0 👤 | **Email sign-in remains constrained: SES production access is pending Amazon** | ⏳ | Earlier 2026-09-28 inspection recorded sandbox access; the owner reports the production-access request is now awaiting Amazon's response. Until approved, SES sandbox sends only to verified recipients. Refresh this status when Amazon replies. Do not rely on the stale “denied” disposition or reopen the case unless Amazon responds with a denial |
 | M7-04 | P2 | Parents see Supabase's raw "Error sending magic link email" when a send fails | ⏳ | `otpRequestErrorMessage` (`src/lib/auth/otp-errors.ts`) only rewrites `email_address_not_authorized` and `over_email_send_rate_limit`; every other failure passes through unchanged, which is how the SES sandbox rejection reached the sign-in form verbatim. Add a send-failure branch in the same style as the existing two, pointing at Google sign-in and the free recipes |
 | M7-05 | P1 | Account linking between an email code and Google is still unproven, and it is now testable | ⏳ | Of 6 users, none holds both an `email` and a `google` identity, so Supabase's same-address linking has never run on this project. `pratik.nandoskar07@gmail.com` already has a Google identity **and** is SES-verified, so signing in to that one address with an email code will show whether it links to the existing user or creates a 7th. Must be answered before a collection goes on sale: a second user orphans the buyer's `access_entitlements` row and their library reads "No Purchased Collections Yet" |
 | M7-02 | P1 | No account-closure procedure, and deleting a user failed (`profiles` FK was NO ACTION) | ⏳ | The account page says "email support to close your account", and the Privacy Policy promises deletion on request, but no runbook exists (Phase 7 validation lists "Account-closure runbook reference" as required evidence). Write one: verify the request comes from the account's address, check for purchases (Phase 8 must keep financial records), delete the user in Supabase Auth (cascades `saved_recipes` and `profiles`), and confirm by email |
@@ -295,7 +295,7 @@ Verified as done (no action):
 
 | ID | Pri | Suggestion | Why |
 | --- | --- | --- | --- |
-| G7-01 | P2 → ⏳ 👤 | **Revised 2026-09-28**: keep Google and add it to the website; turn Apple and password sign-ups off | Email codes were the single way in, and the project can send 2 sign-in emails an hour with no CAPTCHA (M7-01), so two requests close sign-in for everyone. Google does not touch the email quota. Apple returns a Private Relay address, which would orphan a purchase made with an email code. **Built**: `/auth/callback` PKCE route, the Continue with Google button, `sign_in_completed.method`. **Owner**: OWNER-TODO A12 (Google Cloud Web client, Supabase provider keys and redirect URLs, disable Apple and passwords). **Before sale**: verify email-code and Google on one address resolve to one user, or a buyer loses their collection |
+| G7-01 | P2 → ⏳ 👤 | **Revised 2026-09-29**: Google sign-in is configured; same-address account-linking check remains open and is parked by the owner | The Continue with Google button and `/auth/callback` PKCE route are built; Apple is disabled. Before the first sale, verify email-code and Google sign-in on one address resolve to the same user and preserve a test purchase. The owner deferred this check for now; see OWNER-TODO A12 |
 | G7-02 | P2 | A self-service "Delete my account" button | Removes the manual support step in M7-02 |
 
 ---
@@ -457,9 +457,9 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M11-01 | P0 👤 | No one outside the Supabase team can sign in | ⏳ (message ✅) | Auth config: `smtp_host` empty (built-in sender), team has 1 member. Supabase docs: the built-in sender "will refuse to deliver messages to addresses that are not part of the project's team" ("Email address not authorized"). Parents saw that raw text. The sign-in page now explains that free recipes need no account (`src/lib/auth/otp-errors.ts`). Real fix: A1 / M1-03 |
+| M11-01 | P0 👤 | Supabase built-in sender rejected non-team addresses | Superseded by M7-03 | The project later moved to Amazon SES; the built-in-sender finding no longer describes current delivery. SES sandbox still limits recipients to verified addresses; see M7-03 |
 | M11-02 | P1 👤 | Vercel Hobby forbids selling | ⏳ | Vercel fair-use guidelines: Hobby is "restricted to non-commercial personal use only", including "any method of requesting or processing payment" and "advertising the sale of a product". Upgrade to Pro ($20/month) before checkout. Hobby also caps image optimisation at 5,000 transformations a month |
-| M11-03 | P0 👤 | `support@mycuratedhaven.com` can't receive mail | ⏳ | `dig MX mycuratedhaven.com` is empty on 1.1.1.1 and 8.8.8.8. The address is on 9 pages, including the Privacy Policy and account deletion. Add mail forwarding (for example ImprovMX, free) to an inbox you read |
+| M11-03 | P0 👤 | `support@mycuratedhaven.com` can't receive mail | ✅ (receipt verified 2026-09-29) | Owner screenshot confirms a test email from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox. The email displayed Gmail's suspicious-message banner but was delivered. DNS/MX was not independently inspected |
 
 ### Good to have
 
