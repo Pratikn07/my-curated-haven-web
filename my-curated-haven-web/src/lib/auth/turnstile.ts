@@ -22,3 +22,20 @@ export function getTurnstileSiteKey(): string | null {
 export function isTurnstileEnabled(): boolean {
   return getTurnstileSiteKey() !== null;
 }
+
+/**
+ * Whether the email button must stay disabled while the challenge resolves.
+ *
+ * Only true while the widget is genuinely still working on a token. A widget
+ * that failed — a wrong site key, a blocked script, an unsupported browser —
+ * must NOT hold the button shut: it leaves every visitor staring at a disabled
+ * button with no way forward. It failed exactly that way in production on
+ * 2026-09-28 with Turnstile error 400020 (invalid sitekey).
+ */
+export function emailSubmitBlocked(state: {
+  configured: boolean;
+  token: string | null;
+  widgetFailed: boolean;
+}): boolean {
+  return state.configured && !state.token && !state.widgetFailed;
+}

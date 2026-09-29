@@ -44,8 +44,13 @@ interface TurnstileWidgetProps {
   onToken: (token: string | null) => void;
   /** Bump to discard a spent token and issue a fresh challenge. */
   resetSignal: number;
-  /** Called when the script cannot load, e.g. a blocker or an offline browser. */
-  onUnavailable: () => void;
+  /**
+   * Called when the challenge cannot produce a token at all: the script was
+   * blocked, or the widget itself errored (wrong site key, unsupported
+   * browser). The parent must let the visitor proceed rather than hold the
+   * button shut forever.
+   */
+  onUnavailable: (reason: string) => void;
 }
 
 /**
@@ -85,13 +90,19 @@ export default function TurnstileWidget({
           callback: (token: string) => onTokenRef.current(token),
           "expired-callback": () => onTokenRef.current(null),
           "timeout-callback": () => onTokenRef.current(null),
-          "error-callback": () => onTokenRef.current(null),
+          // Turnstile reports a code here, e.g. 400020 for an invalid site key.
+          // Returning true tells it we have handled the error ourselves.
+          "error-callback": (code: string) => {
+            onTokenRef.current(null);
+            onUnavailableRef.current(String(code ?? "error"));
+            return true;
+          },
           // Stay out of the way unless this visitor actually has to do something.
           appearance: "interaction-only",
         });
       })
       .catch(() => {
-        if (!cancelled) onUnavailableRef.current();
+        if (!cancelled) onUnavailableRef.current("script_blocked");
       });
 
     return () => {

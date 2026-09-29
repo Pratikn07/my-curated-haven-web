@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { getTurnstileSiteKey, isTurnstileEnabled, TURNSTILE_SCRIPT_URL } from "../../src/lib/auth/turnstile";
+import {
+  emailSubmitBlocked,
+  getTurnstileSiteKey,
+  isTurnstileEnabled,
+  TURNSTILE_SCRIPT_URL,
+} from "../../src/lib/auth/turnstile";
 import { otpRequestErrorMessage } from "../../src/lib/auth/otp-errors";
 
 function withSiteKey<T>(value: string | undefined, run: () => T): T {
@@ -49,4 +54,23 @@ test("a rejected challenge explains itself and points at Google", () => {
   // Unrelated errors still pass through untouched.
   const wait = "For security purposes, you can only request this after 42 seconds.";
   expect(otpRequestErrorMessage({ code: "over_request_rate_limit", message: wait })).toBe(wait);
+});
+
+// Production incident 2026-09-28: a mistyped site key made Turnstile return
+// error 400020, the widget never issued a token, and the email button stayed
+// disabled for every visitor. A failed challenge must never hold the door shut.
+test("a failed challenge never leaves the email button stuck", () => {
+  const blocked = (o: Partial<Parameters<typeof emailSubmitBlocked>[0]>) =>
+    emailSubmitBlocked({ configured: true, token: null, widgetFailed: false, ...o });
+
+  // Genuinely still resolving: holding the button is correct, and temporary.
+  expect(blocked({})).toBe(true);
+
+  // Every way the challenge can fail must release the button.
+  expect(blocked({ widgetFailed: true }), "widget errored (e.g. 400020)").toBe(false);
+  expect(blocked({ token: "0.abc" }), "token issued").toBe(false);
+  expect(blocked({ configured: false }), "no site key configured").toBe(false);
+
+  // A widget that failed and then recovered still releases it.
+  expect(blocked({ token: "0.abc", widgetFailed: true })).toBe(false);
 });
