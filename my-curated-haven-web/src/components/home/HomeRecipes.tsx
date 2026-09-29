@@ -38,7 +38,7 @@ export default async function HomeRecipes() {
       <Container>
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
           <div>
-            <p className="font-semibold text-action">Recipes by Tiny Soho, inside My Curated Haven.</p>
+            <p className="font-semibold text-action">Recipes by Tiny Soho, from Nibble &amp; Nurture.</p>
             <h2 id="recipes-title" className="mt-3 max-w-xl text-3xl font-semibold sm:text-4xl">
               A simple place to start.
             </h2>

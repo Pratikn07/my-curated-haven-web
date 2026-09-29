@@ -15,7 +15,7 @@ export default function Hero() {
         <p className="max-w-[58ch] text-lg text-text-muted sm:text-xl">
           {isPreparation
             ? "We're starting with toddler recipes from Tiny Soho. The recipe collection is in preparation."
-            : "My Curated Haven brings together toddler recipes and thoughtful ideas for everyday parenting."}
+            : "Nibble & Nurture brings together toddler recipes and thoughtful ideas for everyday parenting."}
         </p>
         <div className="flex flex-wrap gap-3 pt-1">
           <TrackedHomepageLink

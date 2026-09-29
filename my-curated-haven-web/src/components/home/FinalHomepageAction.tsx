@@ -14,7 +14,7 @@ export default function FinalHomepageAction() {
             </h2>
             <p className="mt-2 text-text-muted">
               {isPreparation
-                ? "See what's being prepared for the first part of My Curated Haven."
+                ? "See what's being prepared first at Nibble & Nurture."
                 : "Browse the public toddler recipe collection by Tiny Soho."}
             </p>
           </div>

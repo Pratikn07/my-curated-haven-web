@@ -11,11 +11,11 @@ import { WhatsAhead } from "@/components/home/FeaturePreview";
 import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
-const pageTitle = "My Curated Haven by Nibble & Nurture | Recipes and a glimpse of what's ahead";
+const pageTitle = "Nibble & Nurture | Recipes and a glimpse of what's ahead";
 const pageDescription =
-  "My Curated Haven is a Nibble & Nurture parenting product starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.";
+  "Nibble & Nurture is building a parenting companion, starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.";
 const socialImageAlt =
-  "Nibble & Nurture presents My Curated Haven, starting with Tiny Soho recipes and previews of what may be ahead.";
+  "Nibble & Nurture, starting with Tiny Soho recipes and previews of what may be ahead.";
 
 export const metadata: Metadata = {
   title: { absolute: pageTitle },

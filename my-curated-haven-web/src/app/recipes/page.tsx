@@ -23,7 +23,7 @@ export async function generateMetadata({
   return {
     title: "Toddler Recipes",
     description:
-      "Simple toddler recipes for busy families, with ingredients, steps and storage guidance. Recipes by Tiny Soho, inside My Curated Haven.",
+      "Simple toddler recipes for busy families, with ingredients, steps and storage guidance. Recipes by Tiny Soho, from Nibble & Nurture.",
     alternates: {
       canonical: `${SITE_ORIGIN}/recipes`,
     },
@@ -120,7 +120,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
       {/* Page Header & Attribution */}
       <header className="mb-8 border-b border-border pb-8">
         <p className="mb-2 text-xs font-bold uppercase tracking-wider text-action">
-          Recipes by Tiny Soho, inside My Curated Haven.
+          Recipes by Tiny Soho, from Nibble &amp; Nurture.
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Simple Toddler Recipes

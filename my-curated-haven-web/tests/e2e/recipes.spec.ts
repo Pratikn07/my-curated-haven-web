@@ -18,7 +18,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
       "Simple Toddler Recipes"
     );
     await expect(
-      page.locator("#main").getByText("Recipes by Tiny Soho, inside My Curated Haven.")
+      page.locator("#main").getByText("Recipes by Tiny Soho, from Nibble & Nurture.")
     ).toBeVisible();
 
     // Recipe Cards
@@ -175,7 +175,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     // Attribution & Title
     await expect(page.getByRole("heading", { level: 1 })).toContainText(recipeTitle);
     await expect(
-      page.locator("header").getByText("Recipes by Tiny Soho, inside My Curated Haven.")
+      page.locator("header").getByText("Recipes by Tiny Soho, from Nibble & Nurture.")
     ).toBeVisible();
 
     // Meta stats & Actions

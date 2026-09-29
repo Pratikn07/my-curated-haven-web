@@ -12,7 +12,7 @@ export default function Footer() {
             Nibble &amp; Nurture
           </Link>
           <p className="mt-2 max-w-sm text-text-muted">
-            The company behind My Curated Haven, with recipes by Tiny Soho.
+            Parenting ideas and toddler recipes by Tiny Soho.
           </p>
         </div>
         <ul className="grid gap-2">

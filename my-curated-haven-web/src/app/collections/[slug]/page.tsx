@@ -41,7 +41,7 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${offer.collectionTitle} | Toddler Recipe Collection | My Curated Haven`;
+  const title = `${offer.collectionTitle} | Toddler Recipe Collection | Nibble & Nurture`;
   const description = `${offer.collectionSummary} One-time purchase of ${offer.formattedPrice}. Includes printable recipe pages.`;
   const canonicalUrl = `${SITE_ORIGIN}/collections/${offer.collectionSlug}`;
 
@@ -99,7 +99,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {/* Header and Commercial Hero */}
       <header className="mb-10 text-center sm:text-left">
         <p className="mb-2 text-xs font-bold uppercase tracking-wider text-action">
-          Recipes by Tiny Soho, inside My Curated Haven
+          Recipes by Tiny Soho, from Nibble &amp; Nurture
         </p>
         <h1 className="break-words text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
           {offer.collectionTitle}
