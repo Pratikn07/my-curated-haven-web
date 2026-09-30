@@ -19,6 +19,9 @@ test("sign-in email errors explain what to do", () => {
   // The per-address wait is already clear, and tests rely on its wording.
   const wait = "For security purposes, you can only request this after 42 seconds.";
   expect(otpRequestErrorMessage({ code: "over_request_rate_limit", message: wait })).toBe(wait);
+  // Production returned this same code for a 17-second per-address wait,
+  // which the helper previously mislabeled as the project-wide hourly cap.
+  expect(otpRequestErrorMessage({ code: "over_email_send_rate_limit", message: wait })).toBe(wait);
 });
 
 // The sign-in form once hard-coded maxLength={6} while Supabase's

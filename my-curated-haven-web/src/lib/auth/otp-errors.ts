@@ -11,6 +11,15 @@ export function otpRequestErrorMessage(error: { code?: string; message: string }
     return "We can't send sign-in codes to new email addresses yet. The free recipes don't need an account, so you can keep reading and printing them.";
   }
 
+  // Supabase also uses over_email_send_rate_limit for the per-address
+  // cooldown. Preserve its wait message before applying the hourly fallback.
+  if (
+    (code === "over_email_send_rate_limit" || code === "over_request_rate_limit") &&
+    /only request this after \d+ seconds?/.test(message)
+  ) {
+    return error.message;
+  }
+
   // Project-wide hourly email limit, not the per-address 60-second wait.
   if (code === "over_email_send_rate_limit" || message.includes("email rate limit exceeded")) {
     return "We've sent too many sign-in emails in the last hour. Please try again later. The free recipes don't need an account.";
