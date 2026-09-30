@@ -235,7 +235,7 @@ max_frequency = "1s"
 # Must match production (`mailer_otp_length`) and EMAIL_OTP_LENGTH in
 # src/lib/auth/otp.ts. When local and production disagree, the sign-in form
 # either truncates the code or refuses to submit it.
-otp_length = 10
+otp_length = 6
 # Number of seconds before the email OTP expires.
 otp_expiry = 600
 

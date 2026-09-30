@@ -6,4 +6,4 @@
  * silently truncates or rejects every code and nobody can sign in, so the
  * number lives here once and the UI and tests read it.
  */
-export const EMAIL_OTP_LENGTH = 10;
+export const EMAIL_OTP_LENGTH = 6;
