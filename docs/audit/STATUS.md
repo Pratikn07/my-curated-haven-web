@@ -2,13 +2,13 @@
 
 A single page answering two questions: what is finished, and what is not.
 
-Last updated: 2026-09-29.
+Last updated: 2026-10-01.
 
-## Current owner updates (2026-09-29)
+## Current owner updates (2026-10-01)
 
-- **Amazon SES:** production-access request is pending Amazon's response. The older audit snapshot's “appeal denied” status is stale; sandbox restrictions still apply until Amazon responds.
+- **Amazon SES:** production access is approved. AWS confirms the account was moved out of the sandbox in US East (N. Virginia), with a quota of 50,000 messages per day and a maximum rate of 14 messages per second. An owner screenshot shows a sign-in code delivered to a separate Gmail address after approval. This confirms delivery, not completion of sign-in with that code.
 - **Support email:** an owner-provided screenshot confirms a test email sent from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox. Mail receipt is verified; who monitors it and the reply-time expectation remain undecided. DNS/MX records were not independently inspected.
-- **Turnstile:** site key is deployed and Supabase enforcement is enabled. A live request without a valid CAPTCHA token was rejected (`captcha_failed`). This does not prove successful email-code delivery/sign-in.
+- **Turnstile:** site key is deployed and Supabase enforcement is enabled. A live request without a valid CAPTCHA token was rejected (`captcha_failed`). Email delivery is now confirmed separately; this does not prove someone completed sign-in by entering the code.
 - **Owner decision:** the owner declined rotating the Turnstile secret mentioned in the earlier transcript. Do not list rotation as an open task or ask again.
 - **Account 2FA:** owner screenshots show Google 2-Step Verification, GitHub authenticator-based 2FA, and Supabase MFA enabled. The owner declined adding a second Supabase authenticator; do not list that as an open task.
 - **Parked:** same-address email/Google account-linking test and paid-collection decisions are deferred by the owner. Do not present them as the next task unless the owner reopens them.
@@ -26,11 +26,11 @@ ID prefixes: `R` = review finding, `M` = must-do found outside the plans, `G` = 
 
 ## The short version
 
-**157 audit items: 76 closed, 47 open, 34 of the open ones need the owner as counted in the 2026-09-28 baseline.** The current updates below supersede stale baseline statuses for SES, support mail, Turnstile, and 2FA; the total has not been recomputed.
+**157 audit items: 76 closed, 47 open, 34 of the open ones need the owner as counted in the 2026-09-28 baseline.** This is the original audit count; current updates below supersede stale statuses for SES, support mail, Turnstile, and 2FA. The total has not been recomputed.
 
 Two things gate everything else:
 
-1. **Email sign-in is still constrained.** Amazon SES is in sandbox and production access is awaiting Amazon's response, so only verified addresses receive a code (M7-03). Google sign-in is available, but end-to-end account-linking remains untested and is parked by the owner.
+1. **Email sending is enabled for public recipients.** SES production access is approved and one sign-in code was delivered to a separate Gmail address. The owner has deferred the same-address Google/email account-linking check; it remains a pre-sale check if the owner reopens it.
 2. **Nothing can be sold.** No Stripe account, no commerce tables in production, and all 14 commercial decisions are still open (R8-06, R8-07, M8-02).
 
 Neither is a code problem. Both are accounts and decisions.
@@ -64,12 +64,11 @@ Supabase configuration changed the same day: Apple provider disabled, sign-in co
 
 | ID | Item | Who |
 | --- | --- | --- |
-| **M7-03** | **SES sandbox; production-access request pending Amazon response.** Only verified addresses get a sign-in code while pending | 👤 / Amazon |
 | R1-07 | Support-mail receipt verified; inbox monitor and response-time expectation still need an owner decision | 👤 |
 | A12 / G7-01 | Google sign-in is configured; same-address account/purchase check is unverified and parked until the owner reopens it; complete before first sale | 👤 (parked) |
 | M7-05 | Account linking between an email code and Google is unproven | 👤 (parked; pre-sale gate) |
 | M7-04 | A failed send still shows Supabase's raw error text | assistant |
-| M7-02 | No account-closure procedure | assistant |
+| M7-02 | Account-closure guide and database deletion test exist; production deletion has not been separately verified | assistant |
 | R5-03, R5-04 | Owner review of the 3 free recipes; alt text on every recipe image | 👤 |
 | R5-10, R5-12, R5-13 | 3 recipe images contradict the safety fixes; 4 items need a human expert; how to label AI-checked recipes | 👤 |
 | M5-02, M5-03 | No record that content is AI-generated; image rights unknown | 👤 |
@@ -110,5 +109,5 @@ Plus 30-odd `G` suggestions, none blocking: security headers, Dependabot, self-h
 
 1. **Decide support inbox ownership and reply timing** (R1-07); receipt is verified, staffing is not.
 2. **Replace the three recipe images** that conflict with the safety updates (A5 / R5-10).
-3. **Wait for Amazon's SES decision.** The request is pending; choose a fallback sender only if needed.
+3. **Review the free recipes and their images** for safety, accuracy, health claims, and alt text.
 4. **Keep account-linking and paid-collection decisions parked** until the owner reopens them.
