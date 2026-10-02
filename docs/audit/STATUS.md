@@ -31,7 +31,7 @@ ID prefixes: `R` = review finding, `M` = must-do found outside the plans, `G` = 
 Two things gate everything else:
 
 1. **Email sending is enabled for public recipients.** SES production access is approved and one sign-in code was delivered to a separate Gmail address. The owner has deferred the same-address Google/email account-linking check; it remains a pre-sale check if the owner reopens it.
-2. **Nothing can be sold.** No Stripe account, no commerce tables in production, and all 14 commercial decisions are still open (R8-06, R8-07, M8-02).
+2. **Nothing can be sold yet.** No Stripe account or production commerce setup exists. 13 of the 14 commercial choices remain open (C01–C10 and C12–C14); C11 is answered: there are no existing app purchases (R8-06, R8-07, M8-02).
 
 Neither is a code problem. Both are accounts and decisions.
 
@@ -82,7 +82,7 @@ Supabase configuration changed the same day: Apple provider disabled, sign-in co
 
 | ID | Item | Who |
 | --- | --- | --- |
-| **R8-06** | **All 14 commercial decisions open** (C01–C14): which recipes, price, seller identity, tax, refund terms, access duration, receipts | 👤 |
+| **R8-06** | **13 of 14 commercial choices remain open** (C01–C10, C12–C14): recipes, price, seller and tax details, refund rules, access, support response time, and receipts. C11 is answered: no existing app purchases | 👤 |
 | M8-02 | No Stripe account, webhook endpoint or keys | 👤 |
 | M11-02 | Vercel Hobby forbids selling; Pro needed | 👤 |
 | R8-07 | Commerce schema not applied to production | assistant, at launch |

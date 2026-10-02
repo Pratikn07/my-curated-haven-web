@@ -168,7 +168,7 @@ This duplicate checklist item is superseded by A2. No additional owner action is
 
 - Hostinger → Domains → `mycuratedhaven.com`: turn on **auto-renew**. It expires 2027-01-28.
 
-### B1. The 14 commercial decisions (R8-06)
+### B1. Commercial decisions before selling (R8-06)
 
 Checkout stays off until these are decided. The collection page will show your real terms.
 
