@@ -14,19 +14,24 @@ Each phase has three lists:
 Priority: **P0** = visitors affected now. **P1** = fix before launch. **P2** = cleanup.
 Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decision.
 
+## Owner decisions recorded 2026-10-02
+
+- Support mail is monitored by the owner's team (R1-07). No fixed buyer reply-time promise was supplied (C10).
+- The owner approved the three free recipes and their content checklist (R5-03, free-recipe scope of M6-01). The three image replacements are approved for implementation (R5-10); final image descriptions and their implementation remain pending (R5-04). This is owner approval, not an outside expert review or approval of paid drafts.
+- The owner removed the allergy-wording and AI-disclosure decisions from their active tasks (R5-13, M5-02). PR #73 removed the editorial allergen-review notice from the code; source-listed allergens remain visible. Database review states and Dietary filters are unchanged by this documentation update.
+- The owner confirms the image-generation plan permits commercial use (M5-03); provider terms were not independently reviewed here.
+- Business details supplied for the Terms: **Nibble and Nurture**, **USA** (M1-05). A specific US governing-law state and arbitration choice were not supplied, and Terms implementation remains pending. Sale territories and tax remain separate decisions (C04).
+- Analytics privacy settings, consent setup and optional Search Console are deferred. The existing accepted risk remains recorded (M9-01).
+- Real-iPhone VoiceOver testing and design approval remain open (R3-06, R3-07); the owner asked for testing instructions, now in `OWNER-TODO.md`, section C.
+
 ## Waiting on the owner
 
 | ID | Decision or action |
 | --- | --- |
 | ~~R5-03a~~ | Done 2026-09-26 by OpenAI GPT-6 (Codex): 0 approve, 34 approve with changes, 36 reject, 53 blockers. Results stay outside the repo because they contain the paid drafts: `~/Documents/working/mch/recipe-review/`. Was: run the external AI review of all 70 recipes: `~/Documents/working/mch/recipe-review/REVIEW-PROMPT-ALL-70.md`, with an AI that can run commands (Claude Code, Cursor or Codex). Results go to `review-result-batch-1..7.json` in that folder |
-| R5-03 | Review the 3 free recipes with the checklist (allergens, steps, yield, time, choking and texture, alt text), including each card summary's health claims (M6-01) |
-| M5-02 | Decide whether to disclose AI-assisted recipes and illustrative AI images |
-| M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
 | ~~M7-01~~ | Done 2026-09-29: Turnstile enabled in production; live request without a valid CAPTCHA token was rejected (`captcha_failed`) |
 | R8-06 | Decide the paid collection terms C01–C14 (recipes, price, refunds, access duration, seller and tax, receipts) before checkout opens |
 | M1-03 | ✅ SES production access approved in US East (N. Virginia); no fallback sender needed |
-| M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
-| R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
 | R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in (the cookie dialog was removed) |
 | R3-07 | Approve the design direction (palette, Inter + Cormorant, card style) from the after-fix screenshots |
 | ~~M11-03~~ | Done 2026-09-29: owner screenshot confirms a test email to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox; DNS/MX was not independently inspected |
@@ -52,7 +57,7 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 | R1-04 | P1 | Homepage said "in preparation" while the header linked to Recipes | ✅ PR #38 | `HOMEPAGE_RECIPE_STATE` set to `free_ready` with the three slot slugs |
 | R1-05 | P1 | Privacy and Terms contradicted each other (C13) | ✅ PR #38 | Rewritten from the site's real data handling. Owner approved the merge on 2026-09-25. Jurisdiction still open: M1-05 |
 | R1-06 | P1 | Privacy description said "no accounts"; body said "username and password" | ✅ PR #38 | Fixed in the rewrite |
-| R1-07 | P1 | Support inbox monitoring and response expectation not confirmed (O7) | 👤 | Receipt test passed 2026-09-29 from a separate Gmail account. Owner still needs to choose who monitors the inbox and the expected reply time |
+| R1-07 | P1 | Support inbox monitoring and response expectation not confirmed (O7) | ✅ owner confirmed | Receipt test passed 2026-09-29. On 2026-10-02 the owner confirmed their team monitors `support@mycuratedhaven.com`. No fixed response-time promise was supplied; buyer timing remains part of deferred C10 |
 | R1-08 | P1 | Native app users and subscriptions not resolved (O8) | ✅ | Owner confirmed 2026-09-25: the native app has no users. No separate app privacy policy is needed. See the effects on M1-04 and Phase 4 below |
 | R1-09 | P2 | Content register never signed off | 👤 | Owner ticks the checklist in `CONTENT-REGISTER.md` when approving the PR |
 | R1-10 | P2 | Phase 1 docs said "not deployed" | ✅ PR #38 | README and evidence updated, with an audit section |
@@ -64,17 +69,18 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 | --- | --- | --- | --- | --- |
 | M1-01 | P0 | `www.mycuratedhaven.com` showed a certificate warning. DNS pointed to Vercel, but the domain was not on the project | ✅ | Added to Vercel with a 308 redirect to `https://mycuratedhaven.com`, keeping path and query |
 | M1-02 | P0 | Sign-in emails had no code. The website asks for a 6-digit code, but the Supabase templates only contained a link to `site_url`, which is `http://localhost:8081` | ✅ | Added `{{ .Token }}` to the magic-link and confirm-signup templates. Link kept for the native app. Backup: `docs/audit/rollback/auth-templates-backup-2026-09-25.json` |
-| M1-03 | P1 | Sign-in emails capped at 2 per hour for the whole project | ⏳ 👤 | See [M1-03](#m1-03-custom-email-sender) |
+| M1-03 | P1 | Sign-in emails capped at 2 per hour for the whole project | ✅ production access and delivery confirmed | SES approval and external code delivery recorded 2026-10-01. See [M1-03](#m1-03-custom-email-sender) for the original finding and evidence limits |
 | M1-04 | P1 | Supabase `site_url` is a dev address | ✅ | Done 2026-09-25. See [M1-04](#m1-04-production-auth-urls) |
-| M1-05 | P1 | Terms have no governing law or dispute resolution | ⏳ 👤 | See [M1-05](#m1-05-terms-jurisdiction) |
+| M1-05 | P1 | Terms have no governing law or dispute resolution | ⏳ details supplied | Owner supplied Nibble and Nurture, USA on 2026-10-02. Terms implementation remains pending; see [M1-05](#m1-05-terms-jurisdiction) |
 | M1-06 | P1 | No production check after deploy | ✅ PR #41 | See [M1-06](#m1-06-post-deploy-production-check) |
 
 #### M1-03: custom email sender
 
-- **Problem**: Supabase Auth sends sign-in emails through its built-in sender. `rate_limit_email_sent` is `2`: the whole project can send 2 auth emails per hour. The third person to sign in within an hour gets no code. The built-in sender is meant for testing, and its mail is more likely to land in spam.
+- **Current status (2026-10-01)**: AWS approved SES production access in US East (N. Virginia), 50,000 messages per day and up to 14 messages per second. An owner screenshot confirms one sign-in code delivered to a separate Gmail address. The original setup request is answered; no fallback provider is needed. This evidence does not claim the original five-email/header test below was performed.
+- **Original problem (2026-09-25)**: Supabase Auth sent sign-in emails through its built-in sender. `rate_limit_email_sent` was `2`: the whole project could send 2 auth emails per hour. The built-in sender was intended for testing.
 - **Evidence**: `GET /v1/projects/ccrgvammglkvdlaojgzv/config/auth` on 2026-09-25: `smtp_host` empty, `rate_limit_email_sent: 2`.
-- **Owner decision**: choose a provider. Resend and Postmark both work with Supabase custom SMTP. Either needs DNS records (SPF, DKIM, and ideally DMARC) on `mycuratedhaven.com`.
-- **Steps**:
+- **Original provider options (superseded by SES)**: Resend and Postmark with Supabase custom SMTP and domain authentication records.
+- **Original setup steps (historical)**:
   1. Create the provider account and verify `mycuratedhaven.com` by adding its DNS records at the domain registrar.
   2. Supabase → Authentication → SMTP settings: host, port, username, password from the provider. Sender `My Curated Haven <no-reply@mycuratedhaven.com>`.
   3. Raise `rate_limit_email_sent` to a launch-safe value (for example 30 per hour), and keep per-address limits.
@@ -102,7 +108,7 @@ Remediation plan: none was written. Fixes below are from this audit. Code fixes 
 #### M1-05: Terms jurisdiction
 
 - **Problem**: the redrafted Terms (PR #38) have only an informal "email us first" dispute step. The previous arbitration and governing-law clauses had `[Your State/Country]` placeholders and were removed rather than published unfinished.
-- **Owner decision**: the legal entity name and the state or country whose law governs. Decide whether to keep binding arbitration and a class-action waiver. That needs a lawyer, because consumer arbitration rules vary by place.
+- **Owner details supplied 2026-10-02**: business name **Nibble and Nurture**, country **USA**. The request for those details is answered. No specific US governing-law state or arbitration choice was supplied. Do not infer those choices or mark the Terms implemented; substantive policy changes belong in a separate reviewed task.
 - **Steps**: add "Governing law" and, if chosen, "Arbitration" sections to `src/app/terms/page.tsx`. Name the operating entity in section 1. Update the "Last updated" date.
 - **Done when**: Terms name the entity and governing law, and contain no placeholders.
 
@@ -200,7 +206,7 @@ Verified as done (no action):
 | R3-03 | P1 | The skip link isn't the first focus stop (D08) | ✅ fixed | The first Tab lands on the cookie banner's "privacy notice" link. `AnalyticsProvider` renders the banner before its children, which include the skip link (`SiteShell.tsx:9-11`). Render the skip link first |
 | R3-04 | P1 | Cookie preferences dialog has no focus management (D09) | ✅ fixed | It has `aria-modal="true"` and a label, and Escape closes it. But focus doesn't move into the dialog on open, Tab leaves it, and focus doesn't return to the opener on close. `ConsentPreferencesModal.tsx` only handles Escape. Move focus in, trap Tab, restore focus to the trigger |
 | R3-05 | P2 | Homepage scrolls sideways at 200% text size (D06) | ✅ fixed | At 390px with 200% text, content is 459px wide. The Parenting Chat preview heading (`FeaturePreview.tsx`, homepage-vision work) grows to 427px because its grid column won't shrink. Add `min-w-0` to the preview grid items |
-| R3-06 | P2 | No screen-reader pass and no real iPhone Safari check | ⏳ 👤 | The evidence admits both. They need a person with VoiceOver on an iPhone. Checklist: Home, a recipe page, sign-in, the cookie dialog |
+| R3-06 | P2 | No screen-reader pass and no real iPhone Safari check | ⏳ 👤 | The owner requested instructions on 2026-10-02. Follow `OWNER-TODO.md`, section C: Home, one recipe page and sign-in. The cookie dialog was removed. Record device/iOS version, useful control names, reading order and whether controls can be reached and activated |
 | R3-07 | P2 | Design direction never recorded as approved (P3-02.6-7) | ⏳ 👤 | Owner confirms the palette, Inter/Cormorant pairing and card style (once R3-01 makes the fonts render) |
 | R3-08 | P2 | Phase 3 status docs are stale | ✅ fixed | `README.md` says "detailed plan only". `IMPLEMENTATION-EVIDENCE.md` says "Not deployed" |
 
@@ -248,7 +254,7 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M6-01 | P1 | Card summaries and descriptions make unreviewed health claims | ⏳ 👤 | `public_summary` is the LLM description: "A gentle introduction to fish, packed with Omega-3s", "protein-packed egg strips", "Ideally textured for babies transitioning to solids… melt in the mouth". Add the summary to the owner review (R5-03). The claims can stay only if the owner stands behind them |
+| M6-01 | P1 | Card summaries and descriptions make unreviewed health claims | ✅ for 3 free recipes | Free-recipe summaries were rewritten without the cited unsupported nutrition claims in `20260926144356_phase5_ai_review_fix_live_free_recipes.sql`; owner approved their content checklist on 2026-10-02 (R5-03). This does not approve claims in paid drafts; those remain part of the selected collection's review |
 
 ### Good to have
 
@@ -373,7 +379,7 @@ Verified as done (no action), live on 2026-09-26:
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M9-01 | P1 👤 | Analytics and session recordings run without consent, including for EU and UK visitors | ⏳ accepted risk | Owner decision, 2026-09-26. Under GDPR/ePrivacy (EU) and PECR (UK), non-essential cookies and session replay need opt-in consent. Some US states (for example California, via the Global Privacy Control signal) expect an opt-out. Risk: regulator complaints or fines if the site gets EU/UK traffic. Fix: add the consent platform (OneTrust or similar) before any EU/UK promotion. PostHog has `opt_out_capturing()` and `opt_in_capturing()` for it to call |
+| M9-01 | P1 👤 | Analytics and session recordings run without consent, including for EU and UK visitors | ⏳ accepted risk; deferred | Original accepted-risk decision: 2026-09-26. Owner deferred settings and consent follow-up on 2026-10-02; no settings or consent changes are implemented by this update. Existing follow-up: add the consent platform before EU/UK promotion, review form masking and recording retention. PostHog has `opt_out_capturing()` and `opt_in_capturing()` for integration |
 | M9-03 | P1 | Signed-in users were never linked in PostHog | ✅ fixed | Owner test 2026-09-26: signed in and saved a recipe, but Persons showed 0. Sign-in completes in a server action, so the browser Supabase client fires no auth event. `AnalyticsProvider` now re-reads the session on every page and calls `identify`. Verified locally: `$identify` with user id, email and the prior anonymous id |
 | M9-02 | P2 👤 | Session replay must be switched on in the PostHog project | ✅ already on | Live check 2026-09-26: PostHog loaded the recorder and accepted `/s/` uploads. Original note: | The code starts recordings, but PostHog only accepts them if the project has "Record user sessions" on (PostHog → Settings → Session replay). Also pick retention there |
 
@@ -561,10 +567,10 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| R5-01 | P0 | Every allergen label claims a review that never happened | ✅ applied | Applied 2026-09-25 after a fresh dump and a per-recipe snapshot of the old states (`~/MyCuratedHavenBackups/2026-09-25-before-phase5-reset/`). All 70 bodies are `unknown`. Live pages: "Listed in this recipe, not yet reviewed: fish wheat" (Fish Cakes), "…eggs milk" (Frittata), "No allergens are listed for this recipe, but it hasn't been reviewed yet" (Oat Bars) |
-| R5-02 | P0 | The `unknown` display drops the allergen list | ✅ code | `getAllergenDisplay` now returns the listed allergens for `unknown`, and the page shows "Listed in this recipe, not yet reviewed: …" with a check-the-labels note. Test: `unreviewed allergens stay visible and are labelled as not reviewed` |
-| R5-03 | P1 | Owner review of the 3 free recipes | ⏳ 👤 checklist ready | Checklist with source content, audit notes and draft alt text: `docs/implementation/phase-5/FREE-RECIPE-REVIEW.md`. It found that the Frittata Fingers image shows round fritters next to pasta, not the rectangular strips the recipe makes |
-| R5-04 | P1 | No alt text on any recipe image | ⏳ 👤 drafts ready | Draft alt text for the 3 images is in the checklist. Current alt is acceptable meanwhile: cards use `alt=""` next to the visible title, and detail pages use the recipe title. Add a catalog alt-text field once the wording is approved |
+| R5-01 | P0 | Every allergen label claims a review that never happened | ✅ applied | Review states reset to `unknown` on 2026-09-25 after a fresh dump and snapshot (`~/MyCuratedHavenBackups/2026-09-25-before-phase5-reset/`). PR #73 later removed the public editorial-review notice while preserving source-listed allergens. Owner approval on 2026-10-02 is recorded in documentation; this update makes no database changes |
+| R5-02 | P0 | The `unknown` display drops the allergen list | ✅ code | `getAllergenDisplay` preserves listed allergens for `unknown`. PR #73 removed review-notice copy and updated the regression test; the allergen lists remain visible |
+| R5-03 | P1 | Owner review of the 3 free recipes | ✅ owner approved 2026-10-02 | Owner approved the three free recipes and content checklist in `docs/implementation/phase-5/FREE-RECIPE-REVIEW.md`. This is not an outside expert review or approval of paid drafts. Three image replacements are approved but not yet implemented (R5-10) |
+| R5-04 | P1 | No alt text on any recipe image | ⏳ assistant implementation | Owner approved the free-recipe checklist on 2026-10-02. Its old image descriptions describe the images being replaced; final descriptions must match the replacements. Add the catalog image-description field and verify rendering. Current cards use `alt=""` next to the visible title; detail pages use the recipe title |
 | R5-05 | P1 | `FREE-RECIPES-SELECTION.md` contains invented content | ✅ docs | Notes differ from the database (Oat Bars "ground oats", Fish Cakes "pin bones"), and the doc adds unsourced timings ("Active 10m, Bake 20m", "~16 strips") and meal labels. It presents AI content as "Verified". Correct it to match the source and state the true review status |
 | R5-06 | P1 | Phase 5 docs call the work "implemented and verified" editorial review | ✅ docs | Rewrite the status: ingestion done; editorial review not done; content is AI-generated |
 | R5-07 | P2 | PR #22's migration is still unapplied, so repo and production history differ | ✅ applied | `20260925100000` applied and recorded before the reset, so production history matches the repo |
@@ -575,8 +581,8 @@ Verified as done (no action):
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
 | M5-01 | P0 | The live recipes page claims the recipes are "tested" | ✅ copy | Meta description and hero no longer say "tested" or "verified ingredients". Test: `recipe pages make no tested or verified claims`. The same change fixed the doubled brand in 9 page titles (test: `page titles name the brand once`) |
-| M5-02 | P1 | No record that the content is AI-generated | ⏳ 👤 | Owner decides whether the site discloses AI-assisted recipes and illustrative AI images. At minimum, don't imply real photos of cooked dishes |
-| M5-03 | P1 | Image rights unknown | ⏳ 👤 | FLUX Pro output via Replicate. The owner confirms their account terms allow commercial use, and records it (Phase 6 handoff asked for "image source, usage permission") |
+| M5-02 | P1 | No record that the content is AI-generated | Owner removed task 2026-10-02 | Owner requested removal of the AI-assisted recipe / illustrative-image disclosure decision from their tasks. No disclosure implementation was requested; retain provenance here rather than reopening the decision |
+| M5-03 | P1 | Image rights unknown | ✅ owner confirmed 2026-10-02 | Owner confirms their image-generation plan allows commercial use of recipe pictures. Prior source: FLUX Pro via Replicate. Provider terms were not independently reviewed here |
 | M5-04 | P1 | No gate stops an unreviewed recipe being published | ✅ applied | Applied to production. In a rolled-back transaction, publishing the unreviewed Onigiri draft failed: "recipe 7c7a9197-… has not been editorially reviewed". The 3 free recipes stay published. pgTAP `08_phase5_publish_gate`, 7 tests. A brand-new row inserted directly as published is not gated |
 
 #### AI review results (2026-09-26)
@@ -590,10 +596,10 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| R5-10 | P1 | Live recipe images contradict the safety fixes | ⏳ 👤 | Oat Bars image shows whole blueberries (review blocker). Fish Cakes shows whole peas. Frittata shows round bites beside pasta, not strips. Regenerate these 3, or show a neutral placeholder until new ones exist |
+| R5-10 | P1 | Live recipe images contradict the safety fixes | ⏳ assistant; owner approved | Owner approved replacement on 2026-10-02: flattened blueberries, flattened peas, and frittata strips. Prepare and inspect all three images, update their descriptions, publish and verify the recipe pages. Approval does not mean the current images have been replaced |
 | R5-11 | P1 | 34 rejected drafts and 18 image blockers must be fixed before any paid launch | ⏳ | The publishing gate already blocks them. Many review fixes are guidance rather than exact text, so the drafts need a rewrite pass that applies each issue, then a spot check |
 | R5-12 | P1 | 4 items need a human expert | ⏳ 👤 | Frozen yogurt pops at 12 months, date-almond bites at 24 months, peanut-butter oat discs at 18 months (texture and portion), and the curry image (not seen by the reviewer) |
-| R5-13 | P1 | How to label AI-checked recipes | ⏳ 👤 | Keep "not yet reviewed" (current), or add an "AI-checked" state with honest wording ("Allergens checked against the ingredients by an automated review, not by a person"). This decides when Dietary Options return (R6-01) |
+| R5-13 | P1 | How to label AI-checked recipes | Owner removed task 2026-10-02 | Owner removed the wording decision from active tasks. PR #73 removed the public editorial allergen-review notice; source-listed allergens remain visible. No new AI-checked state or Dietary-filter change is requested |
 
 #### Temporary access for the AI review (created 2026-09-25)
 

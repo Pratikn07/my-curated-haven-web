@@ -2,9 +2,9 @@
 
 ## Support promise and staffing
 
-The site lists `support@mycuratedhaven.com`. **Receipt test passed 2026-09-29:** an owner-provided screenshot shows a message sent from a separate Gmail account to this address arrived in the receiving Gmail inbox. Gmail displayed a suspicious-message banner, but the message was delivered. DNS/MX configuration was not independently inspected. The inbox monitor, backup owner and reply timing still need approval before invitations; a working address does not prove someone answers mail.
+The site lists `support@mycuratedhaven.com`. **Receipt test passed 2026-09-29:** an owner-provided screenshot shows a message sent from a separate Gmail account to this address arrived in the receiving Gmail inbox. Gmail displayed a suspicious-message banner, but the message was delivered. DNS/MX configuration was not independently inspected. **Owner confirmed 2026-10-02:** their team monitors this email inbox. Support monitoring is no longer an open owner task. No named backup or fixed reply-time promise was supplied; buyer response timing remains part of C10 when sales planning resumes.
 
-Propose acknowledgement within one staffed business day for ordinary cases, with payment/access problems escalated during the launch window. Approve the exact hours and wording before publication. Automated acknowledgement is not resolution.
+For future paid support, acknowledgement within one staffed business day is a proposal only, not an approved promise. Approve the exact hours and wording before publication. Automated acknowledgement is not resolution.
 
 Support material should explain how to sign in, find the purchased collection, print, request help and understand approved refund terms. Avoid infrastructure language in customer-facing steps.
 

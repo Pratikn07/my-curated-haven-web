@@ -6,7 +6,7 @@ When you finish an item, tell the assistant the ID. It will do its part, verify,
 
 For the overall picture — what is finished and what is not — see [STATUS.md](STATUS.md).
 
-Last updated: 2026-10-01: SES production access approved; sign-in code delivery to a separate Gmail address confirmed; Google, GitHub, and Supabase 2FA verified from owner screenshots.
+Last updated: 2026-10-02: support monitoring and free-recipe review confirmed by the owner; image replacements approved; commercial image use confirmed; business name and country provided; analytics deferred.
 
 ## Your task list in everyday language
 
@@ -14,14 +14,17 @@ This is the short version. The detailed steps and audit IDs are below. Items mar
 
 ### Before sharing the site publicly
 
-- **Choose who checks the support inbox and how quickly they should reply.** The inbox receives mail; nobody has been assigned to monitor it yet.
-- **Fix the three recipe pictures that could mislead parents:** show blueberries and peas flattened, and cut the frittata into strips.
-- **Review and approve the three free recipes.** Check ingredients, instructions, choking and texture safety, health claims, image descriptions for screen readers, and the content checklist.
-- **Choose the wording for allergy information, and decide whether to say recipes are AI-assisted and images are illustrative.**
-- **Check that your image-generation plan allows commercial use** of the recipe pictures.
-- **Provide the business name and state or country for the Terms.** A lawyer can advise whether to add arbitration.
-- **Check your site-analytics privacy settings:** hide what people type into forms, choose how long recordings are kept, and allow your website address in the project settings. Add a consent tool before promoting in the UK or EU. Adding Google Search Console is optional.
 - **Try the site with VoiceOver on an iPhone and approve the design.** These checks are in the quick-check list below.
+
+### Your decisions recorded on 2026-10-02
+
+- **Support email is monitored by your team.** This means `support@mycuratedhaven.com`. No fixed reply-time promise was supplied.
+- **The three free recipes and their content checklist are approved by you.** This includes the owner review requested for their ingredients, instructions, safety guidance, summaries and draft image descriptions. It does not approve paid drafts or claim an outside expert review.
+- **The three image replacements are approved for implementation:** flattened blueberries, flattened peas, and frittata strips. The replacement images and final descriptions still need to be prepared, checked against each other and published by the assistant.
+- **Allergy-wording and AI-disclosure decisions are removed from your active task list at your request.** PR #73 has already removed the editorial allergen-review notice from the code; listed allergens remain visible. No AI-disclosure change is requested.
+- **Commercial use of the recipe pictures is confirmed by you.** Provider terms have not been independently reviewed here.
+- **Business name: Nibble and Nurture. Country: USA.** These are the details you supplied for the Terms; they are not a decision about where to sell, taxes or receipt wording.
+- **Analytics is deferred:** form masking, recording retention, allowed website address, consent setup and optional Search Console remain for later. The existing accepted analytics risk remains recorded.
 
 ### Before selling recipes
 
@@ -48,7 +51,7 @@ This is the short version. The detailed steps and audit IDs are below. Items mar
 
 ## A. Before you promote the site
 
-> **Current state (2026-10-01):** AWS approved SES production access in US East (N. Virginia), with a quota of 50,000 messages per day and a maximum rate of 14 messages per second. A sign-in code was delivered to a separate Gmail address after approval. A test email to `support@mycuratedhaven.com` also arrived. Support ownership and reply timing still need a decision.
+> **Current state (2026-10-02):** AWS approved SES production access in US East (N. Virginia), with a quota of 50,000 messages per day and a maximum rate of 14 messages per second. A sign-in code was delivered to a separate Gmail address after approval. A test email to `support@mycuratedhaven.com` also arrived. The owner confirms their team monitors support mail; no fixed reply-time promise was supplied.
 
 ### A0. Make support@mycuratedhaven.com receive mail (M11-03) ✅ (receipt verified 2026-09-29)
 
@@ -74,28 +77,27 @@ This is the short version. The detailed steps and audit IDs are below. Items mar
 
 - The owner received a sign-in code at a separate Gmail address after SES production access was approved. This verifies delivery to an external address; completing sign-in with that code was not part of this check.
 
-### A4. Confirm the support inbox is read (R1-07)
+### A4. Confirm the support inbox is read (R1-07) ✅ owner confirmed 2026-10-02
 
 - **Why**: the site, the account page and the Privacy Policy all send people to `support@mycuratedhaven.com`, including for account deletion.
 - **Receipt test done 2026-09-29**: an email from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving inbox.
-- **Still needed**: decide who monitors the inbox and the expected reply time. The owner has not approved a response-time promise.
+- **Owner confirmed 2026-10-02**: their team monitors the inbox. No fixed reply-time promise was supplied; do not publish one as approved. A buyer response-time policy remains part of C10 when sales planning resumes.
 
 ### A5. Replace 3 recipe images (R5-10)
 
+- **Owner approval recorded 2026-10-02**: replacement is approved. Implementation and verification remain with the assistant; the current images are not approved as the final result.
 - **Why**: the live images contradict the safety fixes. Oat Bars shows **whole blueberries**, Fish Cakes shows **whole peas**, and the Frittata shows round bites beside pasta instead of strips.
-- **Steps**: generate or photograph new images matching the steps (flattened berries, flattened peas, frittata cut into strips). Send them to the assistant, or upload them to the `recipe-images` bucket with the same file names.
+- **Assistant work**: prepare new images matching the steps, verify the depicted food shapes, update their image descriptions, then publish and check the recipe pages. R5-04's image-description field is also pending implementation.
 
-### A6. Decide how AI-checked recipes are labelled (R5-13)
+### A6. Allergy-wording decision (R5-13) — removed from owner tasks
 
-- **Choice**:
-  1. Keep "Listed in this recipe, not yet reviewed" (current), or
-  2. Add "Allergens checked against the ingredients by an automated review, not by a person".
-- **This also decides** when the Dietary filters (Gluten-Free, Dairy-Free, etc.) come back (R6-01).
+- **Owner decision 2026-10-02**: remove this wording task. Do not ask again unless the owner reopens it.
+- **Current source**: PR #73 removed the editorial allergen-review notice. Listed allergens remain visible; recipes with none listed say "No allergens are listed for this recipe." This documentation update does not change recipe review states or re-enable Dietary filters (R6-01).
 
-### A7. AI disclosure and image rights (M5-02, M5-03)
+### A7. AI disclosure and image rights (M5-02, M5-03) — no open owner action
 
-- **M5-02**: decide whether the site says recipes are AI-assisted and images are illustrative. The assistant will write the wording.
-- **M5-03**: check your Replicate / FLUX Pro account terms allow commercial use of the images. Note the answer.
+- **M5-02**: owner removed this disclosure task on 2026-10-02. No disclosure change is requested.
+- **M5-03**: owner confirmed on 2026-10-02 that their image-generation plan permits commercial use. This is owner confirmation, not an independent review of the provider terms.
 
 ### A8. Recipe questions for a person or expert (R5-12)
 
@@ -104,11 +106,12 @@ This is the short version. The detailed steps and audit IDs are below. Items mar
 
 ### A9. Terms: legal entity and governing law (M1-05)
 
-- **Why**: the Terms have no "governing law" or dispute clause. The old text had `[Your State/Country]` placeholders, so they were removed rather than published unfinished.
-- **Steps**: tell the assistant your legal business name and the state or country whose law applies. Ideally a lawyer confirms whether to include arbitration.
+- **Details supplied 2026-10-02**: business name **Nibble and Nurture**, country **USA**. The request to provide those details is answered.
+- **Remaining implementation**: the Terms still lack governing-law and dispute clauses. No particular US state or arbitration choice was supplied; do not invent them or describe the Terms as finished. Substantive Terms changes belong in a separate reviewed task.
 
-### A10. PostHog settings (R9-01, M9-01, M9-02)
+### A10. PostHog settings (R9-01, M9-01, M9-02) — deferred by owner 2026-10-02
 
+- **Owner choice**: keep the checks below for later. They are not current requests; the existing accepted analytics risk remains recorded.
 - **Done**: banner removed, PostHog chosen, project key added to Vercel (2026-09-26).
 - **You**:
   1. ~~Turn on session replay~~: already on (recordings arrive).
@@ -177,13 +180,13 @@ Checkout stays off until these are decided. The collection page will show your r
 | C01 | Which recipes are in the paid collection (exact list) |
 | C02 | Whether the 3 free recipes count as part of it |
 | C03 | Price and currency |
-| C04 | Seller identity, which countries you sell to, and tax |
+| C04 | Seller details partly supplied: Nibble and Nurture, USA. Countries to sell to and tax treatment remain undecided |
 | C05 | Refund policy: who can get one, within how long, how to ask |
 | C06 | What happens to access after a partial refund |
 | C07 | Access while a refund or card dispute is pending |
 | C08 | Whether future recipes are included or sold separately |
 | C09 | How long buyers keep access, and what happens if the site closes |
-| C10 | Support address and response time for buyers |
+| C10 | Support address is `support@mycuratedhaven.com`, monitored by the owner's team. Buyer response-time promise remains undecided |
 | C11 | Existing app purchases: **answered, none exist** |
 | C12 | How recipe corrections or safety withdrawals are handled for buyers |
 | C13 | What buyers may do with printed recipes (personal use) |
@@ -216,9 +219,21 @@ Checkout stays off until these are decided. The collection page will show your r
 | ID | What | How |
 | --- | --- | --- |
 | R3-07 | Approve the design | Compare `docs/implementation/phase-3/evidence/audit-2026-09-25/before-home-390.png` and `after-home-390.png`. Reply "approved" or say what to change |
-| R3-06 | Screen reader check | On your iPhone: Settings → Accessibility → VoiceOver on. Visit Home, a recipe page and sign-in. Note anything confusing |
+| R3-06 | Screen reader check | Follow the short iPhone test below; visit Home, a recipe page and sign-in. Report confusing labels, skipped controls or getting stuck |
 | R1-09 | Content register sign-off | Tick the checklist in `docs/implementation/phase-1/CONTENT-REGISTER.md` (or tell the assistant "approved") |
-| R5-03, R5-04 | Recipe checklist and alt text | Only if you want a human sign-off beyond the AI review: `docs/implementation/phase-5/FREE-RECIPE-REVIEW.md` |
+| R5-03, R5-04 | Recipe checklist and image descriptions | Owner approval recorded 2026-10-02 in `docs/implementation/phase-5/FREE-RECIPE-REVIEW.md`; image replacements and final image-description implementation remain with the assistant |
+
+### A short iPhone VoiceOver test
+
+VoiceOver is the iPhone's built-in screen reader. It speaks text and control names aloud so someone can use the site without seeing it. This check asks whether the pages can be read and operated that way.
+
+1. Open `https://mycuratedhaven.com` in Safari. Ask Siri to "Turn on VoiceOver", or use Settings → Accessibility → VoiceOver. To exit at any time, ask Siri to "Turn off VoiceOver".
+2. Swipe right with one finger to hear the next item; swipe left for the previous item. A single tap selects and reads an item. Double-tap to activate the selected link or button. Swipe up with three fingers to scroll down, and down with three fingers to scroll up. These are [Apple's VoiceOver gestures](https://support.apple.com/guide/iphone/use-voiceover-gestures-iph3e2e2281/ios); Apple also explains [turning VoiceOver on and off](https://support.apple.com/guide/iphone/turn-on-and-practice-voiceover-iph3e2e415f/ios).
+3. On **Home**, find and open the navigation/menu and a recipe link. On **one recipe page**, listen to its title, ingredients and steps; find Save and Print. On **sign-in**, find the email field, Google option and email-code control. This checks the controls; the deferred same-address sign-in test is not required here.
+4. A pass means the reading order makes sense, links and buttons have useful names, and you can reach and activate the controls without getting stuck. Record the page and what VoiceOver said when something is confusing, along with your iPhone/iOS version. Do not share passwords or sign-in codes.
+5. Turn VoiceOver off and review the normal page appearance separately: readable text, usable buttons, no sideways scrolling or overlapping content. Tell the assistant whether you approve the design or what needs changing.
+
+Example report: "Home: pass. Recipe: pass. Sign-in: a button has no name. Design: approved." Only mark the real-device test and design approval done after the owner reports the result.
 
 ---
 
