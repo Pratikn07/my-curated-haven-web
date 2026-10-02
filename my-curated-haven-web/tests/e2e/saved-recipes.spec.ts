@@ -196,6 +196,8 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
 
   test("Buyer A can sign in via OTP code and view account overview", async ({ page }) => {
     await page.goto("/sign-in?returnTo=/account");
+    const primaryNav = page.getByRole("navigation", { name: "Primary", exact: true });
+    await expect(primaryNav.getByRole("link", { name: "Sign In", exact: true })).toBeVisible();
 
     const emailInput = page.getByLabel(/email address/i);
     await emailInput.fill("buyer-a@synthetic.test");
@@ -209,11 +211,18 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     // Enter code and submit
     const codeInput = page.getByLabel(/\d+-digit code/i);
     await codeInput.fill(otp);
+    let documentRequests = 0;
+    page.on("request", (request) => {
+      if (request.resourceType() === "document") documentRequests++;
+    });
     await page.getByRole("button", { name: "Verify & Sign In" }).click();
 
     // Navigated to /account
     await page.waitForURL(/\/account$/);
     await expect(page.getByRole("heading", { name: "Account Overview", level: 1 })).toBeVisible();
+    await expect(primaryNav.getByRole("link", { name: "Account", exact: true })).toBeVisible();
+    await expect(primaryNav.getByRole("link", { name: "Sign In", exact: true })).toHaveCount(0);
+    expect(documentRequests).toBe(0);
 
     // Verified email displayed
     await expect(page.getByText("buyer-a@synthetic.test").first()).toBeVisible();
@@ -239,6 +248,8 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
 
     // Responsive check at 320px
     await page.setViewportSize({ width: 320, height: 700 });
+    await primaryNav.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.locator("header").getByRole("link", { name: "Account", exact: true }).filter({ visible: true })).toBeVisible();
     expect(await overflow(page)).toBeLessThanOrEqual(1);
   });
 
@@ -327,6 +338,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await page.getByRole("button", { name: "Verify & Sign In" }).click();
 
     await page.waitForURL(/\/account\/saved-recipes$/);
+    await expect(page.getByRole("navigation", { name: "Primary", exact: true }).getByRole("link", { name: "Account", exact: true })).toBeVisible();
 
     // Empty state rendered
     await expect(page.getByText("0 recipes saved")).toBeVisible();
@@ -349,6 +361,7 @@ test.describe("Phase 7: Authenticated Account & Saved Recipes Workflow", () => {
     await page.getByRole("button", { name: "Verify & Sign In" }).click();
 
     await page.waitForURL(/\/account$/);
+    await expect(page.getByRole("navigation", { name: "Primary", exact: true }).getByRole("link", { name: "Account", exact: true })).toBeVisible();
 
     // 2. Click Sign out
     const signOutBtn = page.getByRole("button", { name: "Sign out" });

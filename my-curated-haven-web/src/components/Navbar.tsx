@@ -18,8 +18,11 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
+    let active = true;
     supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsAuthenticated(Boolean(user));
+      if (active) setIsAuthenticated(Boolean(user));
+    }).catch(() => {
+      if (active) setIsAuthenticated(false);
     });
 
     const {
@@ -29,9 +32,12 @@ export default function Navbar() {
     });
 
     return () => {
+      active = false;
       subscription.unsubscribe();
     };
-  }, []);
+    // Server actions update session cookies without emitting browser auth events.
+    // The shared header survives navigation, so recheck after their redirects.
+  }, [pathname]);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
