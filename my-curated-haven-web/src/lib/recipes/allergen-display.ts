@@ -3,15 +3,11 @@ import type { RecipeBody } from "@/lib/data/recipes";
 export type AllergenDisplay =
   | { kind: "reviewed_listed"; allergens: string[] }
   | { kind: "reviewed_no_allergens"; message: string }
-  | { kind: "unknown"; allergens: string[]; message: string };
-
-const CHECK_LABELS =
-  "Check every ingredient label, especially if your child has an allergy.";
+  | { kind: "unknown"; allergens: string[]; message: string | null };
 
 /**
- * Keep public allergen copy tied to the explicit editorial review state.
- * Unreviewed recipes still show the allergens their source lists: hiding them
- * would be less safe than labelling them honestly as not yet reviewed.
+ * Preserve the explicit review state and source-listed allergens without
+ * displaying the editorial review notice to recipe readers.
  */
 export function getAllergenDisplay(
   reviewState: RecipeBody["allergenReviewState"],
@@ -35,7 +31,7 @@ export function getAllergenDisplay(
     allergens: listed,
     message:
       listed.length > 0
-        ? `An editor hasn't checked this allergen information yet. ${CHECK_LABELS}`
-        : `No allergens are listed for this recipe, but it hasn't been reviewed yet. ${CHECK_LABELS}`,
+        ? null
+        : "No allergens are listed for this recipe.",
   };
 }
