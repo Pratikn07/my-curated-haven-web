@@ -24,7 +24,7 @@ Status: ✅ fixed, 🔶 fix in an open PR, ⏳ open, 👤 needs an owner decisio
 | M5-03 | Confirm the Replicate/FLUX Pro terms allow commercial use of the recipe images |
 | ~~M7-01~~ | Done 2026-09-29: Turnstile enabled in production; live request without a valid CAPTCHA token was rejected (`captcha_failed`) |
 | R8-06 | Decide the paid collection terms C01–C14 (recipes, price, refunds, access duration, seller and tax, receipts) before checkout opens |
-| M1-03 | SES production-access request is pending Amazon; choose/configure a fallback sender only if needed |
+| M1-03 | ✅ SES production access approved in US East (N. Virginia); no fallback sender needed |
 | M1-05 | Legal entity name and governing-law jurisdiction for the Terms. Decide on arbitration |
 | R1-07 | Confirm someone monitors `support@mycuratedhaven.com` |
 | R3-06 | VoiceOver on an iPhone: Home, a recipe page, sign-in (the cookie dialog was removed) |
@@ -277,7 +277,7 @@ Verified as done (no action):
 | --- | --- | --- | --- | --- |
 | R7-01 | P2 | The database doesn't enforce "free or purchased only" on saves (remediation Verification 3) | ⏳ | Locally, as a signed-in user, `insert into saved_recipes` with a draft recipe id succeeded. The INSERT policy checks only `auth.uid() = user_id`. No content leaks (the saved list joins published catalog rows only), but anyone can bypass the app. Add to `WITH CHECK`: the recipe is in `free_recipe_slots`, or in a release the caller holds an active entitlement for |
 | R7-02 | P1 | Saved recipes reference the legacy table | ⏳ | `saved_recipes_recipe_id_fkey` references `public.recipes(id)` (the iOS table), not `recipe_catalog`. A web-only recipe with no legacy row, such as a new paid recipe, can't be saved, and deleting a legacy row deletes users' saves. Re-point the foreign key to `recipe_catalog(id)`; all 3 existing rows have catalog rows |
-| R7-03 | P1 | Email delivery never verified (P7-04 acceptance) | ⏳ 👤 | No staging project or test inbox (evidence admits it). Blocked on M1-03 (custom sender). The owner signs in once afterwards to confirm the code arrives |
+| R7-03 | P1 | Email delivery never verified (P7-04 acceptance) | ✅ delivery verified 2026-10-01 | Owner screenshot confirms a sign-in code was delivered to a separate Gmail address after SES production access was approved. Delivery is verified; entry of that code to complete sign-in was not part of this check |
 | R7-04 | P2 | Tests don't prove the database rules | ⏳ | The save-access tests use a fake client. Nothing tests saving on one device and seeing it on another, or free pages staying up when Auth is down. The R7-01 fix should come with a pgTAP test |
 | R7-05 | P2 | Docs are stale | ⏳ | `README.md` says "implementation plan". Evidence says "No shared Auth settings or email templates were changed", but the audit changed both (M1-02, M1-04, M4-03). Handoff still lists P7-08 as pending |
 
@@ -285,11 +285,11 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M7-01 | P1 | Anyone can block sign-in for everyone | 🔶 CAPTCHA portion done (2026-09-29) | Turnstile site key is deployed and Supabase enforcement enabled. A live sign-in request without a valid CAPTCHA token was rejected (`captcha_failed`). Email delivery and SES sandbox limits remain tracked under M7-03; this does not prove successful email-code delivery/sign-in |
-| M7-03 | P0 👤 | **Email sign-in remains constrained: SES production access is pending Amazon** | ⏳ | Earlier 2026-09-28 inspection recorded sandbox access; the owner reports the production-access request is now awaiting Amazon's response. Until approved, SES sandbox sends only to verified recipients. Refresh this status when Amazon replies. Do not rely on the stale “denied” disposition or reopen the case unless Amazon responds with a denial |
+| M7-01 | P1 | Anyone can block sign-in for everyone | 🔶 CAPTCHA portion done (2026-09-29) | Turnstile site key is deployed and Supabase enforcement enabled. A live sign-in request without a valid CAPTCHA token was rejected (`captcha_failed`). Email delivery is recorded under R7-03; successful email-code sign-in is a separate check |
+| M7-03 | P0 👤 | **SES sandbox restrictions prevented sending to unverified recipients** | ✅ production access confirmed 2026-10-01 | AWS email confirms the account was moved out of the sandbox in US East (N. Virginia), effective immediately, with a quota of 50,000 messages per day and a maximum rate of 14 messages per second. An external Gmail address received a sign-in code after approval; see R7-03 |
 | M7-04 | P2 | Parents see Supabase's raw "Error sending magic link email" when a send fails | ⏳ | `otpRequestErrorMessage` (`src/lib/auth/otp-errors.ts`) only rewrites `email_address_not_authorized` and `over_email_send_rate_limit`; every other failure passes through unchanged, which is how the SES sandbox rejection reached the sign-in form verbatim. Add a send-failure branch in the same style as the existing two, pointing at Google sign-in and the free recipes |
 | M7-05 | P1 | Account linking between an email code and Google is still unproven, and it is now testable | ⏳ | Of 6 users, none holds both an `email` and a `google` identity, so Supabase's same-address linking has never run on this project. `pratik.nandoskar07@gmail.com` already has a Google identity **and** is SES-verified, so signing in to that one address with an email code will show whether it links to the existing user or creates a 7th. Must be answered before a collection goes on sale: a second user orphans the buyer's `access_entitlements` row and their library reads "No Purchased Collections Yet" |
-| M7-02 | P1 | No account-closure procedure, and deleting a user failed (`profiles` FK was NO ACTION) | ⏳ | The account page says "email support to close your account", and the Privacy Policy promises deletion on request, but no runbook exists (Phase 7 validation lists "Account-closure runbook reference" as required evidence). Write one: verify the request comes from the account's address, check for purchases (Phase 8 must keep financial records), delete the user in Supabase Auth (cascades `saved_recipes` and `profiles`), and confirm by email |
+| M7-02 | P1 | Account-closure procedure and user deletion | 🔶 runbook, migration and database test exist; production deletion not separately verified | The support-assisted process is documented in [`ops/ACCOUNT-CLOSURE.md`](../../ops/ACCOUNT-CLOSURE.md). Migration `20260926150820_phase7_audit_saved_recipes_access_and_catalog_fk.sql` changes the profile foreign key to `ON DELETE CASCADE`; pgTAP test `09_phase7_save_access.test.sql` verifies deleting the auth user removes the profile and saved recipes. Confirm the migration is present in production before handling a real request |
 
 ### Good to have
 
@@ -457,7 +457,7 @@ Verified as done (no action):
 
 | ID | Pri | Item | Status | Evidence and fix |
 | --- | --- | --- | --- | --- |
-| M11-01 | P0 👤 | Supabase built-in sender rejected non-team addresses | Superseded by M7-03 | The project later moved to Amazon SES; the built-in-sender finding no longer describes current delivery. SES sandbox still limits recipients to verified addresses; see M7-03 |
+| M11-01 | P0 👤 | Supabase built-in sender rejected non-team addresses | Superseded by M7-03 | The project later moved to Amazon SES. SES production access is now approved in US East (N. Virginia); see M7-03 |
 | M11-02 | P1 👤 | Vercel Hobby forbids selling | ⏳ | Vercel fair-use guidelines: Hobby is "restricted to non-commercial personal use only", including "any method of requesting or processing payment" and "advertising the sale of a product". Upgrade to Pro ($20/month) before checkout. Hobby also caps image optimisation at 5,000 transformations a month |
 | M11-03 | P0 👤 | `support@mycuratedhaven.com` can't receive mail | ✅ (receipt verified 2026-09-29) | Owner screenshot confirms a test email from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox. The email displayed Gmail's suspicious-message banner but was delivered. DNS/MX was not independently inspected |
 

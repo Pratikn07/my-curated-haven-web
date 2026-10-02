@@ -6,13 +6,49 @@ When you finish an item, tell the assistant the ID. It will do its part, verify,
 
 For the overall picture — what is finished and what is not — see [STATUS.md](STATUS.md).
 
-Last updated: 2026-09-29: support-mail receipt verified; Google, GitHub, and Supabase 2FA verified from owner screenshots; SES remains pending Amazon review.
+Last updated: 2026-10-01: SES production access approved; sign-in code delivery to a separate Gmail address confirmed; Google, GitHub, and Supabase 2FA verified from owner screenshots.
+
+## Your task list in everyday language
+
+This is the short version. The detailed steps and audit IDs are below. Items marked **deferred** are recorded for later, not current requests.
+
+### Before sharing the site publicly
+
+- **Choose who checks the support inbox and how quickly they should reply.** The inbox receives mail; nobody has been assigned to monitor it yet.
+- **Fix the three recipe pictures that could mislead parents:** show blueberries and peas flattened, and cut the frittata into strips.
+- **Review and approve the three free recipes.** Check ingredients, instructions, choking and texture safety, health claims, image descriptions for screen readers, and the content checklist.
+- **Choose the wording for allergy information, and decide whether to say recipes are AI-assisted and images are illustrative.**
+- **Check that your image-generation plan allows commercial use** of the recipe pictures.
+- **Provide the business name and state or country for the Terms.** A lawyer can advise whether to add arbitration.
+- **Check your site-analytics privacy settings:** hide what people type into forms, choose how long recordings are kept, and allow your website address in the project settings. Add a consent tool before promoting in the UK or EU. Adding Google Search Console is optional.
+- **Try the site with VoiceOver on an iPhone and approve the design.** These checks are in the quick-check list below.
+
+### Before selling recipes
+
+- **When you are ready to set up checkout, complete Stripe and upgrade Vercel to Pro.** Add Stripe's secret values in Vercel yourself; never paste them into chat. Then tell the assistant so it can finish the protected database setup.
+- **Choose who owns the launch sign-offs and tell the assistant when to prepare a test site.**
+- **Test a purchase and refund on the test site** before taking real payments.
+- **After choosing the collection, review and fix only the recipes and pictures you plan to sell.** Four draft recipe questions need a qualified human review before those recipes are sold.
+
+### Keep in mind
+
+- **SES is ready:** Amazon approved production access in US East (N. Virginia), and a login code reached another Gmail address. No email-provider fallback is needed.
+- **Deferred until you reopen them:** checking that Google and email-code sign-in for the same address reach the same account, and choosing the paid collection.
+- **Already done:** two-step verification is on for Google, GitHub, and Supabase. You declined rotating the Turnstile secret and adding a second Supabase authenticator; neither is listed as an open task.
+- **Routine:** turn on domain auto-renew before it expires on 2027-01-28; check the backup log weekly; review recipe analytics around 2026-10-27; tell the assistant if GitHub reports a production smoke-check failure. If someone asks to delete their account, follow the existing `ops/ACCOUNT-CLOSURE.md` guide.
+- **Optional sign-in settings:** strengthen password rules in Supabase. The site needs email codes, so password sign-in cannot simply be switched off there. Exact production callback-URL hardening is optional; local callback fixes are only needed if you want sign-in testing on your computer.
+
+### Deferred until you are ready to plan sales again
+
+- **Choose the paid collection and its terms:** which recipes, price, seller and tax details, refund rules, buyer access, future updates, corrections, personal printing, and the name shown on receipts. Existing app purchases are already confirmed as none.
+- **Choose whether sales start with invited buyers or open to everyone.**
+- **Check that Google sign-in and email-code sign-in with the same address reach one account.** You asked to park this check; it needs to be completed before the first sale if you reopen sales planning.
 
 ---
 
 ## A. Before you promote the site
 
-> **Current state (2026-09-29):** SES production access is awaiting Amazon's response. A test email to `support@mycuratedhaven.com` arrived in the owner's Gmail inbox on 2026-09-29. Support ownership and reply timing still need a decision.
+> **Current state (2026-10-01):** AWS approved SES production access in US East (N. Virginia), with a quota of 50,000 messages per day and a maximum rate of 14 messages per second. A sign-in code was delivered to a separate Gmail address after approval. A test email to `support@mycuratedhaven.com` also arrived. Support ownership and reply timing still need a decision.
 
 ### A0. Make support@mycuratedhaven.com receive mail (M11-03) ✅ (receipt verified 2026-09-29)
 
@@ -23,28 +59,20 @@ Last updated: 2026-09-29: support-mail receipt verified; Google, GitHub, and Sup
   3. When you set up A1, merge the two SPF records into one (`v=spf1 include:... include:... ~all`). Ask the assistant if unsure.
 - **Done**: owner screenshots show a test sent from a separate Gmail account to `support@mycuratedhaven.com` arrived in the receiving Gmail inbox on 2026-09-29. The receiving message displayed a Gmail suspicious-message banner, but was delivered. Mail routing is verified; DNS/MX configuration was not independently inspected.
 
-### A1. Sign-in email delivery (M1-03, M7-03) — waiting on Amazon
+### A1. Sign-in email delivery (M1-03, M7-03) ✅ production access and external delivery confirmed 2026-10-01
 
-- **Current state (2026-09-29)**: Amazon SES production-access request is submitted and awaiting Amazon's response. Do not treat the earlier audit note saying the appeal was denied as current. If Amazon denies the request or the wait becomes unacceptable, choose a fallback sender then.
-
-- **Why**: the project uses Amazon SES, but SES is still in the sandbox. Only verified recipient addresses can receive sign-in codes until Amazon grants production access. The earlier built-in-sender limitation is stale.
-- **Fallback steps if selected** (not active while Amazon's request is pending):
-  1. Sign up for **Resend** (free tier: 3,000 emails a month) or **Postmark**.
-  2. Add `mycuratedhaven.com` as a sending domain. The provider shows DNS records (SPF, DKIM, DMARC); add them where you bought the domain.
-  3. Wait until the provider shows the domain as verified.
-  4. Tell the assistant, and keep the SMTP username and password ready to paste into Supabase yourself (Authentication → SMTP Settings). Don't paste them into chat.
-- **If a fallback sender is selected**: the assistant can update the hourly limit, rebrand the email, and test delivery.
-- **Done when**: 5 sign-ins in a row within an hour all receive a code from `mycuratedhaven.com`.
+- AWS confirms SES is out of the sandbox in US East (N. Virginia): 50,000 messages per day and up to 14 messages per second.
+- An owner screenshot shows a sign-in code from the site delivered to a separate Gmail address after approval.
+- No fallback sender is needed. This confirms email delivery; it does not claim that the code was entered to complete a sign-in.
 
 ### A2. Bot protection on sign-in (M7-01 CAPTCHA portion) ✅ (verified 2026-09-29)
 
 - **Done**: Turnstile is enabled on the production sign-in form and Supabase enforcement is on. A live request without a valid CAPTCHA token was rejected (`captcha_failed`).
-- **Limit**: this confirms CAPTCHA enforcement only. It does not verify a successful email-code sign-in or remove SES sandbox restrictions; see A1 / M7-03.
+- **Limit**: this confirms CAPTCHA enforcement only; it does not verify that someone completed sign-in by entering an email code. SES access and delivery are recorded in A1.
 
-### A3. Confirm a sign-in email arrives (R7-03) 🔶 (verified owner address only)
+### A3. Confirm a sign-in email arrives (R7-03) ✅ (separate Gmail address)
 
-- **Done 2026-09-26**: the owner received and used a sign-in code for a verified address.
-- **Still unverified for the public**: SES remains in sandbox, so this does not prove delivery to an unverified parent's address. Recheck after Amazon grants production access or a fallback sender is configured.
+- The owner received a sign-in code at a separate Gmail address after SES production access was approved. This verifies delivery to an external address; completing sign-in with that code was not part of this check.
 
 ### A4. Confirm the support inbox is read (R1-07)
 

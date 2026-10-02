@@ -228,6 +228,9 @@ Runbook: [ops/ACCOUNT-CLOSURE.md](../../../ops/ACCOUNT-CLOSURE.md).
 
 ### Still open
 
-- R7-03 email delivery to a real inbox: after the custom sender (backlog M1-03).
-- M7-01 sign-in abuse: custom sender plus Cloudflare Turnstile.
+- Full production email-code sign-in and same-address Google/email account linking are deferred by the owner; see `docs/audit/OWNER-TODO.md`.
 - R7-04 cross-device and Auth-outage browser tests.
+
+### Updated 2026-10-01
+
+- **R7-03 email delivery:** verified by owner screenshot after SES production access. A sign-in code reached a separate Gmail address. Entering that code to complete sign-in is outside this delivery check.
