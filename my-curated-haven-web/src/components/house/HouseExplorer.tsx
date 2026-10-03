@@ -61,18 +61,26 @@ function StatusLabel({ status }: { status: HouseRoomStatus }) {
   );
 }
 
-/** The Library's way in: a closed storybook whose cover swings open before the page moves to the sample. */
-function LibraryBookLink() {
+/**
+ * The Library's way in: a closed storybook whose cover swings open, then the room view
+ * closes and the page moves to the sample. Without JavaScript it is a plain link.
+ */
+function LibraryBookLink({ onLeaveRoom }: { onLeaveRoom: (after: () => void) => void }) {
   const [opening, setOpening] = useState(false);
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     event.preventDefault();
-    setOpening(true);
-    window.setTimeout(() => {
-      window.history.pushState(null, "", "#library");
-      document.getElementById("library")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const goToSample = () => {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#library`);
+      document.getElementById("library")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
       setOpening(false);
-    }, 650);
+    };
+    if (reduce) {
+      onLeaveRoom(goToSample);
+      return;
+    }
+    setOpening(true);
+    window.setTimeout(() => onLeaveRoom(goToSample), 650);
   };
   return (
     <a
@@ -90,7 +98,15 @@ function LibraryBookLink() {
   );
 }
 
-function RoomCardBody({ room, kitchenRecipes }: { room: HouseRoom; kitchenRecipes: KitchenRecipeLink[] }) {
+function RoomCardBody({
+  room,
+  kitchenRecipes,
+  onLeaveRoom,
+}: {
+  room: HouseRoom;
+  kitchenRecipes: KitchenRecipeLink[];
+  onLeaveRoom: (after: () => void) => void;
+}) {
   if (room.id === "kitchen") {
     return (
       <>
@@ -126,7 +142,7 @@ function RoomCardBody({ room, kitchenRecipes }: { room: HouseRoom; kitchenRecipe
       </>
     );
   }
-  if (room.id === "library") return <LibraryBookLink />;
+  if (room.id === "library") return <LibraryBookLink onLeaveRoom={onLeaveRoom} />;
   if (room.id === "nursery") return <NurserySample />;
   return <ShelfSample />;
 }
@@ -140,14 +156,32 @@ export default function HouseExplorer({
 }) {
   const [active, setActive] = useState<HouseRoomId | null>(null);
   const [hover, setHover] = useState<HouseRoomId | null>(null);
+  const activeRef = useRef<HouseRoomId | null>(null);
   const openedFrom = useRef<HTMLElement | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const viewRef = useRef<HTMLDivElement | null>(null);
   const cardHeadings = useRef<Partial<Record<HouseRoomId, HTMLHeadingElement | null>>>({});
+  // Opening a room adds a history entry, so the phone's back gesture steps out of the room
+  // instead of leaving the site. A room opened from a shared link has no entry of its own.
+  const pushedEntry = useRef(false);
+  const afterClose = useRef<(() => void) | null>(null);
 
-  const openRoom = useCallback((id: HouseRoomId, trigger: HTMLElement | null) => {
-    openedFrom.current = trigger;
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+
+  const openRoom = useCallback((id: HouseRoomId, trigger: HTMLElement | null, history: "push" | "replace" | "none") => {
+    if (trigger) openedFrom.current = trigger;
     setActive(id);
-    window.history.replaceState(null, "", `#room-${id}`);
+    if (history === "push") {
+      // The page behind never moves while a room is open, so the browser need not restore
+      // a scroll position when stepping back out (it would undo a scroll made after closing).
+      window.history.scrollRestoration = "manual";
+      window.history.pushState(null, "", `#room-${id}`);
+      pushedEntry.current = true;
+    } else if (history === "replace") {
+      window.history.replaceState(null, "", `#room-${id}`);
+    }
     void trackAnalyticsEvent(
       "homepage_preview_opened",
       { feature_key: id, placement: "house", content_version: HOMEPAGE_CONTENT_VERSION },
@@ -155,42 +189,93 @@ export default function HouseExplorer({
     );
   }, []);
 
-  const closeRoom = useCallback(() => {
+  const finishClose = useCallback(() => {
     setActive(null);
-    window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    openedFrom.current?.focus({ preventScroll: true });
+    const after = afterClose.current;
+    afterClose.current = null;
+    // Wait until the room view has closed and the page can scroll again.
+    window.requestAnimationFrame(() =>
+      window.requestAnimationFrame(() => {
+        window.history.scrollRestoration = "auto";
+        if (after) after();
+        else openedFrom.current?.focus({ preventScroll: true });
+      }),
+    );
   }, []);
 
-  // Move focus to the opened card so keyboard and screen reader users land on it.
+  /** Steps out of the room. `after` runs once the room view has closed. */
+  const closeRoom = useCallback(
+    (after?: () => void) => {
+      afterClose.current = after ?? null;
+      if (pushedEntry.current) {
+        pushedEntry.current = false;
+        window.history.back(); // the popstate handler below finishes closing
+        return;
+      }
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      finishClose();
+    },
+    [finishClose],
+  );
+
+  // Inside a room: land on its heading, start at the top of the room, and keep the page behind still.
   useEffect(() => {
     if (!active) return;
-    const heading = cardHeadings.current[active];
-    heading?.focus({ preventScroll: true });
-    heading?.closest("article")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    viewRef.current?.scrollTo({ top: 0 });
+    cardHeadings.current[active]?.focus({ preventScroll: true });
+    const root = document.documentElement;
+    root.classList.add("room-view-open");
+    return () => root.classList.remove("room-view-open");
   }, [active]);
 
+  // Escape steps out; Tab stays inside the room view while it is open.
   useEffect(() => {
     if (!active) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeRoom();
+      if (event.key === "Escape") {
+        closeRoom();
+        return;
+      }
+      if (event.key !== "Tab" || !viewRef.current) return;
+      const focusable = [
+        ...viewRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input, [tabindex]:not([tabindex='-1'])"),
+      ].filter((node) => node.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [active, closeRoom]);
 
-  // A shared link such as /#room-library opens that room, on arrival or when the hash changes.
+  // The address decides the room: a shared /#room-library link opens it, and going back closes it.
   useEffect(() => {
-    const openFromHash = () => {
-      const id = window.location.hash.replace("#room-", "");
-      if (window.location.hash.startsWith("#room-") && isHouseRoomId(id)) openRoom(id, null);
+    const syncWithAddress = () => {
+      const hash = window.location.hash;
+      const id = hash.replace("#room-", "");
+      if (hash.startsWith("#room-") && isHouseRoomId(id)) {
+        if (activeRef.current !== id) openRoom(id, null, "none");
+      } else if (activeRef.current) {
+        pushedEntry.current = false;
+        finishClose();
+      }
     };
-    const frame = window.requestAnimationFrame(openFromHash);
-    window.addEventListener("hashchange", openFromHash);
+    const frame = window.requestAnimationFrame(syncWithAddress);
+    window.addEventListener("popstate", syncWithAddress);
+    window.addEventListener("hashchange", syncWithAddress);
     return () => {
       window.cancelAnimationFrame(frame);
-      window.removeEventListener("hashchange", openFromHash);
+      window.removeEventListener("popstate", syncWithAddress);
+      window.removeEventListener("hashchange", syncWithAddress);
     };
-  }, [openRoom]);
+  }, [openRoom, finishClose]);
 
   // Keep the light in step with the visitor's clock while the page stays open.
   useEffect(() => {
@@ -201,7 +286,8 @@ export default function HouseExplorer({
   const onRoomClick = (id: HouseRoomId) => (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     if (active === id) return;
-    openRoom(id, event.currentTarget);
+    // Moving between rooms inside the room view replaces the entry, so one back gesture leaves the house's room.
+    openRoom(id, active ? null : event.currentTarget, active ? "replace" : "push");
   };
 
   const activeRoom = HOUSE_ROOMS.find((room) => room.id === active);
@@ -221,14 +307,6 @@ export default function HouseExplorer({
       >
         <div className="house-camera">{scene}</div>
         <HouseDepth frameRef={frameRef} />
-        {/* Painted close-ups that settle in when a room opens. Decorative; the card below carries the content. */}
-        <div aria-hidden="true">
-          {HOUSE_ROOMS.map((room) => (
-            <div key={room.id} className="hs-room" data-room={room.id}>
-              {room.id === "kitchen" ? <div className="hs-room-cat" /> : null}
-            </div>
-          ))}
-        </div>
         {HOUSE_ROOMS.map((room) => (
           <a
             key={room.id}
@@ -243,21 +321,12 @@ export default function HouseExplorer({
             onPointerLeave={() => setHover(null)}
           />
         ))}
-        {active ? (
-          <button
-            type="button"
-            onClick={closeRoom}
-            className="absolute top-3 left-3 z-10 inline-flex min-h-11 items-center gap-1 rounded-full border border-border bg-surface/95 px-4 text-sm font-semibold shadow-sm"
-          >
-            <span aria-hidden="true">←</span> Back to the house
-          </button>
-        ) : null}
       </div>
 
       <h2 id="house-rooms-title" className="sr-only">
         Rooms in the house
       </h2>
-      <p className="text-sm text-text-muted">{active ? "Pick another room, or go back to the house." : "Tap a room to look inside."}</p>
+      <p className="text-sm text-text-muted">Tap a room to look inside.</p>
       <ul aria-labelledby="house-rooms-title" className="grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] gap-2">
         {LIST_ROOMS.map((room) => (
           <li key={room.id} className="min-w-0">
@@ -277,32 +346,80 @@ export default function HouseExplorer({
         ))}
       </ul>
 
-      <div>
-        {LIST_ROOMS.map((room) => (
-          <article
-            key={room.id}
-            id={`room-${room.id}`}
-            aria-labelledby={`room-${room.id}-title`}
-            data-open={active === room.id ? "" : undefined}
-            className="room-card mt-2 grid scroll-mt-24 gap-4 rounded-[var(--radius-card)] border border-border bg-surface-muted p-5"
-          >
-            <div className="grid gap-1">
-              <StatusLabel status={room.status} />
-              <h3
-                id={`room-${room.id}-title`}
-                ref={(node) => {
-                  cardHeadings.current[room.id] = node;
-                }}
-                tabIndex={-1}
-                className="font-display text-2xl font-normal outline-none"
+      {/*
+        Step inside: with JavaScript, an open room fills the screen (a centred panel on large
+        screens) with its painted close-up above what the room holds. Without JavaScript the
+        room cards are simply listed here, and each room link jumps to its card.
+      */}
+      <div
+        ref={viewRef}
+        className="room-view"
+        data-open={active ? "" : undefined}
+        data-room={active ?? undefined}
+        role={active ? "dialog" : undefined}
+        aria-modal={active ? true : undefined}
+        aria-labelledby={active ? `room-${active}-title` : undefined}
+      >
+        <div className="room-view-panel">
+          <div className="room-view-picture" aria-hidden="true">
+            {HOUSE_ROOMS.map((room) => (
+              <div key={room.id} className="hs-room" data-room={room.id}>
+                {room.id === "kitchen" ? <div className="hs-room-cat" /> : null}
+              </div>
+            ))}
+          </div>
+          <div className="room-view-sheet">
+            {LIST_ROOMS.map((room) => (
+              <article
+                key={room.id}
+                id={`room-${room.id}`}
+                aria-labelledby={`room-${room.id}-title`}
+                data-open={active === room.id ? "" : undefined}
+                className="room-card mt-2 grid scroll-mt-24 gap-4 rounded-[var(--radius-card)] border border-border bg-surface-muted p-5"
               >
-                The {room.name} · {room.holds}
-              </h3>
-            </div>
-            <p className="max-w-[60ch] text-text-muted">{room.summary}</p>
-            <RoomCardBody room={room} kitchenRecipes={kitchenRecipes} />
-          </article>
-        ))}
+                <div className="grid gap-1">
+                  <StatusLabel status={room.status} />
+                  <h3
+                    id={`room-${room.id}-title`}
+                    ref={(node) => {
+                      cardHeadings.current[room.id] = node;
+                    }}
+                    tabIndex={-1}
+                    className="font-display text-2xl font-normal outline-none"
+                  >
+                    The {room.name} · {room.holds}
+                  </h3>
+                </div>
+                <p className="max-w-[60ch] text-text-muted">{room.summary}</p>
+                <RoomCardBody room={room} kitchenRecipes={kitchenRecipes} onLeaveRoom={closeRoom} />
+              </article>
+            ))}
+            {active ? (
+              <nav aria-label="Other rooms" className="room-view-others">
+                <p className="text-sm font-semibold text-text-muted">Other rooms</p>
+                <ul className="flex flex-wrap gap-2">
+                  {LIST_ROOMS.filter((room) => room.id !== active).map((room) => (
+                    <li key={room.id}>
+                      <a
+                        href={`#room-${room.id}`}
+                        onClick={onRoomClick(room.id)}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-control bg-surface px-4 text-sm font-semibold hover:bg-surface-muted"
+                      >
+                        {room.name}
+                        <span className="font-normal text-text-muted">· {HOUSE_STATUS_LABEL[room.status]}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ) : null}
+          </div>
+          {active ? (
+            <button type="button" onClick={() => closeRoom()} className="room-view-back">
+              <span aria-hidden="true">←</span> Back to the house
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

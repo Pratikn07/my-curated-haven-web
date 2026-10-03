@@ -77,6 +77,38 @@ test("[haven-house] the Library's storybook opens on the way to the sample page"
   await expect(page.locator("#library figure")).toBeInViewport();
 });
 
+test("[haven-house] stepping into a room keeps the page where it was, and back steps out", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => window.scrollTo(0, 150));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(150);
+
+  await roomList(page).getByRole("link", { name: /^Kitchen/ }).click();
+  const room = page.getByRole("dialog", { name: "The Kitchen · Recipes" });
+  await expect(room).toBeVisible();
+  await expect(page.locator(".hs-room[data-room=\"kitchen\"]")).toHaveCSS("opacity", "1");
+  expect(await page.evaluate(() => window.scrollY)).toBe(150);
+
+  // Moving to another room stays inside the room view.
+  await room.getByRole("navigation", { name: "Other rooms" }).getByRole("link", { name: /^Nursery/ }).click();
+  await expect(page.getByRole("dialog", { name: "The Nursery · Milestones" })).toBeVisible();
+  await expect(page).toHaveURL(/#room-nursery$/);
+
+  // The phone's back gesture steps out of the room rather than leaving the site.
+  await page.goBack();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/$/);
+  expect(await page.evaluate(() => window.scrollY)).toBe(150);
+});
+
+test("[haven-house] the garden stays planted on the ground when the page scrolls", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => window.scrollTo(0, 300));
+  await page.waitForTimeout(600);
+  const garden = await page.locator('[data-depth="garden"]').evaluate((node) => node.style.translate);
+  const y = Number.parseFloat(garden.split(" ")[1] ?? "0");
+  expect(Math.abs(y)).toBeLessThan(0.5);
+});
+
 test("[haven-house] a shared room link opens that room", async ({ page }) => {
   await page.goto("/#room-shelf");
   await expect(page.locator("#room-shelf")).toBeVisible();

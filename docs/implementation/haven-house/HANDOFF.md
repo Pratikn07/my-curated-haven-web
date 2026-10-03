@@ -4,7 +4,7 @@ Updated 2026-10-03. Branch `feat/haven-house-homepage`. The full conversation th
 
 ## Where things stand
 
-The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is the **painted clay miniature** (`src/components/house/HouseScene.tsx`): a painted sky behind, the house in the middle and a front garden strip in front, all blending between day, evening and night by the visitor's clock, with lamp and window glow, gentle depth on scroll and touch, and fireflies at night. Opening a room glides the camera in and its painted close-up settles over the frame; in the Kitchen the cat on the windowsill breathes. Steam rises from the painted pot on the house and from the pot in the Kitchen card. The Library card's closed storybook swings open on the way to the sample, which is laid out on the open book. All Round 2 art is in `art/chosen/`; `prop-cat` is held back (see the shot list). See [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
+The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is the **painted clay miniature** (`src/components/house/HouseScene.tsx`): a painted sky behind, the house in the middle and a front garden strip in front, all blending between day, evening and night by the visitor's clock, with lamp and window glow, gentle depth on scroll and touch, and fireflies at night. Opening a room steps inside it: the house glides toward the room and a room view settles over the page (full screen on phones, a centred panel on large screens) with the painted close-up above what the room holds; the page behind never moves, and the back gesture steps out. In the Kitchen the cat on the windowsill breathes. Steam rises from the painted pot on the house and from the pot in the Kitchen card. The Library card's closed storybook swings open on the way to the sample, which is laid out on the open book. All Round 2 art is in `art/chosen/`; `prop-cat` is held back (see the shot list). See [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
 
 Built in `my-curated-haven-web/`:
 
@@ -29,6 +29,11 @@ Built in `my-curated-haven-web/`:
 - One real bug fixed: the analytics validator only accepted `hv-` content versions, so every room-open event from the house (`hh-2026-10-02`) was dropped.
 - The full suite passed apart from three sign-in email tests, which need the local mail catcher (Mailpit) that was not started.
 - First screen on a throttled phone (9 Mbps, 150 ms latency, 4x slower CPU): largest paint about 0.8s by day and 0.95s at night, and the painting is the largest element. The house art adds about 63 KB. The whole first load is about 604 KB compressed: 317 KB JavaScript and 166 KB fonts are the bulk.
+
+## Owner feedback, 2026-10-03 (screen recording on iPhone)
+
+- The front garden lifted off the bottom of the frame when scrolling, because the nearest layer moved up with the scroll. It now has its own layer that only sways sideways.
+- Tapping a room used to glide into the close-up and then scroll the page down to the room card, leaving the close-up off screen. Rooms now open in a room view instead (option A, "Step inside"), so the picture and what the room offers are seen together.
 
 ## Fonts (2026-10-03)
 

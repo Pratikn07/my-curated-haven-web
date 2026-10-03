@@ -58,9 +58,9 @@
 }
 
 /*
- * Room close-ups. Opening a room glides the camera toward it, then its painted
- * close-up settles in over the frame. Each image downloads only when its room opens.
- * At evening and night a soft wash keeps the room in step with the hour.
+ * Room close-ups, shown in the room view. Opening a room glides the house camera toward it
+ * while the room view settles in with the painted close-up. Each image downloads only when
+ * its room opens. At evening and night a soft wash keeps the room in step with the hour.
  */
 .hs-room {
   position: absolute;
@@ -96,7 +96,7 @@
   transform-origin: 50% 100%;
 }
 
-.house-frame[data-active="kitchen"] .hs-room-cat {
+.room-view[data-room="kitchen"] .hs-room-cat {
   background-image: url("/images/house/kitchen-cat-210.webp");
   background-image: image-set(url("/images/house/kitchen-cat-210.avif") type("image/avif"), url("/images/house/kitchen-cat-210.webp") type("image/webp"));
   animation: hs-cat-breathe 4.2s ease-in-out infinite;
@@ -117,7 +117,7 @@
   opacity: calc(var(--hs-night, 0) * 0.45);
 }
 
-.house-frame[data-active="kitchen"] .hs-room[data-room="kitchen"] {
+.room-view[data-room="kitchen"] .hs-room[data-room="kitchen"] {
   opacity: 1;
   transform: scale(1);
   background-image: url("/images/house/room-kitchen-868.webp");
@@ -130,7 +130,7 @@
   );
 }
 
-.house-frame[data-active="library"] .hs-room[data-room="library"] {
+.room-view[data-room="library"] .hs-room[data-room="library"] {
   opacity: 1;
   transform: scale(1);
   background-image: url("/images/house/room-library-868.webp");
@@ -143,7 +143,7 @@
   );
 }
 
-.house-frame[data-active="nursery"] .hs-room[data-room="nursery"] {
+.room-view[data-room="nursery"] .hs-room[data-room="nursery"] {
   opacity: 1;
   transform: scale(1);
   background-image: url("/images/house/room-nursery-868.webp");
@@ -156,7 +156,7 @@
   );
 }
 
-.house-frame[data-active="shelf"] .hs-room[data-room="shelf"] {
+.room-view[data-room="shelf"] .hs-room[data-room="shelf"] {
   opacity: 1;
   transform: scale(1);
   background-image: url("/images/house/room-shelf-868.webp");
@@ -658,6 +658,170 @@
   align-items: center;
 }
 
+/*
+ * Step inside: the room view. Phones get the whole screen, with the painted close-up on top
+ * and a sheet holding what the room offers. Large screens get a centred panel over the house.
+ * Without JavaScript none of this applies and the room cards are listed in the page.
+ */
+.room-view-picture,
+.room-view-back,
+.room-view-others {
+  display: none;
+}
+
+.js .room-view {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--canvas);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 350ms ease,
+    visibility 0s linear 350ms;
+}
+
+.js .room-view[data-open] {
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity 400ms ease 120ms,
+    visibility 0s;
+}
+
+:root.room-view-open,
+:root.room-view-open body {
+  overflow: hidden;
+}
+
+.js .room-view-panel {
+  position: relative;
+  min-height: 100%;
+}
+
+/* The close-up keeps its 4:5 shape and covers the picture area, so the breathing cat stays on its sill. */
+.js .room-view-picture {
+  display: block;
+  position: relative;
+  height: 58vh;
+  height: 58svh;
+  overflow: hidden;
+  container-type: size;
+  background: #e9dccb;
+}
+
+.js .room-view .hs-room {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: max(100cqw, 80cqh);
+  aspect-ratio: 4 / 5;
+  translate: -50% -50%;
+}
+
+.js .room-view-sheet {
+  position: relative;
+  z-index: 2;
+  margin-top: -1.5rem;
+  padding: 1.5rem 1rem calc(2rem + env(safe-area-inset-bottom));
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: var(--canvas);
+  box-shadow: 0 -12px 30px -18px rgb(40 30 25 / 0.35);
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 450ms ease,
+    transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.js .room-view[data-open] .room-view-sheet {
+  opacity: 1;
+  transform: none;
+  transition-delay: 280ms;
+}
+
+/* Inside the room view the card is the page itself, not a box on a page. */
+.js .room-view .room-card {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.js .room-view-others {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.js .room-view-back {
+  position: fixed;
+  top: max(0.75rem, env(safe-area-inset-top));
+  left: 0.75rem;
+  z-index: 3;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgb(255 253 249 / 0.94);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 6px 16px -10px rgb(40 30 25 / 0.5);
+}
+
+@media (min-width: 1024px) {
+  .js .room-view {
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: rgb(28 24 36 / 0.5);
+  }
+
+  .js .room-view-panel {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    width: min(1100px, 100%);
+    height: min(86vh, 760px);
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: var(--canvas);
+    box-shadow: 0 40px 80px -40px rgb(20 15 30 / 0.6);
+    transform: scale(0.97);
+    transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .js .room-view[data-open] .room-view-panel {
+    transform: none;
+  }
+
+  .js .room-view-picture {
+    height: 100%;
+  }
+
+  .js .room-view-sheet {
+    margin: 0;
+    padding: 3.5rem 2.5rem 2.5rem;
+    overflow-y: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .js .room-view-back {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+  }
+}
+
 /* With JavaScript, only the open room's card shows. Without it, every card is listed. */
 .js .room-card:not([data-open]) {
   display: none;
@@ -710,6 +874,10 @@
   .house-camera,
   .house-hotspot,
   .hs-room,
+  .js .room-view,
+  .js .room-view[data-open],
+  .js .room-view-sheet,
+  .js .room-view-panel,
   .hs-garden-evening,
   .hs-garden-night,
   .hs-paint-evening,
@@ -728,7 +896,7 @@
   }
 
   .hs-steam,
-  .house-frame[data-active="kitchen"] .hs-room-cat {
+  .room-view[data-room="kitchen"] .hs-room-cat {
     animation: none;
   }
 

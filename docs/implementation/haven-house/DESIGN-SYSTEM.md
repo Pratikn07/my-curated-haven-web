@@ -147,6 +147,8 @@ Motion should feel like a slow breath, never like a notification.
 - **Tap is the only required gesture.** No pinch, swipe, drag or press-and-hold to reach anything.
 - **Every room has a visible label and status,** for example "Kitchen · Recipes" with "Open now". Status is text, never lighting.
 - **Every room is a real link** that works without JavaScript and from the keyboard.
+- **Opening a room steps inside it, without moving the page.** The room view covers the screen on phones (the painted close-up on top, what the room holds in a sheet below) and is a centred panel on large screens. The page behind stays exactly where it was. "Back to the house", Escape and the phone's back gesture all step out; the back gesture never leaves the site. "Other rooms" moves between rooms without stepping out. Without JavaScript the room cards are listed under the house instead.
+- **Nothing is lifted off the ground.** The front garden only sways sideways with the depth effect; moving it vertically would show a gap under it.
 - **A direct "Browse recipes" button is always visible** next to the house.
 - **One small surprise per room,** such as steam that turns into tonight's recipe card. It is a bonus, never the only route to anything.
 - **Coming-soon rooms offer a sample to try,** marked "Sample", with a way to hear when the room opens.
