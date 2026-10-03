@@ -111,6 +111,32 @@ test("[haven-house] the garden stays planted on the ground when the page scrolls
   expect(Math.abs(y)).toBeLessThan(0.5);
 });
 
+test("[haven-house] each room carries its own tag on the house, and the rooms light up once on a first visit", async ({ page }) => {
+  await page.goto("/");
+  const kitchenTag = page.locator(".house-frame").getByRole("link", { name: /^Kitchen/ });
+  await expect(kitchenTag).toBeVisible();
+  await expect(kitchenTag).toContainText("Open now");
+
+  // The light-up plays once, then never again for this visitor.
+  await expect(page.locator(".house-frame")).toHaveAttribute("data-intro", "");
+  await expect(page.locator(".house-frame")).not.toHaveAttribute("data-intro", /.*/, { timeout: 5000 });
+  await page.reload();
+  await page.waitForTimeout(2000);
+  await expect(page.locator(".house-frame")).not.toHaveAttribute("data-intro", /.*/);
+
+  // The slim row under the house is a second way in.
+  await page.getByRole("paragraph").filter({ hasText: "Tap a room to step inside" }).getByRole("link", { name: "Library" }).click();
+  await expect(page.getByRole("dialog", { name: "The Library · Storybooks" })).toBeVisible();
+});
+
+test("[haven-house] reduced motion skips the first-visit light-up", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.waitForTimeout(2000);
+  await expect(page.locator(".house-frame")).not.toHaveAttribute("data-intro", /.*/);
+  await expect(page.locator(".house-frame").getByRole("link", { name: /^Kitchen/ })).toBeVisible();
+});
+
 test("[haven-house] a shared room link opens that room", async ({ page }) => {
   await page.goto("/#room-shelf");
   await expect(page.locator("#room-shelf")).toBeVisible();

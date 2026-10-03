@@ -44,17 +44,164 @@
   transition: box-shadow 500ms ease;
 }
 
-.house-frame:not([data-active])[data-hover="kitchen"] .house-hotspot[data-room="kitchen"],
-.house-frame:not([data-active])[data-hover="library"] .house-hotspot[data-room="library"],
-.house-frame:not([data-active])[data-hover="nursery"] .house-hotspot[data-room="nursery"],
-.house-frame:not([data-active])[data-hover="shelf"] .house-hotspot[data-room="shelf"] {
-  box-shadow:
-    inset 0 0 0 2px rgb(255 250 240 / 0.85),
-    0 0 28px 2px rgb(255 214 150 / 0.4);
-}
-
 .house-frame[data-active] .house-hotspot {
   pointer-events: none;
+}
+
+/*
+ * Room tags and light. Each room carries a small tag pinned to the beam or floor below it,
+ * and a warm glow that answers a touch. Both follow the house as it moves with depth.
+ */
+.house-glows,
+.house-tags {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.house-frame[data-active] .house-glows,
+.house-frame[data-active] .house-tags {
+  opacity: 0;
+}
+
+.house-glow {
+  position: absolute;
+  border-radius: 0.875rem;
+  background: radial-gradient(ellipse 72% 78% at 50% 60%, rgb(255 200 110 / 0.9), rgb(255 210 135 / 0.45) 50%, rgb(255 222 160 / 0) 82%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 450ms ease;
+}
+
+/* The attic follows the roof's slope, so its light never spills into the sky. */
+.house-glow[data-room="library"] {
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+}
+
+.house-frame:not([data-active])[data-hover="kitchen"] .house-glow[data-room="kitchen"],
+.house-frame:not([data-active])[data-hover="library"] .house-glow[data-room="library"],
+.house-frame:not([data-active])[data-hover="nursery"] .house-glow[data-room="nursery"],
+.house-frame:not([data-active])[data-hover="shelf"] .house-glow[data-room="shelf"] {
+  opacity: 1;
+}
+
+.house-tag-spot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.house-tag {
+  display: grid;
+  min-height: 2.75rem;
+  align-content: center;
+  justify-items: center;
+  gap: 0.05rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgb(61 64 91 / 0.12);
+  border-radius: 0.875rem;
+  background: rgb(255 252 246 / 0.92);
+  color: var(--text);
+  line-height: 1.15;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px -8px rgb(40 30 25 / 0.55);
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.house-tag-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.house-tag-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.house-tag-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+}
+
+/* The open room's tag is the warm one; the others stay quiet. Status is always written, never only coloured. */
+.house-tag[data-status="open"] {
+  border-color: transparent;
+  background: var(--action);
+  color: var(--action-foreground);
+}
+
+.house-tag[data-status="open"] .house-tag-status {
+  color: var(--action-foreground);
+}
+
+.house-tag[data-status="open"] .house-tag-dot {
+  background: currentColor;
+}
+
+.house-tag[data-status="soon"] .house-tag-dot {
+  border-color: var(--room-library-accent);
+  background: var(--room-library-accent);
+}
+
+/* A wide screen has room for one line: "Kitchen · Open now". */
+@media (min-width: 640px) {
+  .house-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .house-tag-name::after {
+    content: " ·";
+    font-weight: 400;
+  }
+
+  .house-tag-status {
+    font-size: 0.8125rem;
+  }
+}
+
+.house-frame:not([data-active])[data-hover="kitchen"] .house-tag[data-room="kitchen"],
+.house-frame:not([data-active])[data-hover="library"] .house-tag[data-room="library"],
+.house-frame:not([data-active])[data-hover="nursery"] .house-tag[data-room="nursery"],
+.house-frame:not([data-active])[data-hover="shelf"] .house-tag[data-room="shelf"],
+.house-tag:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 18px -8px rgb(40 30 25 / 0.6);
+}
+
+/* First visit: each room lights up in turn, top of the house first, and its tag lifts with it. */
+.house-frame[data-intro] .house-glow {
+  animation: house-glow-walk 950ms ease-in-out calc(var(--intro-order) * 300ms) both;
+}
+
+.house-frame[data-intro] .house-tag {
+  animation: house-tag-lift 950ms ease-in-out calc(var(--intro-order) * 300ms);
+}
+
+@keyframes house-glow-walk {
+  0%, 100% { opacity: 0; }
+  45% { opacity: 1; }
+}
+
+@keyframes house-tag-lift {
+  0%, 100% { transform: none; }
+  45% {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px -8px rgb(40 30 25 / 0.6);
+  }
 }
 
 /*
@@ -873,6 +1020,8 @@
 @media (prefers-reduced-motion: reduce) {
   .house-camera,
   .house-hotspot,
+  .house-glow,
+  .house-tag,
   .hs-room,
   .js .room-view,
   .js .room-view[data-open],
