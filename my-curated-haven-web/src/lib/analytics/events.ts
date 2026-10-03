@@ -14,8 +14,8 @@ export type ResultCountBucket = "0" | "1-5" | "6-10" | "11+";
 export type RecipeAccessKind = "free" | "paid";
 export type RecipeSaveAction = "saved" | "removed";
 export type SignInMethod = "email_code" | "google";
-export type HomepageFeatureKey = "chat" | "shop" | "bloom";
-export type HomepagePlacement = "hero" | "overview" | "preview" | "footer" | "final";
+export type HomepageFeatureKey = "kitchen" | "library" | "nursery" | "shelf";
+export type HomepagePlacement = "hero" | "house" | "overview" | "preview" | "footer" | "final";
 export type HomepageDestination =
   | "recipes_index"
   | "recipe_detail"

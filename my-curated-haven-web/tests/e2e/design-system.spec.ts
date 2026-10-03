@@ -21,7 +21,7 @@ test("homepage copy stays visible with reduced motion", async ({ page }) => {
   await expect(
     page
       .getByRole("contentinfo")
-      .getByText("Parenting ideas and toddler recipes by Tiny Soho.", { exact: true }),
+      .getByText("A calm corner for parents, with toddler recipes by Tiny Soho.", { exact: true }),
   ).toBeVisible();
 });
 
@@ -120,7 +120,8 @@ test("brand fonts are the computed fonts", async ({ page }) => {
     wordmark: getComputedStyle(document.querySelector("header a[href='/']")!).fontFamily,
   }));
   expect(fonts.body).toMatch(/Inter/);
-  expect(fonts.heading).toMatch(/Inter/);
+  // The homepage headline uses the Haven house display face.
+  expect(fonts.heading).toMatch(/Fraunces/);
   expect(fonts.wordmark).toMatch(/Cormorant/);
 });
 

@@ -38,9 +38,9 @@ async function overflow(page: Page) {
 test("[QA-J01:partial] homepage shows the brand and recipe promise", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("navigation")).toContainText("Nibble & Nurture");
+  await expect(page.getByRole("navigation")).toContainText("My Curated Haven");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "A little more support for everyday parenting",
+    "Good enough is exactly enough",
   );
 });
 
@@ -54,7 +54,7 @@ test("public pages load", async ({ page }) => {
 
 test("brand link returns home", async ({ page }) => {
   await page.goto("/about");
-  await page.getByRole("navigation").getByRole("link", { name: "Nibble & Nurture" }).click();
+  await page.getByRole("navigation").getByRole("link", { name: "My Curated Haven" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
@@ -206,19 +206,19 @@ test("[QA-P05:partial] sitemap lists only the public pages", async ({ request })
 
 test("[QA-P04:partial] metadata uses the official origin", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/Nibble & Nurture/);
+  await expect(page).toHaveTitle(/My Curated Haven/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     /^https:\/\/mycuratedhaven\.com\/?$/,
   );
 });
 
-test("company identity is visible while product and recipe brands remain clear", async ({ page }) => {
+test("site, company and recipe brands remain clear", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("navigation").getByRole("link", { name: "Nibble & Nurture" })).toBeVisible();
-  await expect(page.locator("#our-story")).toContainText("Nibble & Nurture brings these parenting ideas together");
-  await expect(page.locator("#our-story")).toContainText("Tiny Soho");
-  await expect(page.locator("footer")).toContainText("Parenting ideas and toddler recipes by Tiny Soho.");
+  await expect(page.getByRole("navigation").getByRole("link", { name: "My Curated Haven" })).toBeVisible();
+  await expect(page.locator("#questions")).toContainText("Nibble & Nurture, our small company");
+  await expect(page.locator("#questions")).toContainText("Tiny Soho is our recipe brand");
+  await expect(page.locator("footer")).toContainText("A calm corner for parents, with toddler recipes by Tiny Soho.");
   await expect(page.locator("footer")).toContainText(/© \d{4} Nibble & Nurture/);
 
   await page.goto("/about");
@@ -228,14 +228,14 @@ test("company identity is visible while product and recipe brands remain clear",
   await expect(page.locator("main")).toContainText("mycuratedhaven.com");
 });
 
-test("company metadata identifies Nibble & Nurture", async ({ page }) => {
+test("site metadata names My Curated Haven while the company stays the publisher", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("Nibble & Nurture | Recipes and a glimpse of what's ahead");
-  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "Nibble & Nurture");
-  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /Nibble & Nurture.*Tiny Soho recipes/);
+  await expect(page).toHaveTitle("My Curated Haven | A calm corner for parents of little ones");
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "My Curated Haven");
+  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /My Curated Haven.*Tiny Soho/);
 
   await page.goto("/about");
-  await expect(page).toHaveTitle("About | Nibble & Nurture");
+  await expect(page).toHaveTitle("About | My Curated Haven");
 
   await page.goto("/recipes/synth-free-oat-bake");
   const recipe = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "{}") as {
@@ -294,7 +294,7 @@ test("page titles name the brand once", async ({ page }) => {
   for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/about", "/support", "/sign-in"]) {
     await page.goto(path);
     const title = await page.title();
-    expect(title.split("Nibble & Nurture").length - 1, `${path}: ${title}`).toBe(1);
+    expect(title.split("My Curated Haven").length - 1, `${path}: ${title}`).toBe(1);
   }
 });
 

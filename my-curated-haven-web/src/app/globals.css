@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
 @import "../styles/recipe-print.css";
+@import "../styles/house.css";
 
 @theme inline {
   --color-background: var(--canvas);
@@ -28,6 +29,7 @@
   --font-body: var(--font-body);
   --font-brand: var(--font-brand);
   --font-logo: var(--font-brand);
+  --font-display: var(--font-display);
 }
 
 body {
@@ -38,17 +40,20 @@ body {
   line-height: 1.6;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
-  line-height: 1.2;
-  scroll-margin-top: var(--header-offset);
-  /* At 200% text a single long word can exceed a phone screen; break it only when it can't fit (D06). */
-  overflow-wrap: anywhere;
+/* In the base layer so utilities such as font-display can override it. */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    line-height: 1.2;
+    scroll-margin-top: var(--header-offset);
+    /* At 200% text a single long word can exceed a phone screen; break it only when it can't fit (D06). */
+    overflow-wrap: anywhere;
+  }
 }
 
 .skip-link {

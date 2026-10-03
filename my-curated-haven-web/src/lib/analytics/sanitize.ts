@@ -46,8 +46,8 @@ const ENTRY_POINTS = new Set([
 ]);
 const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
 const SIGN_IN_METHODS = new Set(["email_code", "google"]);
-const HOMEPAGE_FEATURE_KEYS = new Set(["chat", "shop", "bloom"]);
-const HOMEPAGE_PLACEMENTS = new Set(["hero", "overview", "preview", "footer", "final"]);
+const HOMEPAGE_FEATURE_KEYS = new Set(["kitchen", "library", "nursery", "shelf"]);
+const HOMEPAGE_PLACEMENTS = new Set(["hero", "house", "overview", "preview", "footer", "final"]);
 const HOMEPAGE_DESTINATIONS = new Set([
   "recipes_index",
   "recipe_detail",
@@ -114,7 +114,7 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "presentation_state" && !HOMEPAGE_PRESENTATION_STATES.has(value)) {
     return fail("presentation_state");
   }
-  if (key === "content_version" && !/^hv-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
+  if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");
   }
   return value;

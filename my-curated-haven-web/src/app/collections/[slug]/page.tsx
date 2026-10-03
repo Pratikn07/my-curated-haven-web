@@ -41,7 +41,7 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${offer.collectionTitle} | Toddler Recipe Collection | Nibble & Nurture`;
+  const title = `${offer.collectionTitle} | Toddler Recipe Collection | My Curated Haven`;
   const description = `${offer.collectionSummary} One-time purchase of ${offer.formattedPrice}. Includes printable recipe pages.`;
   const canonicalUrl = `${SITE_ORIGIN}/collections/${offer.collectionSlug}`;
 

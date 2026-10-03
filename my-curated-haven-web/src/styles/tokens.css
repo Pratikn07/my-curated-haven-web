@@ -33,6 +33,13 @@
   --font-heading: var(--font-inter-source), Inter, "Segoe UI", sans-serif;
   --font-brand: var(--font-cormorant-source), "Cormorant Garamond", Georgia, serif;
   --font-logo: var(--font-brand);
+  /* Homepage display headings (Haven house design system). */
+  --font-display: var(--font-fraunces-source), Fraunces, Georgia, serif;
+
+  /* Room washes: section backgrounds only, never body text on their own. */
+  --room-kitchen-wash: #f8e6dc;
+  --room-library-wash: #eee9f6;
+  --room-library-accent: #6a5b92;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;

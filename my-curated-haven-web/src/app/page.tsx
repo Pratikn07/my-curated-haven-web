@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import Hero from "@/components/Hero";
-import BrandStory from "@/components/home/BrandStory";
+import HavenHero from "@/components/house/HavenHero";
 import CollectionSummary from "@/components/home/CollectionSummary";
-import FinalHomepageAction from "@/components/home/FinalHomepageAction";
+import HavenPromises from "@/components/home/HavenPromises";
 import HomeFaq from "@/components/home/HomeFaq";
 import HomeRecipes from "@/components/home/HomeRecipes";
-import HomepagePreviewTracker from "@/components/home/HomepagePreviewTracker";
-import PillarOverview from "@/components/home/PillarOverview";
-import { WhatsAhead } from "@/components/home/FeaturePreview";
+import LibraryPreview from "@/components/home/LibraryPreview";
 import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import { SITE_ORIGIN } from "@/config/site-navigation";
+import { loadHomepageRecipes } from "@/lib/data/load-homepage-recipes";
 
-const pageTitle = "Nibble & Nurture | Recipes and a glimpse of what's ahead";
+const pageTitle = "My Curated Haven | A calm corner for parents of little ones";
 const pageDescription =
-  "Nibble & Nurture is building a parenting companion, starting with toddler recipes by Tiny Soho. Parenting Chat, Curated Shop and Bloom are planned for the web.";
-const socialImageAlt =
-  "Nibble & Nurture, starting with Tiny Soho recipes and previews of what may be ahead.";
+  "Free toddler recipes by Tiny Soho you can read or print without an account, with storybooks and more rooms on the way.";
+const socialImageAlt = "My Curated Haven: good enough is exactly enough. Free toddler recipes by Tiny Soho.";
 
 export const metadata: Metadata = {
   title: { absolute: pageTitle },
@@ -25,7 +22,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: `${SITE_ORIGIN}/`,
-    siteName: "Nibble & Nurture",
+    siteName: "My Curated Haven",
     title: pageTitle,
     description: pageDescription,
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: socialImageAlt }],
@@ -38,18 +35,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const recipes = await loadHomepageRecipes();
+  const kitchenRecipes =
+    recipes.status === "ready"
+      ? recipes.recipes.map(({ slug, title, totalMinutes }) => ({ slug, title, totalMinutes }))
+      : [];
+
   return (
     <>
-      <Hero />
-      <PillarOverview />
-      <HomeRecipes />
+      <HavenHero kitchenRecipes={kitchenRecipes} />
+      <HomeRecipes data={recipes} />
       <CollectionSummary state={HOMEPAGE_RECIPE_STATE} />
-      <WhatsAhead />
-      <HomepagePreviewTracker />
-      <BrandStory />
+      <LibraryPreview />
+      <HavenPromises />
       <HomeFaq state={HOMEPAGE_RECIPE_STATE} />
-      <FinalHomepageAction />
     </>
   );
 }

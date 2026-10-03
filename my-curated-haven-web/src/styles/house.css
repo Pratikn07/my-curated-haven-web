@@ -1,0 +1,742 @@
+/*
+ * Homepage house: a painted clay miniature in day, evening and night light.
+ *
+ * The light follows the visitor's clock. src/lib/house-light.ts writes three numbers
+ * on <html> before first paint and once a minute after: --hs-evening and --hs-night
+ * (how much of each painting shows) and --hs-lamps (how bright the lamps are). It also
+ * sets data-house-* flags, and each painting's image is only declared under its flag,
+ * so a daytime visitor never downloads the night house. Without JavaScript the house
+ * stays in day. Light is atmosphere only; room status is always text.
+ * See docs/implementation/haven-house/DESIGN-SYSTEM.md.
+ */
+
+/* Frame and camera. Portrait 4:5 for phones; capped by screen height on large screens. */
+.house-frame {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  aspect-ratio: 4 / 5;
+  width: min(100%, calc((100vh - 11rem) * 0.8));
+  width: min(100%, calc((100svh - 11rem) * 0.8));
+  margin-inline: auto;
+  border-radius: var(--radius-card);
+  background: #efe2d2;
+  box-shadow: 0 24px 40px -28px rgb(61 64 91 / 0.45);
+}
+
+.house-camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transition: transform 800ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.house-frame[data-active] .house-camera {
+  transform: scale(var(--zoom-scale)) translate(calc(50% - var(--zoom-x)), calc(50% - var(--zoom-y)));
+}
+
+/* Pointer shortcuts over each painted room. Keyboard and screen reader users use the room list. */
+.house-hotspot {
+  position: absolute;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow 500ms ease;
+}
+
+.house-frame:not([data-active])[data-hover="kitchen"] .house-hotspot[data-room="kitchen"],
+.house-frame:not([data-active])[data-hover="library"] .house-hotspot[data-room="library"],
+.house-frame:not([data-active])[data-hover="nursery"] .house-hotspot[data-room="nursery"],
+.house-frame:not([data-active])[data-hover="shelf"] .house-hotspot[data-room="shelf"] {
+  box-shadow:
+    inset 0 0 0 2px rgb(255 250 240 / 0.85),
+    0 0 28px 2px rgb(255 214 150 / 0.4);
+}
+
+.house-frame[data-active] .house-hotspot {
+  pointer-events: none;
+}
+
+/*
+ * Room close-ups. Opening a room glides the camera toward it, then its painted
+ * close-up settles in over the frame. Each image downloads only when its room opens.
+ * At evening and night a soft wash keeps the room in step with the hour.
+ */
+.hs-room {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.08);
+  background-size: cover;
+  background-position: center;
+  transition:
+    opacity 700ms ease 250ms,
+    transform 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) 150ms;
+}
+
+.hs-room::before,
+.hs-room::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+/* The cat on the Kitchen windowsill, cut from the close-up itself so it lines up exactly, breathing slowly. */
+.hs-room-cat {
+  position: absolute;
+  left: 4.6%;
+  top: 40.24%;
+  width: 24.17%;
+  height: 11.14%;
+  background-size: 100% 100%;
+  transform-origin: 50% 100%;
+}
+
+.house-frame[data-active="kitchen"] .hs-room-cat {
+  background-image: url("/images/house/kitchen-cat-210.webp");
+  background-image: image-set(url("/images/house/kitchen-cat-210.avif") type("image/avif"), url("/images/house/kitchen-cat-210.webp") type("image/webp"));
+  animation: hs-cat-breathe 4.2s ease-in-out infinite;
+}
+
+@keyframes hs-cat-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  45% { transform: scale(1.012, 1.045); }
+}
+
+.hs-room::before {
+  background: #f6c38f;
+  opacity: calc(var(--hs-evening, 0) * 0.3);
+}
+
+.hs-room::after {
+  background: linear-gradient(180deg, #5f6aa8, #7c78a6);
+  opacity: calc(var(--hs-night, 0) * 0.45);
+}
+
+.house-frame[data-active="kitchen"] .hs-room[data-room="kitchen"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-kitchen-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-kitchen-640.webp") 1x, url("/images/house/room-kitchen-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-kitchen-640.avif") type("image/avif") 1x,
+    url("/images/house/room-kitchen-868.avif") type("image/avif") 2x,
+    url("/images/house/room-kitchen-640.webp") type("image/webp") 1x,
+    url("/images/house/room-kitchen-868.webp") type("image/webp") 2x
+  );
+}
+
+.house-frame[data-active="library"] .hs-room[data-room="library"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-library-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-library-640.webp") 1x, url("/images/house/room-library-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-library-640.avif") type("image/avif") 1x,
+    url("/images/house/room-library-868.avif") type("image/avif") 2x,
+    url("/images/house/room-library-640.webp") type("image/webp") 1x,
+    url("/images/house/room-library-868.webp") type("image/webp") 2x
+  );
+}
+
+.house-frame[data-active="nursery"] .hs-room[data-room="nursery"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-nursery-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-nursery-640.webp") 1x, url("/images/house/room-nursery-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-nursery-640.avif") type("image/avif") 1x,
+    url("/images/house/room-nursery-868.avif") type("image/avif") 2x,
+    url("/images/house/room-nursery-640.webp") type("image/webp") 1x,
+    url("/images/house/room-nursery-868.webp") type("image/webp") 2x
+  );
+}
+
+.house-frame[data-active="shelf"] .hs-room[data-room="shelf"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-shelf-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-shelf-640.webp") 1x, url("/images/house/room-shelf-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-shelf-640.avif") type("image/avif") 1x,
+    url("/images/house/room-shelf-868.avif") type("image/avif") 2x,
+    url("/images/house/room-shelf-640.webp") type("image/webp") 1x,
+    url("/images/house/room-shelf-868.webp") type("image/webp") 2x
+  );
+}
+
+
+/* Scene layers. HouseDepth moves each depth layer a few pixels with the CSS translate property. */
+.hs-scene,
+.hs-depth {
+  position: absolute;
+  inset: 0;
+}
+
+.hs-depth {
+  will-change: translate;
+}
+
+/* The sky is drawn larger than the frame, so its edges never show as it moves. */
+.hs-depth-sky {
+  transform: scale(1.3);
+  transform-origin: 50% 85%;
+}
+
+.hs-sky,
+.hs-ground {
+  position: absolute;
+  inset: 0;
+}
+
+/* Painted skies. A flat colour shows for the moment before each image arrives. */
+.hs-sky {
+  background-size: cover;
+  background-position: center;
+}
+
+.hs-sky-day {
+  background-color: #e8e6dc;
+}
+
+:root:not([data-house-day-covered]) .hs-sky-day {
+  background-image: url("/images/house/sky-day-819.webp");
+  background-image: -webkit-image-set(url("/images/house/sky-day-640.webp") 1x, url("/images/house/sky-day-819.webp") 2x);
+  background-image: image-set(
+    url("/images/house/sky-day-640.avif") type("image/avif") 1x,
+    url("/images/house/sky-day-819.avif") type("image/avif") 2x,
+    url("/images/house/sky-day-640.webp") type("image/webp") 1x,
+    url("/images/house/sky-day-819.webp") type("image/webp") 2x
+  );
+}
+
+.hs-sky-evening {
+  opacity: var(--hs-evening, 0);
+  background-color: #f2a27e;
+}
+
+:root[data-house-evening] .hs-sky-evening {
+  background-image: url("/images/house/sky-evening-819.webp");
+  background-image: -webkit-image-set(url("/images/house/sky-evening-640.webp") 1x, url("/images/house/sky-evening-819.webp") 2x);
+  background-image: image-set(
+    url("/images/house/sky-evening-640.avif") type("image/avif") 1x,
+    url("/images/house/sky-evening-819.avif") type("image/avif") 2x,
+    url("/images/house/sky-evening-640.webp") type("image/webp") 1x,
+    url("/images/house/sky-evening-819.webp") type("image/webp") 2x
+  );
+}
+
+/* Twilight: blue above a rose horizon, strongest while evening and night overlap (dawn and dusk). */
+.hs-sky-twilight {
+  opacity: min(0.75, calc(var(--hs-evening, 0) * var(--hs-night, 0) * 2.6));
+  background:
+    radial-gradient(90% 30% at 50% 74%, rgb(248 176 132 / 0.5), transparent 70%),
+    linear-gradient(180deg, #27305f 0%, #4b4a7c 34%, #a77a95 60%, #e9a487 80%, #d99c82 100%);
+}
+
+/* The night sky comes in late, so dusk stays warm rather than turning grey. */
+.hs-sky-night {
+  opacity: calc(var(--hs-night, 0) * var(--hs-night, 0));
+  background-color: #1d1f4a;
+}
+
+:root[data-house-night] .hs-sky-night {
+  background-image: url("/images/house/sky-night-819.webp");
+  background-image: -webkit-image-set(url("/images/house/sky-night-640.webp") 1x, url("/images/house/sky-night-819.webp") 2x);
+  background-image: image-set(
+    url("/images/house/sky-night-640.avif") type("image/avif") 1x,
+    url("/images/house/sky-night-819.avif") type("image/avif") 2x,
+    url("/images/house/sky-night-640.webp") type("image/webp") 1x,
+    url("/images/house/sky-night-819.webp") type("image/webp") 2x
+  );
+}
+
+.hs-ground {
+  background:
+    radial-gradient(120% 40% at 50% 100%, rgb(70 55 40 / 0.12), transparent 70%),
+    linear-gradient(180deg, transparent 70%, rgb(70 55 40 / 0.06) 100%);
+}
+
+/* The house sits in the same box as HOUSE_BOX in HouseExplorer.tsx. */
+.hs-house {
+  position: absolute;
+  left: 6%;
+  top: 9%;
+  width: 88%;
+  height: 88%;
+}
+
+.hs-shadow {
+  position: absolute;
+  left: 2%;
+  right: 2%;
+  top: 92%;
+  height: 8%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(45 32 28 / 0.38), rgb(45 32 28 / 0.12) 60%, transparent);
+  filter: blur(2px);
+}
+
+.hs-paint,
+.hs-glow-breath {
+  position: absolute;
+  inset: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.hs-paint-evening {
+  opacity: var(--hs-evening, 0);
+  transition: opacity 1.2s ease;
+}
+
+.hs-paint-night {
+  opacity: var(--hs-night, 0);
+  transition: opacity 1.2s ease;
+}
+
+:root:not([data-house-day-covered]) .hs-paint-day {
+  background-image: url("/images/house/house-day-960.webp");
+  background-image: -webkit-image-set(url("/images/house/house-day-640.webp") 1x, url("/images/house/house-day-960.webp") 2x);
+  background-image: image-set(
+    url("/images/house/house-day-640.avif") type("image/avif") 1x,
+    url("/images/house/house-day-960.avif") type("image/avif") 2x,
+    url("/images/house/house-day-640.webp") type("image/webp") 1x,
+    url("/images/house/house-day-960.webp") type("image/webp") 2x
+  );
+}
+@media (min-width: 1024px) {
+  :root:not([data-house-day-covered]) .hs-paint-day {
+    background-image: url("/images/house/house-day-960.webp");
+    background-image: -webkit-image-set(url("/images/house/house-day-640.webp") 1x, url("/images/house/house-day-1120.webp") 2x);
+    background-image: image-set(
+      url("/images/house/house-day-640.avif") type("image/avif") 1x,
+      url("/images/house/house-day-1120.avif") type("image/avif") 2x,
+      url("/images/house/house-day-640.webp") type("image/webp") 1x,
+      url("/images/house/house-day-1120.webp") type("image/webp") 2x
+    );
+  }
+}
+
+:root[data-house-evening] .hs-paint-evening {
+  background-image: url("/images/house/house-evening-960.webp");
+  background-image: -webkit-image-set(url("/images/house/house-evening-640.webp") 1x, url("/images/house/house-evening-960.webp") 2x);
+  background-image: image-set(
+    url("/images/house/house-evening-640.avif") type("image/avif") 1x,
+    url("/images/house/house-evening-960.avif") type("image/avif") 2x,
+    url("/images/house/house-evening-640.webp") type("image/webp") 1x,
+    url("/images/house/house-evening-960.webp") type("image/webp") 2x
+  );
+}
+@media (min-width: 1024px) {
+  :root[data-house-evening] .hs-paint-evening {
+    background-image: url("/images/house/house-evening-960.webp");
+    background-image: -webkit-image-set(url("/images/house/house-evening-640.webp") 1x, url("/images/house/house-evening-1120.webp") 2x);
+    background-image: image-set(
+      url("/images/house/house-evening-640.avif") type("image/avif") 1x,
+      url("/images/house/house-evening-1120.avif") type("image/avif") 2x,
+      url("/images/house/house-evening-640.webp") type("image/webp") 1x,
+      url("/images/house/house-evening-1120.webp") type("image/webp") 2x
+    );
+  }
+}
+
+:root[data-house-night] .hs-paint-night {
+  background-image: url("/images/house/house-night-960.webp");
+  background-image: -webkit-image-set(url("/images/house/house-night-640.webp") 1x, url("/images/house/house-night-960.webp") 2x);
+  background-image: image-set(
+    url("/images/house/house-night-640.avif") type("image/avif") 1x,
+    url("/images/house/house-night-960.avif") type("image/avif") 2x,
+    url("/images/house/house-night-640.webp") type("image/webp") 1x,
+    url("/images/house/house-night-960.webp") type("image/webp") 2x
+  );
+}
+@media (min-width: 1024px) {
+  :root[data-house-night] .hs-paint-night {
+    background-image: url("/images/house/house-night-960.webp");
+    background-image: -webkit-image-set(url("/images/house/house-night-640.webp") 1x, url("/images/house/house-night-1120.webp") 2x);
+    background-image: image-set(
+      url("/images/house/house-night-640.avif") type("image/avif") 1x,
+      url("/images/house/house-night-1120.avif") type("image/avif") 2x,
+      url("/images/house/house-night-640.webp") type("image/webp") 1x,
+      url("/images/house/house-night-1120.webp") type("image/webp") 2x
+    );
+  }
+}
+
+/* Lamps and lit windows: a soft bloom added with a screen blend, breathing slowly. */
+.hs-depth.hs-glow {
+  mix-blend-mode: screen;
+  opacity: var(--hs-lamps, 0);
+  transition: opacity 1.2s ease;
+}
+
+:root[data-house-lamps] .hs-glow-breath {
+  background-image: url("/images/house/house-glow.webp");
+  background-image: image-set(
+    url("/images/house/house-glow.avif") type("image/avif"),
+    url("/images/house/house-glow.webp") type("image/webp")
+  );
+  animation: hs-breathe 7s ease-in-out infinite alternate;
+}
+
+@keyframes hs-breathe {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+/* Front garden strip, nearest layer, in the same three lights as the house. */
+.hs-garden {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: -1.5%;
+  aspect-ratio: 800 / 132;
+}
+
+.hs-garden-paint {
+  position: absolute;
+  inset: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.hs-garden-evening {
+  opacity: var(--hs-evening, 0);
+  transition: opacity 1.2s ease;
+}
+
+.hs-garden-night {
+  opacity: var(--hs-night, 0);
+  transition: opacity 1.2s ease;
+}
+
+:root:not([data-house-day-covered]) .hs-garden-day {
+  background-image: url("/images/house/garden-day-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/garden-day-800.webp") 1x, url("/images/house/garden-day-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/garden-day-800.avif") type("image/avif") 1x,
+    url("/images/house/garden-day-1200.avif") type("image/avif") 2x,
+    url("/images/house/garden-day-800.webp") type("image/webp") 1x,
+    url("/images/house/garden-day-1200.webp") type("image/webp") 2x
+  );
+}
+
+:root[data-house-evening] .hs-garden-evening {
+  background-image: url("/images/house/garden-evening-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/garden-evening-800.webp") 1x, url("/images/house/garden-evening-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/garden-evening-800.avif") type("image/avif") 1x,
+    url("/images/house/garden-evening-1200.avif") type("image/avif") 2x,
+    url("/images/house/garden-evening-800.webp") type("image/webp") 1x,
+    url("/images/house/garden-evening-1200.webp") type("image/webp") 2x
+  );
+}
+
+:root[data-house-night] .hs-garden-night {
+  background-image: url("/images/house/garden-night-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/garden-night-800.webp") 1x, url("/images/house/garden-night-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/garden-night-800.avif") type("image/avif") 1x,
+    url("/images/house/garden-night-1200.avif") type("image/avif") 2x,
+    url("/images/house/garden-night-800.webp") type("image/webp") 1x,
+    url("/images/house/garden-night-1200.webp") type("image/webp") 2x
+  );
+}
+
+/* Fireflies after dark, drifting slowly near the garden. */
+.hs-fireflies {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+
+:root[data-house-fireflies] .hs-fireflies {
+  display: block;
+  opacity: calc((var(--hs-night, 0) - 0.5) * 2);
+}
+
+.hs-firefly {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe0 0 35%, #f6d878 55%, rgb(246 216 120 / 0) 75%);
+  box-shadow: 0 0 9px 3px rgb(246 216 120 / 0.4);
+  opacity: 0.2;
+  animation:
+    hs-firefly-drift var(--ff-time) ease-in-out var(--ff-delay) infinite alternate,
+    hs-firefly-blink calc(var(--ff-time) * 0.45) ease-in-out var(--ff-delay) infinite;
+}
+
+@keyframes hs-firefly-drift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(calc(var(--ff-dx) * 0.55), var(--ff-dy)); }
+  100% { transform: translate(var(--ff-dx), calc(var(--ff-dy) * 0.35)); }
+}
+
+@keyframes hs-firefly-blink {
+  0%, 100% { opacity: 0.12; }
+  45% { opacity: 1; }
+  60% { opacity: 0.85; }
+}
+
+/* Steam: three soft wisps that rise and fade, used over the painted pot and in the Kitchen card. */
+.hs-steam {
+  position: absolute;
+  pointer-events: none;
+}
+
+.hs-steam span {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 46%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0));
+  opacity: 0;
+  animation: hs-steam-rise 5.4s ease-out infinite;
+}
+
+.hs-steam span:nth-child(2) {
+  animation-delay: -1.8s;
+  --steam-drift: -40%;
+}
+
+.hs-steam span:nth-child(3) {
+  animation-delay: -3.6s;
+  --steam-drift: 10%;
+}
+
+@keyframes hs-steam-rise {
+  0% { transform: translate(-50%, 10%) scale(0.5); opacity: 0; }
+  25% { opacity: 0.85; }
+  100% { transform: translate(var(--steam-drift, -15%), -150%) scale(1.5, 1.8); opacity: 0; }
+}
+
+/* Over the painted pot on the house; the Kitchen's quiet motion while no room is open. */
+.hs-steam-house {
+  left: 54.6%;
+  top: 63.6%;
+  width: 7.4%;
+  height: 8.6%;
+}
+
+/* A faint grey edge, like cotton-wool steam in a miniature, so it reads against the pale tiles. */
+.hs-steam-house span {
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.98) 30%, rgb(214 206 198 / 0.75) 65%, rgb(170 160 150 / 0));
+}
+
+.house-frame[data-active] .hs-steam-house {
+  display: none;
+}
+
+/* The pot in the Kitchen card, with steam rising toward tonight's recipes. */
+.kitchen-pot {
+  position: relative;
+  flex: none;
+  width: 6.5rem;
+  height: 7.25rem;
+  margin-block: -1.5rem -0.25rem;
+}
+
+.kitchen-pot-image {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  aspect-ratio: 300 / 202;
+  background-size: 100% 100%;
+  background-image: url("/images/house/prop-pot-300.webp");
+  background-image: -webkit-image-set(url("/images/house/prop-pot-200.webp") 1x, url("/images/house/prop-pot-300.webp") 2x);
+  background-image: image-set(
+    url("/images/house/prop-pot-200.avif") type("image/avif") 1x,
+    url("/images/house/prop-pot-300.avif") type("image/avif") 2x,
+    url("/images/house/prop-pot-200.webp") type("image/webp") 1x,
+    url("/images/house/prop-pot-300.webp") type("image/webp") 2x
+  );
+  filter: drop-shadow(0 8px 10px rgb(60 45 30 / 0.22));
+}
+
+.kitchen-pot .hs-steam {
+  left: 25%;
+  right: 25%;
+  bottom: 52%;
+  height: 55%;
+}
+
+.kitchen-pot .hs-steam span {
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0));
+  filter: drop-shadow(0 0 2px rgb(150 140 130 / 0.25));
+}
+
+/* The Library's closed storybook. On tap its cover swings open before the page moves to the sample. */
+.library-book {
+  position: relative;
+  flex: none;
+  width: 2.75rem;
+  aspect-ratio: 330 / 346;
+  perspective: 300px;
+}
+
+.library-book-pages,
+.library-book-cover {
+  position: absolute;
+  inset: 0;
+}
+
+.library-book-pages {
+  left: 14%;
+  top: 4%;
+  bottom: 4%;
+  border-radius: 2px 4px 4px 2px;
+  background: linear-gradient(90deg, #e9dcc4, #fbf5e8 30%, #f4ead6);
+  box-shadow: inset 0 0 0 1px rgb(120 100 80 / 0.25);
+}
+
+.library-book-cover {
+  background-size: 100% 100%;
+  background-image: url("/images/house/prop-book-closed-330.webp");
+  background-image: -webkit-image-set(url("/images/house/prop-book-closed-220.webp") 1x, url("/images/house/prop-book-closed-330.webp") 2x);
+  background-image: image-set(
+    url("/images/house/prop-book-closed-220.avif") type("image/avif") 1x,
+    url("/images/house/prop-book-closed-330.avif") type("image/avif") 2x,
+    url("/images/house/prop-book-closed-220.webp") type("image/webp") 1x,
+    url("/images/house/prop-book-closed-330.webp") type("image/webp") 2x
+  );
+  transform-origin: 14% 50%;
+  transition: transform 600ms cubic-bezier(0.3, 0.6, 0.2, 1);
+  filter: drop-shadow(0 4px 5px rgb(60 40 70 / 0.25));
+}
+
+.library-book-link:hover .library-book-cover {
+  transform: rotateY(-18deg);
+}
+
+.library-book-link[data-opening] .library-book-cover {
+  transform: rotateY(-150deg);
+}
+
+/* The storybook sample, laid out on the open book: drawing on the left page, story on the right. */
+.storybook-book {
+  position: relative;
+  aspect-ratio: 1200 / 664;
+  background-size: 100% 100%;
+  background-image: url("/images/house/prop-book-open-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/prop-book-open-800.webp") 1x, url("/images/house/prop-book-open-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/prop-book-open-800.avif") type("image/avif") 1x,
+    url("/images/house/prop-book-open-1200.avif") type("image/avif") 2x,
+    url("/images/house/prop-book-open-800.webp") type("image/webp") 1x,
+    url("/images/house/prop-book-open-1200.webp") type("image/webp") 2x
+  );
+  filter: drop-shadow(0 22px 24px rgb(40 30 60 / 0.28));
+}
+
+.storybook-page-left {
+  position: absolute;
+  left: 7%;
+  top: 8%;
+  width: 37%;
+  height: 80%;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.storybook-page-right {
+  position: absolute;
+  left: 53.5%;
+  top: 8%;
+  width: 35%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+}
+
+/* With JavaScript, only the open room's card shows. Without it, every card is listed. */
+.js .room-card:not([data-open]) {
+  display: none;
+}
+
+.storybook-layer {
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.storybook-layer[data-on] {
+  opacity: 1;
+}
+
+/* Storybook sample: one drawing, four art styles */
+.storybook-layer .sb-sky { fill: var(--sb-sky); }
+.storybook-layer .sb-star { fill: var(--sb-moon); }
+.storybook-layer .sb-moon { fill: var(--sb-moon); }
+.storybook-layer .sb-hill { fill: var(--sb-hill); }
+.storybook-layer .sb-pj { fill: var(--sb-pj); }
+.storybook-layer .sb-skin { fill: var(--sb-skin); }
+.storybook-layer .sb-hair { fill: var(--sb-hair); }
+.storybook-layer .sb-teddy { fill: var(--sb-teddy); }
+.storybook-layer .sb-cheek { fill: var(--sb-pj); opacity: 0.45; }
+.storybook-layer .sb-eye { fill: #2b2230; }
+.storybook-layer .sb-mouth { fill: none; stroke: #2b2230; stroke-width: 2; stroke-linecap: round; }
+.storybook-layer .sb-arm { fill: none; stroke: var(--sb-skin); stroke-width: 8; stroke-linecap: round; }
+.storybook-layer .sb-line { stroke: var(--sb-stroke); stroke-width: var(--sb-stroke-width); stroke-linejoin: round; }
+
+.storybook-layer[data-style="watercolor"] {
+  --sb-sky: #c9d5ea; --sb-moon: #f8e8b8; --sb-hill: #a8c49f; --sb-pj: #e8a18b; --sb-skin: #f3caa9;
+  --sb-hair: #7b4c36; --sb-teddy: #c99a70; --sb-stroke: transparent; --sb-stroke-width: 0;
+  filter: url(#sb-watercolor);
+}
+.storybook-layer[data-style="cartoon"] {
+  --sb-sky: #33447e; --sb-moon: #ffd75e; --sb-hill: #5fae6b; --sb-pj: #ff7a59; --sb-skin: #ffd0a8;
+  --sb-hair: #5a2e1c; --sb-teddy: #cf8d50; --sb-stroke: #2a1d1a; --sb-stroke-width: 3.5;
+}
+.storybook-layer[data-style="paper"] {
+  --sb-sky: #eadfcf; --sb-moon: #fffaf0; --sb-hill: #b8c8a2; --sb-pj: #d98c74; --sb-skin: #efd3b7;
+  --sb-hair: #6b4a3a; --sb-teddy: #b9946e; --sb-stroke: transparent; --sb-stroke-width: 0;
+}
+.storybook-layer[data-style="paper"] .sb-shadow { filter: url(#sb-paper); }
+.storybook-layer[data-style="crayon"] {
+  --sb-sky: #fdf6e4; --sb-moon: #ffd166; --sb-hill: #83c283; --sb-pj: #ef6f6c; --sb-skin: #f9c7a1;
+  --sb-hair: #8a5a3b; --sb-teddy: #b07d4f; --sb-stroke: #4a3a7a; --sb-stroke-width: 2.5;
+  filter: url(#sb-crayon);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .house-camera,
+  .house-hotspot,
+  .hs-room,
+  .hs-garden-evening,
+  .hs-garden-night,
+  .hs-paint-evening,
+  .hs-paint-night,
+  .hs-glow,
+  .storybook-layer {
+    transition: none;
+  }
+
+  :root[data-house-lamps] .hs-glow-breath {
+    animation: none;
+  }
+
+  :root[data-house-fireflies] .hs-fireflies {
+    display: none;
+  }
+
+  .hs-steam,
+  .house-frame[data-active="kitchen"] .hs-room-cat {
+    animation: none;
+  }
+
+  .hs-steam {
+    display: none;
+  }
+
+  .library-book-cover {
+    transition: none;
+  }
+}
