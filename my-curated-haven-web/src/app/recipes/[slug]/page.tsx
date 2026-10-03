@@ -7,9 +7,9 @@ import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import {
   getRecipeBySlug,
   getFreeRecipeCatalog,
-  type RecipeIngredient,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
+import { formatIngredient, normalizeInstructions } from "@/lib/recipes/format";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import { checkRecipeAccess } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
@@ -70,32 +70,6 @@ export async function generateMetadata({
         : [],
     },
   };
-}
-
-function normalizeInstructions(rawInstructions: unknown): { step: number; text: string }[] {
-  if (!Array.isArray(rawInstructions)) return [];
-  return rawInstructions.map((item, index) => {
-    if (typeof item === "string") {
-      return { step: index + 1, text: item };
-    }
-    if (typeof item === "object" && item !== null && "text" in item) {
-      const typed = item as { step?: unknown; text?: unknown };
-      return {
-        step: typeof typed.step === "number" ? typed.step : index + 1,
-        text: String(typed.text),
-      };
-    }
-    return { step: index + 1, text: String(item) };
-  });
-}
-
-function formatIngredient(ingredient: RecipeIngredient | string): string {
-  if (typeof ingredient === "string") return ingredient;
-  const parts: string[] = [];
-  if (ingredient.amount) parts.push(ingredient.amount);
-  if (ingredient.unit) parts.push(ingredient.unit);
-  if (ingredient.item) parts.push(ingredient.item);
-  return parts.join(" ");
 }
 
 export default async function RecipeDetailPage({ params }: RecipeDetailPageProps) {

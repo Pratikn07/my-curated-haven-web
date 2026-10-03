@@ -24,6 +24,9 @@ export type HomepageDestination =
   | "about"
   | "support";
 export type HomepagePresentationState = "preparation" | "free_ready" | "collection_ready";
+export type StoryRoomKey = "kitchen";
+export type StoryAction = "recipe_jump" | "full_recipe" | "more_recipe" | "collection" | "about";
+export type StoryPlacement = "card" | "sticky" | "recipe" | "next" | "offer" | "about";
 
 export type CanonicalRouteKey =
   | "home"
@@ -39,7 +42,8 @@ export type CanonicalRouteKey =
   | "privacy"
   | "support"
   | "about"
-  | "terms";
+  | "terms"
+  | "story";
 
 export interface AnalyticsEnvelope {
   event_id: string;
@@ -156,6 +160,18 @@ export interface HomepagePreviewViewedPayload {
   content_version: string;
 }
 
+/** An Instagram landing page was shown. The slug names the post. */
+export interface StoryViewPayload {
+  story_slug: string;
+  room: StoryRoomKey;
+}
+
+export interface StoryActionClickedPayload {
+  story_slug: string;
+  story_action: StoryAction;
+  story_placement: StoryPlacement;
+}
+
 export type AnalyticsEventMap = {
   page_view: PageViewPayload;
   recipe_list_view: RecipeListViewPayload;
@@ -176,6 +192,8 @@ export type AnalyticsEventMap = {
   homepage_cta_clicked: HomepageCtaClickedPayload;
   homepage_preview_opened: HomepagePreviewOpenedPayload;
   homepage_preview_viewed: HomepagePreviewViewedPayload;
+  story_view: StoryViewPayload;
+  story_action_clicked: StoryActionClickedPayload;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;

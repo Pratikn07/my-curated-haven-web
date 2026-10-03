@@ -7,8 +7,19 @@ Copy the link for where you're posting it. Each one opens the normal website; th
 | Profile bio | `https://mycuratedhaven.com/?utm_source=instagram&utm_medium=organic_social&utm_campaign=bio_link` |
 | Story link sticker | `https://mycuratedhaven.com/?utm_source=instagram&utm_medium=organic_social&utm_campaign=story_link` |
 | DM or broadcast channel | `https://mycuratedhaven.com/?utm_source=instagram&utm_medium=organic_social&utm_campaign=instagram_dm` |
+| Automatic DM after a comment keyword | `https://mycuratedhaven.com/stories/<post>?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm` |
 
-Reel and feed captions can't hold clickable links, so they point people to the bio.
+Reel and feed captions can't hold clickable links, so they ask people to comment a keyword (the DM tool replies with the post's page) or point them to the bio.
+
+## Linking to a post's own page
+
+Each post can have its own landing page at `/stories/<post>`. Its first screen repeats the post, and the recipe is right under it. See [the landing page plan](implementation/instagram-landing/PLAN.md).
+
+Use the post's page for its Story link sticker and for DMs about it. Keep the tag for where you posted it; the page's address already says which post it was, so `utm_content` isn't needed:
+
+| Post | Story link sticker | Automatic DM |
+| --- | --- | --- |
+| Frittata fingers | `https://mycuratedhaven.com/stories/frittata-fingers?utm_source=instagram&utm_medium=organic_social&utm_campaign=story_link` | `https://mycuratedhaven.com/stories/frittata-fingers?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm` |
 
 ## Telling Stories apart
 
@@ -33,6 +44,8 @@ https://mycuratedhaven.com/recipes/soft-baked-blueberry-and-oat-bars?utm_source=
 ## Where to see the results
 
 PostHog → **Web analytics** → the **UTM campaign** or **Channels** breakdown. Or PostHog → **Activity**, filter on the property `campaign_code`.
+
+For post pages: the event `story_view` names the post (`story_slug`), `story_action_clicked` records taps on its buttons, and the session property `entry_story` ties a later recipe open or purchase back to the post.
 
 ## Adding a new place
 
