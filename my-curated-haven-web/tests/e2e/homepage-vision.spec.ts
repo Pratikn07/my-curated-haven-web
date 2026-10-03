@@ -79,14 +79,16 @@ test("[haven-house] the Library's storybook opens on the way to the sample page"
 
 test("[haven-house] stepping into a room keeps the page where it was, and back steps out", async ({ page }) => {
   await page.goto("/");
-  await page.evaluate(() => window.scrollTo(0, 150));
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(150);
+  const kitchen = roomList(page).getByRole("link", { name: /^Kitchen/ });
+  // Bring the room into view first: tapping scrolls it into view on short screens, which is not the room view moving the page.
+  await kitchen.scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => window.scrollY);
 
-  await roomList(page).getByRole("link", { name: /^Kitchen/ }).click();
+  await kitchen.click();
   const room = page.getByRole("dialog", { name: "The Kitchen · Recipes" });
   await expect(room).toBeVisible();
   await expect(page.locator(".hs-room[data-room=\"kitchen\"]")).toHaveCSS("opacity", "1");
-  expect(await page.evaluate(() => window.scrollY)).toBe(150);
+  expect(await page.evaluate(() => window.scrollY)).toBe(before);
 
   // Moving to another room stays inside the room view.
   await room.getByRole("navigation", { name: "Other rooms" }).getByRole("link", { name: /^Nursery/ }).click();
@@ -97,7 +99,7 @@ test("[haven-house] stepping into a room keeps the page where it was, and back s
   await page.goBack();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page).toHaveURL(/\/$/);
-  expect(await page.evaluate(() => window.scrollY)).toBe(150);
+  expect(await page.evaluate(() => window.scrollY)).toBe(before);
 });
 
 test("[haven-house] the garden stays planted on the ground when the page scrolls", async ({ page }) => {
