@@ -18,6 +18,13 @@ export type HouseRoom = {
   zoom: { x: number; y: number; scale: number };
   /** Where the room label sits inside its area. */
   labelAt: "top" | "bottom";
+  /**
+   * Where the room's tag is pinned on the painted house (% of the image). Tags sit on the
+   * beam or floor below each room, so they never cover the furniture.
+   */
+  tagAt: { x: number; y: number };
+  /** Order in the first-visit light-up, top of the house first. */
+  introOrder: number;
 };
 
 export const HOUSE_STATUS_LABEL: Record<HouseRoomStatus, string> = {
@@ -36,6 +43,8 @@ export const HOUSE_ROOMS: readonly HouseRoom[] = [
     area: { left: 15, top: 9, width: 71, height: 23.2 },
     zoom: { x: 50.5, y: 21, scale: 1.5 },
     labelAt: "bottom",
+    tagAt: { x: 50.5, y: 32 },
+    introOrder: 0,
   },
   {
     id: "nursery",
@@ -46,6 +55,8 @@ export const HOUSE_ROOMS: readonly HouseRoom[] = [
     area: { left: 10.7, top: 34.4, width: 40.6, height: 24.8 },
     zoom: { x: 31, y: 46.8, scale: 2.1 },
     labelAt: "top",
+    tagAt: { x: 31, y: 59.5 },
+    introOrder: 1,
   },
   {
     id: "shelf",
@@ -56,6 +67,8 @@ export const HOUSE_ROOMS: readonly HouseRoom[] = [
     area: { left: 53.5, top: 34.4, width: 37.9, height: 24.8 },
     zoom: { x: 72.4, y: 46.8, scale: 2.1 },
     labelAt: "top",
+    tagAt: { x: 72.5, y: 59.5 },
+    introOrder: 2,
   },
   {
     id: "kitchen",
@@ -67,6 +80,8 @@ export const HOUSE_ROOMS: readonly HouseRoom[] = [
     area: { left: 10.2, top: 61, width: 80.7, height: 27.1 },
     zoom: { x: 50.5, y: 74.5, scale: 1.45 },
     labelAt: "top",
+    tagAt: { x: 50.5, y: 89.5 },
+    introOrder: 3,
   },
 ] as const;
 

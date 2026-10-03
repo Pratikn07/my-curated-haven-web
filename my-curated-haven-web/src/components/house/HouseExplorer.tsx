@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Pointer } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import {
   HOUSE_ROOMS,
@@ -33,6 +34,16 @@ function toFrame(room: HouseRoom["area"]) {
     height: `${(room.height * HOUSE_BOX.height) / 100}%`,
   };
 }
+
+/** A point on the painted house, in frame percentages. */
+function pointOnFrame(point: { x: number; y: number }) {
+  return {
+    left: `${HOUSE_BOX.left + (point.x * HOUSE_BOX.width) / 100}%`,
+    top: `${HOUSE_BOX.top + (point.y * HOUSE_BOX.height) / 100}%`,
+  };
+}
+
+const INTRO_SEEN_KEY = "haven-house-intro-seen";
 
 /** Camera centre in frame percentages, kept inside the frame so no empty edge shows when zoomed. */
 function cameraFor(room: HouseRoom) {
@@ -283,6 +294,42 @@ export default function HouseExplorer({
     return () => window.clearInterval(timer);
   }, []);
 
+  // First visit only: once the house is in view, its rooms light up one after another, so a
+  // newcomer sees four separate rooms to step into. Tags never start hidden; they only lift.
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try {
+      if (window.localStorage.getItem(INTRO_SEEN_KEY)) return;
+    } catch {
+      return;
+    }
+    let startTimer = 0;
+    let endTimer = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio < 0.5) return;
+        observer.disconnect();
+        startTimer = window.setTimeout(() => {
+          frame.dataset.intro = "";
+          try {
+            window.localStorage.setItem(INTRO_SEEN_KEY, "1");
+          } catch {
+            // Without storage the light-up may play again next time, which is harmless.
+          }
+          endTimer = window.setTimeout(() => delete frame.dataset.intro, 2200);
+        }, 600);
+      },
+      { threshold: [0, 0.5] },
+    );
+    observer.observe(frame);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(startTimer);
+      window.clearTimeout(endTimer);
+    };
+  }, []);
+
   const onRoomClick = (id: HouseRoomId) => (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     if (active === id) return;
@@ -298,6 +345,9 @@ export default function HouseExplorer({
 
   return (
     <div className="grid min-w-0 gap-4">
+      <h2 id="house-rooms-title" className="sr-only">
+        Rooms in the house
+      </h2>
       <div
         ref={frameRef}
         className="house-frame"
@@ -321,30 +371,62 @@ export default function HouseExplorer({
             onPointerLeave={() => setHover(null)}
           />
         ))}
+        {/* Warm light that answers a touch, and lights each room in turn on a first visit. */}
+        <div className="house-glows" data-depth="house" aria-hidden="true">
+          {HOUSE_ROOMS.map((room) => (
+            <div
+              key={room.id}
+              className="house-glow"
+              data-room={room.id}
+              style={{ ...toFrame(room.area), "--intro-order": room.introOrder } as CSSProperties}
+            />
+          ))}
+        </div>
+        {/* Name tags pinned to each room: the list of rooms, and the main way in. */}
+        <ul aria-labelledby="house-rooms-title" className="house-tags" data-depth="house">
+          {LIST_ROOMS.map((room) => (
+            <li key={room.id} className="house-tag-spot" style={pointOnFrame(room.tagAt)}>
+              <a
+                href={`#room-${room.id}`}
+                aria-current={active === room.id ? "true" : undefined}
+                onClick={onRoomClick(room.id)}
+                onPointerEnter={() => setHover(room.id)}
+                onPointerLeave={() => setHover(null)}
+                className="house-tag"
+                data-room={room.id}
+                data-status={room.status}
+                style={{ "--intro-order": room.introOrder } as CSSProperties}
+              >
+                <span className="house-tag-name">{room.name}</span>
+                <span className="sr-only"> · {room.holds},</span>
+                <span className="house-tag-status">
+                  <span aria-hidden="true" className="house-tag-dot" />
+                  {HOUSE_STATUS_LABEL[room.status]}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <h2 id="house-rooms-title" className="sr-only">
-        Rooms in the house
-      </h2>
-      <p className="text-sm text-text-muted">Tap a room to look inside.</p>
-      <ul aria-labelledby="house-rooms-title" className="grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] gap-2">
-        {LIST_ROOMS.map((room) => (
-          <li key={room.id} className="min-w-0">
-            <a
-              href={`#room-${room.id}`}
-              aria-current={active === room.id ? "true" : undefined}
-              onClick={onRoomClick(room.id)}
-              onPointerEnter={() => setHover(room.id)}
-              onPointerLeave={() => setHover(null)}
-              className="grid h-full min-h-14 content-start gap-0.5 rounded-xl border border-border bg-surface px-3 py-2.5 hover:bg-surface-muted aria-[current=true]:border-action aria-[current=true]:bg-surface-muted"
-            >
-              <span className="font-semibold">{room.name}</span>
-              <span className="text-sm text-text-muted">{room.holds}</span>
-              <StatusLabel status={room.status} />
-            </a>
-          </li>
-        ))}
-      </ul>
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-muted">
+        <Pointer aria-hidden="true" size={16} strokeWidth={1.75} className="shrink-0" />
+        <span>Tap a room to step inside, or pick one:</span>
+        <span className="inline-flex flex-wrap items-center gap-x-1">
+          {LIST_ROOMS.map((room, index) => (
+            <span key={room.id} className="inline-flex items-center gap-x-1">
+              {index > 0 ? <span aria-hidden="true">·</span> : null}
+              <a
+                href={`#room-${room.id}`}
+                onClick={onRoomClick(room.id)}
+                className="inline-flex min-h-11 items-center font-semibold text-foreground underline decoration-1 underline-offset-4"
+              >
+                {room.name}
+              </a>
+            </span>
+          ))}
+        </span>
+      </p>
 
       {/*
         Step inside: with JavaScript, an open room fills the screen (a centred panel on large

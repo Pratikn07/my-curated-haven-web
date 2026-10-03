@@ -145,7 +145,8 @@ Motion should feel like a slow breath, never like a notification.
 ## The house
 
 - **Tap is the only required gesture.** No pinch, swipe, drag or press-and-hold to reach anything.
-- **Every room has a visible label and status,** for example "Kitchen · Recipes" with "Open now". Status is text, never lighting.
+- **Every room has a tag pinned to it on the house,** for example "Kitchen · Open now". Tags sit on the beam or floor below each room so they never cover the furniture, and they are the room links (the accessible list of rooms). The open room's tag is filled terracotta; the others are quiet. Status is always written, never shown by colour or lighting alone. A slim row of room names under the house is a second way in.
+- **Rooms answer a touch.** A finger on a room (or a pointer over it) warms its light and lifts its tag. On a first visit only, the rooms light up one after another, top of the house first, in under two seconds; never with reduced motion, and tags never start hidden.
 - **Every room is a real link** that works without JavaScript and from the keyboard.
 - **Opening a room steps inside it, without moving the page.** The room view covers the screen on phones (the painted close-up on top, what the room holds in a sheet below) and is a centred panel on large screens. The page behind stays exactly where it was. "Back to the house", Escape and the phone's back gesture all step out; the back gesture never leaves the site. "Other rooms" moves between rooms without stepping out. Without JavaScript the room cards are listed under the house instead.
 - **Nothing is lifted off the ground.** The front garden only sways sideways with the depth effect; moving it vertically would show a gap under it.

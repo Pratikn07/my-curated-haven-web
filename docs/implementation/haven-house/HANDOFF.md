@@ -35,6 +35,8 @@ Built in `my-curated-haven-web/`:
 - The front garden lifted off the bottom of the frame when scrolling, because the nearest layer moved up with the scroll. It now has its own layer that only sways sideways.
 - Tapping a room used to glide into the close-up and then scroll the page down to the room card, leaving the close-up off screen. Rooms now open in a room view instead (option A, "Step inside"), so the picture and what the room offers are seen together.
 
+- The room boxes under the house did not say "tap the house". Each room now carries a tag on the house ("Kitchen · Open now"), rooms warm up under a finger, and a first visit lights the rooms up in turn. The boxes became a slim row of room names, kept as a fallback (owner's choice).
+
 ## Fonts (2026-10-03)
 
 The wordmark font is trimmed to the letters of "My Curated Haven" (about 5 KB for both styles, down from 36 KB), which also gives "Haven" its real italic instead of a browser-slanted one. Fonts on the first load went from 166 KB to 134 KB. Fraunces stays preloaded: without it the headline painted about 200 ms sooner but visibly switched typeface a moment later.
