@@ -1,0 +1,302 @@
+/*
+ * Homepage house. Colours follow the visitor's clock through data-daypart on <html>,
+ * set before first paint by the inline script in app/layout.tsx. Without JavaScript
+ * the house stays in Day. Light is atmosphere only; room status is always text.
+ * See docs/implementation/haven-house/DESIGN-SYSTEM.md.
+ */
+:root {
+  --hs-sky-top: #f8e4d3;
+  --hs-sky-bottom: #fbf4ea;
+  --hs-orb: #f6c06e;
+  --hs-orb-drop: 0px;
+  --hs-stars-opacity: 0;
+  --hs-cloud: #ffffff;
+  --hs-cloud-opacity: 0.9;
+  --hs-hill-front: #cfdcc3;
+  --hs-hill-back: #bccfb2;
+  --hs-ground: #dde6d0;
+  --hs-tree: #9cba8e;
+  --hs-tree-dark: #7fa173;
+  --hs-wall: #efe3d2;
+  --hs-roof: #b4614b;
+  --hs-shingle: #8f4635;
+  --hs-trim: #fbf5ec;
+  --hs-stone: #cdbfad;
+  --hs-wood: #c69a73;
+  --hs-object: #8b6f5c;
+  --hs-window: #cfe2ea;
+  --hs-star: #ffffff;
+  --hs-glow: #f6c98a;
+  --hs-lamp-opacity: 0.5;
+  --hs-bulb: #f3c27c;
+  --hs-bulb-opacity: 0.35;
+  --hs-kitchen: #f6dccb;
+  --hs-library: #e2daf0;
+  --hs-nursery: #f9e3d7;
+  --hs-shelf: #dfe9da;
+  --hs-clay: #e07a5f;
+  --hs-sage: #526849;
+  --hs-lilac: #6a5b92;
+  --hs-gold: #d4a853;
+  --hs-paper: #ffffff;
+}
+
+:root[data-daypart="evening"] {
+  --hs-sky-top: #f2a979;
+  --hs-sky-bottom: #f9dcbc;
+  --hs-orb: #f08a50;
+  --hs-orb-drop: 26px;
+  --hs-cloud: #f6c3b0;
+  --hs-cloud-opacity: 0.85;
+  --hs-hill-front: #d6cfa6;
+  --hs-hill-back: #c2c193;
+  --hs-ground: #d9d6ad;
+  --hs-tree: #a5ab7a;
+  --hs-tree-dark: #8a9466;
+  --hs-wall: #f1dcc4;
+  --hs-trim: #fdf3e6;
+  --hs-window: #f6c9a0;
+  --hs-glow: #f4ae62;
+  --hs-lamp-opacity: 0.8;
+  --hs-bulb: #ffc977;
+  --hs-bulb-opacity: 0.75;
+  --hs-kitchen: #f7d4ba;
+  --hs-library: #e8d6ea;
+  --hs-nursery: #f9dcca;
+  --hs-shelf: #e6e2c6;
+}
+
+:root[data-daypart="night"] {
+  --hs-sky-top: #1a1c3a;
+  --hs-sky-bottom: #3b2f50;
+  --hs-orb: #f2e7c6;
+  --hs-stars-opacity: 1;
+  --hs-cloud: #6b6688;
+  --hs-cloud-opacity: 0.3;
+  --hs-hill-front: #2b3a35;
+  --hs-hill-back: #232e28;
+  --hs-ground: #232a23;
+  --hs-tree: #32463b;
+  --hs-tree-dark: #26362b;
+  --hs-wall: #3a3241;
+  --hs-roof: #70402f;
+  --hs-shingle: #3f2219;
+  --hs-trim: #4b4252;
+  --hs-stone: #3c3641;
+  --hs-wood: #7b5b45;
+  --hs-object: #cfae92;
+  --hs-window: #1f2a45;
+  --hs-star: #ffe9b8;
+  --hs-glow: #f3b765;
+  --hs-lamp-opacity: 0.95;
+  --hs-bulb: #ffd27a;
+  --hs-bulb-opacity: 1;
+  --hs-kitchen: #5e4234;
+  --hs-library: #3e3756;
+  --hs-nursery: #4a393a;
+  --hs-shelf: #34412f;
+  --hs-clay: #e58c72;
+  --hs-sage: #aac4a1;
+  --hs-lilac: #c6b9ea;
+  --hs-gold: #e2b862;
+  --hs-paper: #efe6d8;
+}
+
+/* Frame and camera */
+.house-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 400 / 380;
+  width: 100%;
+  border-radius: var(--radius-card);
+  background: var(--hs-sky-bottom);
+  box-shadow: 0 24px 40px -28px rgb(61 64 91 / 0.45);
+}
+
+.house-camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transition: transform 800ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.house-frame[data-active] .house-camera {
+  transform: scale(var(--zoom-scale)) translate(calc(50% - var(--zoom-x)), calc(50% - var(--zoom-y)));
+}
+
+.hs-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Pointer shortcuts over each drawn room. Keyboard and screen reader users use the room list. */
+.house-hotspot {
+  position: absolute;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.house-frame[data-active] .house-hotspot {
+  pointer-events: none;
+}
+
+/* Fills */
+.hs-orb { fill: var(--hs-orb); }
+.hs-orb,
+.hs-orb-glow {
+  transform: translateY(var(--hs-orb-drop));
+  transition: transform 1.6s ease;
+}
+.hs-stars { fill: var(--hs-star); opacity: var(--hs-stars-opacity); }
+.hs-cloud { fill: var(--hs-cloud); opacity: var(--hs-cloud-opacity); }
+.hs-smoke { fill: var(--hs-cloud); opacity: calc(var(--hs-cloud-opacity) * 0.75); }
+.hs-hill-front { fill: var(--hs-hill-front); }
+.hs-hill-back { fill: var(--hs-hill-back); }
+.hs-ground { fill: var(--hs-ground); }
+.hs-tree { fill: var(--hs-tree); }
+.hs-tree-dark { fill: var(--hs-tree-dark); }
+.hs-wall { fill: var(--hs-wall); }
+.hs-roof { fill: var(--hs-roof); }
+.hs-trim { fill: var(--hs-trim); }
+.hs-stone { fill: var(--hs-stone); }
+.hs-wood { fill: var(--hs-wood); }
+.hs-object { fill: var(--hs-object); }
+.hs-window { fill: var(--hs-window); }
+.hs-star { fill: var(--hs-star); }
+.hs-paper { fill: var(--hs-paper); }
+.hs-kitchen { fill: var(--hs-kitchen); }
+.hs-library { fill: var(--hs-library); }
+.hs-nursery { fill: var(--hs-nursery); }
+.hs-shelf { fill: var(--hs-shelf); }
+.hs-clay { fill: var(--hs-clay); }
+.hs-sage { fill: var(--hs-sage); }
+.hs-lilac { fill: var(--hs-lilac); }
+.hs-gold { fill: var(--hs-gold); }
+.hs-glow { fill: url(#hs-lamp); opacity: var(--hs-lamp-opacity); }
+.hs-door-light { fill: var(--hs-glow); }
+.hs-bulb { fill: var(--hs-bulb); }
+.hs-bulb-glow { fill: var(--hs-bulb); opacity: calc(var(--hs-bulb-opacity) * 0.5); }
+
+/* Lines */
+.hs-shingle { fill: none; stroke: var(--hs-shingle); stroke-width: 1.2; opacity: 0.7; }
+.hs-fascia { fill: none; stroke: var(--hs-trim); stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
+.hs-frame { fill: none; stroke: var(--hs-trim); stroke-width: 4; }
+.hs-trim-line { fill: none; stroke: var(--hs-trim); stroke-width: 2.2; }
+.hs-line { fill: none; stroke: var(--hs-object); stroke-width: 1.8; stroke-linecap: round; }
+.hs-thin { fill: none; stroke: var(--hs-object); stroke-width: 1; opacity: 0.8; }
+.hs-thin-light { fill: none; stroke: var(--hs-trim); stroke-width: 1; opacity: 0.7; }
+.hs-stem { fill: none; stroke: var(--hs-tree-dark); stroke-width: 1.5; stroke-linecap: round; }
+.hs-vine { fill: none; stroke: var(--hs-tree); stroke-width: 1.2; }
+.hs-legs { fill: none; stroke: var(--hs-wood); stroke-width: 3; stroke-linecap: round; }
+.hs-wreath { fill: none; stroke: var(--hs-tree); stroke-width: 3; stroke-dasharray: 2.4 1.6; }
+.hs-steam path { fill: none; stroke: var(--hs-object); stroke-width: 1.8; stroke-linecap: round; opacity: 0.45; }
+.hs-outline { fill: none; stroke: transparent; stroke-width: 3; transition: stroke 600ms ease; }
+.house-frame[data-active="kitchen"] [data-room="kitchen"] .hs-outline,
+.house-frame[data-active="library"] [data-room="library"] .hs-outline,
+.house-frame[data-active="nursery"] [data-room="nursery"] .hs-outline,
+.house-frame[data-active="shelf"] [data-room="shelf"] .hs-outline,
+.house-frame[data-hover="kitchen"] [data-room="kitchen"] .hs-outline,
+.house-frame[data-hover="library"] [data-room="library"] .hs-outline,
+.house-frame[data-hover="nursery"] [data-room="nursery"] .hs-outline,
+.house-frame[data-hover="shelf"] [data-room="shelf"] .hs-outline {
+  stroke: var(--hs-clay);
+}
+
+/* One slow ambient motion at a time: the Kitchen by default, otherwise the open room. */
+.house-frame:not([data-active]) .hs-steam path,
+.house-frame[data-active="kitchen"] .hs-steam path {
+  animation: hs-steam 6s ease-in-out infinite;
+}
+.house-frame:not([data-active]) .hs-steam path:nth-child(2),
+.house-frame[data-active="kitchen"] .hs-steam path:nth-child(2) { animation-delay: -2s; }
+.house-frame:not([data-active]) .hs-steam path:nth-child(3),
+.house-frame[data-active="kitchen"] .hs-steam path:nth-child(3) { animation-delay: -4s; }
+
+.house-frame[data-active="library"] .hs-page {
+  transform-box: fill-box;
+  transform-origin: left bottom;
+  animation: hs-lift 7s ease-in-out infinite;
+}
+.house-frame[data-active="nursery"] .hs-mobile {
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: hs-sway 8s ease-in-out infinite;
+}
+.house-frame[data-active="shelf"] .hs-curtain {
+  transform-box: fill-box;
+  transform-origin: center top;
+  animation: hs-sway 9s ease-in-out infinite;
+}
+
+@keyframes hs-steam {
+  0% { transform: translateY(4px); opacity: 0; }
+  40% { opacity: 0.5; }
+  100% { transform: translateY(-10px); opacity: 0; }
+}
+@keyframes hs-lift {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-14deg); }
+}
+@keyframes hs-sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+/* With JavaScript, only the open room's card shows. Without it, every card is listed. */
+.js .room-card:not([data-open]) {
+  display: none;
+}
+
+.storybook-layer {
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.storybook-layer[data-on] {
+  opacity: 1;
+}
+
+/* Storybook sample: one drawing, four art styles */
+.storybook-layer .sb-sky { fill: var(--sb-sky); }
+.storybook-layer .sb-star { fill: var(--sb-moon); }
+.storybook-layer .sb-moon { fill: var(--sb-moon); }
+.storybook-layer .sb-hill { fill: var(--sb-hill); }
+.storybook-layer .sb-pj { fill: var(--sb-pj); }
+.storybook-layer .sb-skin { fill: var(--sb-skin); }
+.storybook-layer .sb-hair { fill: var(--sb-hair); }
+.storybook-layer .sb-teddy { fill: var(--sb-teddy); }
+.storybook-layer .sb-cheek { fill: var(--sb-pj); opacity: 0.45; }
+.storybook-layer .sb-eye { fill: #2b2230; }
+.storybook-layer .sb-mouth { fill: none; stroke: #2b2230; stroke-width: 2; stroke-linecap: round; }
+.storybook-layer .sb-arm { fill: none; stroke: var(--sb-skin); stroke-width: 8; stroke-linecap: round; }
+.storybook-layer .sb-line { stroke: var(--sb-stroke); stroke-width: var(--sb-stroke-width); stroke-linejoin: round; }
+
+.storybook-layer[data-style="watercolor"] {
+  --sb-sky: #c9d5ea; --sb-moon: #f8e8b8; --sb-hill: #a8c49f; --sb-pj: #e8a18b; --sb-skin: #f3caa9;
+  --sb-hair: #7b4c36; --sb-teddy: #c99a70; --sb-stroke: transparent; --sb-stroke-width: 0;
+  filter: url(#sb-watercolor);
+}
+.storybook-layer[data-style="cartoon"] {
+  --sb-sky: #33447e; --sb-moon: #ffd75e; --sb-hill: #5fae6b; --sb-pj: #ff7a59; --sb-skin: #ffd0a8;
+  --sb-hair: #5a2e1c; --sb-teddy: #cf8d50; --sb-stroke: #2a1d1a; --sb-stroke-width: 3.5;
+}
+.storybook-layer[data-style="paper"] {
+  --sb-sky: #eadfcf; --sb-moon: #fffaf0; --sb-hill: #b8c8a2; --sb-pj: #d98c74; --sb-skin: #efd3b7;
+  --sb-hair: #6b4a3a; --sb-teddy: #b9946e; --sb-stroke: transparent; --sb-stroke-width: 0;
+}
+.storybook-layer[data-style="paper"] .sb-shadow { filter: url(#sb-paper); }
+.storybook-layer[data-style="crayon"] {
+  --sb-sky: #fdf6e4; --sb-moon: #ffd166; --sb-hill: #83c283; --sb-pj: #ef6f6c; --sb-skin: #f9c7a1;
+  --sb-hair: #8a5a3b; --sb-teddy: #b07d4f; --sb-stroke: #4a3a7a; --sb-stroke-width: 2.5;
+  filter: url(#sb-crayon);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .house-camera,
+  .hs-orb,
+  .hs-orb-glow,
+  .storybook-layer {
+    transition: none;
+  }
+}

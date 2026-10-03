@@ -10,7 +10,7 @@ export type NavLink = {
 export const headerLinks: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/recipes", label: "Recipes" },
-  { href: "/#whats-ahead", label: "What's ahead" },
+  { href: "/#house", label: "The house" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
 ];

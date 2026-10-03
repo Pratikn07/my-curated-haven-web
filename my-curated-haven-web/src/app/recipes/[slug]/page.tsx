@@ -49,7 +49,7 @@ export async function generateMetadata({
   }
 
   const catalog = result.status === "ok" ? result.recipe.catalog : result.catalog;
-  const title = `${catalog.title} | Toddler Recipe | Nibble & Nurture`;
+  const title = `${catalog.title} | Toddler Recipe | My Curated Haven`;
   const description = catalog.publicSummary;
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
 

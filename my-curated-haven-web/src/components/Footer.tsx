@@ -9,10 +9,10 @@ export default function Footer() {
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-10 sm:px-6 md:grid-cols-2">
         <div>
           <Link href="/" className="font-brand text-2xl font-semibold">
-            Nibble &amp; Nurture
+            My Curated <em className="text-action">Haven</em>
           </Link>
           <p className="mt-2 max-w-sm text-text-muted">
-            Parenting ideas and toddler recipes by Tiny Soho.
+            A calm corner for parents, with toddler recipes by Tiny Soho.
           </p>
         </div>
         <ul className="grid gap-2">

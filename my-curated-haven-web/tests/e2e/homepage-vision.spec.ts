@@ -1,122 +1,181 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 function isDesktop(projectName: string) {
   return projectName.includes("desktop");
 }
 
-test("[homepage-vision] free-ready page points to free recipes without implying a sale", async ({ page }) => {
+function roomList(page: Page) {
+  return page.getByRole("list", { name: "Rooms in the house" });
+}
+
+test("[haven-house] opening offers recipes first without implying a sale", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "A little more support for everyday parenting.",
-  );
-  await expect(page.getByText("brings together toddler recipes", { exact: false })).toBeVisible();
-  await expect(page.getByRole("link", { name: "See the recipe plan" })).toHaveCount(0);
-  const recipeActions = page.getByRole("link", { name: "Explore free recipes" });
-  await expect(recipeActions).toHaveCount(2);
-  await expect(recipeActions.first()).toHaveAttribute("href", "/recipes");
-  await expect(recipeActions.last()).toHaveAttribute("href", "/recipes");
-  await expect(page.getByRole("link", { name: "See what's ahead" })).toHaveAttribute(
-    "href",
-    "#whats-ahead",
-  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Good enough is exactly enough.");
+  await expect(page.getByText("A little room to pause.")).toBeVisible();
+
+  const hero = page.locator("#house");
+  await expect(hero.getByRole("link", { name: "Browse recipes" }).first()).toHaveAttribute("href", "/recipes");
+  await expect(hero.getByRole("link", { name: "See what's coming" })).toHaveAttribute("href", "#library");
 
   const recipes = page.locator("#recipes");
-  await expect(recipes).toContainText("Recipes by Tiny Soho, from Nibble & Nurture.");
-  await expect(recipes).toContainText("read or print it without an account");
-  await expect(recipes).not.toContainText("in preparation");
-  // Only approved production slugs render as cards; local fixtures use synthetic slugs.
+  await expect(recipes).toContainText("The Kitchen · Recipes by Tiny Soho");
   expect(await recipes.locator("article").count()).toBeLessThanOrEqual(3);
   await expect(page.locator("#recipe-collection")).toHaveCount(0);
   await expect(page.locator("a[href*='checkout'], a[href*='buy'], a[href*='purchase']")).toHaveCount(0);
-});
-
-test("[homepage-vision] four pillars and three static previews have visible status", async ({ page }) => {
-  await page.goto("/");
-  const overview = page.locator("#explore-haven");
-  await expect(overview.getByRole("heading", { name: "Explore Nibble & Nurture" })).toBeVisible();
-  for (const label of ["Recipes", "Parenting Chat", "Curated Shop", "Bloom"]) {
-    await expect(overview.getByText(label, { exact: true })).toBeVisible();
-  }
-  await expect(overview.getByRole("link", { name: /Recipes/ })).toHaveAttribute("href", "#recipes");
-  for (const [label, anchor] of [
-    ["Parenting Chat", "#parenting-chat-preview"],
-    ["Curated Shop", "#curated-shop-preview"],
-    ["Bloom", "#bloom-preview"],
-  ]) {
-    await expect(overview.getByRole("link", { name: `Preview ${label}` })).toHaveAttribute("href", anchor);
-  }
-
-  for (const [id, title] of [
-    ["parenting-chat-preview", "Everyday questions deserve thoughtful support."],
-    ["curated-shop-preview", "Parenting products, thoughtfully gathered."],
-    ["bloom-preview", "A place for the little milestones."],
-  ]) {
-    const preview = page.locator(`#${id}`);
-    await expect(preview.getByRole("heading", { name: title })).toBeVisible();
-    await expect(preview.getByText("Planned for the web", { exact: true })).toBeVisible();
-    await expect(preview.getByText("Illustrative preview based on our parenting app. The final web experience will differ.")).toBeVisible();
-    await expect(preview.locator("input, textarea, form, button")).toHaveCount(0);
-  }
-  await expect(page.locator("#parenting-chat-preview")).toContainText("Sample conversation");
-  await expect(page.locator("#curated-shop-preview")).toContainText("Feeding");
-  await expect(page.locator("#bloom-preview")).toContainText("Sample milestone");
-  await expect(page.locator("a[href^='/chat'], a[href^='/shop'], a[href^='/bloom']")).toHaveCount(0);
   const renderedCopy = await page.locator("main").innerText();
   expect(renderedCopy).not.toMatch(/\$\s?\d|expert-vetted|clinician-approved|buy now|limited time/i);
 });
 
-test("[homepage-vision] story and free-ready FAQs use established facts", async ({ page }) => {
+test("[haven-house] every room shows its name and status as text", async ({ page }) => {
   await page.goto("/");
-  const story = page.locator("#our-story");
-  await expect(story.getByRole("heading", { name: "Meet Nibble & Nurture" })).toBeVisible();
-  await expect(story).toContainText("Tiny Soho is our recipe brand");
-  await expect(page.locator("main")).not.toContainText("My Curated Haven");
+  const rooms = roomList(page);
+  for (const [name, holds, status] of [
+    ["Kitchen", "Recipes", "Open now"],
+    ["Library", "Storybooks", "Coming soon"],
+    ["Nursery", "Milestones", "Later"],
+    ["Shelf", "Family finds", "Later"],
+  ]) {
+    const room = rooms.getByRole("link", { name: new RegExp(`^${name}`) });
+    await expect(room).toBeVisible();
+    await expect(room).toContainText(holds);
+    await expect(room).toContainText(status);
+  }
+  await expect(page.locator("a[href^='/chat'], a[href^='/shop'], a[href^='/bloom'], a[href^='/library']")).toHaveCount(0);
+});
 
+test("[haven-house] tapping a room opens its card and Back returns to the house", async ({ page }) => {
+  await page.goto("/");
+  await roomList(page).getByRole("link", { name: /^Library/ }).click();
+
+  await expect(page).toHaveURL(/#room-library$/);
+  const card = page.locator("#room-library");
+  await expect(card).toBeVisible();
+  await expect(card.getByRole("heading", { name: "The Library · Storybooks" })).toBeFocused();
+  await expect(card.getByRole("link", { name: "Try a sample page" })).toHaveAttribute("href", "#library");
+  await expect(page.locator("#room-kitchen")).toBeHidden();
+  await expect(page.locator(".house-frame")).toHaveAttribute("data-active", "library");
+
+  await page.getByRole("button", { name: "Back to the house" }).click();
+  await expect(card).toBeHidden();
+  await expect(page.locator(".house-frame")).not.toHaveAttribute("data-active", /.+/);
+
+  await roomList(page).getByRole("link", { name: /^Kitchen/ }).click();
+  await expect(page.locator("#room-kitchen").getByRole("link", { name: "Browse recipes" })).toHaveAttribute("href", "/recipes");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#room-kitchen")).toBeHidden();
+});
+
+test("[haven-house] a shared room link opens that room", async ({ page }) => {
+  await page.goto("/#room-shelf");
+  await expect(page.locator("#room-shelf")).toBeVisible();
+  await page.locator("#room-shelf").getByRole("button", { name: "See why we'd pick it" }).click();
+  await expect(page.locator("#room-shelf")).toContainText("Sample only. Not a product listing.");
+});
+
+test("[haven-house] samples in unopened rooms say nothing is saved", async ({ page }) => {
+  await page.goto("/");
+  await roomList(page).getByRole("link", { name: /^Nursery/ }).click();
+  await page.locator("#room-nursery").getByRole("button", { name: "Stamp a sample keepsake" }).click();
+  await expect(page.locator("#room-nursery")).toContainText("Sample only. Nothing is saved.");
+  await expect(page.locator("#room-nursery").locator("input, textarea, form")).toHaveCount(0);
+});
+
+test.describe("[haven-house] without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("every room card is listed and reachable by link", async ({ page }) => {
+    await page.goto("/");
+    for (const id of ["kitchen", "library", "nursery", "shelf"]) {
+      await expect(page.locator(`#room-${id}`)).toBeVisible();
+      await expect(roomList(page).locator(`a[href="#room-${id}"]`)).toHaveCount(1);
+    }
+    await expect(page.locator("html")).not.toHaveAttribute("data-daypart", /.+/);
+  });
+});
+
+test("[haven-house] the storybook sample uses the typed name and stays on the page", async ({ page }) => {
+  await page.goto("/");
+  const library = page.locator("#library");
+  await expect(library.getByRole("heading", { name: "A bedtime story where your child is the hero." })).toBeVisible();
+  await expect(library).toContainText("The Library · Coming soon");
+  await library.getByLabel("Try your child's name").fill("noor");
+  await expect(library.locator("figcaption")).toContainText("Noor found a silver ladder");
+  await library.getByRole("button", { name: "A new baby at home" }).click();
+  await expect(library.getByRole("button", { name: "A new baby at home" })).toHaveAttribute("aria-pressed", "true");
+  await expect(library.locator("figcaption")).toContainText("Noor got a very important new job");
+  await library.getByRole("button", { name: "Paper cut" }).click();
+  await expect(library.getByRole("button", { name: "Paper cut" })).toHaveAttribute("aria-pressed", "true");
+  await expect(library.locator('[data-style="paper"]')).toHaveAttribute("data-on", "");
+});
+
+test.describe("[haven-house] the house light follows the visitor's clock", () => {
+  test.use({ timezoneId: "UTC" });
+
+  for (const [time, daypart] of [
+    ["2026-10-02T09:00:00Z", "day"],
+    ["2026-10-02T18:30:00Z", "evening"],
+    ["2026-10-02T21:00:00Z", "night"],
+    ["2026-10-03T05:30:00Z", "night"],
+  ] as const) {
+    test(`${time} is ${daypart}`, async ({ page }) => {
+      await page.clock.setFixedTime(new Date(time));
+      await page.goto("/");
+      await expect(page.locator("html")).toHaveAttribute("data-daypart", daypart);
+      // Light is atmosphere only: statuses read the same at any hour.
+      await expect(roomList(page)).toContainText("Open now");
+    });
+  }
+});
+
+test("[haven-house] FAQ names the company and points to support", async ({ page }) => {
+  await page.goto("/");
   const faq = page.locator("#questions");
   await expect(faq.getByRole("heading", { name: "Questions" })).toBeVisible();
-  await expect(faq.getByText("These sections are sneak peeks", { exact: false })).toBeVisible();
-  await expect(faq.getByText("The free recipe area is available from the Recipes page", { exact: false })).toBeVisible();
-  await expect(faq.getByText("No paid collection is being presented here", { exact: false })).toBeVisible();
+  await expect(faq).toContainText("read or print it without an account");
+  await expect(faq).toContainText("Nibble & Nurture, our small company");
+  await expect(faq).toContainText("no paid collection is being presented here");
   await expect(faq.getByRole("link", { name: "Support" })).toHaveAttribute("href", "/support");
 });
 
-test("[homepage-vision] metadata and social image match the preparation message", async ({ page, request }) => {
+test("[haven-house] metadata and social image use the My Curated Haven brand", async ({ page, request }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("Nibble & Nurture | Recipes and a glimpse of what's ahead");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-    "content",
-    /starting with toddler recipes by Tiny Soho.*planned for the web/i,
-  );
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-    "href",
-    /^https:\/\/mycuratedhaven\.com\/?$/,
-  );
-  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
-    "content",
-    /Nibble & Nurture.*Tiny Soho recipes.*previews/i,
-  );
+  await expect(page).toHaveTitle("My Curated Haven | A calm corner for parents of little ones");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /toddler recipes by Tiny Soho/i);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /^https:\/\/mycuratedhaven\.com\/?$/);
+  await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute("content", "My Curated Haven");
+  await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute("content", /My Curated Haven.*Tiny Soho/);
   const image = await request.get("/opengraph-image");
   expect(image.status()).toBe(200);
   expect(image.headers()["content-type"]).toContain("image/png");
 });
 
-test("[homepage-vision] cross-route What's ahead anchor closes the mobile menu and focuses its target", async ({ page }, testInfo) => {
+test("[haven-house] The house link closes the mobile menu and focuses the house", async ({ page }, testInfo) => {
   test.skip(isDesktop(testInfo.project.name), "mobile navigation behavior is covered by mobile projects");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/about");
   const menu = page.getByRole("button", { name: "Open menu" });
   const menuId = await menu.getAttribute("aria-controls");
   await menu.click();
-  await page.locator(`[id="${menuId}"]`).getByRole("link", { name: "What's ahead" }).click();
-  await expect(page).toHaveURL(/\/#whats-ahead$/);
+  await page.locator(`[id="${menuId}"]`).getByRole("link", { name: "The house" }).click();
+  await expect(page).toHaveURL(/\/#house$/);
   await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator("#whats-ahead")).toBeFocused();
-  await expect(page.locator("#whats-ahead")).toBeInViewport();
+  await expect(page.locator("#house")).toBeFocused();
+  await expect(page.locator("#house")).toBeInViewport();
 });
 
-test("[homepage-vision] page fits the documented responsive widths", async ({ page }, testInfo) => {
+test("[haven-house] a phone sees the headline, Browse recipes and the house on the first screen", async ({ page }, testInfo) => {
+  test.skip(isDesktop(testInfo.project.name), "first-screen check runs on phone projects");
+  // An iPhone screen minus Instagram's in-app browser bars.
+  await page.setViewportSize({ width: 390, height: 664 });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeInViewport();
+  await expect(page.locator("#house").getByRole("link", { name: "Browse recipes" }).first()).toBeInViewport();
+  await expect(page.locator(".house-frame")).toBeInViewport({ ratio: 0.5 });
+});
+
+test("[haven-house] page fits the documented responsive widths", async ({ page }, testInfo) => {
   test.skip(!isDesktop(testInfo.project.name), "the width sweep runs once on desktop");
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });
@@ -127,22 +186,20 @@ test("[homepage-vision] page fits the documented responsive widths", async ({ pa
     }));
     expect(sizes.scroll - sizes.client, `${width}px horizontal overflow`).toBeLessThanOrEqual(1);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.locator("#whats-ahead")).toBeVisible();
+    await expect(page.locator(".house-frame")).toBeVisible();
   }
 });
 
-test("[homepage-vision] home page has no serious automated accessibility violations", async ({ page }, testInfo) => {
+test("[haven-house] home page has no serious automated accessibility violations", async ({ page }, testInfo) => {
   test.skip(!isDesktop(testInfo.project.name), "axe scan runs once on desktop");
   await page.goto("/");
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   expect(results.violations.filter((issue) => ["critical", "serious"].includes(issue.impact ?? ""))).toEqual([]);
 });
 
-test("[homepage-vision] image failure leaves headings, status and descriptions readable", async ({ page }) => {
+test("[haven-house] image failure leaves headings and room status readable", async ({ page }) => {
   await page.route("**/_next/image**", (route) => route.abort());
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.locator("#parenting-chat-preview")).toContainText("Planned for the web");
-  await expect(page.locator("#curated-shop-preview")).toContainText("Planned for the web");
-  await expect(page.locator("#bloom-preview")).toContainText("Planned for the web");
+  await expect(roomList(page)).toContainText("Coming soon");
 });

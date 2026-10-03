@@ -1,7 +1,7 @@
-export const HOMEPAGE_CONTENT_VERSION = "hv-2026-09-24" as const;
+export const HOMEPAGE_CONTENT_VERSION = "hh-2026-10-02" as const;
 
-export type HomepageFeatureKey = "chat" | "shop" | "bloom";
-export type HomepagePlacement = "hero" | "overview" | "preview" | "footer" | "final";
+export type HomepageFeatureKey = "kitchen" | "library" | "nursery" | "shelf";
+export type HomepagePlacement = "hero" | "house" | "overview" | "preview" | "footer" | "final";
 export type HomepageDestination =
   | "recipes_index"
   | "recipe_detail"
@@ -155,37 +155,3 @@ export const APPROVED_HOMEPAGE_RECIPE_STATE = {
 } as const;
 
 export const HOMEPAGE_RECIPE_STATE = resolveHomepageRecipeState(APPROVED_HOMEPAGE_RECIPE_STATE);
-
-export const HOME_PILLARS = [
-  { key: "recipes", label: "Recipes", href: "#recipes", description: "The first place to start." },
-  { key: "chat", label: "Parenting Chat", href: "#parenting-chat-preview", description: "A look at thoughtful everyday support." },
-  { key: "shop", label: "Curated Shop", href: "#curated-shop-preview", description: "A look at considered family finds." },
-  { key: "bloom", label: "Bloom", href: "#bloom-preview", description: "A look at small moments and milestones." },
-] as const;
-
-export const HOME_FEATURE_PREVIEWS = [
-  {
-    key: "chat",
-    id: "parenting-chat-preview",
-    label: "Parenting Chat",
-    heading: "Everyday questions deserve thoughtful support.",
-    summary: "A glimpse of the kind of parenting conversation Nibble & Nurture is exploring.",
-    caption: "Illustrative preview based on our parenting app. The final web experience will differ.",
-  },
-  {
-    key: "shop",
-    id: "curated-shop-preview",
-    label: "Curated Shop",
-    heading: "Parenting products, thoughtfully gathered.",
-    summary: "A glimpse of a considered place for everyday family categories and ideas.",
-    caption: "Illustrative preview based on our parenting app. The final web experience will differ.",
-  },
-  {
-    key: "bloom",
-    id: "bloom-preview",
-    label: "Bloom",
-    heading: "A place for the little milestones.",
-    summary: "A glimpse of a gentle way to notice the small moments in family life.",
-    caption: "Illustrative preview based on our parenting app. The final web experience will differ.",
-  },
-] as const;

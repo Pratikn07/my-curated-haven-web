@@ -43,14 +43,14 @@ test("sign-in, account and checkout pages are never session-recorded", () => {
   }
 });
 
-test("[homepage-vision] preview click records only fixed analytics values", async ({ page }) => {
+test("[haven-house] opening a room records only fixed analytics values", async ({ page }) => {
   await page.goto("/");
 
   await page
-    .locator("#explore-haven")
-    .getByRole("link", { name: "Preview Parenting Chat" })
+    .getByRole("list", { name: "Rooms in the house" })
+    .getByRole("link", { name: /^Library/ })
     .click();
-  await expect(page).toHaveURL(/#parenting-chat-preview$/);
+  await expect(page).toHaveURL(/#room-library$/);
 
   await expect
     .poll(() => countEvents(page, (event) => event.event_name === "homepage_preview_opened"))
@@ -58,29 +58,13 @@ test("[homepage-vision] preview click records only fixed analytics values", asyn
 
   const event = (await recordedEvents(page)).find((item) => item.event_name === "homepage_preview_opened");
   expect(event?.properties).toEqual({
-    feature_key: "chat",
-    placement: "overview",
-    content_version: "hv-2026-09-24",
+    feature_key: "library",
+    placement: "house",
+    content_version: "hh-2026-10-02",
   });
 });
 
-test("[homepage-vision] preview visibility is recorded once", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/");
-
-  const isBloomView = (event: RecordedEvent) =>
-    event.event_name === "homepage_preview_viewed" && event.properties.feature_key === "bloom";
-  const preview = page.locator("#bloom-preview");
-  await preview.scrollIntoViewIfNeeded();
-  await expect.poll(() => countEvents(page, isBloomView)).toBe(1);
-
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await preview.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1100);
-  expect(await countEvents(page, isBloomView)).toBe(1);
-});
-
-test("[homepage-vision] analytics provider failure does not block preview navigation", async ({ page }) => {
+test("[haven-house] analytics provider failure does not block opening a room", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => {
     const provider = (
@@ -91,8 +75,8 @@ test("[homepage-vision] analytics provider failure does not block preview naviga
     if (provider) provider.send = async () => { throw new Error("offline"); };
   });
 
-  await page.locator("#explore-haven").getByRole("link", { name: "Preview Parenting Chat" }).click();
-  await expect(page).toHaveURL(/#parenting-chat-preview$/);
+  await page.getByRole("list", { name: "Rooms in the house" }).getByRole("link", { name: /^Kitchen/ }).click();
+  await expect(page.locator("#room-kitchen")).toBeVisible();
 });
 
 test("a registered Instagram campaign is kept from the first page", async ({ page }) => {

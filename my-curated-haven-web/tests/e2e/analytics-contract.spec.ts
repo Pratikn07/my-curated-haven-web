@@ -35,26 +35,26 @@ test("accepts a minimal recipe open", () => {
   expect(result.ok).toBe(true);
 });
 
-test("[homepage-vision] accepts bounded preview events and rejects raw destinations", () => {
+test("[haven-house] accepts bounded room events and rejects raw destinations", () => {
   const accepted = validateAnalyticsEvent("homepage_preview_opened", {
-    feature_key: "chat",
-    placement: "overview",
-    content_version: "hv-2026-09-24",
+    feature_key: "library",
+    placement: "house",
+    content_version: "hh-2026-10-02",
   });
   expect(accepted.ok).toBe(true);
 
   const rawDestination = validateAnalyticsEvent("homepage_preview_opened", {
-    feature_key: "chat",
-    placement: "overview",
-    content_version: "hv-2026-09-24",
-    destination_url: "/chat?child_id=private",
+    feature_key: "library",
+    placement: "house",
+    content_version: "hh-2026-10-02",
+    destination_url: "/library?child_id=private",
   });
   expect(rawDestination.ok).toBe(false);
 
   const unknownFeature = validateAnalyticsEvent("homepage_preview_opened", {
     feature_key: "expert_marketplace",
     placement: "overview",
-    content_version: "hv-2026-09-24",
+    content_version: "hh-2026-10-02",
   });
   expect(unknownFeature.ok).toBe(false);
 
@@ -62,7 +62,7 @@ test("[homepage-vision] accepts bounded preview events and rejects raw destinati
     placement: "hero",
     destination: "recipes_index",
     presentation_state: "preparation",
-    content_version: "hv-2026-09-24",
+    content_version: "hh-2026-10-02",
   });
   expect(cta.ok).toBe(true);
 
@@ -71,14 +71,14 @@ test("[homepage-vision] accepts bounded preview events and rejects raw destinati
       placement: "hero",
       destination: "/recipes?email=person@example.com",
       presentation_state: "preparation",
-      content_version: "hv-2026-09-24",
+      content_version: "hh-2026-10-02",
     }).ok,
   ).toBe(false);
 
   expect(
     validateAnalyticsEvent("homepage_preview_viewed", {
-      feature_key: "bloom",
-      content_version: "hv-2026-09-24",
+      feature_key: "nursery",
+      content_version: "hh-2026-10-02",
     }).ok,
   ).toBe(true);
 });

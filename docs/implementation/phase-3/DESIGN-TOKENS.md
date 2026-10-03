@@ -1,5 +1,7 @@
 # Design tokens and theme specification
 
+> Update proposed on 2026-10-02: the [Haven house design system](../haven-house/DESIGN-SYSTEM.md) replaces this document's Direction, Typography, Shape and Motion guidance for the homepage redesign. The contrast, spacing, control size and Tailwind rules below still apply.
+
 ## Direction
 
 A warm, readable editorial product with useful food photography. Keep My Curated Haven as the umbrella brand and Tiny Soho as the recipe attribution.

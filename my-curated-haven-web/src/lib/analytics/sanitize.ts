@@ -46,8 +46,8 @@ const ENTRY_POINTS = new Set([
 ]);
 const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
 const SIGN_IN_METHODS = new Set(["email_code", "google"]);
-const HOMEPAGE_FEATURE_KEYS = new Set(["chat", "shop", "bloom"]);
-const HOMEPAGE_PLACEMENTS = new Set(["hero", "overview", "preview", "footer", "final"]);
+const HOMEPAGE_FEATURE_KEYS = new Set(["kitchen", "library", "nursery", "shelf"]);
+const HOMEPAGE_PLACEMENTS = new Set(["hero", "house", "overview", "preview", "footer", "final"]);
 const HOMEPAGE_DESTINATIONS = new Set([
   "recipes_index",
   "recipe_detail",

@@ -64,9 +64,9 @@ export default function Navbar() {
 
   useEffect(() => {
     const focusPreviewTarget = () => {
-      if (window.location.pathname !== "/" || window.location.hash !== "#whats-ahead") return;
+      if (window.location.pathname !== "/" || window.location.hash !== "#house") return;
       window.requestAnimationFrame(() => {
-        const target = document.getElementById("whats-ahead");
+        const target = document.getElementById("house");
         if (!target) return;
         target.scrollIntoView({
           block: "start",
@@ -87,11 +87,11 @@ export default function Navbar() {
 
   const closeMenu = () => setMobileMenuOpen(false);
   const handleNavigation = (href: string) => {
-    if (href !== "/#whats-ahead" || pathname !== "/") return;
+    if (href !== "/#house" || pathname !== "/") return;
     void trackAnalyticsEvent(
       "homepage_cta_clicked",
       {
-        placement: "overview",
+        placement: "house",
         destination: "previews",
         presentation_state: HOMEPAGE_RECIPE_STATE.mode,
         content_version: HOMEPAGE_CONTENT_VERSION,
@@ -99,7 +99,7 @@ export default function Navbar() {
       "home",
     );
     window.requestAnimationFrame(() => {
-      const target = document.getElementById("whats-ahead");
+      const target = document.getElementById("house");
       if (!target) return;
       target.scrollIntoView({
         block: "start",
@@ -113,9 +113,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-[var(--z-header)] border-b border-border bg-canvas">
       <nav aria-label="Primary" className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link href="/" className="min-w-0 font-brand text-[1.5rem] leading-none font-semibold text-foreground sm:text-[1.75rem]">
-          <span>Nibble </span>
-          <span className="text-action">&amp;</span>
-          <span> Nurture</span>
+          My Curated <em className="font-semibold text-action">Haven</em>
         </Link>
 
         <div className="hidden items-center gap-5 lg:flex">
