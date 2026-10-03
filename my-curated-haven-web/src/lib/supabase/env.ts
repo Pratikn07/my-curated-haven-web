@@ -1,7 +1,7 @@
 const LOCAL_SUPABASE_URL = "http://127.0.0.1:54321";
 const LOCAL_SUPABASE_ANON_KEY = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
 
-function isHostedDeploy(): boolean {
+export function isHostedDeploy(): boolean {
   return process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
 }
 

@@ -32,6 +32,7 @@ const ROUTE_KEYS = new Set([
   "support",
   "about",
   "terms",
+  "story",
 ]);
 
 const DEVICE_CLASSES = new Set(["mobile", "desktop", "tablet"]);
@@ -57,6 +58,10 @@ const HOMEPAGE_DESTINATIONS = new Set([
   "support",
 ]);
 const HOMEPAGE_PRESENTATION_STATES = new Set(["preparation", "free_ready", "collection_ready"]);
+const STORY_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const STORY_ROOMS = new Set(["kitchen"]);
+const STORY_ACTIONS = new Set(["recipe_jump", "full_recipe", "more_recipe", "collection", "about"]);
+const STORY_PLACEMENTS = new Set(["card", "sticky", "recipe", "next", "offer", "about"]);
 
 const UUID_FIELDS = new Set([
   "recipe_id",
@@ -114,6 +119,10 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "presentation_state" && !HOMEPAGE_PRESENTATION_STATES.has(value)) {
     return fail("presentation_state");
   }
+  if (key === "story_slug" && !STORY_SLUG_REGEX.test(value)) return fail("story_slug");
+  if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
+  if (key === "story_action" && !STORY_ACTIONS.has(value)) return fail("story_action");
+  if (key === "story_placement" && !STORY_PLACEMENTS.has(value)) return fail("story_placement");
   if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");
   }

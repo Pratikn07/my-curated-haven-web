@@ -2,6 +2,7 @@
 @import "../styles/tokens.css";
 @import "../styles/recipe-print.css";
 @import "../styles/house.css";
+@import "../styles/stories.css";
 
 @theme inline {
   --color-background: var(--canvas);

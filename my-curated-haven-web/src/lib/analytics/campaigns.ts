@@ -2,9 +2,11 @@ import { CAMPAIGN_STORAGE_KEY, isAnalyticsPermitted } from "./consent";
 
 /**
  * One campaign per clickable Instagram placement (owner, 2026-09-26).
+ * comment_dm is the automatic DM sent when someone comments a keyword, kept
+ * apart from DMs sent by hand (instagram_dm).
  * Links for each are in docs/INSTAGRAM-LINKS.md.
  */
-export const ALLOWED_CAMPAIGNS = ["bio_link", "story_link", "instagram_dm"] as const;
+export const ALLOWED_CAMPAIGNS = ["bio_link", "story_link", "instagram_dm", "comment_dm"] as const;
 
 export const ALLOWED_SOURCES = ["instagram"] as const;
 export const ALLOWED_MEDIUMS = ["organic_social"] as const;
