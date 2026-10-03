@@ -35,7 +35,7 @@ Most visitors arrive from Instagram on a phone, inside Instagram's in-app browse
 - **Nothing blocks the first screen.** No pop-ups, no full-screen consent or signup prompts, no interstitials.
 - **No sign-in on the path to value.** Google blocks its sign-in inside embedded in-app browsers like Instagram's, so the Google button in `SignInForm.tsx` fails there. Email codes force a switch to the mail app and back. Recipes, room samples and the waitlist must all work without an account.
 - **Check device-only features in Instagram's browser.** `window.print()` in `PrintButton.tsx` may do nothing there. Offer a fallback such as "Open in your browser to print" or saving the recipe.
-- **Fonts.** Only Fraunces and Inter load as web fonts, subset and preloaded. The Cormorant wordmark becomes an SVG logo. Handwritten notes use an SVG or are dropped on phones.
+- **Fonts.** Inter and Fraunces load as web fonts, Latin subset and preloaded. The Cormorant wordmark loads only its own letters ("My Curated Haven", about 2 KB per style, in `src/app/fonts/`), so it stays real text. Handwritten notes use an SVG or are dropped on phones.
 - **Images.** Served through `next/image` as AVIF or WebP, sized for phone widths. The first-screen image is preloaded.
 - **Scripts.** The interactive layer (Rive or dotLottie runtime) loads only after the first screen is usable, and never on the critical path.
 

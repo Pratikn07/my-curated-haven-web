@@ -30,11 +30,14 @@ Built in `my-curated-haven-web/`:
 - The full suite passed apart from three sign-in email tests, which need the local mail catcher (Mailpit) that was not started.
 - First screen on a throttled phone (9 Mbps, 150 ms latency, 4x slower CPU): largest paint about 0.8s by day and 0.95s at night, and the painting is the largest element. The house art adds about 63 KB. The whole first load is about 604 KB compressed: 317 KB JavaScript and 166 KB fonts are the bulk.
 
+## Fonts (2026-10-03)
+
+The wordmark font is trimmed to the letters of "My Curated Haven" (about 5 KB for both styles, down from 36 KB), which also gives "Haven" its real italic instead of a browser-slanted one. Fonts on the first load went from 166 KB to 134 KB. Fraunces stays preloaded: without it the headline painted about 200 ms sooner but visibly switched typeface a moment later.
+
 ## Next steps
 
-1. Fonts are the cheapest first-load saving: the design system says only Fraunces and Inter should load, with the Cormorant wordmark as an SVG.
-2. The open-book image (about 7–18 KB) loads with the page even though the Library is further down; it could wait until the visitor scrolls near it.
-3. Test on real phones from an Instagram DM link, iPhone and Android, before release.
+1. The open-book image (about 7–18 KB) loads with the page even though the Library is further down; it could wait until the visitor scrolls near it.
+2. Test on real phones from an Instagram DM link, iPhone and Android, before release.
 
 ## Open owner decisions
 
