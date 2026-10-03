@@ -1,10 +1,10 @@
 # Haven house handoff
 
-Updated 2026-10-02. Branch `feat/haven-house-homepage`.
+Updated 2026-10-02. Branch `feat/haven-house-homepage`. The full conversation that led here is in the owner's exported session zip, which is uploaded to the cloud session and must never be committed (this repository is public).
 
 ## Where things stand
 
-The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is still a **placeholder drawing in code** (`src/components/house/HouseScene.tsx`). The owner wants a premium, painted, living scene instead. The painted art is being generated now; see [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
+The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is still a **placeholder drawing in code** (`src/components/house/HouseScene.tsx`). The owner wants a premium, living scene instead. The art is chosen: a handmade clay miniature house, with day and night versions in `art/chosen/`. The remaining Round 2 images are being generated; see [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
 
 Built in `my-curated-haven-web/`:
 
@@ -26,7 +26,7 @@ Built in `my-curated-haven-web/`:
 ## Next steps
 
 1. Run the rewritten Playwright specs and fix any failures.
-2. When the Round 2 art arrives: remove backgrounds, check that the day, evening and night houses line up, make window and lamp glow masks, and compress for phones (AVIF/WebP, phone sizes first).
+2. Now: cut out `art/chosen/house-day.webp` and `house-night.webp` and align them. The night canvas is a different size (1198 × 1313 against 1122 × 1402), so register them on the chimney, roof peak and base corners. Then start the layered scene with these two. When the rest of Round 2 arrives, add the evening house, skies, garden strip, room close-ups and props. Make window and lamp glow masks, and compress for phones (AVIF/WebP, phone sizes first).
 3. Replace `HouseScene` with a layered painted scene: skies behind, house in the middle, garden strip in front, with depth on scroll and touch. Blend day, evening and night by the clock. Glow overlays, fireflies at night, steam from the pot prop, a breathing cat prop. Keep the SVG house only as a fallback if useful.
 4. Room open: the camera glides in and the painted room close-up fades in, with the room card as real HTML on top. In the Kitchen the steam forms the recipe card. In the Library the closed book prop opens into the storybook sample with the name drawn on the open-book prop.
 5. Map the room hotspots and `area`/`zoom` values in `house-rooms.ts` to the painted house.
