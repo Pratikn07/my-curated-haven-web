@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Fraunces, Inter } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import SiteShell from "@/components/layout/SiteShell";
 import { HOUSE_LIGHT_SCRIPT } from "@/lib/house-light";
 import "./globals.css";
@@ -10,11 +11,17 @@ const inter = Inter({
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
+// The wordmark is the only Cormorant text, so only its letters are loaded ("My Curated Haven", about 2 KB
+// per style instead of 36 KB). Any other letter falls back to Georgia through --font-brand in tokens.css.
+// Subsets from Google Fonts (text=My Curated Haven), Cormorant Garamond SemiBold, SIL Open Font License.
+const cormorant = localFont({
   variable: "--font-cormorant-source",
-  subsets: ["latin"],
-  weight: ["600", "700"],
+  src: [
+    { path: "./fonts/cormorant-wordmark-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/cormorant-wordmark-600-italic.woff2", weight: "600", style: "italic" },
+  ],
   display: "swap",
+  fallback: ["Georgia", "serif"],
 });
 
 const fraunces = Fraunces({
@@ -22,6 +29,8 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   style: ["normal", "italic"],
   display: "swap",
+  // Kept preloaded: without it the headline first paints in a fallback serif and visibly
+  // switches to Fraunces about 200 ms later on a phone-speed connection (measured 2026-10-03).
 });
 
 
