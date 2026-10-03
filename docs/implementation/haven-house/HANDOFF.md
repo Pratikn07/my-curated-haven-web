@@ -4,12 +4,12 @@ Updated 2026-10-03. Branch `feat/haven-house-homepage`. The full conversation th
 
 ## Where things stand
 
-The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is now the **painted clay miniature** (`src/components/house/HouseScene.tsx`), layered over a sky, blending between day, evening and night by the visitor's clock, with lamp and window glow, gentle depth on scroll and touch, and fireflies at night. The placeholder SVG drawing is gone. The evening house is a graded stand-in until R2-01 arrives, and the skies are drawn in CSS until R2-03 to R2-05 arrive. The remaining Round 2 images are being generated; see [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
+The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is the **painted clay miniature** (`src/components/house/HouseScene.tsx`): a painted sky behind, the house in the middle and a front garden strip in front, all blending between day, evening and night by the visitor's clock, with lamp and window glow, gentle depth on scroll and touch, and fireflies at night. Opening a room glides the camera in and its painted close-up settles over the frame. All Round 2 art is generated and in `art/chosen/`; the pot, book and cat props are not used yet. See [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
 
 Built in `my-curated-haven-web/`:
 
 - `src/components/house/HavenHero.tsx`: opening screen with the headline "Good enough is exactly enough.", Browse recipes, and the house.
-- `src/components/house/HouseScene.tsx` and `HouseDepth.tsx`: the painted scene and its depth effect. Layers: sky (day, evening, twilight, night with moon and stars), contact shadow, the three paintings, a screen-blended glow layer, and fireflies. Each painting is a CSS background declared under a `data-house-*` flag, so it only downloads once it shows.
+- `src/components/house/HouseScene.tsx` and `HouseDepth.tsx`: the painted scene and its depth effect. Layers: painted skies (with a drawn twilight blend for dawn and dusk), contact shadow, the three house paintings, a screen-blended glow layer, the front garden strip and fireflies. Room close-ups live in `HouseExplorer.tsx`. Each painting is a CSS background declared under a `data-house-*` flag, so it only downloads once it shows.
 - `src/lib/house-light.ts`: the light timetable, the before-first-paint script (sets `data-daypart`, `--hs-evening`, `--hs-night`, `--hs-lamps` and preloads the main painting) and the minute ticker. Unit tested in `tests/homepage/house-light.test.mjs`.
 - `scripts/house-art/prepare_house_art.py`: aligns, cuts out and compresses the house art into `public/images/house/`.
 - `src/components/house/HouseExplorer.tsx`: room list with text status, tap a room to zoom in and open its card, Back or Esc to return, `/#room-<id>` deep links, room-open analytics, and a clock check every minute. Tap areas and zoom points in `house-rooms.ts` are mapped to the painted house.
@@ -32,11 +32,10 @@ Built in `my-curated-haven-web/`:
 
 ## Next steps
 
-1. When Round 2 images arrive: save the chosen R2-01 as `art/chosen/house-evening.webp` and rerun the pipeline; add the skies (R2-03 to R2-05) as sky layers in place of the CSS gradients, and the garden strip (R2-06) as a near layer in front of the house.
-2. Room open: the camera glides in and the painted room close-up (R2-07 to R2-10) fades in, with the room card as real HTML on top. In the Kitchen the steam forms the recipe card. In the Library the closed book prop opens into the storybook sample.
-3. Props: steam from the pot (R2-11), a breathing cat (R2-14), cut out with the same pipeline.
-4. Fonts are the cheapest first-load saving: the design system says only Fraunces and Inter should load, with the Cormorant wordmark as an SVG.
-5. Test on real phones from an Instagram DM link, iPhone and Android, before release.
+1. Props: steam rising from the Kitchen pot, the cat breathing on the Kitchen close-up's windowsill, both cut out with the same pipeline (`prop-pot`, `prop-cat`).
+2. Library: the closed book (`prop-book-closed`) opens into the storybook sample, with the child's name written on the open book (`prop-book-open`).
+3. Fonts are the cheapest first-load saving: the design system says only Fraunces and Inter should load, with the Cormorant wordmark as an SVG.
+4. Test on real phones from an Instagram DM link, iPhone and Android, before release.
 
 ## Open owner decisions
 

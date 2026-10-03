@@ -11,13 +11,16 @@ into the layered, phone-sized files the homepage loads from public/images/house/
      image, and uses it for every version so their outlines match exactly.
      Edge pixels have the old background colour removed, so no halo shows
      against the sky.
-  3. Builds an evening house. Until the generated evening edit (R2-01) arrives,
-     it is graded from the day image: warm low light from the left, cooler
-     shadows on the right.
+  3. Aligns the generated evening house (R2-01) the same way. Without it, an
+     evening stand-in is graded from the day image.
   4. Extracts a glow layer from the night house: only the lamps, windows and
      the light they throw, blurred into a soft bloom on black. The page adds it
      with a screen blend and lets it breathe slowly.
-  5. Writes AVIF and WebP at phone and large sizes. At 960px wide the house is
+  5. Crops the skies to the frame's portrait shape (moving the night moon
+     into view), cuts out the front garden strip and relights it for
+     evening and night from the house's own mossy base, and crops the room
+     close-ups to the frame.
+  6. Writes AVIF and WebP at phone and large sizes. At 960px wide the house is
      about 55 KB as AVIF, inside the first-screen budget in DESIGN-SYSTEM.md.
 
 Requires Python 3.10+ with: pillow (with AVIF), numpy, opencv-python-headless,
@@ -177,17 +180,23 @@ def extract_glow(night: np.ndarray, alpha: np.ndarray) -> np.ndarray:
 
 # ---------- export ----------
 
-def save_layer(name: str, rgb: np.ndarray, alpha: np.ndarray | None) -> None:
+def save_layer(
+    name: str,
+    rgb: np.ndarray,
+    alpha: np.ndarray | None,
+    widths: tuple[int, ...] = WIDTHS,
+    avif_quality: int = AVIF_QUALITY,
+) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     if alpha is None:
         image = Image.fromarray(rgb.astype(np.uint8), "RGB")
     else:
         rgba = np.dstack([rgb, alpha * 255.0]).round().astype(np.uint8)
         image = Image.fromarray(rgba, "RGBA")
-    for width in WIDTHS:
+    for width in widths:
         height = round(image.height * width / image.width)
         sized = image.resize((width, height), Image.LANCZOS)
-        sized.save(OUT / f"{name}-{width}.avif", quality=AVIF_QUALITY, speed=4)
+        sized.save(OUT / f"{name}-{width}.avif", quality=avif_quality, speed=4)
         sized.save(OUT / f"{name}-{width}.webp", quality=WEBP_QUALITY, method=6)
     sizes = ", ".join(
         f"{p.name} {p.stat().st_size // 1024} KB" for p in sorted(OUT.glob(f"{name}-*")) if p.suffix in {".avif", ".webp"}
@@ -203,6 +212,112 @@ def save_glow(rgb: np.ndarray) -> None:
     sized.save(OUT / "house-glow.avif", quality=50, speed=4)
     sized.save(OUT / "house-glow.webp", quality=72, method=6)
     print(f"  house-glow.avif {(OUT / 'house-glow.avif').stat().st_size // 1024} KB, house-glow.webp {(OUT / 'house-glow.webp').stat().st_size // 1024} KB")
+
+
+# ---------- skies, garden and rooms ----------
+
+# The sky layer is drawn at 1.3x the frame, scaled from 50% 85% (see .hs-depth-sky in house.css).
+# Skies are cropped to the frame's 4:5 shape around their centre.
+SKY_WIDTHS = (640, 819)
+# Room close-ups fill the 4:5 frame. Each 4:3 image is cropped to 4:5 starting this far from its left edge.
+ROOM_CROP_LEFT = {"kitchen": 0.08, "library": 0.22, "nursery": 0.24, "shelf": 0.25}
+ROOM_WIDTHS = (640, 868)
+
+
+def crop_to_portrait(img: np.ndarray, left_fraction: float | None = None) -> np.ndarray:
+    h, w = img.shape[:2]
+    crop_w = round(h * 0.8)
+    x0 = (w - crop_w) // 2 if left_fraction is None else round(w * left_fraction)
+    x0 = max(0, min(w - crop_w, x0))
+    return img[:, x0 : x0 + crop_w]
+
+
+def move_moon_into_view(sky: np.ndarray, crop_x0: int) -> np.ndarray:
+    """The night sky's moon sits outside the portrait crop. Lift it out, shrink it to suit the
+    house, and place it in the open sky left of the roof (the chimney fills the top right)."""
+    h, w = sky.shape[:2]
+    img = sky.astype(np.float32)
+    luma = img.mean(axis=2)
+    search = np.zeros_like(luma)
+    search[: h // 3, w // 2 :] = luma[: h // 3, w // 2 :]
+    blurred = cv2.GaussianBlur(search, (0, 0), 6)
+    my, mx = np.unravel_index(np.argmax(blurred), blurred.shape)
+    r = round(h * 0.11)
+    patch = img[my - r : my + r, mx - r : mx + r]
+    # The moon and its glow, as light added on top of the plain sky around it.
+    background = cv2.GaussianBlur(cv2.medianBlur(patch.astype(np.uint8), 2 * (r // 2) + 1).astype(np.float32), (0, 0), r / 3)
+    light = np.clip(patch - background, 0, 255)
+    yy, xx = np.mgrid[-r:r, -r:r].astype(np.float32)
+    feather = np.clip(1.2 - np.hypot(xx, yy) / r, 0, 1)[..., None]
+    out = sky.astype(np.float32).copy()
+    # Remove the original moon so it does not appear twice if the crop ever widens.
+    out[my - r : my + r, mx - r : mx + r] -= light * feather
+    scale = 0.6
+    small = cv2.resize(light * feather, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+    s = small.shape[0] // 2
+    crop_w = round(h * 0.8)
+    # Frame position (17%, 9%) in the enlarged sky: x = 50 + (17 - 50) / 1.3, y = 85 + (9 - 85) / 1.3.
+    tx = crop_x0 + round(crop_w * (0.5 - 0.33 / 1.3))
+    ty = round(h * (0.85 - 0.76 / 1.3))
+    out[ty - s : ty - s + small.shape[0], tx - s : tx - s + small.shape[1]] += small
+    return np.clip(out, 0, 255)
+
+
+def prepare_skies() -> None:
+    for name in ("day", "evening", "night"):
+        source = ART / f"sky-{name}.webp"
+        if not source.exists():
+            print(f"  sky-{name}: no source yet, the page keeps its drawn sky")
+            continue
+        sky = np.asarray(Image.open(source).convert("RGB"))
+        h, w = sky.shape[:2]
+        crop_x0 = (w - round(h * 0.8)) // 2
+        if name == "night":
+            sky = move_moon_into_view(sky, crop_x0)
+        save_layer(f"sky-{name}", crop_to_portrait(sky), None, widths=SKY_WIDTHS, avif_quality=40)
+
+
+def colour_match(source_pixels: np.ndarray, target_pixels: np.ndarray):
+    """Least-squares colour transform that maps one lighting onto another."""
+    a = np.c_[source_pixels, np.ones(len(source_pixels))]
+    matrix, *_ = np.linalg.lstsq(a, target_pixels, rcond=None)
+    return lambda img: np.clip(np.c_[img.reshape(-1, 3), np.ones(img.shape[0] * img.shape[1])] @ matrix, 0, 255).reshape(img.shape)
+
+
+def prepare_garden(day: np.ndarray, evening: np.ndarray, night: np.ndarray, alpha: np.ndarray, work: Path) -> None:
+    """The front garden strip, relit for evening and night to match the house's own mossy base."""
+    source = ART / "garden-strip.webp"
+    if not source.exists():
+        return
+    strip = Image.open(source).convert("RGB")
+    cached = work / "mask-garden.png"
+    if not cached.exists():
+        from rembg import new_session, remove
+
+        remove(strip, session=new_session("birefnet-general"), only_mask=True).save(cached)
+    mask = np.asarray(Image.open(cached), dtype=np.float32) / 255.0
+    mask[mask < 0.02] = 0.0
+    mask[mask > 0.98] = 1.0
+    rgb = decontaminate(np.asarray(strip), mask)
+    rows = np.nonzero(mask.max(axis=1) > 0.05)[0]
+    top, bottom = max(0, rows[0] - 8), min(mask.shape[0], rows[-1] + 8)
+    rgb, mask = rgb[top:bottom], mask[top:bottom]
+    # The house base (lawn, flowers, stones) is the same material in every lighting.
+    base = np.zeros_like(alpha, dtype=bool)
+    base[round(alpha.shape[0] * 0.88) :] = True
+    base &= alpha > 0.95
+    for name, lit in (("day", day), ("evening", evening), ("night", night)):
+        graded = rgb if name == "day" else colour_match(day[base], lit[base])(rgb)
+        save_layer(f"garden-{name}", graded, mask, widths=(800, 1200), avif_quality=44)
+
+
+def prepare_rooms() -> None:
+    for room, left in ROOM_CROP_LEFT.items():
+        source = ART / f"room-{room}.webp"
+        if not source.exists():
+            continue
+        img = crop_to_portrait(np.asarray(Image.open(source).convert("RGB")), left)
+        save_layer(f"room-{room}", img, None, widths=ROOM_WIDTHS, avif_quality=46)
 
 
 def main() -> None:
@@ -238,6 +353,13 @@ def main() -> None:
     save_layer("house-evening", evening, alpha)
     save_layer("house-night", night, alpha)
     save_glow(extract_glow(night, alpha))
+
+    print("Skies")
+    prepare_skies()
+    print("Front garden")
+    prepare_garden(day, evening, night, alpha, args.work)
+    print("Room close-ups")
+    prepare_rooms()
 
 
 if __name__ == "__main__":

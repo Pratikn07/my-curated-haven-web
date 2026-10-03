@@ -57,6 +57,96 @@
   pointer-events: none;
 }
 
+/*
+ * Room close-ups. Opening a room glides the camera toward it, then its painted
+ * close-up settles in over the frame. Each image downloads only when its room opens.
+ * At evening and night a soft wash keeps the room in step with the hour.
+ */
+.hs-room {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.08);
+  background-size: cover;
+  background-position: center;
+  transition:
+    opacity 700ms ease 250ms,
+    transform 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) 150ms;
+}
+
+.hs-room::before,
+.hs-room::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: multiply;
+}
+
+.hs-room::before {
+  background: #f6c38f;
+  opacity: calc(var(--hs-evening, 0) * 0.3);
+}
+
+.hs-room::after {
+  background: linear-gradient(180deg, #5f6aa8, #7c78a6);
+  opacity: calc(var(--hs-night, 0) * 0.45);
+}
+
+.house-frame[data-active="kitchen"] .hs-room[data-room="kitchen"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-kitchen-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-kitchen-640.webp") 1x, url("/images/house/room-kitchen-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-kitchen-640.avif") type("image/avif") 1x,
+    url("/images/house/room-kitchen-868.avif") type("image/avif") 2x,
+    url("/images/house/room-kitchen-640.webp") type("image/webp") 1x,
+    url("/images/house/room-kitchen-868.webp") type("image/webp") 2x
+  );
+}
+
+.house-frame[data-active="library"] .hs-room[data-room="library"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-library-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-library-640.webp") 1x, url("/images/house/room-library-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-library-640.avif") type("image/avif") 1x,
+    url("/images/house/room-library-868.avif") type("image/avif") 2x,
+    url("/images/house/room-library-640.webp") type("image/webp") 1x,
+    url("/images/house/room-library-868.webp") type("image/webp") 2x
+  );
+}
+
+.house-frame[data-active="nursery"] .hs-room[data-room="nursery"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-nursery-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-nursery-640.webp") 1x, url("/images/house/room-nursery-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-nursery-640.avif") type("image/avif") 1x,
+    url("/images/house/room-nursery-868.avif") type("image/avif") 2x,
+    url("/images/house/room-nursery-640.webp") type("image/webp") 1x,
+    url("/images/house/room-nursery-868.webp") type("image/webp") 2x
+  );
+}
+
+.house-frame[data-active="shelf"] .hs-room[data-room="shelf"] {
+  opacity: 1;
+  transform: scale(1);
+  background-image: url("/images/house/room-shelf-868.webp");
+  background-image: -webkit-image-set(url("/images/house/room-shelf-640.webp") 1x, url("/images/house/room-shelf-868.webp") 2x);
+  background-image: image-set(
+    url("/images/house/room-shelf-640.avif") type("image/avif") 1x,
+    url("/images/house/room-shelf-868.avif") type("image/avif") 2x,
+    url("/images/house/room-shelf-640.webp") type("image/webp") 1x,
+    url("/images/house/room-shelf-868.webp") type("image/webp") 2x
+  );
+}
+
+
 /* Scene layers. HouseDepth moves each depth layer a few pixels with the CSS translate property. */
 .hs-scene,
 .hs-depth {
@@ -80,60 +170,66 @@
   inset: 0;
 }
 
+/* Painted skies. A flat colour shows for the moment before each image arrives. */
+.hs-sky {
+  background-size: cover;
+  background-position: center;
+}
+
 .hs-sky-day {
-  background:
-    radial-gradient(circle at 70% 26%, rgb(255 248 228 / 0.95) 0 3%, rgb(255 238 204 / 0.5) 7%, transparent 20%),
-    linear-gradient(180deg, #d8e5e9 0%, #e9ebe4 34%, #f6e7d7 66%, #f0dfcc 100%);
+  background-color: #e8e6dc;
+}
+
+:root:not([data-house-day-covered]) .hs-sky-day {
+  background-image: url("/images/house/sky-day-819.webp");
+  background-image: -webkit-image-set(url("/images/house/sky-day-640.webp") 1x, url("/images/house/sky-day-819.webp") 2x);
+  background-image: image-set(
+    url("/images/house/sky-day-640.avif") type("image/avif") 1x,
+    url("/images/house/sky-day-819.avif") type("image/avif") 2x,
+    url("/images/house/sky-day-640.webp") type("image/webp") 1x,
+    url("/images/house/sky-day-819.webp") type("image/webp") 2x
+  );
 }
 
 .hs-sky-evening {
   opacity: var(--hs-evening, 0);
+  background-color: #f2a27e;
+}
+
+:root[data-house-evening] .hs-sky-evening {
+  background-image: url("/images/house/sky-evening-819.webp");
+  background-image: -webkit-image-set(url("/images/house/sky-evening-640.webp") 1x, url("/images/house/sky-evening-819.webp") 2x);
+  background-image: image-set(
+    url("/images/house/sky-evening-640.avif") type("image/avif") 1x,
+    url("/images/house/sky-evening-819.avif") type("image/avif") 2x,
+    url("/images/house/sky-evening-640.webp") type("image/webp") 1x,
+    url("/images/house/sky-evening-819.webp") type("image/webp") 2x
+  );
+}
+
+/* Twilight: blue above a rose horizon, strongest while evening and night overlap (dawn and dusk). */
+.hs-sky-twilight {
+  opacity: min(0.75, calc(var(--hs-evening, 0) * var(--hs-night, 0) * 2.6));
   background:
-    radial-gradient(circle at 20% 60%, rgb(255 214 140 / 0.95) 0 2.6%, rgb(255 180 110 / 0.5) 7%, transparent 22%),
-    linear-gradient(180deg, #e39d82 0%, #f0b48f 38%, #f8cfa3 66%, #efc59b 100%);
+    radial-gradient(90% 30% at 50% 74%, rgb(248 176 132 / 0.5), transparent 70%),
+    linear-gradient(180deg, #27305f 0%, #4b4a7c 34%, #a77a95 60%, #e9a487 80%, #d99c82 100%);
 }
 
 /* The night sky comes in late, so dusk stays warm rather than turning grey. */
 .hs-sky-night {
   opacity: calc(var(--hs-night, 0) * var(--hs-night, 0));
-  background: linear-gradient(180deg, #11152f 0%, #1b1f45 42%, #2c2a50 70%, #2a2440 100%);
+  background-color: #1d1f4a;
 }
 
-/* Twilight: blue above a rose horizon, strongest while evening and night overlap (dawn and dusk). */
-.hs-sky-twilight {
-  opacity: min(1, calc(var(--hs-evening, 0) * var(--hs-night, 0) * 3.2));
-  background:
-    radial-gradient(90% 30% at 50% 74%, rgb(248 176 132 / 0.55), transparent 70%),
-    linear-gradient(180deg, #27305f 0%, #4b4a7c 34%, #a77a95 60%, #e9a487 80%, #d99c82 100%);
-}
-
-/* The part of the enlarged sky that matches the frame, so stars and moon sit in frame coordinates. */
-.hs-sky-view {
-  position: absolute;
-  left: 11.54%;
-  top: 19.62%;
-  width: 76.92%;
-  height: 76.92%;
-}
-
-.hs-stars {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  fill: #fff3d2;
-  opacity: 0.85;
-}
-
-.hs-moon {
-  position: absolute;
-  left: 81%;
-  top: 6%;
-  width: 7.5%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 72% 34%, transparent 0 44%, #f4e9c8 46%);
-  box-shadow: 0 0 18px 2px rgb(244 233 200 / 0.18);
+:root[data-house-night] .hs-sky-night {
+  background-image: url("/images/house/sky-night-819.webp");
+  background-image: -webkit-image-set(url("/images/house/sky-night-640.webp") 1x, url("/images/house/sky-night-819.webp") 2x);
+  background-image: image-set(
+    url("/images/house/sky-night-640.avif") type("image/avif") 1x,
+    url("/images/house/sky-night-819.avif") type("image/avif") 2x,
+    url("/images/house/sky-night-640.webp") type("image/webp") 1x,
+    url("/images/house/sky-night-819.webp") type("image/webp") 2x
+  );
 }
 
 .hs-ground {
@@ -270,6 +366,65 @@
   to { opacity: 1; }
 }
 
+/* Front garden strip, nearest layer, in the same three lights as the house. */
+.hs-garden {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: -1.5%;
+  aspect-ratio: 800 / 132;
+}
+
+.hs-garden-paint {
+  position: absolute;
+  inset: 0;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.hs-garden-evening {
+  opacity: var(--hs-evening, 0);
+  transition: opacity 1.2s ease;
+}
+
+.hs-garden-night {
+  opacity: var(--hs-night, 0);
+  transition: opacity 1.2s ease;
+}
+
+:root:not([data-house-day-covered]) .hs-garden-day {
+  background-image: url("/images/house/garden-day-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/garden-day-800.webp") 1x, url("/images/house/garden-day-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/garden-day-800.avif") type("image/avif") 1x,
+    url("/images/house/garden-day-1200.avif") type("image/avif") 2x,
+    url("/images/house/garden-day-800.webp") type("image/webp") 1x,
+    url("/images/house/garden-day-1200.webp") type("image/webp") 2x
+  );
+}
+
+:root[data-house-evening] .hs-garden-evening {
+  background-image: url("/images/house/garden-evening-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/garden-evening-800.webp") 1x, url("/images/house/garden-evening-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/garden-evening-800.avif") type("image/avif") 1x,
+    url("/images/house/garden-evening-1200.avif") type("image/avif") 2x,
+    url("/images/house/garden-evening-800.webp") type("image/webp") 1x,
+    url("/images/house/garden-evening-1200.webp") type("image/webp") 2x
+  );
+}
+
+:root[data-house-night] .hs-garden-night {
+  background-image: url("/images/house/garden-night-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/garden-night-800.webp") 1x, url("/images/house/garden-night-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/garden-night-800.avif") type("image/avif") 1x,
+    url("/images/house/garden-night-1200.avif") type("image/avif") 2x,
+    url("/images/house/garden-night-800.webp") type("image/webp") 1x,
+    url("/images/house/garden-night-1200.webp") type("image/webp") 2x
+  );
+}
+
 /* Fireflies after dark, drifting slowly near the garden. */
 .hs-fireflies {
   position: absolute;
@@ -358,6 +513,9 @@
 @media (prefers-reduced-motion: reduce) {
   .house-camera,
   .house-hotspot,
+  .hs-room,
+  .hs-garden-evening,
+  .hs-garden-night,
   .hs-paint-evening,
   .hs-paint-night,
   .hs-glow,

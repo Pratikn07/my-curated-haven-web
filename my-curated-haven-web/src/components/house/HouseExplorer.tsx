@@ -194,6 +194,12 @@ export default function HouseExplorer({
       >
         <div className="house-camera">{scene}</div>
         <HouseDepth frameRef={frameRef} />
+        {/* Painted close-ups that settle in when a room opens. Decorative; the card below carries the content. */}
+        <div aria-hidden="true">
+          {HOUSE_ROOMS.map((room) => (
+            <div key={room.id} className="hs-room" data-room={room.id} />
+          ))}
+        </div>
         {HOUSE_ROOMS.map((room) => (
           <a
             key={room.id}
@@ -212,7 +218,7 @@ export default function HouseExplorer({
           <button
             type="button"
             onClick={closeRoom}
-            className="absolute top-3 left-3 inline-flex min-h-11 items-center gap-1 rounded-full border border-border bg-surface/95 px-4 text-sm font-semibold shadow-sm"
+            className="absolute top-3 left-3 z-10 inline-flex min-h-11 items-center gap-1 rounded-full border border-border bg-surface/95 px-4 text-sm font-semibold shadow-sm"
           >
             <span aria-hidden="true">←</span> Back to the house
           </button>

@@ -1,6 +1,6 @@
 # Haven house art shot list
 
-Status, 2026-10-03: Round 1 done, the house is chosen and its night version is approved and in use on the homepage. The rest of Round 2 has not been generated yet.
+Status, 2026-10-03: Round 1 and Round 2 are done. All chosen images are in `art/chosen/` and the house, evening and night versions, skies, garden strip and room close-ups are in use on the homepage. The pot, book and cat props are saved for the next steps.
 
 The homepage house is built from images that code layers and animates: depth between layers, light that follows the visitor's clock, window and lamp glow, and small cut-out props (pot steam, a breathing cat, a book that opens). The images themselves do not move.
 
@@ -18,7 +18,12 @@ The homepage house is built from images that code layers and animates: depth bet
 `my-curated-haven-web/scripts/house-art/prepare_house_art.py` turns the chosen images into the web layers in `my-curated-haven-web/public/images/house/`. It aligns night (and evening, when present) onto the day house, cuts the house out with one shared outline, extracts the lamp glow from the night house, and writes AVIF and WebP at 640, 960 and 1120px. See the script's header for setup.
 
 - The night edit came back at 1198 × 1313 and slightly squashed. The script registers it on the day house to a median error under 1px.
-- Until R2-01 arrives, the evening house is graded from the day house. Save the chosen R2-01 as `art/chosen/house-evening.webp` and rerun the script; it then aligns and uses the real evening edit instead.
+- The evening edit (R2-01, 1080 × 1350) is aligned the same way, to a median error of about 0.5px.
+- Skies are cropped to the frame's 4:5 shape. The night moon fell outside that crop, so the script lifts it out, shrinks it and places it left of the roof.
+- The garden strip is daylight only; the script relights it for evening and night by matching the colours of the house's own mossy base in each lighting.
+- Room close-ups are cropped to 4:5 with a per-room offset (`ROOM_CROP_LEFT`) so the key furniture stays in view.
+
+Chosen files: `house-day`, `house-night`, `house-evening`, `sky-day`, `sky-evening`, `sky-night`, `garden-strip`, `room-kitchen`, `room-library`, `room-nursery`, `room-shelf`, `prop-pot`, `prop-book-open`, `prop-book-closed`, `prop-cat` (all `.webp`).
 
 ## Rules for every image
 
@@ -32,12 +37,12 @@ The homepage house is built from images that code layers and animates: depth bet
 
 | # | Image | Use | Status |
 | --- | --- | --- | --- |
-| R2-01 | House at golden evening (edit) | Blends between day and night by the visitor's clock | To do |
-| R2-02 | House at night (edit) | Same | Done |
-| R2-03 to R2-05 | Day, evening and night skies | Behind the house, drift for depth | To do |
-| R2-06 | Front garden strip | In front of the house, moves more for depth | To do |
-| R2-07 to R2-10 | Kitchen, Library, Nursery and Shelf close-ups | Shown when a room is opened | To do |
-| R2-11 to R2-14 | Pot, open book, closed book, sleeping cat | Cut-out props that animate | To do |
+| R2-01 | House at golden evening (edit) | Blends between day and night by the visitor's clock | Done, in use |
+| R2-02 | House at night (edit) | Same | Done, in use |
+| R2-03 to R2-05 | Day, evening and night skies | Behind the house, drift for depth | Done, in use |
+| R2-06 | Front garden strip | In front of the house, moves more for depth | Done, in use |
+| R2-07 to R2-10 | Kitchen, Library, Nursery and Shelf close-ups | Shown when a room is opened | Done, in use |
+| R2-11 to R2-14 | Pot, open book, closed book, sleeping cat | Cut-out props that animate | Done, not yet used |
 
 **R2-01, evening** (use edit mode on the day image)
 ```text

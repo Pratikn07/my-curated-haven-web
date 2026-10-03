@@ -135,27 +135,38 @@ test.describe("[haven-house] the painted house", () => {
   async function houseImagesAt(page: Page, time: string) {
     const requested: string[] = [];
     page.on("request", (request) => {
-      const match = request.url().match(/\/images\/house\/(house-[a-z]+)[-.]/);
+      const match = request.url().match(/\/images\/house\/((?:house|sky|garden|room)-[a-z]+)[-.]/);
       if (match) requested.push(match[1]);
     });
     await page.clock.setFixedTime(new Date(time));
     await page.goto("/");
     await page.waitForLoadState("networkidle");
-    return new Set(requested);
+    // Live list: images requested later (such as a room close-up) are added as they load.
+    return requested;
   }
 
-  test("a daytime visit downloads only the day painting", async ({ page }) => {
+  test("a daytime visit downloads only the day paintings", async ({ page }) => {
     const images = await houseImagesAt(page, "2026-10-02T12:00:00Z");
-    expect([...images]).toEqual(["house-day"]);
+    expect([...new Set(images)].sort()).toEqual(["garden-day", "house-day", "sky-day"]);
     await expect(page.locator(".hs-fireflies")).toBeHidden();
   });
 
   test("a late-night visit downloads the night painting and lamp glow, and the fireflies come out", async ({ page }) => {
     const images = await houseImagesAt(page, "2026-10-02T23:00:00Z");
-    expect(images.has("house-night")).toBe(true);
-    expect(images.has("house-glow")).toBe(true);
-    expect(images.has("house-day")).toBe(false);
+    expect(images).toEqual(expect.arrayContaining(["house-night", "house-glow", "sky-night", "garden-night"]));
+    expect(images.some((name) => name.endsWith("-day"))).toBe(false);
     await expect(page.locator(".hs-fireflies")).toBeVisible();
+  });
+
+  test("opening a room downloads and shows only that room's close-up", async ({ page }) => {
+    const images = await houseImagesAt(page, "2026-10-02T12:00:00Z");
+    expect(images.some((name) => name.startsWith("room-"))).toBe(false);
+    const closeUp = page.waitForRequest(/\/images\/house\/room-nursery-/);
+    await roomList(page).getByRole("link", { name: /^Nursery/ }).click();
+    await closeUp;
+    await expect(page.locator('.hs-room[data-room="nursery"]')).toHaveCSS("opacity", "1");
+    await expect(page.locator('.hs-room[data-room="kitchen"]')).toHaveCSS("opacity", "0");
+    expect([...new Set(images.filter((name) => name.startsWith("room-")))]).toEqual(["room-nursery"]);
   });
 
   test("reduced motion keeps the scene still but still lit for the hour", async ({ page }) => {
