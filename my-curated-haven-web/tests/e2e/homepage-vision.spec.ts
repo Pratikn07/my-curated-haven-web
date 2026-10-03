@@ -129,6 +129,57 @@ test.describe("[haven-house] the house light follows the visitor's clock", () =>
   }
 });
 
+test.describe("[haven-house] the painted house", () => {
+  test.use({ timezoneId: "UTC" });
+
+  async function houseImagesAt(page: Page, time: string) {
+    const requested: string[] = [];
+    page.on("request", (request) => {
+      const match = request.url().match(/\/images\/house\/(house-[a-z]+)[-.]/);
+      if (match) requested.push(match[1]);
+    });
+    await page.clock.setFixedTime(new Date(time));
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    return new Set(requested);
+  }
+
+  test("a daytime visit downloads only the day painting", async ({ page }) => {
+    const images = await houseImagesAt(page, "2026-10-02T12:00:00Z");
+    expect([...images]).toEqual(["house-day"]);
+    await expect(page.locator(".hs-fireflies")).toBeHidden();
+  });
+
+  test("a late-night visit downloads the night painting and lamp glow, and the fireflies come out", async ({ page }) => {
+    const images = await houseImagesAt(page, "2026-10-02T23:00:00Z");
+    expect(images.has("house-night")).toBe(true);
+    expect(images.has("house-glow")).toBe(true);
+    expect(images.has("house-day")).toBe(false);
+    await expect(page.locator(".hs-fireflies")).toBeVisible();
+  });
+
+  test("reduced motion keeps the scene still but still lit for the hour", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.clock.setFixedTime(new Date("2026-10-02T23:00:00Z"));
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-house-night", "");
+    await expect(page.locator(".hs-fireflies")).toBeHidden();
+    await expect(page.locator(".hs-glow-breath")).toHaveCSS("animation-name", "none");
+    const frame = page.locator(".house-frame");
+    await frame.hover({ position: { x: 20, y: 20 } });
+    await page.waitForTimeout(300);
+    await expect(page.locator('[data-depth="near"]')).not.toHaveAttribute("style", /translate/);
+  });
+});
+
+test("[haven-house] moving over the house gives it depth", async ({ page }, testInfo) => {
+  test.skip(!isDesktop(testInfo.project.name), "pointer depth is checked with a mouse on desktop");
+  await page.goto("/");
+  const frame = page.locator(".house-frame");
+  await frame.hover({ position: { x: 20, y: 20 } });
+  await expect(page.locator('[data-depth="near"]')).toHaveAttribute("style", /translate/);
+});
+
 test("[haven-house] FAQ names the company and points to support", async ({ page }) => {
   await page.goto("/");
   const faq = page.locator("#questions");
@@ -199,6 +250,7 @@ test("[haven-house] home page has no serious automated accessibility violations"
 
 test("[haven-house] image failure leaves headings and room status readable", async ({ page }) => {
   await page.route("**/_next/image**", (route) => route.abort());
+  await page.route("**/images/house/**", (route) => route.abort());
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(roomList(page)).toContainText("Coming soon");

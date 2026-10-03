@@ -61,8 +61,10 @@ The page takes on the light of the visitor's own clock. Light is atmosphere only
 | Evening | 17:00 to 19:59 | Golden sky, low orange sun, pink clouds, fairy lights half on |
 | Night | 20:00 to 05:59 | Indigo sky, moon, stars, lamps and fairy lights on |
 
-- A small inline script in `src/app/layout.tsx` sets `data-daypart` on the root element before first paint, so a night visitor never sees a flash of day colours.
-- A client effect rechecks every minute, so an open page changes at 17:00 and 20:00.
+- Page colours switch at the period boundaries above. The house scene does not switch: its day, evening and night paintings blend gradually along a timetable (golden from 17:00, twilight around 19:00 to 20:00, full night from 20:45, dawn from 05:30, full day from 08:30), and the lamps come on as it gets dark. The timetable lives in `src/lib/house-light.ts`.
+- A small inline script from `src/lib/house-light.ts`, run in `src/app/layout.tsx`, sets `data-daypart` and the scene's light before first paint, so a night visitor never sees a flash of day colours. It also preloads the painting that shows most.
+- A client effect rechecks every minute, so an open page follows the light.
+- Each painting downloads only when it shows. A daytime visitor never downloads the night house, and at full night the day house is skipped.
 - The period follows the clock, not the operating system's dark mode setting.
 - Without JavaScript the page renders in Day.
 

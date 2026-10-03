@@ -1,6 +1,6 @@
 # Haven house art shot list
 
-Status, 2026-10-02: Round 1 done, the house is chosen and its night version is approved. The rest of Round 2 has not been generated yet.
+Status, 2026-10-03: Round 1 done, the house is chosen and its night version is approved and in use on the homepage. The rest of Round 2 has not been generated yet.
 
 The homepage house is built from images that code layers and animates: depth between layers, light that follows the visitor's clock, window and lamp glow, and small cut-out props (pot steam, a breathing cat, a book that opens). The images themselves do not move.
 
@@ -12,6 +12,13 @@ The homepage house is built from images that code layers and animates: depth bet
 - **Why this one:** it looks like a real handmade miniature, the most premium of the three styles. Its pendant lamps, floor lamp and windows glow convincingly at night. The kitchen floor is clear (no table), which leaves room for the steam-to-recipe-card moment. Its palette (lilac gingham, sage, terracotta, cream) matches the site, and it sits on a plain background with a neat mossy base, which makes it easy to cut out.
 - **Runner-up:** paper-cut option 3 (`round-1/C-paper-3.webp`), which is calmer and reads best at small sizes, with less wow.
 - **All 12 Round 1 options** are in `art/round-1/`: gouache (A), clay (B) and paper-cut (C).
+
+## Preparing images for the site
+
+`my-curated-haven-web/scripts/house-art/prepare_house_art.py` turns the chosen images into the web layers in `my-curated-haven-web/public/images/house/`. It aligns night (and evening, when present) onto the day house, cuts the house out with one shared outline, extracts the lamp glow from the night house, and writes AVIF and WebP at 640, 960 and 1120px. See the script's header for setup.
+
+- The night edit came back at 1198 × 1313 and slightly squashed. The script registers it on the day house to a median error under 1px.
+- Until R2-01 arrives, the evening house is graded from the day house. Save the chosen R2-01 as `art/chosen/house-evening.webp` and rerun the script; it then aligns and uses the real evening edit instead.
 
 ## Rules for every image
 

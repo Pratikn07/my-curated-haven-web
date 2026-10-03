@@ -12,6 +12,8 @@ import {
 } from "@/config/house-rooms";
 import { HOMEPAGE_CONTENT_VERSION } from "@/config/homepage-content";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { applyHouseLight } from "@/lib/house-light";
+import HouseDepth from "@/components/house/HouseDepth";
 import { NurserySample, ShelfSample } from "@/components/house/RoomSamples";
 
 export type KitchenRecipeLink = { slug: string; title: string; totalMinutes: number | null };
@@ -19,11 +21,28 @@ export type KitchenRecipeLink = { slug: string; title: string; totalMinutes: num
 const STATUS_ORDER: Record<HouseRoomStatus, number> = { open: 0, soon: 1, later: 2 };
 const LIST_ROOMS = [...HOUSE_ROOMS].sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
 
-function daypartNow(date = new Date()) {
-  const hour = date.getHours();
-  if (hour >= 20 || hour < 6) return "night";
-  if (hour >= 17) return "evening";
-  return "day";
+/** Where the painted house sits in the frame, as percentages. Matches .hs-house in house.css. */
+const HOUSE_BOX = { left: 6, top: 9, width: 88, height: 88 };
+
+function toFrame(room: HouseRoom["area"]) {
+  return {
+    left: `${HOUSE_BOX.left + (room.left * HOUSE_BOX.width) / 100}%`,
+    top: `${HOUSE_BOX.top + (room.top * HOUSE_BOX.height) / 100}%`,
+    width: `${(room.width * HOUSE_BOX.width) / 100}%`,
+    height: `${(room.height * HOUSE_BOX.height) / 100}%`,
+  };
+}
+
+/** Camera centre in frame percentages, kept inside the frame so no empty edge shows when zoomed. */
+function cameraFor(room: HouseRoom) {
+  const { scale } = room.zoom;
+  const half = 50 / scale;
+  const clamp = (value: number) => Math.min(100 - half, Math.max(half, value));
+  return {
+    x: clamp(HOUSE_BOX.left + (room.zoom.x * HOUSE_BOX.width) / 100),
+    y: clamp(HOUSE_BOX.top + (room.zoom.y * HOUSE_BOX.height) / 100),
+    scale,
+  };
 }
 
 function StatusLabel({ status }: { status: HouseRoomStatus }) {
@@ -95,6 +114,7 @@ export default function HouseExplorer({
   const [active, setActive] = useState<HouseRoomId | null>(null);
   const [hover, setHover] = useState<HouseRoomId | null>(null);
   const openedFrom = useRef<HTMLElement | null>(null);
+  const frameRef = useRef<HTMLDivElement | null>(null);
   const cardHeadings = useRef<Partial<Record<HouseRoomId, HTMLHeadingElement | null>>>({});
 
   const openRoom = useCallback((id: HouseRoomId, trigger: HTMLElement | null) => {
@@ -147,9 +167,7 @@ export default function HouseExplorer({
 
   // Keep the light in step with the visitor's clock while the page stays open.
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      document.documentElement.dataset.daypart = daypartNow();
-    }, 60_000);
+    const timer = window.setInterval(() => applyHouseLight(document.documentElement), 60_000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -160,18 +178,22 @@ export default function HouseExplorer({
   };
 
   const activeRoom = HOUSE_ROOMS.find((room) => room.id === active);
-  const frameStyle = activeRoom
-    ? ({
-        "--zoom-x": `${activeRoom.zoom.x}%`,
-        "--zoom-y": `${activeRoom.zoom.y}%`,
-        "--zoom-scale": activeRoom.zoom.scale,
-      } as CSSProperties)
+  const camera = activeRoom ? cameraFor(activeRoom) : null;
+  const frameStyle = camera
+    ? ({ "--zoom-x": `${camera.x}%`, "--zoom-y": `${camera.y}%`, "--zoom-scale": camera.scale } as CSSProperties)
     : undefined;
 
   return (
     <div className="grid min-w-0 gap-4">
-      <div className="house-frame" data-active={active ?? undefined} data-hover={hover ?? undefined} style={frameStyle}>
+      <div
+        ref={frameRef}
+        className="house-frame"
+        data-active={active ?? undefined}
+        data-hover={hover ?? undefined}
+        style={frameStyle}
+      >
         <div className="house-camera">{scene}</div>
+        <HouseDepth frameRef={frameRef} />
         {HOUSE_ROOMS.map((room) => (
           <a
             key={room.id}
@@ -179,12 +201,8 @@ export default function HouseExplorer({
             aria-hidden="true"
             tabIndex={-1}
             className="house-hotspot"
-            style={{
-              left: `${room.area.left}%`,
-              top: `${room.area.top}%`,
-              width: `${room.area.width}%`,
-              height: `${room.area.height}%`,
-            }}
+            data-room={room.id}
+            style={toFrame(room.area)}
             onClick={onRoomClick(room.id)}
             onPointerEnter={() => setHover(room.id)}
             onPointerLeave={() => setHover(null)}
