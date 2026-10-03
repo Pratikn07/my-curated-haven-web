@@ -114,7 +114,7 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "presentation_state" && !HOMEPAGE_PRESENTATION_STATES.has(value)) {
     return fail("presentation_state");
   }
-  if (key === "content_version" && !/^hv-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
+  if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");
   }
   return value;
