@@ -86,6 +86,9 @@ test.describe("Phase 7: Return Path Sanitization Unit Checks", () => {
     expect(sanitizeReturnTo("/recipes/synth-free-oat-bake")).toBe("/recipes/synth-free-oat-bake");
     expect(sanitizeReturnTo("/account")).toBe("/account");
     expect(sanitizeReturnTo("/account/saved-recipes")).toBe("/account/saved-recipes");
+    expect(sanitizeReturnTo("/admin")).toBe("/admin");
+    expect(sanitizeReturnTo("/admin/recipes/new")).toBe("/admin/recipes/new");
+    expect(sanitizeReturnTo("/administer")).toBe("/account/saved-recipes");
   });
 
   test("[QA-J10:partial] rejects open redirects, protocol-relative URLs, and loops", () => {

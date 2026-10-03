@@ -68,11 +68,12 @@ export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
 
   const isAccountRoute = pathname === "/account" || pathname.startsWith("/account/");
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
   const isSignInRoute = pathname === "/sign-in";
   const isCheckoutReturn = pathname === "/checkout/return";
   const isAuthCallback = pathname === "/auth/callback";
 
-  if ((isAccountRoute || isCheckoutReturn) && !user) {
+  if ((isAccountRoute || isAdminRoute || isCheckoutReturn) && !user) {
     const returnTarget = pathname + (request.nextUrl.search || "");
     const redirectUrl = new URL(
       `/sign-in?returnTo=${encodeURIComponent(returnTarget)}`,
@@ -86,8 +87,12 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  if (isAccountRoute || isSignInRoute || isCheckoutReturn || isAuthCallback) {
+  if (isAccountRoute || isAdminRoute || isSignInRoute || isCheckoutReturn || isAuthCallback) {
     supabaseResponse.headers.set("Cache-Control", "no-store, private");
+  }
+
+  if (isAdminRoute) {
+    supabaseResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
 
   return supabaseResponse;

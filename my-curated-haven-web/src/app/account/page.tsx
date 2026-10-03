@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { isRecipeAdmin } from "@/lib/admin/recipes";
 import SignOutButton from "@/components/account/SignOutButton";
-import { Bookmark, ShoppingBag, Mail, HelpCircle, AlertTriangle } from "lucide-react";
+import { Bookmark, ShoppingBag, Mail, HelpCircle, AlertTriangle, ChefHat } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -20,6 +21,11 @@ export default async function AccountPage() {
   if (!user) {
     redirect("/sign-in?returnTo=/account");
   }
+
+  // Only the owners see the admin link; a failed check just hides it.
+  const showRecipeAdmin = await createClient()
+    .then(isRecipeAdmin)
+    .catch(() => false);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -112,6 +118,21 @@ export default async function AccountPage() {
             </div>
           </Link>
         </section>
+
+        {showRecipeAdmin ? (
+          <Link
+            href="/admin/recipes"
+            className="flex items-center gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-5 transition-all hover:border-action hover:shadow-sm"
+          >
+            <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-action/10 text-action">
+              <ChefHat className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Recipe admin</h2>
+              <p className="mt-1 text-sm text-text-muted">Add, edit and publish recipes.</p>
+            </div>
+          </Link>
+        ) : null}
 
         {/* Account Closure Guidance */}
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-5 sm:p-8">

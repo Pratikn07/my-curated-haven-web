@@ -542,3 +542,64 @@ ON CONFLICT (source_kind, source_id, release_id) DO UPDATE SET
   is_eligible = EXCLUDED.is_eligible;
 
 
+
+-- ============================================================================
+-- Synthetic recipe admin (local and CI only)
+-- ============================================================================
+INSERT INTO auth.users (
+  id,
+  instance_id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at
+) VALUES (
+  '00000000-0000-0000-0000-000000000004',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated',
+  'authenticated',
+  'editor-e@synthetic.test',
+  crypt('password123', gen_salt('bf')),
+  now(),
+  '',
+  '',
+  '',
+  '',
+  '{"provider":"email","providers":["email"]}',
+  '{"name":"Synthetic Editor E"}',
+  now(),
+  now()
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.identities (
+  id,
+  provider_id,
+  user_id,
+  identity_data,
+  provider,
+  created_at,
+  updated_at
+) VALUES (
+  '00000000-0000-0000-0000-000000000004',
+  'editor-e@synthetic.test',
+  '00000000-0000-0000-0000-000000000004',
+  '{"sub":"00000000-0000-0000-0000-000000000004","email":"editor-e@synthetic.test"}'::jsonb,
+  'email',
+  now(),
+  now()
+)
+ON CONFLICT (provider_id, provider) DO NOTHING;
+
+INSERT INTO private.admin_users (user_id, note)
+VALUES ('00000000-0000-0000-0000-000000000004', 'synthetic editor')
+ON CONFLICT (user_id) DO NOTHING;

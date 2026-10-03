@@ -95,6 +95,9 @@ jobs:
       - name: Data access error-handling unit tests
         run: npm run test:data:unit
 
+      - name: Admin recipe editor unit tests
+        run: npm run test:admin:unit
+
       - name: Typecheck
         run: npm run typecheck
 

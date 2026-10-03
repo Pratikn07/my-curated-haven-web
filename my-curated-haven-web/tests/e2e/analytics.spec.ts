@@ -34,11 +34,11 @@ test("page views are recorded with no banner, and nothing leaves the browser wit
   expect(captures).toEqual([]);
 });
 
-test("sign-in, account and checkout pages are never session-recorded", () => {
-  for (const path of ["/sign-in", "/account", "/account/saved", "/checkout", "/checkout/success"]) {
+test("sign-in, account, checkout and admin pages are never session-recorded", () => {
+  for (const path of ["/sign-in", "/account", "/account/saved", "/checkout", "/checkout/success", "/admin", "/admin/recipes/new"]) {
     expect(isPrivatePath(path), path).toBe(true);
   }
-  for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/accounting", "/sign-in-help"]) {
+  for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/accounting", "/sign-in-help", "/administer"]) {
     expect(isPrivatePath(path), path).toBe(false);
   }
 });

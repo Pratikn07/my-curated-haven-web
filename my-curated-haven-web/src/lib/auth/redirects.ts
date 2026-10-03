@@ -1,6 +1,6 @@
 /**
  * Validates and sanitizes post-authentication return paths.
- * Allows intended recipe and account paths while preventing open redirects,
+ * Allows intended recipe, account and admin paths while preventing open redirects,
  * protocol-relative URLs, loops, and control characters.
  */
 export function sanitizeReturnTo(raw: string | null | undefined): string {
@@ -32,8 +32,9 @@ export function sanitizeReturnTo(raw: string | null | undefined): string {
   const isAccountPath = trimmed === "/account" || trimmed.startsWith("/account/");
   const isCollectionPath = trimmed === "/collections" || trimmed.startsWith("/collections/");
   const isCheckoutPath = trimmed === "/checkout" || trimmed.startsWith("/checkout/");
+  const isAdminPath = trimmed === "/admin" || trimmed.startsWith("/admin/");
 
-  if (isRecipePath || isAccountPath || isCollectionPath || isCheckoutPath) {
+  if (isRecipePath || isAccountPath || isCollectionPath || isCheckoutPath || isAdminPath) {
     return trimmed;
   }
 

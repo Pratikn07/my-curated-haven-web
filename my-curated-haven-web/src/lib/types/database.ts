@@ -1410,10 +1410,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_recipe: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_list_recipes: {
+        Args: { p_state?: string }
+        Returns: {
+          collections: string[]
+          free_slot: number
+          id: string
+          preview_image_path: string
+          publication_state: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      admin_publish_recipe: {
+        Args: { p_expected_version: string; p_recipe_id: string }
+        Returns: Json
+      }
+      admin_save_recipe: {
+        Args: {
+          p_expected_version?: string
+          p_recipe: Json
+          p_recipe_id?: string
+        }
+        Returns: Json
+      }
+      admin_withdraw_recipe: {
+        Args: { p_expected_version: string; p_recipe_id: string }
+        Returns: Json
+      }
       increment_shop_click: {
         Args: { product_id_input: string }
         Returns: undefined
       }
+      is_recipe_admin: { Args: never; Returns: boolean }
       search_shop_products: {
         Args: { query_text: string; result_limit?: number }
         Returns: {
