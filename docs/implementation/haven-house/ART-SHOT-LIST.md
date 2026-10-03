@@ -22,6 +22,8 @@ The homepage house is built from images that code layers and animates: depth bet
 - Skies are cropped to the frame's 4:5 shape. The night moon fell outside that crop, so the script lifts it out, shrinks it and places it left of the roof.
 - The garden strip is daylight only; the script relights it for evening and night by matching the colours of the house's own mossy base in each lighting.
 - Room close-ups are cropped to 4:5 with a per-room offset (`ROOM_CROP_LEFT`) so the key furniture stays in view.
+- Props are cut out and trimmed: the pot sits in the Kitchen card with steam, the closed book is the Library card's way into the sample, and the open book holds the storybook sample page.
+- The breathing cat is cut from the Kitchen close-up itself (`KITCHEN_CAT_BOX`), not from `prop-cat`, so it lines up exactly with the painting. `prop-cat` has a slightly different pose and light, and a second cat in the kitchen would look odd; it is kept for later use elsewhere.
 
 Chosen files: `house-day`, `house-night`, `house-evening`, `sky-day`, `sky-evening`, `sky-night`, `garden-strip`, `room-kitchen`, `room-library`, `room-nursery`, `room-shelf`, `prop-pot`, `prop-book-open`, `prop-book-closed`, `prop-cat` (all `.webp`).
 
@@ -42,7 +44,7 @@ Chosen files: `house-day`, `house-night`, `house-evening`, `sky-day`, `sky-eveni
 | R2-03 to R2-05 | Day, evening and night skies | Behind the house, drift for depth | Done, in use |
 | R2-06 | Front garden strip | In front of the house, moves more for depth | Done, in use |
 | R2-07 to R2-10 | Kitchen, Library, Nursery and Shelf close-ups | Shown when a room is opened | Done, in use |
-| R2-11 to R2-14 | Pot, open book, closed book, sleeping cat | Cut-out props that animate | Done, not yet used |
+| R2-11 to R2-14 | Pot, open book, closed book, sleeping cat | Cut-out props that animate | Pot and books in use; cat held back (see below) |
 
 **R2-01, evening** (use edit mode on the day image)
 ```text

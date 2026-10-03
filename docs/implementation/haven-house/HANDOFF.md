@@ -4,7 +4,7 @@ Updated 2026-10-03. Branch `feat/haven-house-homepage`. The full conversation th
 
 ## Where things stand
 
-The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is the **painted clay miniature** (`src/components/house/HouseScene.tsx`): a painted sky behind, the house in the middle and a front garden strip in front, all blending between day, evening and night by the visitor's clock, with lamp and window glow, gentle depth on scroll and touch, and fireflies at night. Opening a room glides the camera in and its painted close-up settles over the frame. All Round 2 art is generated and in `art/chosen/`; the pot, book and cat props are not used yet. See [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
+The homepage is rebuilt around an interactive house, with My Curated Haven as the site brand. The house is the **painted clay miniature** (`src/components/house/HouseScene.tsx`): a painted sky behind, the house in the middle and a front garden strip in front, all blending between day, evening and night by the visitor's clock, with lamp and window glow, gentle depth on scroll and touch, and fireflies at night. Opening a room glides the camera in and its painted close-up settles over the frame; in the Kitchen the cat on the windowsill breathes. Steam rises from the painted pot on the house and from the pot in the Kitchen card. The Library card's closed storybook swings open on the way to the sample, which is laid out on the open book. All Round 2 art is in `art/chosen/`; `prop-cat` is held back (see the shot list). See [ART-SHOT-LIST.md](ART-SHOT-LIST.md).
 
 Built in `my-curated-haven-web/`:
 
@@ -32,10 +32,9 @@ Built in `my-curated-haven-web/`:
 
 ## Next steps
 
-1. Props: steam rising from the Kitchen pot, the cat breathing on the Kitchen close-up's windowsill, both cut out with the same pipeline (`prop-pot`, `prop-cat`).
-2. Library: the closed book (`prop-book-closed`) opens into the storybook sample, with the child's name written on the open book (`prop-book-open`).
-3. Fonts are the cheapest first-load saving: the design system says only Fraunces and Inter should load, with the Cormorant wordmark as an SVG.
-4. Test on real phones from an Instagram DM link, iPhone and Android, before release.
+1. Fonts are the cheapest first-load saving: the design system says only Fraunces and Inter should load, with the Cormorant wordmark as an SVG.
+2. The open-book image (about 7–18 KB) loads with the page even though the Library is further down; it could wait until the visitor scrolls near it.
+3. Test on real phones from an Instagram DM link, iPhone and Android, before release.
 
 ## Open owner decisions
 

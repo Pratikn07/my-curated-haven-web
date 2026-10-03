@@ -14,6 +14,7 @@ import { HOMEPAGE_CONTENT_VERSION } from "@/config/homepage-content";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { applyHouseLight } from "@/lib/house-light";
 import HouseDepth from "@/components/house/HouseDepth";
+import { Steam } from "@/components/house/HouseScene";
 import { NurserySample, ShelfSample } from "@/components/house/RoomSamples";
 
 export type KitchenRecipeLink = { slug: string; title: string; totalMinutes: number | null };
@@ -60,6 +61,35 @@ function StatusLabel({ status }: { status: HouseRoomStatus }) {
   );
 }
 
+/** The Library's way in: a closed storybook whose cover swings open before the page moves to the sample. */
+function LibraryBookLink() {
+  const [opening, setOpening] = useState(false);
+  const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    event.preventDefault();
+    setOpening(true);
+    window.setTimeout(() => {
+      window.history.pushState(null, "", "#library");
+      document.getElementById("library")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setOpening(false);
+    }, 650);
+  };
+  return (
+    <a
+      href="#library"
+      onClick={onClick}
+      data-opening={opening ? "" : undefined}
+      className="library-book-link inline-flex min-h-12 items-center gap-4 justify-self-start rounded-xl border border-border-control bg-surface py-2 pr-5 pl-3 font-semibold hover:bg-surface-muted"
+    >
+      <span className="library-book" aria-hidden="true">
+        <span className="library-book-pages" />
+        <span className="library-book-cover" />
+      </span>
+      Try a sample page
+    </a>
+  );
+}
+
 function RoomCardBody({ room, kitchenRecipes }: { room: HouseRoom; kitchenRecipes: KitchenRecipeLink[] }) {
   if (room.id === "kitchen") {
     return (
@@ -81,25 +111,22 @@ function RoomCardBody({ room, kitchenRecipes }: { room: HouseRoom; kitchenRecipe
             ))}
           </ul>
         ) : null}
-        <Link
-          href="/recipes"
-          className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
-        >
-          Browse recipes
-        </Link>
+        <div className="flex items-end justify-between gap-4">
+          <Link
+            href="/recipes"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+          >
+            Browse recipes
+          </Link>
+          <div className="kitchen-pot" aria-hidden="true">
+            <Steam />
+            <div className="kitchen-pot-image" />
+          </div>
+        </div>
       </>
     );
   }
-  if (room.id === "library") {
-    return (
-      <a
-        href="#library"
-        className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl border border-border-control bg-surface px-5 py-3 font-semibold hover:bg-surface-muted"
-      >
-        Try a sample page
-      </a>
-    );
-  }
+  if (room.id === "library") return <LibraryBookLink />;
   if (room.id === "nursery") return <NurserySample />;
   return <ShelfSample />;
 }
@@ -197,7 +224,9 @@ export default function HouseExplorer({
         {/* Painted close-ups that settle in when a room opens. Decorative; the card below carries the content. */}
         <div aria-hidden="true">
           {HOUSE_ROOMS.map((room) => (
-            <div key={room.id} className="hs-room" data-room={room.id} />
+            <div key={room.id} className="hs-room" data-room={room.id}>
+              {room.id === "kitchen" ? <div className="hs-room-cat" /> : null}
+            </div>
           ))}
         </div>
         {HOUSE_ROOMS.map((room) => (

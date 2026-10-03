@@ -20,7 +20,9 @@ into the layered, phone-sized files the homepage loads from public/images/house/
      into view), cuts out the front garden strip and relights it for
      evening and night from the house's own mossy base, and crops the room
      close-ups to the frame.
-  6. Writes AVIF and WebP at phone and large sizes. At 960px wide the house is
+  6. Cuts out the props (pot, closed and open storybook) and the sleeping cat
+     from the Kitchen close-up, so it can breathe on its own layer.
+  7. Writes AVIF and WebP at phone and large sizes. At 960px wide the house is
      about 55 KB as AVIF, inside the first-screen budget in DESIGN-SYSTEM.md.
 
 Requires Python 3.10+ with: pillow (with AVIF), numpy, opencv-python-headless,
@@ -320,6 +322,61 @@ def prepare_rooms() -> None:
         save_layer(f"room-{room}", img, None, widths=ROOM_WIDTHS, avif_quality=46)
 
 
+# ---------- props ----------
+
+def _cut_out(image: Image.Image, work: Path, name: str) -> np.ndarray:
+    cached = work / f"mask-{name}.png"
+    if not cached.exists():
+        from rembg import new_session, remove
+
+        remove(image, session=new_session("birefnet-general"), only_mask=True).save(cached)
+    mask = np.asarray(Image.open(cached), dtype=np.float32) / 255.0
+    mask[mask < 0.02] = 0.0
+    mask[mask > 0.98] = 1.0
+    return mask
+
+
+def _trim(rgb: np.ndarray, mask: np.ndarray, pad: int = 6):
+    rows = np.nonzero(mask.max(axis=1) > 0.05)[0]
+    cols = np.nonzero(mask.max(axis=0) > 0.05)[0]
+    top, bottom = max(0, rows[0] - pad), min(mask.shape[0], rows[-1] + pad)
+    left, right = max(0, cols[0] - pad), min(mask.shape[1], cols[-1] + pad)
+    return rgb[top:bottom, left:right], mask[top:bottom, left:right], (left, top)
+
+
+# Where the sleeping cat lies in the Kitchen close-up (room-kitchen after its 4:5 crop), in pixels.
+KITCHEN_CAT_BOX = (30, 420, 275, 575)
+
+
+def prepare_props(work: Path) -> None:
+    """Cut-out props: the pot and both storybooks, plus the cat from the Kitchen close-up."""
+    for name, widths in (("prop-pot", (200, 300)), ("prop-book-closed", (220, 330)), ("prop-book-open", (800, 1200))):
+        source = ART / f"{name}.webp"
+        if not source.exists():
+            continue
+        image = Image.open(source).convert("RGB")
+        mask = _cut_out(image, work, name)
+        rgb, mask, _ = _trim(decontaminate(np.asarray(image), mask), mask)
+        save_layer(name, rgb, mask, widths=widths, avif_quality=50)
+
+    kitchen = ART / "room-kitchen.webp"
+    if kitchen.exists():
+        room = crop_to_portrait(np.asarray(Image.open(kitchen).convert("RGB")), ROOM_CROP_LEFT["kitchen"])
+        x0, y0, x1, y1 = KITCHEN_CAT_BOX
+        patch = Image.fromarray(np.ascontiguousarray(room[y0:y1, x0:x1]))
+        mask = _cut_out(patch, work, "kitchen-cat")
+        rgb, mask, (left, top) = _trim(np.asarray(patch).astype(np.float32), mask, pad=2)
+        # Soften the outline so the breathing cat blends into the painting under it.
+        mask = cv2.GaussianBlur(mask, (0, 0), 0.8)
+        save_layer("kitchen-cat", rgb, mask, widths=(rgb.shape[1],), avif_quality=56)
+        h, w = room.shape[:2]
+        box = (x0 + left, y0 + top, rgb.shape[1], rgb.shape[0])
+        print(
+            "  kitchen cat box in the close-up (% of width/height): "
+            f"left {100 * box[0] / w:.2f}, top {100 * box[1] / h:.2f}, width {100 * box[2] / w:.2f}, height {100 * box[3] / h:.2f}"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--work", type=Path, default=Path(tempfile.gettempdir()) / "haven-house-art")
@@ -360,6 +417,8 @@ def main() -> None:
     prepare_garden(day, evening, night, alpha, args.work)
     print("Room close-ups")
     prepare_rooms()
+    print("Props")
+    prepare_props(args.work)
 
 
 if __name__ == "__main__":

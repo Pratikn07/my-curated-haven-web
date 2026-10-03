@@ -19,6 +19,17 @@ const FIREFLIES: [number, number, number, number, number, number][] = [
   [36, 95, 20, -10, 10, -5], [64, 96, -18, -12, 11, -1], [12, 54, 16, -16, 13, -10], [89, 50, -14, -18, 16, -12],
 ];
 
+/** Soft steam: three wisps that rise and fade. Decorative. */
+export function Steam({ className = "" }: { className?: string }) {
+  return (
+    <div className={`hs-steam ${className}`} aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
 export default function HouseScene() {
   return (
     <div className="hs-scene" aria-hidden="true">
@@ -36,6 +47,7 @@ export default function HouseScene() {
           <div className="hs-paint hs-paint-day" />
           <div className="hs-paint hs-paint-evening" />
           <div className="hs-paint hs-paint-night" />
+          <Steam className="hs-steam-house" />
         </div>
       </div>
 

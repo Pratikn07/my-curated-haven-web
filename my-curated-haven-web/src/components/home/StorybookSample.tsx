@@ -82,8 +82,8 @@ export default function StorybookSample() {
 
   return (
     <div className="grid min-w-0 gap-5">
-      <figure className="m-0 grid grid-cols-2 rounded-xl bg-[#f7f1e6] p-2.5 shadow-[0_30px_50px_-30px_rgb(30_20_50_/_0.55)] sm:p-3.5">
-        <div className="aspect-[300/340] overflow-hidden rounded-md" aria-hidden="true">
+      <figure className="storybook-book m-0 max-sm:-mx-3">
+        <div className="storybook-page-left" aria-hidden="true">
           <svg viewBox="0 0 300 340" className="block h-full w-full">
             <defs>
               <filter id="sb-watercolor" x="-5%" y="-5%" width="110%" height="110%">
@@ -111,11 +111,13 @@ export default function StorybookSample() {
             ))}
           </svg>
         </div>
-        <figcaption className="flex flex-col justify-center rounded-md bg-[#fbf7ee] p-3 text-[#3b3346] sm:p-6">
-          <p className="font-display text-[0.95rem] leading-relaxed italic sm:text-xl">{story.text(name)}</p>
-          <p className="mt-auto pt-3 text-center text-xs tracking-widest text-[#6b6176] uppercase">Sample page</p>
+        <figcaption className="storybook-page-right text-[#3b3346]">
+          <p className="font-display text-[0.8rem] leading-[1.4] italic min-[420px]:text-[0.9rem] sm:text-lg lg:text-xl">
+            {story.text(name)}
+          </p>
         </figcaption>
       </figure>
+      <p className="-mt-2 text-center text-xs tracking-widest text-text-muted uppercase">Sample page</p>
 
       <div className="grid gap-4">
         <div className="grid gap-2">

@@ -67,6 +67,16 @@ test("[haven-house] tapping a room opens its card and Back returns to the house"
   await expect(page.locator("#room-kitchen")).toBeHidden();
 });
 
+test("[haven-house] the Library's storybook opens on the way to the sample page", async ({ page }) => {
+  await page.goto("/");
+  await roomList(page).getByRole("link", { name: /^Library/ }).click();
+  const book = page.locator("#room-library").getByRole("link", { name: "Try a sample page" });
+  await book.click();
+  await expect(book).toHaveAttribute("data-opening", "");
+  await expect(page).toHaveURL(/#library$/);
+  await expect(page.locator("#library figure")).toBeInViewport();
+});
+
 test("[haven-house] a shared room link opens that room", async ({ page }) => {
   await page.goto("/#room-shelf");
   await expect(page.locator("#room-shelf")).toBeVisible();

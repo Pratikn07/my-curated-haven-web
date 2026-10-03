@@ -81,7 +81,30 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   mix-blend-mode: multiply;
+}
+
+/* The cat on the Kitchen windowsill, cut from the close-up itself so it lines up exactly, breathing slowly. */
+.hs-room-cat {
+  position: absolute;
+  left: 4.6%;
+  top: 40.24%;
+  width: 24.17%;
+  height: 11.14%;
+  background-size: 100% 100%;
+  transform-origin: 50% 100%;
+}
+
+.house-frame[data-active="kitchen"] .hs-room-cat {
+  background-image: url("/images/house/kitchen-cat-210.webp");
+  background-image: image-set(url("/images/house/kitchen-cat-210.avif") type("image/avif"), url("/images/house/kitchen-cat-210.webp") type("image/webp"));
+  animation: hs-cat-breathe 4.2s ease-in-out infinite;
+}
+
+@keyframes hs-cat-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  45% { transform: scale(1.012, 1.045); }
 }
 
 .hs-room::before {
@@ -462,6 +485,179 @@
   60% { opacity: 0.85; }
 }
 
+/* Steam: three soft wisps that rise and fade, used over the painted pot and in the Kitchen card. */
+.hs-steam {
+  position: absolute;
+  pointer-events: none;
+}
+
+.hs-steam span {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 46%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0));
+  opacity: 0;
+  animation: hs-steam-rise 5.4s ease-out infinite;
+}
+
+.hs-steam span:nth-child(2) {
+  animation-delay: -1.8s;
+  --steam-drift: -40%;
+}
+
+.hs-steam span:nth-child(3) {
+  animation-delay: -3.6s;
+  --steam-drift: 10%;
+}
+
+@keyframes hs-steam-rise {
+  0% { transform: translate(-50%, 10%) scale(0.5); opacity: 0; }
+  25% { opacity: 0.85; }
+  100% { transform: translate(var(--steam-drift, -15%), -150%) scale(1.5, 1.8); opacity: 0; }
+}
+
+/* Over the painted pot on the house; the Kitchen's quiet motion while no room is open. */
+.hs-steam-house {
+  left: 54.6%;
+  top: 63.6%;
+  width: 7.4%;
+  height: 8.6%;
+}
+
+/* A faint grey edge, like cotton-wool steam in a miniature, so it reads against the pale tiles. */
+.hs-steam-house span {
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.98) 30%, rgb(214 206 198 / 0.75) 65%, rgb(170 160 150 / 0));
+}
+
+.house-frame[data-active] .hs-steam-house {
+  display: none;
+}
+
+/* The pot in the Kitchen card, with steam rising toward tonight's recipes. */
+.kitchen-pot {
+  position: relative;
+  flex: none;
+  width: 6.5rem;
+  height: 7.25rem;
+  margin-block: -1.5rem -0.25rem;
+}
+
+.kitchen-pot-image {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  aspect-ratio: 300 / 202;
+  background-size: 100% 100%;
+  background-image: url("/images/house/prop-pot-300.webp");
+  background-image: -webkit-image-set(url("/images/house/prop-pot-200.webp") 1x, url("/images/house/prop-pot-300.webp") 2x);
+  background-image: image-set(
+    url("/images/house/prop-pot-200.avif") type("image/avif") 1x,
+    url("/images/house/prop-pot-300.avif") type("image/avif") 2x,
+    url("/images/house/prop-pot-200.webp") type("image/webp") 1x,
+    url("/images/house/prop-pot-300.webp") type("image/webp") 2x
+  );
+  filter: drop-shadow(0 8px 10px rgb(60 45 30 / 0.22));
+}
+
+.kitchen-pot .hs-steam {
+  left: 25%;
+  right: 25%;
+  bottom: 52%;
+  height: 55%;
+}
+
+.kitchen-pot .hs-steam span {
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0));
+  filter: drop-shadow(0 0 2px rgb(150 140 130 / 0.25));
+}
+
+/* The Library's closed storybook. On tap its cover swings open before the page moves to the sample. */
+.library-book {
+  position: relative;
+  flex: none;
+  width: 2.75rem;
+  aspect-ratio: 330 / 346;
+  perspective: 300px;
+}
+
+.library-book-pages,
+.library-book-cover {
+  position: absolute;
+  inset: 0;
+}
+
+.library-book-pages {
+  left: 14%;
+  top: 4%;
+  bottom: 4%;
+  border-radius: 2px 4px 4px 2px;
+  background: linear-gradient(90deg, #e9dcc4, #fbf5e8 30%, #f4ead6);
+  box-shadow: inset 0 0 0 1px rgb(120 100 80 / 0.25);
+}
+
+.library-book-cover {
+  background-size: 100% 100%;
+  background-image: url("/images/house/prop-book-closed-330.webp");
+  background-image: -webkit-image-set(url("/images/house/prop-book-closed-220.webp") 1x, url("/images/house/prop-book-closed-330.webp") 2x);
+  background-image: image-set(
+    url("/images/house/prop-book-closed-220.avif") type("image/avif") 1x,
+    url("/images/house/prop-book-closed-330.avif") type("image/avif") 2x,
+    url("/images/house/prop-book-closed-220.webp") type("image/webp") 1x,
+    url("/images/house/prop-book-closed-330.webp") type("image/webp") 2x
+  );
+  transform-origin: 14% 50%;
+  transition: transform 600ms cubic-bezier(0.3, 0.6, 0.2, 1);
+  filter: drop-shadow(0 4px 5px rgb(60 40 70 / 0.25));
+}
+
+.library-book-link:hover .library-book-cover {
+  transform: rotateY(-18deg);
+}
+
+.library-book-link[data-opening] .library-book-cover {
+  transform: rotateY(-150deg);
+}
+
+/* The storybook sample, laid out on the open book: drawing on the left page, story on the right. */
+.storybook-book {
+  position: relative;
+  aspect-ratio: 1200 / 664;
+  background-size: 100% 100%;
+  background-image: url("/images/house/prop-book-open-1200.webp");
+  background-image: -webkit-image-set(url("/images/house/prop-book-open-800.webp") 1x, url("/images/house/prop-book-open-1200.webp") 2x);
+  background-image: image-set(
+    url("/images/house/prop-book-open-800.avif") type("image/avif") 1x,
+    url("/images/house/prop-book-open-1200.avif") type("image/avif") 2x,
+    url("/images/house/prop-book-open-800.webp") type("image/webp") 1x,
+    url("/images/house/prop-book-open-1200.webp") type("image/webp") 2x
+  );
+  filter: drop-shadow(0 22px 24px rgb(40 30 60 / 0.28));
+}
+
+.storybook-page-left {
+  position: absolute;
+  left: 7%;
+  top: 8%;
+  width: 37%;
+  height: 80%;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.storybook-page-right {
+  position: absolute;
+  left: 53.5%;
+  top: 8%;
+  width: 35%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+}
+
 /* With JavaScript, only the open room's card shows. Without it, every card is listed. */
 .js .room-card:not([data-open]) {
   display: none;
@@ -529,5 +725,18 @@
 
   :root[data-house-fireflies] .hs-fireflies {
     display: none;
+  }
+
+  .hs-steam,
+  .house-frame[data-active="kitchen"] .hs-room-cat {
+    animation: none;
+  }
+
+  .hs-steam {
+    display: none;
+  }
+
+  .library-book-cover {
+    transition: none;
   }
 }
