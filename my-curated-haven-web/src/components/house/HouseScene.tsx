@@ -58,12 +58,15 @@ export default function HouseScene() {
         </div>
       </div>
 
-      <div className="hs-depth hs-depth-near" data-depth="near">
+      <div className="hs-depth" data-depth="garden">
         <div className="hs-garden">
           <div className="hs-garden-paint hs-garden-day" />
           <div className="hs-garden-paint hs-garden-evening" />
           <div className="hs-garden-paint hs-garden-night" />
         </div>
+      </div>
+
+      <div className="hs-depth hs-depth-near" data-depth="near">
         <div className="hs-fireflies">
           {FIREFLIES.map(([x, y, dx, dy, seconds, delay]) => (
             <span

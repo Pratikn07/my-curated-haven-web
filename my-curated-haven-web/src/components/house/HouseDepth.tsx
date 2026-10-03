@@ -2,11 +2,16 @@
 
 import { useEffect, type RefObject } from "react";
 
-/** How far each layer travels, in CSS pixels. Nearer layers move more, which reads as depth. */
+/**
+ * How far each layer travels, in CSS pixels. Nearer layers move more, which reads as depth.
+ * The garden is planted on the frame's bottom edge, so it only sways sideways: moving it up
+ * would lift it off the ground.
+ */
 const LAYERS = {
-  sky: { tilt: 4, scroll: 0.16 },
-  house: { tilt: 9, scroll: 0 },
-  near: { tilt: 16, scroll: -0.08 },
+  sky: { tilt: 4, scroll: 0.16, vertical: 1 },
+  house: { tilt: 9, scroll: 0, vertical: 1 },
+  garden: { tilt: 14, scroll: 0, vertical: 0 },
+  near: { tilt: 16, scroll: -0.08, vertical: 1 },
 } as const;
 
 type LayerName = keyof typeof LAYERS;
@@ -42,9 +47,9 @@ export default function HouseDepth({ frameRef }: { frameRef: RefObject<HTMLEleme
       current.y += (target.y - current.y) * 0.08;
       current.scroll += (target.scroll - current.scroll) * 0.2;
       for (const [node, name] of layers) {
-        const { tilt, scroll } = LAYERS[name];
+        const { tilt, scroll, vertical } = LAYERS[name];
         const x = -current.x * tilt;
-        const y = -current.y * tilt * 0.6 + current.scroll * scroll;
+        const y = (-current.y * tilt * 0.6 + current.scroll * scroll) * vertical;
         node.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`;
       }
       const settled =
