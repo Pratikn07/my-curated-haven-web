@@ -19,6 +19,12 @@ const KITCHEN_COLLECTION: CampaignCollectionCopy = {
   growsLine: "Plus every recipe we add to it later, at no extra cost.",
 };
 
+const LITTLE_HANDS_RECIPES: Campaign["recipes"] = [
+  { slug: "sweet-potato-and-spinach-frittata-fingers", note: "Soft egg strips that keep well for busy mornings." },
+  { slug: "soft-baked-blueberry-and-oat-bars", note: "Naturally sweet, from ripe banana and blueberries." },
+  { slug: "salmon-and-pea-fish-cakes" },
+];
+
 export const CAMPAIGNS: readonly Campaign[] = [
   {
     // The first post. Its link already went out in DMs, so the address must keep working.
@@ -27,11 +33,10 @@ export const CAMPAIGNS: readonly Campaign[] = [
     room: "kitchen",
     theme: "kitchen",
     motif: "leaves",
-    title: "Frittata fingers *small hands can hold.*",
-    subtitle: "Soft egg strips with sweet potato and spinach, made for little fingers and busy mornings.",
+    title: "3 recipes *small hands can hold.*",
+    subtitle: "A breakfast, a snack and a dinner, each one made to be picked up by tiny fingers.",
     instagram: { postedOn: "2026-10-03" },
-    recipes: [{ slug: "sweet-potato-and-spinach-frittata-fingers" }],
-    recipesHeading: "Your recipe is here.",
+    recipes: LITTLE_HANDS_RECIPES,
     featuredCollection: KITCHEN_COLLECTION,
   },
   {
@@ -43,11 +48,7 @@ export const CAMPAIGNS: readonly Campaign[] = [
     title: "3 recipes *small hands can hold.*",
     subtitle: "A breakfast, a snack and a dinner, each one made to be picked up by tiny fingers.",
     instagram: { postedOn: "2026-10-04" },
-    recipes: [
-      { slug: "sweet-potato-and-spinach-frittata-fingers", note: "Soft egg strips that keep well for busy mornings." },
-      { slug: "soft-baked-blueberry-and-oat-bars", note: "Naturally sweet, from ripe banana and blueberries." },
-      { slug: "salmon-and-pea-fish-cakes" },
-    ],
+    recipes: LITTLE_HANDS_RECIPES,
     featuredCollection: KITCHEN_COLLECTION,
     analytics: { series: "little-hands" },
   },

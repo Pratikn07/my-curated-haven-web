@@ -8,7 +8,7 @@ One campaign is one Instagram post or selection. It can promise one recipe or ma
 
 | # | Section | What it does | Shown when |
 | --- | --- | --- | --- |
-| 1 | Hero | The post's promise (rising word by word), its photo in an arch, a ring with how many free recipes wait below, one button down to them, "Picked by Bhagyashree · Recipes by Tiny Soho", and a band of short facts | Always |
+| 1 | Hero | The post's promise (rising word by word), its photo in an arch, neighbouring recipe photos on large screens, one button stating the free recipe count, and "Picked by Bhagyashree · Recipes by Tiny Soho" | Always |
 | 2 | Your recipes | The promised recipes, in order, with what waits on each recipe page (ingredients, steps, allergens, print). Each card opens the recipe's permanent page. The layout follows the count (see below) | Always |
 | 3 | Meet Bhagyashree & Anaika | Five moments of one kitchen scene, then Bhagyashree's note, read along as it scrolls | Always |
 | 4 | Pack | "Want more …?", the pack's name, recipe count, a few of its recipes, one price, "See what's inside" | Checkout on, and the pack is on sale |
@@ -49,11 +49,11 @@ The supplied photos of Bhagyashree and Anaika are one scene in five moments: Pre
 
 One easing curve (`--cp-ease`). Three layers, each optional:
 
-1. **CSS, always:** the first screen's load moment (the headline rises word by word from behind a mask, the italic phrase gets a marker stroke, the photo settles, the count ring spins in, all under 1.6 seconds), hover states, and scroll-driven effects where the browser supports them (reading progress line, photo drift in recipe cards, the dark collection panel opening to full width, the shelf's progress line).
+1. **CSS, always:** the first screen's load moment (the headline rises word by word from behind a mask, the italic phrase gets a marker stroke, the photo settles, all under 1.6 seconds), hover states, and scroll-driven effects where the browser supports them (reading progress line, photo drift in recipe cards, the dark collection panel opening to full width, the shelf's progress line).
 2. **`CampaignMotion` on every screen:** sections rise into place as they arrive (`data-reveal`), the recipe dock, the cooking time counting up, and a mouse drag on the related shelf.
 3. **Mouse only:** buttons lean toward the pointer and fill from where it enters, recipe cards tilt, a round "Open" or "Drag" label follows the pointer over things it can open or drag, the hero's letters thicken under the pointer (Fraunces is variable, so only its weight changes), drawn ingredients lean with it, and on large screens a WebGL lens follows it across the hero photo (`motion/ripple.ts`; if WebGL fails the photo simply stays).
 
-Text a parent reads is never faded in: reveals move it from behind a mask or a little below its place. The one exception is the moment lines inside the pinned story, which stay in the page for screen readers. Anything already on screen when the script starts stays exactly where it is. Ambient loops are quiet: the drawn ingredients, the count ring and the band of facts take 9 seconds or more per cycle, the two small dots pulse every 3 seconds, and the band pauses under the pointer. With reduced motion nothing moves and nothing waits on an animation; without the script the page is complete and still. Both are covered by browser tests.
+Text a parent reads is never faded in: reveals move it from behind a mask or a little below its place. The one exception is the moment lines inside the pinned story, which stay in the page for screen readers. Anything already on screen when the script starts stays exactly where it is. Ambient loops are quiet: the drawn ingredients and the closing ring take 9 seconds or more per cycle, and the two small dots pulse every 3 seconds. With reduced motion nothing moves and nothing waits on an animation; without the script the page is complete and still. Both are covered by browser tests.
 
 ## Adding a campaign
 
