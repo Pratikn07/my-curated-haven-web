@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import type { CampaignPageData } from "@/lib/data/load-campaign";
 import { recipeCountLabel } from "@/lib/campaigns/validate";
 import { usableImageSrc } from "@/lib/recipes/format";
-import { Marquee, Motif, Orbit, SplitTitle } from "./CampaignParts";
+import { Motif, SplitTitle } from "./CampaignParts";
 
 /**
  * 1. The first screen says "you're in the right place": the post's promise,
@@ -11,7 +11,7 @@ import { Marquee, Motif, Orbit, SplitTitle } from "./CampaignParts";
  * No navigation or commerce competes with it.
  *
  * The headline arrives word by word from behind a mask, the photo settles in
- * its arch, and a ring of short facts turns slowly around the recipe count.
+ * its arch, with the other recipe photos beside it on larger screens.
  * On large screens the letters lean toward the pointer and the photo ripples
  * under it (CampaignMotion); none of that is needed to read or use the page.
  */
@@ -24,15 +24,6 @@ export default function CampaignHero({ data }: { data: CampaignPageData }) {
     .filter((print): print is { src: string; title: string } => Boolean(print.src) && print.src !== hero.src)
     .slice(0, 2);
   const portrait = story.moments[story.moments.length - 1]?.image;
-  const free = count === 1 ? "free recipe" : "free recipes";
-  const ribbon = [
-    recipeCountLabel(count, "free"),
-    "No account needed",
-    "Cook it, print it, keep it",
-    "Allergens on every recipe",
-    ...recipes.slice(0, 3).map((recipe) => recipe.title),
-    "From our kitchen to yours",
-  ];
 
   return (
     <header className="cp-hero" aria-labelledby="cp-title">
@@ -86,7 +77,7 @@ export default function CampaignHero({ data }: { data: CampaignPageData }) {
             alt={hero.alt}
             fill
             priority
-            sizes="(min-width: 1024px) 36rem, 62vw"
+            sizes="(min-width: 1024px) 36rem, 100vw"
             placeholder={hero.blurDataURL ? "blur" : "empty"}
             blurDataURL={hero.blurDataURL}
             style={hero.focus ? { objectPosition: hero.focus } : undefined}
@@ -109,22 +100,7 @@ export default function CampaignHero({ data }: { data: CampaignPageData }) {
           </div>
         ))}
 
-        <Orbit id="cp-orbit-hero" className="cp-hero-badge" text={`${free} · no account · print at home · `}>
-          <span className="cp-hero-count" style={{ "--digits": String(count).length } as CSSProperties}>
-            {count}
-          </span>
-          <span className="cp-hero-count-label">
-            {count === 1 ? "recipe" : "recipes"}
-            <br />
-            below
-          </span>
-        </Orbit>
-
         <Motif motif={campaign.motif} placement="hero" />
-      </div>
-
-      <div className="cp-hero-ribbon">
-        <Marquee items={ribbon} />
       </div>
     </header>
   );
