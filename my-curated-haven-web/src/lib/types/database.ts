@@ -34,12 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      user_roles: {
-        Row: { user_id: string; role: string; granted_at: string }
-        Insert: { user_id: string; role: string; granted_at?: string }
-        Update: { user_id?: string; role?: string; granted_at?: string }
-        Relationships: []
-      }
       access_entitlements: {
         Row: {
           created_at: string
@@ -1411,19 +1405,34 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          granted_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      is_recipe_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       increment_shop_click: {
         Args: { product_id_input: string }
         Returns: undefined
       }
+      is_recipe_admin: { Args: never; Returns: boolean }
       search_shop_products: {
         Args: { query_text: string; result_limit?: number }
         Returns: {
