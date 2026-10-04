@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
-import { getFreeRecipeCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
+import { getFreeRecipeCatalog, getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
+import { isRecipeAdmin } from "@/lib/data/access";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeFilters from "@/components/recipe/RecipeFilters";
@@ -100,11 +101,15 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   let fetchError: string | null = null;
 
   let user = null;
+  let isAdmin = false;
   let savedIds = new Set<string>();
 
   try {
     const supabase = await createClient();
-    catalog = await getFreeRecipeCatalog(supabase);
+    isAdmin = await isRecipeAdmin(supabase);
+    catalog = isAdmin
+      ? await getPublishedCatalog(supabase)
+      : await getFreeRecipeCatalog(supabase);
     user = await getCurrentUser();
     if (user) {
       savedIds = await getSavedRecipeIds(supabase, user.id);
@@ -126,9 +131,9 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
           Simple Toddler Recipes
         </h1>
         <p className="mt-3 max-w-3xl text-lg text-text-muted">
-          Simple toddler recipes for busy families. Every free recipe includes its
-          ingredients, step-by-step instructions and storage guidance, with no sign-up
-          or paywall.
+          {isAdmin
+            ? "Admin access: browse every recipe, including drafts and withdrawn recipes. These recipes keep their existing publication and customer access settings."
+            : "Simple toddler recipes for busy families. Every free recipe includes its ingredients, step-by-step instructions and storage guidance, with no sign-up or paywall."}
         </p>
       </header>
 
@@ -153,7 +158,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
       ) : (
         <div className="grid gap-8">
           {/* Client-side filter controls with search params sync */}
-          <RecipeCatalogTracker totalCount={filteredRecipes.length} />
+          {!isAdmin && <RecipeCatalogTracker totalCount={filteredRecipes.length} />}
           <Suspense fallback={<div className="h-14 animate-pulse rounded-xl bg-surface-muted" />}>
             <RecipeFilters totalCount={filteredRecipes.length} />
           </Suspense>

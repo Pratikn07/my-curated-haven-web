@@ -11,7 +11,7 @@ import {
 } from "@/lib/data/recipes";
 import { formatIngredient, normalizeInstructions } from "@/lib/recipes/format";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
-import { checkRecipeAccess } from "@/lib/data/access";
+import { checkRecipeAccess, isRecipeAdmin } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import AllergenInformation from "@/components/recipe/AllergenInformation";
 import { RecipeIngredients, RecipeMethod, RecipeStorageNotes } from "@/components/recipe/RecipeSections";
@@ -26,6 +26,8 @@ const getCachedRecipe = cache(async (slug: string) => {
   const supabase = await createClient();
   return getRecipeBySlug(supabase, slug);
 });
+
+const getCachedAdminStatus = cache(async () => isRecipeAdmin(await createClient()));
 
 const getCachedFreeCatalog = cache(async () => {
   const supabase = await createClient();
@@ -61,6 +63,7 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalUrl,
     },
+    ...(await getCachedAdminStatus() ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       title,
       description,
@@ -92,6 +95,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
 
   // Fetch auth and saved recipe state
+  const isAdmin = await getCachedAdminStatus();
   const user = await getCurrentUser();
   const supabase = await createClient();
   const savedIds = user ? await getSavedRecipeIds(supabase, user.id) : new Set<string>();
@@ -215,7 +219,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                 Access
               </span>
               <span className={`text-base font-semibold ${isAccessDenied ? "text-text-muted" : "text-action"}`}>
-                {isAccessDenied ? "Collection Recipe" : accessKind === "free" ? "Free Toddler Recipe" : "Your Collection Recipe"}
+                {isAdmin ? "Admin access" : isAccessDenied ? "Collection Recipe" : accessKind === "free" ? "Free Toddler Recipe" : "Your Collection Recipe"}
               </span>
             </div>
           </div>
@@ -238,7 +242,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   Jump to recipe
                 </a>
                 <div className="flex-1 sm:flex-initial">
-                  <PrintButton recipeId={catalog.id} accessKind={accessKind} />
+                  <PrintButton recipeId={isAdmin ? undefined : catalog.id} accessKind={accessKind} />
                 </div>
               </>
             )}
@@ -307,7 +311,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </div>
         ) : body ? (
           <>
-            <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />
+            {!isAdmin && <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />}
             <RecipeIngredients ingredients={body.ingredients} />
             <RecipeMethod instructions={body.instructions} />
             <AllergenInformation

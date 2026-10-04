@@ -2,7 +2,7 @@
 // never a successful empty result or a false "denied".
 import assert from "node:assert/strict";
 import test from "node:test";
-import { checkRecipeAccess } from "../../src/lib/data/access.ts";
+import { checkRecipeAccess, isRecipeAdmin } from "../../src/lib/data/access.ts";
 import {
   getFreeRecipeCatalog,
   getFreeRecipeSlots,
@@ -28,7 +28,7 @@ const CATALOG_ROW = {
  * Fake Supabase client. `tables` maps a table name to the response its query resolves to.
  * Every builder method returns the builder, so any select/eq/order chain works.
  */
-function fakeClient({ tables = {}, user = { data: { user: null }, error: null }, throwOn } = {}) {
+function fakeClient({ tables = {}, user = { data: { user: null }, error: null }, throwOn, admin = { data: false, error: null } } = {}) {
   return {
     from(table) {
       if (table === throwOn) throw new Error("network down");
@@ -45,6 +45,7 @@ function fakeClient({ tables = {}, user = { data: { user: null }, error: null },
       return builder;
     },
     auth: { getUser: async () => user },
+    rpc: async () => admin,
   };
 }
 
@@ -120,4 +121,38 @@ test("checkRecipeAccess reports an error when the entitlement query fails", asyn
 test("checkRecipeAccess turns a thrown client error into a typed error", async () => {
   const result = await checkRecipeAccess(fakeClient({ throwOn: "recipe_catalog" }), RECIPE_ID);
   assert.deepEqual(result, { type: "error", message: "network down" });
+});
+
+const SIGNED_IN_USER = { data: { user: { id: "20000000-0000-0000-0000-000000000001" } }, error: null };
+
+test("admin status comes from the protected role RPC, not editable metadata", async () => {
+  assert.equal(await isRecipeAdmin(fakeClient({ user: SIGNED_IN_USER, admin: { data: true, error: null } })), true);
+  const forgedUser = { data: { user: { ...SIGNED_IN_USER.data.user, user_metadata: { role: "admin" } } }, error: null };
+  assert.equal(await isRecipeAdmin(fakeClient({ user: forgedUser })), false);
+});
+
+test("signed-out callers do not query the authenticated admin RPC", async () => {
+  const client = fakeClient();
+  client.rpc = () => { throw new Error("must not query roles without a user"); };
+  assert.equal(await isRecipeAdmin(client), false);
+});
+
+test("role lookup failures and malformed responses fail closed", async () => {
+  for (const admin of [FAILURE, { data: null, error: null }, { data: "true", error: null }]) {
+    await assert.rejects(isRecipeAdmin(fakeClient({ user: SIGNED_IN_USER, admin })), /Failed to check recipe admin role/);
+  }
+});
+
+test("an admin can access a draft without a free slot or purchase", async () => {
+  const client = fakeClient({
+    user: SIGNED_IN_USER,
+    admin: { data: true, error: null },
+    tables: { recipe_catalog: { data: { id: RECIPE_ID }, error: null } },
+  });
+  assert.deepEqual(await checkRecipeAccess(client, RECIPE_ID), { type: "admin" });
+});
+
+test("a regular signed-in user without a purchase remains denied", async () => {
+  const client = fakeClient({ user: SIGNED_IN_USER, tables: { recipe_catalog: { data: { id: RECIPE_ID }, error: null } } });
+  assert.deepEqual(await checkRecipeAccess(client, RECIPE_ID), { type: "denied" });
 });

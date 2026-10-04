@@ -34,6 +34,12 @@ export type Database = {
   }
   public: {
     Tables: {
+      user_roles: {
+        Row: { user_id: string; role: string; granted_at: string }
+        Insert: { user_id: string; role: string; granted_at?: string }
+        Update: { user_id?: string; role?: string; granted_at?: string }
+        Relationships: []
+      }
       access_entitlements: {
         Row: {
           created_at: string
@@ -1410,6 +1416,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_recipe_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       increment_shop_click: {
         Args: { product_id_input: string }
         Returns: undefined

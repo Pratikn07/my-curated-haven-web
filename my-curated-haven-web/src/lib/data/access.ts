@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/database";
 
 export type AccessStatus =
+  | { type: "admin" }
   | { type: "free"; slot: number }
   | { type: "entitled"; releaseId: string }
   | { type: "denied" }
@@ -15,6 +16,22 @@ function isMissingSession(error: { name?: string; message?: string }): boolean {
     message.includes("auth session missing") ||
     message.includes("session missing")
   );
+}
+
+/** Check the protected role table through an RPC under the caller's session. */
+async function hasRecipeAdminRole(client: SupabaseClient<Database>): Promise<boolean> {
+  const { data, error } = await client.rpc("is_recipe_admin");
+  if (error || typeof data !== "boolean") {
+    throw new Error(`Failed to check recipe admin role: ${error?.message ?? "invalid response"}`);
+  }
+  return data;
+}
+
+export async function isRecipeAdmin(client: SupabaseClient<Database>): Promise<boolean> {
+  const { data, error } = await client.auth.getUser();
+  if (error && !isMissingSession(error)) throw new Error(error.message);
+  if (!data.user) return false;
+  return hasRecipeAdminRole(client);
 }
 
 /**
@@ -36,7 +53,7 @@ async function resolveRecipeAccess(
   client: SupabaseClient<Database>,
   recipeId: string
 ): Promise<AccessStatus> {
-  // 1. Verify existence in published catalog
+  // 1. Verify existence in the catalog visible under the caller's RLS policies
   const { data: catalog, error: catalogError } = await client
     .from("recipe_catalog")
     .select("id")
@@ -76,6 +93,10 @@ async function resolveRecipeAccess(
   const user = userData.user;
   if (!user) {
     return { type: "denied" };
+  }
+
+  if (await hasRecipeAdminRole(client)) {
+    return { type: "admin" };
   }
 
   const { data: entitlements, error: entitlementError } = await client
