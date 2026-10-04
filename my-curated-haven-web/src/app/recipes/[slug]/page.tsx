@@ -7,13 +7,14 @@ import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import {
   getRecipeBySlug,
   getFreeRecipeCatalog,
-  type RecipeIngredient,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
+import { formatIngredient, normalizeInstructions } from "@/lib/recipes/format";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import { checkRecipeAccess } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import AllergenInformation from "@/components/recipe/AllergenInformation";
+import { RecipeIngredients, RecipeMethod, RecipeStorageNotes } from "@/components/recipe/RecipeSections";
 import PrintButton from "@/components/recipe/PrintButton";
 import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
 import RecipeOpenTracker from "@/components/recipe/RecipeOpenTracker";
@@ -70,32 +71,6 @@ export async function generateMetadata({
         : [],
     },
   };
-}
-
-function normalizeInstructions(rawInstructions: unknown): { step: number; text: string }[] {
-  if (!Array.isArray(rawInstructions)) return [];
-  return rawInstructions.map((item, index) => {
-    if (typeof item === "string") {
-      return { step: index + 1, text: item };
-    }
-    if (typeof item === "object" && item !== null && "text" in item) {
-      const typed = item as { step?: unknown; text?: unknown };
-      return {
-        step: typeof typed.step === "number" ? typed.step : index + 1,
-        text: String(typed.text),
-      };
-    }
-    return { step: index + 1, text: String(item) };
-  });
-}
-
-function formatIngredient(ingredient: RecipeIngredient | string): string {
-  if (typeof ingredient === "string") return ingredient;
-  const parts: string[] = [];
-  if (ingredient.amount) parts.push(ingredient.amount);
-  if (ingredient.unit) parts.push(ingredient.unit);
-  if (ingredient.item) parts.push(ingredient.item);
-  return parts.join(" ");
 }
 
 export default async function RecipeDetailPage({ params }: RecipeDetailPageProps) {
@@ -333,65 +308,13 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
         ) : body ? (
           <>
             <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />
-            {/* Ingredients Section */}
-            <section aria-labelledby="ingredients-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-              <h2 id="ingredients-heading" className="text-2xl font-bold text-foreground">
-                Ingredients
-              </h2>
-              <ul className="mt-4 divide-y divide-border text-base text-foreground">
-                {body.ingredients.map((ing, i) => (
-                  <li key={i} className="flex items-start gap-3 py-2.5">
-                    <span className="mt-1 flex h-2 w-2 shrink-0 rounded-full bg-action" aria-hidden="true" />
-                    <span className="leading-relaxed [overflow-wrap:anywhere]">{formatIngredient(ing)}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            {/* Instructions Section */}
-            <section aria-labelledby="instructions-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-              <h2 id="instructions-heading" className="text-2xl font-bold text-foreground">
-                Method & Instructions
-              </h2>
-              <ol className="mt-4 grid gap-4 text-base text-foreground">
-                {instructions.map((step) => (
-                  <li key={step.step} className="flex min-w-0 gap-4">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-bold text-foreground">
-                      {step.step}
-                    </span>
-                    <p className="min-w-0 flex-1 pt-0.5 leading-relaxed [overflow-wrap:anywhere]">{step.text}</p>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
+            <RecipeIngredients ingredients={body.ingredients} />
+            <RecipeMethod instructions={body.instructions} />
             <AllergenInformation
               reviewState={body.allergenReviewState}
               allergens={body.allergens}
             />
-
-            {/* Storage Guidance and Notes */}
-            {(body.storageNotes || body.reviewedNotes) && (
-              <section aria-labelledby="storage-notes-heading" className="w-full min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-8">
-                <h2 id="storage-notes-heading" className="text-xl font-bold text-foreground">
-                  Storage & Preparation Notes
-                </h2>
-                <div className="mt-3 grid gap-4 text-sm leading-relaxed text-text-muted">
-                  {body.storageNotes && (
-                    <div>
-                      <h3 className="font-semibold text-foreground">Storage Instructions:</h3>
-                      <p className="mt-1 whitespace-pre-line break-words">{body.storageNotes}</p>
-                    </div>
-                  )}
-                  {body.reviewedNotes && (
-                    <div>
-                      <h3 className="font-semibold text-foreground">Helpful Toddler Feeding Tips:</h3>
-                      <p className="mt-1 whitespace-pre-line break-words">{body.reviewedNotes}</p>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
+            <RecipeStorageNotes storageNotes={body.storageNotes} reviewedNotes={body.reviewedNotes} />
 
             {/* Print Footer Attribution (visible only in print) */}
             <div className="hidden border-t border-border pt-4 text-xs text-text-muted print:block">

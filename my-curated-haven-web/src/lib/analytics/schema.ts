@@ -52,6 +52,9 @@ export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey | n
   if (pathname.startsWith("/collections/")) {
     return "collection_detail";
   }
+  if (pathname.startsWith("/stories/")) {
+    return "story";
+  }
   return null;
 }
 
@@ -95,6 +98,8 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
   homepage_preview_viewed: ["feature_key", "content_version"],
+  story_view: ["story_slug", "room"],
+  story_action_clicked: ["story_slug", "story_action", "story_placement"],
 };
 
 export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
@@ -117,4 +122,6 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
   homepage_preview_viewed: ["feature_key", "content_version"],
+  story_view: ["story_slug", "room"],
+  story_action_clicked: ["story_slug", "story_action", "story_placement"],
 };

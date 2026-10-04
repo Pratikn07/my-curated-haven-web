@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { acceptCampaignInput } from "../../src/lib/analytics/campaigns";
 import { remoteAnalyticsAllowed, trustedAnalyticsEnvironment } from "../../src/lib/analytics/environment";
 import { validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
+import { pathToCanonicalRouteKey } from "../../src/lib/analytics/schema";
 
 const RECIPE_ID = "10000000-0000-0000-0000-000000000001";
 
@@ -92,7 +93,7 @@ test("keeps only registered campaign values", () => {
       utm_content: content,
     });
 
-  for (const campaign of ["bio_link", "story_link", "instagram_dm"]) {
+  for (const campaign of ["bio_link", "story_link", "instagram_dm", "comment_dm"]) {
     expect(link(campaign)?.utm_campaign, campaign).toBe(campaign);
   }
   expect(link("story_link", "2026-10-01")?.utm_content).toBe("2026-10-01");
@@ -145,4 +146,37 @@ test("remote analytics stays off without an explicit environment", () => {
       else process.env[key] = value;
     }
   }
+});
+
+test("[stories] landing page events accept only fixed values", () => {
+  expect(pathToCanonicalRouteKey("/stories/frittata-fingers")).toBe("story");
+  expect(validateAnalyticsEvent("page_view", { route_key: "story", device_class: "mobile" }).ok).toBe(true);
+
+  expect(validateAnalyticsEvent("story_view", { story_slug: "frittata-fingers", room: "kitchen" }).ok).toBe(true);
+  expect(
+    validateAnalyticsEvent("story_action_clicked", {
+      story_slug: "frittata-fingers",
+      story_action: "collection",
+      story_placement: "offer",
+    }).ok
+  ).toBe(true);
+
+  for (const story_slug of ["Frittata Fingers", "parent@example.com", "https://x.test", "../x", ""]) {
+    expect(validateAnalyticsEvent("story_view", { story_slug, room: "kitchen" }).ok, story_slug).toBe(false);
+  }
+  expect(validateAnalyticsEvent("story_view", { story_slug: "frittata-fingers", room: "garden" }).ok).toBe(false);
+  expect(
+    validateAnalyticsEvent("story_action_clicked", {
+      story_slug: "frittata-fingers",
+      story_action: "https://mycuratedhaven.com/collections/x",
+      story_placement: "offer",
+    }).ok
+  ).toBe(false);
+  expect(
+    validateAnalyticsEvent("story_action_clicked", {
+      story_slug: "frittata-fingers",
+      story_action: "recipe_jump",
+      story_placement: "popup",
+    }).ok
+  ).toBe(false);
 });

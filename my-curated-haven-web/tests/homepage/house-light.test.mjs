@@ -27,7 +27,7 @@ function at(hours, minutes) {
   return new Date(2026, 9, 2, hours, minutes, 0);
 }
 
-function runInlineScript(date) {
+function runInlineScript(date, pathname = "/") {
   const root = fakeRoot();
   const links = [];
   const RealDate = Date;
@@ -38,6 +38,7 @@ function runInlineScript(date) {
       createElement: () => ({ setAttribute(name, value) { this[name] = value; } }),
     },
     CSS: { supports: () => true },
+    location: { pathname },
     Date: class extends RealDate {
       constructor() {
         super(date.getTime());
@@ -102,4 +103,11 @@ test("the script preloads only the painting that shows most", () => {
   assert.ok(night.every((link) => link.imagesrcset.includes("house-night-") && link.type === "image/avif"));
   const day = runInlineScript(at(12, 0)).links;
   assert.ok(day.every((link) => link.imagesrcset.includes("house-day-")));
+});
+
+test("pages other than the homepage never preload the house", () => {
+  assert.equal(runInlineScript(at(12, 0), "/stories/frittata-fingers").links.length, 0);
+  assert.equal(runInlineScript(at(23, 0), "/recipes").links.length, 0);
+  // The light itself still applies everywhere.
+  assert.equal(runInlineScript(at(23, 0), "/recipes").root.attributes.get("data-daypart"), "night");
 });

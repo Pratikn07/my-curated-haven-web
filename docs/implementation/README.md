@@ -29,6 +29,7 @@ These efforts sit outside the numbered roadmap. They keep their own task IDs, sc
 | --- | --- | --- | --- |
 | Homepage vision and feature previews | Broader My Curated Haven homepage, recipe entry and static sneak peeks of Parenting Chat, Curated Shop and Bloom | [Homepage vision plan](homepage-vision/README.md) | Plan documented, homepage implementation and release pending |
 | Haven house redesign | Interactive illustrated house homepage, time-of-day light, room samples and Instagram landing pages | [Haven house design system](haven-house/DESIGN-SYSTEM.md) | Proposed, owner decisions open |
+| Instagram landing pages | One page per post at `/stories/<slug>`: the recipe first, Bhagyashree's note, one honest collection offer | [Landing page plan](instagram-landing/PLAN.md) | First page built for review, owner facts and photos pending |
 
 The homepage effort does not implement the previewed features, replace Phase 12 or create Phase 13. Its release state follows verified recipe and commerce readiness.
 
