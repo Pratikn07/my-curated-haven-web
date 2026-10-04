@@ -3,6 +3,7 @@ import Image from "next/image";
 import Badge from "@/components/ui/Badge";
 import SaveRecipeButton from "./SaveRecipeButton";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
+import { usableImageSrc } from "@/lib/recipes/format";
 
 export type RecipeExample = {
   id: string;
@@ -48,7 +49,8 @@ export default function RecipeCard({
     : recipe.dietaryLabels || [];
   const accessLabel = isCatalog ? "Free recipe" : (recipe.accessLabel ?? "Free sample");
   const summary = isCatalog ? recipe.publicSummary : undefined;
-  const imageSrc = isCatalog ? recipe.previewImagePath : undefined;
+  // A path next/image can't load (not root-relative or absolute) shows the no-photo state, not a broken image.
+  const imageSrc = isCatalog ? usableImageSrc(recipe.previewImagePath) ?? undefined : undefined;
   const missingImage = !isCatalog && recipe.missingImage;
   const imageLabel = !isCatalog ? recipe.imageLabel : undefined;
 

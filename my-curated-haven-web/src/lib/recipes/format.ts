@@ -1,6 +1,6 @@
 import type { RecipeIngredient } from "@/lib/data/recipes";
 
-/** Shared by the recipe page and the Instagram landing pages, so both show a recipe the same way. */
+/** Shared by the recipe page and its structured data, so both list the steps the same way. */
 export function normalizeInstructions(rawInstructions: unknown): { step: number; text: string }[] {
   if (!Array.isArray(rawInstructions)) return [];
   return rawInstructions.map((item, index) => {

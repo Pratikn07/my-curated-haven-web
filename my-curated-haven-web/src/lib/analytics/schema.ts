@@ -98,8 +98,9 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
   homepage_preview_viewed: ["feature_key", "content_version"],
-  story_view: ["story_slug", "room"],
-  story_action_clicked: ["story_slug", "story_action", "story_placement"],
+  story_view: ["story_slug", "room", "recipe_count", "offer_state", "story_series"],
+  story_action_clicked: ["story_slug", "story_action", "story_placement", "recipe_id", "recipe_position"],
+  story_section_viewed: ["story_slug", "story_section"],
 };
 
 export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
@@ -124,4 +125,5 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   homepage_preview_viewed: ["feature_key", "content_version"],
   story_view: ["story_slug", "room"],
   story_action_clicked: ["story_slug", "story_action", "story_placement"],
+  story_section_viewed: ["story_slug", "story_section"],
 };

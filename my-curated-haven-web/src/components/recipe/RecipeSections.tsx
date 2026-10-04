@@ -2,8 +2,8 @@ import type { RecipeBody } from "@/lib/data/recipes";
 import { formatIngredient, normalizeInstructions } from "@/lib/recipes/format";
 
 /**
- * The recipe's own sections, shared by the recipe page and the Instagram
- * landing pages so a recipe looks the same wherever a parent reads it.
+ * The recipe's own sections. The recipe page is the one place a recipe is read
+ * in full; Instagram campaign pages link to it instead of repeating it.
  */
 
 export function RecipeIngredients({ ingredients }: { ingredients: RecipeBody["ingredients"] }) {

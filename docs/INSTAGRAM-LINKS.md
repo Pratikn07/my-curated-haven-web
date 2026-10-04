@@ -13,7 +13,7 @@ Reel and feed captions can't hold clickable links, so they ask people to comment
 
 ## Linking to a post's own page
 
-Each post can have its own landing page at `/stories/<post>`. Its first screen repeats the post, and the recipe is right under it. See [the landing page plan](implementation/instagram-landing/PLAN.md).
+Each post can have its own landing page at `/stories/<post>`. Its first screen repeats the post, and the recipes it promised (one or several) are right under it, each opening its recipe page. See [the landing page plan](implementation/instagram-landing/PLAN.md) and [how to add a campaign](implementation/instagram-landing/CAMPAIGNS.md).
 
 Use the post's page for its Story link sticker and for DMs about it. Keep the tag for where you posted it; the page's address already says which post it was, so `utm_content` isn't needed:
 
@@ -45,7 +45,7 @@ https://mycuratedhaven.com/recipes/soft-baked-blueberry-and-oat-bars?utm_source=
 
 PostHog → **Web analytics** → the **UTM campaign** or **Channels** breakdown. Or PostHog → **Activity**, filter on the property `campaign_code`.
 
-For post pages: the event `story_view` names the post (`story_slug`), `story_action_clicked` records taps on its buttons, and the session property `entry_story` ties a later recipe open or purchase back to the post.
+For post pages: the event `story_view` names the post (`story_slug`) and how many recipes and offers it showed, `story_action_clicked` records taps on its buttons (which promised recipe was opened, the pack or collection, back to Instagram), `story_section_viewed` shows how far down the page parents got, and the session property `entry_story` ties a later recipe open or purchase back to the post.
 
 ## Adding a new place
 
