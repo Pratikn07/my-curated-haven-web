@@ -115,7 +115,7 @@ test("[stories] large screens pin the story and move through it with scroll; les
   const third = page.locator(".cp-moment").nth(2).locator(".cp-moment-text");
   await expect.poll(() => third.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeLessThan(0.1);
   // The pinned range runs from the track's top meeting the header to its bottom meeting the screen's.
-  // The third moment rests a little before half way (KitchenStoryMotion's timeline: 2.15 of 4.65 units).
+  // The third moment rests a little before half way (the story timeline in motion/story.ts: 2.15 of 4.65 units).
   const target = await page.locator(".cp-story-track").evaluate((element) => {
     const track = element as HTMLElement;
     const header = parseFloat(getComputedStyle(track.querySelector(".cp-story-stage")!).top);
@@ -139,6 +139,92 @@ test("[stories] large screens pin the story and move through it with scroll; les
   await still.waitForTimeout(1500);
   await expect(still.locator(".cp-story")).not.toHaveAttribute("data-motion", "pinned");
   await still.close();
+});
+
+test("[stories] the filmstrip under the pinned story jumps to any moment", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-desktop", "The filmstrip belongs to the pinned story on large screens.");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(MULTI);
+
+  const story = page.locator(".cp-story");
+  await story.scrollIntoViewIfNeeded();
+  await expect(story).toHaveAttribute("data-motion", "pinned");
+
+  const reel = page.getByRole("list", { name: "Moments of the story" });
+  const top = reel.getByRole("button", { name: "Moment 4 of 5: Top" });
+  await top.click();
+  const fourth = page.locator(".cp-moment").nth(3).locator(".cp-moment-text");
+  await expect.poll(() => fourth.evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.9);
+  await expect(top).toHaveAttribute("aria-current", "step");
+  await expect(reel.getByRole("button", { name: "Moment 1 of 5: Prep" })).not.toHaveAttribute("aria-current", "step");
+});
+
+test("[stories] the promised recipe stays one tap away once it has scrolled past", async ({ page }) => {
+  await page.goto(SINGLE);
+  const dock = page.locator(".cp-dock");
+  const open = dock.getByRole("link", { name: /Open recipe/ });
+  // Not on the first screen, where the hero's button is the way down.
+  await expect(dock).toHaveAttribute("data-visible", "false");
+  await expect(open).toBeHidden();
+
+  const intoStory = () =>
+    page.evaluate(() => {
+      const story = document.querySelector("#cp-story")!;
+      window.scrollTo(0, story.getBoundingClientRect().top + window.scrollY + 300);
+    });
+  await intoStory();
+  await expect(dock).toHaveAttribute("data-visible", "true");
+  await expect(open).toBeVisible();
+  await expect(open).toHaveAttribute("href", "/recipes/synth-free-veggie-frittata");
+
+  // It steps aside while an offer is on screen, so it never competes with a price.
+  await page.locator(".cp-collection").scrollIntoViewIfNeeded();
+  await expect(dock).toHaveAttribute("data-visible", "false");
+  await expect(open).toBeHidden();
+
+  await intoStory();
+  await expect(open).toBeVisible();
+  await open.click();
+  await expect(page).toHaveURL(/\/recipes\/synth-free-veggie-frittata$/);
+  const taps = (await recordedEvents(page)).filter((event) => event.event_name === "story_action_clicked");
+  expect(taps.map((event) => event.properties)).toEqual([
+    {
+      story_slug: "local-sample-frittata",
+      story_action: "campaign_recipe",
+      story_placement: "sticky",
+      recipe_id: "10000000-0000-0000-0000-000000000002",
+      recipe_position: 1,
+    },
+  ]);
+});
+
+test("[stories] with reduced motion every part of the page is simply in place", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(MULTI);
+  for (const selector of ["#cp-recipes", "#cp-story", ".cp-pack", ".cp-questions", ".cp-closing"]) {
+    await page.locator(selector).scrollIntoViewIfNeeded();
+  }
+  // Nothing is held below its place or behind a mask, waiting for a reveal.
+  const held = await page.evaluate(() => [
+    ...Array.from(document.querySelectorAll("[data-reveal]")).filter((element) => getComputedStyle(element).translate !== "none"),
+    ...Array.from(document.querySelectorAll(".cp-word-in")).filter((element) => getComputedStyle(element).transform !== "none"),
+  ].length);
+  expect(held).toBe(0);
+  await expect(page.locator(".cp-story")).not.toHaveAttribute("data-motion", "pinned");
+});
+
+test("[stories] without script the page is complete and still", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(MULTI);
+  await expect(page.getByRole("heading", { level: 1, name: "3 breakfasts worth saving." })).toBeVisible();
+  await expect(page.getByRole("link", { name: /See the 3 free recipes/ })).toHaveAttribute("href", "#cp-recipes");
+  await expect(page.locator("#cp-recipes").getByRole("heading", { level: 3 })).toHaveCount(3);
+  await expect(page.locator(".cp-moment")).toHaveCount(5);
+  await expect(page.getByText("Anaika is pulling at my leg")).toBeVisible();
+  // The dock needs the script to know where the reader is, so it never shows without it.
+  await expect(page.locator(".cp-dock a")).toBeHidden();
+  await context.close();
 });
 
 test("[stories] commerce comes after the recipes and the story, with one honest price per offer", async ({ page }) => {

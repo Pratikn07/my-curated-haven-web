@@ -1,7 +1,3 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-
 type Gsap = typeof import("gsap").gsap;
 type ScrollTriggerType = typeof import("gsap/ScrollTrigger").ScrollTrigger;
 
@@ -10,13 +6,19 @@ type ScrollTriggerType = typeof import("gsap/ScrollTrigger").ScrollTrigger;
  * a phone, and anyone who prefers less motion keep the CSS story and never
  * download GSAP.
  */
-const PINNED_QUERY = "(min-width: 1024px) and (min-height: 620px) and (prefers-reduced-motion: no-preference)";
+export const PINNED_QUERY = "(min-width: 1024px) and (min-height: 620px) and (prefers-reduced-motion: no-preference)";
 
 /** Timeline units: each moment gets one unit of scroll, the new photo opens a quarter of the way in. */
 const STEP = 1;
 const OPEN_AT = 0.25;
 const TEXT_AT = 0.35;
+const TEXT_IN = 0.35;
 const TAIL = 0.65;
+
+/** When moment `index` has fully arrived: its photo open and its line in place. */
+function restTime(index: number): number {
+  return index === 0 ? 0 : (index - 1) * STEP + OPEN_AT + TEXT_AT + TEXT_IN;
+}
 
 function buildPinnedStory(section: HTMLElement, gsap: Gsap, ScrollTrigger: ScrollTriggerType) {
   const track = section.querySelector<HTMLElement>(".cp-story-track");
@@ -32,6 +34,7 @@ function buildPinnedStory(section: HTMLElement, gsap: Gsap, ScrollTrigger: Scrol
   const origins = moments.map((moment) => getComputedStyle(moment).getPropertyValue("--origin").trim() || "50% 60%");
   const ticks = Array.from(section.querySelectorAll<HTMLElement>(".cp-story-tick"));
   const fill = section.querySelector<HTMLElement>(".cp-story-progress-fill");
+  const reel = section.querySelector<HTMLElement>(".cp-story-counter-reel");
   const drift = Array.from(section.querySelectorAll<HTMLElement>('.cp-motif[data-placement="story"] .cp-motif-item'));
   const count = moments.length;
 
@@ -53,7 +56,9 @@ function buildPinnedStory(section: HTMLElement, gsap: Gsap, ScrollTrigger: Scrol
       // The moment before leans back a little, for depth.
       .to(photos[index - 1], { scale: 1.08, duration: 0.7, ease: "power1.in" }, at)
       .to(texts[index - 1], { opacity: 0, y: -24, duration: 0.25, ease: "power1.in" }, at + 0.1)
-      .fromTo(texts[index], { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }, at + TEXT_AT);
+      .fromTo(texts[index], { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: TEXT_IN, ease: "power2.out" }, at + TEXT_AT);
+    // The big counter rolls to the next number as the photo opens.
+    if (reel) timeline.to(reel, { yPercent: (-100 * index) / count, duration: 0.45, ease: "power3.inOut" }, at + 0.1);
   }
 
   // A short rest on the last moment before the stage lets go.
@@ -73,12 +78,14 @@ function buildPinnedStory(section: HTMLElement, gsap: Gsap, ScrollTrigger: Scrol
     if (next === active) return;
     active = next;
     ticks.forEach((tick, index) => {
+      if (index === active) tick.setAttribute("aria-current", "step");
+      else tick.removeAttribute("aria-current");
       if (index <= active) tick.dataset.active = "true";
       else delete tick.dataset.active;
     });
   };
 
-  ScrollTrigger.create({
+  const trigger = ScrollTrigger.create({
     trigger: track,
     // The stage sticks under the site header; its computed top is that offset in pixels.
     start: () => `top top+=${parseFloat(getComputedStyle(stage).top) || 0}`,
@@ -89,12 +96,29 @@ function buildPinnedStory(section: HTMLElement, gsap: Gsap, ScrollTrigger: Scrol
     onUpdate: (self) => setActive(self.progress * timeline.duration()),
   });
 
+  // The filmstrip: each frame scrolls the page to the point where its moment rests.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const onTick = (event: Event) => {
+    const tick = (event.currentTarget as HTMLElement | null) ?? null;
+    const index = Number(tick?.dataset.moment);
+    if (!Number.isInteger(index)) return;
+    const progress = Math.min(1, restTime(index) / timeline.duration());
+    window.scrollTo({ top: trigger.start + (trigger.end - trigger.start) * progress, behavior: reduce.matches ? "auto" : "smooth" });
+  };
+  ticks.forEach((tick) => tick.addEventListener("click", onTick));
+
   return () => {
-    delete section.dataset.motion;
     ticks.forEach((tick, index) => {
-      if (index === 0) tick.dataset.active = "true";
-      else delete tick.dataset.active;
+      tick.removeEventListener("click", onTick);
+      if (index === 0) {
+        tick.dataset.active = "true";
+        tick.setAttribute("aria-current", "step");
+      } else {
+        delete tick.dataset.active;
+        tick.removeAttribute("aria-current");
+      }
     });
+    delete section.dataset.motion;
   };
 }
 
@@ -103,55 +127,55 @@ function buildPinnedStory(section: HTMLElement, gsap: Gsap, ScrollTrigger: Scrol
  * scroll. GSAP loads only when the story is near or the browser is idle, and
  * gsap.matchMedia undoes everything if the screen shrinks or motion is turned off.
  */
-export default function KitchenStoryMotion() {
-  const anchor = useRef<HTMLSpanElement>(null);
+export function setupPinnedStory(section: HTMLElement): () => void {
+  if (typeof IntersectionObserver === "undefined") return () => {};
 
-  useEffect(() => {
-    const section = anchor.current?.closest<HTMLElement>(".cp-story");
-    if (!section || typeof IntersectionObserver === "undefined") return;
+  const media = window.matchMedia(PINNED_QUERY);
+  let disposed = false;
+  let started = false;
+  let revert: (() => void) | null = null;
 
-    const media = window.matchMedia(PINNED_QUERY);
-    let disposed = false;
-    let started = false;
-    let revert: (() => void) | null = null;
-
-    const start = () => {
-      if (started || disposed || !media.matches) return;
-      started = true;
-      void Promise.all([import("gsap"), import("gsap/ScrollTrigger")])
-        .then(([{ gsap }, { ScrollTrigger }]) => {
-          if (disposed) return;
-          gsap.registerPlugin(ScrollTrigger);
-          const mm = gsap.matchMedia();
-          mm.add(PINNED_QUERY, () => buildPinnedStory(section, gsap, ScrollTrigger));
-          revert = () => mm.revert();
-        })
-        .catch(() => {
-          // The stacked story stays; nothing depends on the script.
+  const start = () => {
+    if (started || disposed || !media.matches) return;
+    started = true;
+    void Promise.all([import("gsap"), import("gsap/ScrollTrigger")])
+      .then(([{ gsap }, { ScrollTrigger }]) => {
+        if (disposed) return;
+        gsap.registerPlugin(ScrollTrigger);
+        const mm = gsap.matchMedia();
+        mm.add(PINNED_QUERY, () => buildPinnedStory(section, gsap, ScrollTrigger));
+        // Late web fonts change line heights, and so the pinned range.
+        void document.fonts?.ready.then(() => {
+          if (!disposed) ScrollTrigger.refresh();
         });
-    };
+        revert = () => mm.revert();
+      })
+      .catch(() => {
+        // The stacked story stays; nothing depends on the script.
+      });
+  };
 
-    const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(
+    (entries) => {
       if (entries.some((entry) => entry.isIntersecting)) start();
-    }, { rootMargin: "150% 0px" });
-    observer.observe(section);
+    },
+    { rootMargin: "150% 0px" }
+  );
+  observer.observe(section);
 
-    const idle =
-      typeof window.requestIdleCallback === "function"
-        ? window.requestIdleCallback(start, { timeout: 2500 })
-        : window.setTimeout(start, 1500);
-    const onChange = () => start();
-    media.addEventListener("change", onChange);
+  const idle =
+    typeof window.requestIdleCallback === "function"
+      ? window.requestIdleCallback(start, { timeout: 2500 })
+      : window.setTimeout(start, 1500);
+  const onChange = () => start();
+  media.addEventListener("change", onChange);
 
-    return () => {
-      disposed = true;
-      observer.disconnect();
-      media.removeEventListener("change", onChange);
-      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
-      else window.clearTimeout(idle);
-      revert?.();
-    };
-  }, []);
-
-  return <span ref={anchor} hidden />;
+  return () => {
+    disposed = true;
+    observer.disconnect();
+    media.removeEventListener("change", onChange);
+    if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idle);
+    else window.clearTimeout(idle);
+    revert?.();
+  };
 }

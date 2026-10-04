@@ -11,6 +11,8 @@ export default function ShelfControls({ targetId }: { targetId: string }) {
     if (!shelf) return;
     const update = () => {
       const max = shelf.scrollWidth - shelf.clientWidth;
+      // campaign.css shows the shelf's progress line only when there is somewhere to scroll.
+      shelf.toggleAttribute("data-overflow", max > 4);
       setState({ overflow: max > 4, atStart: shelf.scrollLeft <= 4, atEnd: shelf.scrollLeft >= max - 4 });
     };
     update();
