@@ -46,6 +46,21 @@ test("[stories] the first screen confirms the post and how many free recipes wai
   await expect(page.getByRole("heading", { level: 2, name: "Your recipes are here." })).toBeInViewport();
 });
 
+test("[stories] headline words stay whole: no word is ever split across lines", async ({ page }) => {
+  // Safari once put the first letter of each hero word on a line of its own ("F / rittata").
+  for (const path of [SINGLE, MULTI]) {
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    const split = await page.evaluate(() =>
+      Array.from(document.querySelectorAll<HTMLElement>(".campaign .cp-word-in"))
+        // offsetHeight ignores the reveal's rotate, so this is the word's laid-out height: one line or more.
+        .filter((word) => word.offsetHeight > parseFloat(getComputedStyle(word).fontSize) * 1.5)
+        .map((word) => word.textContent)
+    );
+    expect(split, path).toEqual([]);
+  }
+});
+
 test("[stories] one campaign shows every promised recipe, in order, each opening its permanent page", async ({ page }) => {
   await page.goto(MULTI);
 
