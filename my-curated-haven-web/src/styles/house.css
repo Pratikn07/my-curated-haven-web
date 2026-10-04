@@ -94,15 +94,17 @@
   transform: translate(-50%, -50%);
 }
 
+/* Small on phones so the painting stays the hero; the whole room around each tag is tappable too. */
 .house-tag {
+  position: relative;
   display: grid;
-  min-height: 2.75rem;
+  min-height: 2.25rem;
   align-content: center;
   justify-items: center;
   gap: 0.05rem;
-  padding: 0.3rem 0.75rem;
+  padding: 0.2rem 0.55rem;
   border: 1px solid rgb(61 64 91 / 0.12);
-  border-radius: 0.875rem;
+  border-radius: 0.75rem;
   background: rgb(255 252 246 / 0.92);
   color: var(--text);
   line-height: 1.15;
@@ -116,7 +118,7 @@
 }
 
 .house-tag-name {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -124,7 +126,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-muted);
 }
 
@@ -155,12 +157,44 @@
   background: var(--room-library-accent);
 }
 
+/*
+ * "Start here": a cream halo around the open room's tag (it sits on the terracotta kitchen floor, so a
+ * terracotta ring would vanish). It ripples outward a few times, then rests.
+ */
+.house-tag[data-status="open"]::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px rgb(255 247 232 / 0.8);
+}
+
+/* Not during the first-visit light-up; it ripples again once the light-up ends. */
+.house-frame:not([data-intro]) .house-tag[data-status="open"]::after {
+  animation: house-tag-ring 2.4s ease-out 1s 3;
+}
+
+@keyframes house-tag-ring {
+  0% { box-shadow: 0 0 0 3px rgb(255 247 232 / 0.8); }
+  50% { box-shadow: 0 0 0 14px rgb(255 247 232 / 0); }
+  51% { box-shadow: 0 0 0 0 rgb(255 247 232 / 0); }
+  100% { box-shadow: 0 0 0 3px rgb(255 247 232 / 0.8); }
+}
+
 /* A wide screen has room for one line: "Kitchen · Open now". */
 @media (min-width: 640px) {
   .house-tag {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.875rem;
+  }
+
+  .house-tag-name {
+    font-size: 0.875rem;
   }
 
   .house-tag-name::after {
@@ -1045,7 +1079,8 @@
   }
 
   .hs-steam,
-  .room-view[data-room="kitchen"] .hs-room-cat {
+  .room-view[data-room="kitchen"] .hs-room-cat,
+  .house-frame:not([data-intro]) .house-tag[data-status="open"]::after {
     animation: none;
   }
 

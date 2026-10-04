@@ -28,7 +28,7 @@ Working rule for every screen: **useful first, delightful second, never in the w
 Most visitors arrive from Instagram on a phone, inside Instagram's in-app browser. Design and test for that first; desktop is the adaptation.
 
 - **Phone composition first.** The house illustration is drawn in portrait for a 390px-wide screen. Desktop gets a wider crop with more garden and sky.
-- **Something useful on the first screen.** The house, the room labels and a "Browse recipes" button all fit above the fold on a 390 × 664px viewport (an iPhone screen minus Instagram's bars).
+- **Something useful on the first screen.** What the site is, the headline, the tap hint and the house with every room tag, including the open Kitchen's, fit above the fold on a 390 × 664px viewport (an iPhone screen minus Instagram's bars). "Browse recipes" waits directly under the house.
 - **Readable labels.** Room labels and statuses are HTML laid over the illustration, at least 14px, never text inside the scaled-down drawing.
 - **Big tap targets.** Each room's tap area is at least 44 × 44px at 360px width. Main actions sit in thumb reach.
 - **Viewport units.** Use `svh`/`dvh`, not `100vh`, because Instagram's own top and bottom bars change the visible height. Respect safe-area insets.
@@ -150,10 +150,10 @@ Motion should feel like a slow breath, never like a notification.
 - **Every room is a real link** that works without JavaScript and from the keyboard.
 - **Opening a room steps inside it, without moving the page.** The room view covers the screen on phones (the painted close-up on top, what the room holds in a sheet below) and is a centred panel on large screens. The page behind stays exactly where it was. "Back to the house", Escape and the phone's back gesture all step out; the back gesture never leaves the site. "Other rooms" moves between rooms without stepping out. Without JavaScript the room cards are listed under the house instead.
 - **Nothing is lifted off the ground.** The front garden only sways sideways with the depth effect; moving it vertically would show a gap under it.
-- **A direct "Browse recipes" button is always visible** next to the house.
+- **A direct "Browse recipes" button sits right under the house,** after the room names (owner's choice: the house comes first).
 - **One small surprise per room,** such as steam that turns into tonight's recipe card. It is a bonus, never the only route to anything.
 - **Coming-soon rooms offer a sample to try,** marked "Sample", with a way to hear when the room opens.
-- **A first-visit hint** may say "Tap a room to look inside". Short instructions are fine.
+- **The hint "Tap a room to step inside"** sits directly above the house with a door icon (not a hand or emoji: a flipped hand looked odd and emoji vary by phone). The open room's tag carries a cream halo that ripples a few times, then rests; no ripple with reduced motion.
 
 | Room | Status | Sample |
 | --- | --- | --- |
@@ -204,7 +204,7 @@ Checked against the state of web tooling on 2026-10-02. Each layer has a fallbac
 
 ## Open decisions
 
-1. Headline: "Good enough is exactly enough." or "A calmer house for parents."
+1. Headline (decided): "Come in. The kitchen's open." under "Free toddler recipes by Tiny Soho". "Good enough is exactly enough." stays as the brand sign-off. Revisit "Free" if paid collections launch.
 2. Status labels for the Nursery and Shelf.
 3. Whether to commission an illustrator, and when.
 4. Approval of Fraunces for headings.

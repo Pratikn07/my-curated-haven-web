@@ -8,7 +8,7 @@ The homepage is rebuilt around an interactive house, with My Curated Haven as th
 
 Built in `my-curated-haven-web/`:
 
-- `src/components/house/HavenHero.tsx`: opening screen with the headline "Good enough is exactly enough.", Browse recipes, and the house.
+- `src/components/house/HavenHero.tsx`: opening screen: "Free toddler recipes by Tiny Soho", the headline "Come in. The kitchen's open.", the hint "Tap a room to step inside" (door icon), then the house with "Browse recipes" under it. "Good enough is exactly enough." is the brand sign-off in the footer and on the share image.
 - `src/components/house/HouseScene.tsx` and `HouseDepth.tsx`: the painted scene and its depth effect. Layers: painted skies (with a drawn twilight blend for dawn and dusk), contact shadow, the three house paintings, a screen-blended glow layer, the front garden strip and fireflies. Room close-ups live in `HouseExplorer.tsx`. Each painting is a CSS background declared under a `data-house-*` flag, so it only downloads once it shows.
 - `src/lib/house-light.ts`: the light timetable, the before-first-paint script (sets `data-daypart`, `--hs-evening`, `--hs-night`, `--hs-lamps` and preloads the main painting) and the minute ticker. Unit tested in `tests/homepage/house-light.test.mjs`.
 - `scripts/house-art/prepare_house_art.py`: aligns, cuts out and compresses the house art into `public/images/house/`.
@@ -36,6 +36,7 @@ Built in `my-curated-haven-web/`:
 - Tapping a room used to glide into the close-up and then scroll the page down to the room card, leaving the close-up off screen. Rooms now open in a room view instead (option A, "Step inside"), so the picture and what the room offers are seen together.
 
 - The room boxes under the house did not say "tap the house". Each room now carries a tag on the house ("Kitchen · Open now"), rooms warm up under a finger, and a first visit lights the rooms up in turn. The boxes became a slim row of room names, kept as a fallback (owner's choice).
+- Owner feedback on the first screen: the big headline pushed the house down and nothing said "tap the house". The headline is now smaller and invites the visitor in, a door-icon hint sits right above the house, "Browse recipes" moved under the house, and the phone tags are smaller. At 390 × 664 the open Kitchen's tag is on the first screen; a cream halo around it ripples a few times as "start here".
 
 ## Fonts (2026-10-03)
 

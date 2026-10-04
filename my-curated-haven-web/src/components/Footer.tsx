@@ -11,7 +11,10 @@ export default function Footer() {
           <Link href="/" className="font-brand text-2xl font-semibold">
             My Curated <em className="text-action">Haven</em>
           </Link>
-          <p className="mt-2 max-w-sm text-text-muted">
+          <p className="mt-3 font-display text-xl">
+            Good enough is <em>exactly</em> enough.
+          </p>
+          <p className="mt-1 max-w-sm text-text-muted">
             A calm corner for parents, with toddler recipes by Tiny Soho.
           </p>
         </div>

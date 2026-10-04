@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Pointer } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import {
   HOUSE_ROOMS,
@@ -161,9 +160,12 @@ function RoomCardBody({
 export default function HouseExplorer({
   scene,
   kitchenRecipes,
+  after,
 }: {
   scene: ReactNode;
   kitchenRecipes: KitchenRecipeLink[];
+  /** Shown under the house and its room names, such as the way to all recipes. */
+  after?: ReactNode;
 }) {
   const [active, setActive] = useState<HouseRoomId | null>(null);
   const [hover, setHover] = useState<HouseRoomId | null>(null);
@@ -410,8 +412,7 @@ export default function HouseExplorer({
       </div>
 
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-muted">
-        <Pointer aria-hidden="true" size={16} strokeWidth={1.75} className="shrink-0" />
-        <span>Tap a room to step inside, or pick one:</span>
+        <span>Or pick a room:</span>
         <span className="inline-flex flex-wrap items-center gap-x-1">
           {LIST_ROOMS.map((room, index) => (
             <span key={room.id} className="inline-flex items-center gap-x-1">
@@ -427,6 +428,8 @@ export default function HouseExplorer({
           ))}
         </span>
       </p>
+
+      {after}
 
       {/*
         Step inside: with JavaScript, an open room fills the screen (a centred panel on large

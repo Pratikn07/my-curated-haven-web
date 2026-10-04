@@ -12,12 +12,13 @@ function roomList(page: Page) {
 test("[haven-house] opening offers recipes first without implying a sale", async ({ page }) => {
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Good enough is exactly enough.");
-  await expect(page.getByText("A little room to pause.")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Come in. The kitchen’s open.");
+  await expect(page.getByText("Free toddler recipes by Tiny Soho")).toBeVisible();
+  await expect(page.getByText("Tap a room to step inside")).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toContainText("Good enough is exactly enough.");
 
   const hero = page.locator("#house");
-  await expect(hero.getByRole("link", { name: "Browse recipes" }).first()).toHaveAttribute("href", "/recipes");
-  await expect(hero.getByRole("link", { name: "See what's coming" })).toHaveAttribute("href", "#library");
+  await expect(hero.getByRole("link", { name: "Browse recipes" })).toHaveAttribute("href", "/recipes");
 
   const recipes = page.locator("#recipes");
   await expect(recipes).toContainText("The Kitchen · Recipes by Tiny Soho");
@@ -125,7 +126,7 @@ test("[haven-house] each room carries its own tag on the house, and the rooms li
   await expect(page.locator(".house-frame")).not.toHaveAttribute("data-intro", /.*/);
 
   // The slim row under the house is a second way in.
-  await page.getByRole("paragraph").filter({ hasText: "Tap a room to step inside" }).getByRole("link", { name: "Library" }).click();
+  await page.getByRole("paragraph").filter({ hasText: "Or pick a room" }).getByRole("link", { name: "Library" }).click();
   await expect(page.getByRole("dialog", { name: "The Library · Storybooks" })).toBeVisible();
 });
 
@@ -297,14 +298,19 @@ test("[haven-house] The house link closes the mobile menu and focuses the house"
   await expect(page.locator("#house")).toBeInViewport();
 });
 
-test("[haven-house] a phone sees the headline, Browse recipes and the house on the first screen", async ({ page }, testInfo) => {
+test("[haven-house] a phone sees the headline, the tap hint and the open Kitchen on the first screen", async ({ page }, testInfo) => {
   test.skip(isDesktop(testInfo.project.name), "first-screen check runs on phone projects");
   // An iPhone screen minus Instagram's in-app browser bars.
   await page.setViewportSize({ width: 390, height: 664 });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeInViewport();
-  await expect(page.locator("#house").getByRole("link", { name: "Browse recipes" }).first()).toBeInViewport();
-  await expect(page.locator(".house-frame")).toBeInViewport({ ratio: 0.5 });
+  await expect(page.getByText("Tap a room to step inside")).toBeInViewport();
+  await expect(roomList(page).getByRole("link", { name: /^Kitchen/ })).toBeInViewport({ ratio: 1 });
+  // The way to all recipes waits under the house, after the room names.
+  const browse = page.locator("#house").getByRole("link", { name: "Browse recipes" });
+  const frameBox = await page.locator(".house-frame").boundingBox();
+  const browseBox = await browse.boundingBox();
+  expect(browseBox!.y).toBeGreaterThan(frameBox!.y + frameBox!.height);
 });
 
 test("[haven-house] page fits the documented responsive widths", async ({ page }, testInfo) => {

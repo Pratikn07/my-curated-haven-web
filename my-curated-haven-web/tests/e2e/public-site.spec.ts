@@ -39,9 +39,8 @@ test("[QA-J01:partial] homepage shows the brand and recipe promise", async ({ pa
   const response = await page.goto("/");
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("navigation")).toContainText("My Curated Haven");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "Good enough is exactly enough",
-  );
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("The kitchen’s open");
+  await expect(page.getByRole("contentinfo")).toContainText("Good enough is exactly enough");
 });
 
 test("public pages load", async ({ page }) => {
