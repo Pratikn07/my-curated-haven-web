@@ -1,26 +1,24 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  StoryAbout,
-  StoryCard,
-  StoryMoreFromKitchen,
-  StoryOffer,
-  StoryQuestions,
-  StoryRecipe,
-  StorySaveCard,
-  StoryWayBack,
-  recipeActionLabel,
-} from "@/components/stories/StoryBlocks";
-import { StoryStickyAction, StoryTracker } from "@/components/stories/StoryClient";
+import CampaignClosing from "@/components/campaign/CampaignClosing";
+import CampaignHero from "@/components/campaign/CampaignHero";
+import { CampaignCollection, CampaignPack, OfferLadder } from "@/components/campaign/CampaignOffers";
+import CampaignQuestions from "@/components/campaign/CampaignQuestions";
+import CampaignRecipes from "@/components/campaign/CampaignRecipes";
+import CampaignRelated from "@/components/campaign/CampaignRelated";
+import CampaignTracker from "@/components/campaign/CampaignTracker";
+import KitchenStory from "@/components/campaign/KitchenStory";
 import { SITE_ORIGIN } from "@/config/site-navigation";
-import { loadStoryPage } from "@/lib/data/load-story";
-import { usableImageSrc } from "@/lib/recipes/format";
+import { plainCampaignTitle } from "@/lib/campaigns/validate";
+import { loadCampaignPage } from "@/lib/data/load-campaign";
 
 /**
- * Instagram landing pages. They hold no account features, so each page is
- * built on its first visit and served from the cache to everyone after that,
- * which keeps the first screen fast inside Instagram's in-app browser.
+ * Instagram campaign pages: the recipes a post promised, the people behind
+ * them, and then (only then) the pack and collection that go with it. They
+ * hold no account features, so each page is built on its first visit and served
+ * from the cache to everyone after that, which keeps the first screen fast
+ * inside Instagram's in-app browser.
  */
 export const revalidate = 3600;
 
@@ -29,57 +27,71 @@ export function generateStaticParams() {
   return [];
 }
 
-const getStoryPage = cache(loadStoryPage);
+const getCampaignPage = cache(loadCampaignPage);
 
-interface StoryPageProps {
+interface CampaignPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: StoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CampaignPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const result = await getStoryPage(slug);
+  const result = await getCampaignPage(slug);
   if (result.status !== "ok") {
     return { title: "Page not found", robots: { index: false, follow: false } };
   }
 
-  const { story, recipe } = result.data;
-  const image = story.cover?.src ?? usableImageSrc(recipe.catalog.previewImagePath);
+  const { campaign, recipes, hero } = result.data;
+  const title = plainCampaignTitle(campaign.title);
+  const url = `${SITE_ORIGIN}/stories/${campaign.slug}`;
+  // A one-recipe page repeats that recipe, so the recipe page is the copy search engines should list.
+  const canonical = recipes.length === 1 ? `${SITE_ORIGIN}/recipes/${recipes[0].slug}` : url;
   return {
-    title: story.headline,
-    description: recipe.catalog.publicSummary,
-    // The recipe page is the one copy search engines should list.
-    alternates: { canonical: `${SITE_ORIGIN}/recipes/${recipe.catalog.slug}` },
+    title,
+    description: campaign.subtitle,
+    alternates: { canonical },
     robots: { index: false, follow: true },
     openGraph: {
-      title: story.headline,
-      description: recipe.catalog.publicSummary,
-      url: `${SITE_ORIGIN}/stories/${story.slug}`,
+      title,
+      description: campaign.subtitle,
+      url,
       type: "article",
-      images: image ? [{ url: image, alt: recipe.catalog.title }] : [],
+      images: [{ url: hero.src, alt: hero.alt }],
     },
   };
 }
 
-export default async function StoryPage({ params }: StoryPageProps) {
+export default async function CampaignPage({ params }: CampaignPageProps) {
   const { slug } = await params;
-  const result = await getStoryPage(slug);
+  const result = await getCampaignPage(slug);
   if (result.status !== "ok") notFound();
 
-  const { story, recipe, moreRecipes, offer } = result.data;
+  const data = result.data;
+  const { campaign, recipes, story, pack, collection, related, offerState } = data;
+  const showPack = Boolean(pack && campaign.featuredPack);
+  const showCollection = Boolean(collection && campaign.featuredCollection);
+  // The comparison sits with the last offer on the page.
+  const ladder =
+    showPack || showCollection ? (
+      <OfferLadder freeCount={recipes.length} pack={showPack ? pack : null} collection={showCollection ? collection : null} />
+    ) : null;
 
   return (
-    <div className="story" data-story={story.slug}>
-      <StoryTracker slug={story.slug} room={story.room} />
-      <StoryCard story={story} recipe={recipe} />
-      <div className="story-after">
-        <StoryRecipe recipe={recipe} />
-        <StorySaveCard recipe={recipe} />
-        <StoryAbout story={story} />
-        {offer ? <StoryOffer story={story} offer={offer} /> : <StoryMoreFromKitchen recipes={moreRecipes} />}
-        <StoryQuestions story={story} offer={offer} />
-        <StoryWayBack story={story} offer={offer} />
-      </div>
-      <StoryStickyAction label={recipeActionLabel(recipe)} />
+    <div className="campaign" data-theme={campaign.theme} data-campaign={campaign.slug}>
+      <CampaignTracker
+        slug={campaign.slug}
+        room={campaign.room}
+        recipeCount={recipes.length}
+        offerState={offerState}
+        series={campaign.analytics?.series}
+      />
+      <CampaignHero data={data} />
+      <CampaignRecipes data={data} />
+      <KitchenStory story={story} motif={campaign.motif} />
+      {showPack ? <CampaignPack copy={campaign.featuredPack!} offer={pack!} ladder={showCollection ? null : ladder} /> : null}
+      {showCollection ? <CampaignCollection copy={campaign.featuredCollection!} offer={collection!} ladder={ladder} /> : null}
+      <CampaignRelated recipes={related} />
+      <CampaignQuestions data={data} />
+      <CampaignClosing data={data} />
     </div>
   );
 }

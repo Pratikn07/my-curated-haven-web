@@ -1,8 +1,8 @@
 # Instagram landing pages
 
-Updated 2026-10-03. Branch `claude/eager-ramanujan-20fua6`, built on `feat/haven-house-homepage`.
+Updated 2026-10-04. First built 2026-10-03 (single-recipe pages); redesigned 2026-10-04 as campaign pages that promise one or many recipes. How the pages are built and how to add one: [CAMPAIGNS.md](CAMPAIGNS.md).
 
-A parent comments a keyword on a post, gets a DM with a link, and lands on a page made for that post at `/stories/<slug>`. The page hands over the recipe they asked for first, then shows who is behind it, then makes one honest offer for the collection. Most traffic is expected from DMs, so the page is designed for someone who saw a Reel or feed post, not a Story.
+A parent comments a keyword on a post, gets a DM with a link, and lands on a page made for that post at `/stories/<slug>`. The page shows the recipes the post promised first, then who is behind them (Bhagyashree and Anaika), then the pack and the collection that go with the post. Most traffic is expected from DMs, so the page is designed for someone who saw a Reel or feed post, not a Story.
 
 Prototypes (private to the owner): the three looks compared, https://claude.ai/artifact/8UTFLxVN6hpLCEdfDcv6XR, and the chosen DM page, https://claude.ai/artifact/VHdbQ3dpjcsswDx61PAsS7.
 
@@ -10,30 +10,29 @@ Prototypes (private to the owner): the three looks compared, https://claude.ai/a
 
 | Decision | Choice |
 | --- | --- |
-| Look | C, the clay recipe card resting on the post's photo |
+| Look | An editorial campaign page: warm paper, espresso type, the post's photo in an arch, and a seasonal accent per campaign (2026-10-04). Replaces look C, the clay recipe card |
 | Where links go | Story link stickers and DMs go to the post's page. The bio link is still the homepage for now |
-| Recipe posts | The full recipe sits on the landing page, drawn by the same components as the recipe page so it looks the same everywhere, with a link to the recipe page for printing and saving. Only free recipes can be landing pages |
-| About | Bhagyashree's note in her own voice (draft 1), naming Anaika. A photo of Bhagyashree and Anaika will follow |
+| Recipes per page | One campaign promises one or many recipes (2026-10-04). The page shows each as a card that opens the recipe's permanent page; ingredients, steps, allergens, printing and saving live only there. Only free recipes are shown |
+| About | Bhagyashree and Anaika cooking together, five photos told as one scroll-driven scene, then Bhagyashree's note (draft 1) |
 | Refunds | None, and the landing page doesn't mention them. The collection page and checkout must say so plainly |
 | Future recipes (C08) | One purchase includes recipes added later. The page says so |
 | Price changes | The price is not planned to rise, so the page says nothing about it |
-| What we sell at launch | One-time purchases only: a small themed pack that matches the post (for example 8 Halloween treats for about $6.99) and the growing collection (for example every treat, about $19.99). All-access comes later |
+| What we sell at launch | One-time purchases only: a small themed pack that matches the post (for example 8 Halloween treats for about $6.99) and the growing collection (for example every treat, about $19.99). All-access comes later. Both are `recipe_collections` with their own offer, so the page reads them the same way; "added later" is only said of the collection |
 | All-access | Later, once there is a large reviewed library, a steady schedule of new recipes and repeat buyers. Lead with a yearly price. Money already spent on packs comes off it |
 | Halloween 2026 | A free hook (posts, one free recipe page, a way back through DMs). The first paid pack launches with a tested checkout |
 
 ## The page, top to bottom
 
-1. **Right place.** The post's photo and words, who it's for, time, yield, diet labels, allergens, "Picked by Bhagyashree · recipe by Tiny Soho", and "Get the recipe · 40 min".
-2. **The recipe**, in the recipe page's own sections (Ingredients, Method & Instructions, Allergen Information, Storage & Preparation Notes with the feeding tips), then "Open the full recipe page to print or save it". Save and Print stay on the recipe page, because both fail inside Instagram's browser.
-3. **Keep the shopping list.** A card made to be screenshotted, and how to print from inside Instagram.
-4. **Who's behind this kitchen.** Bhagyashree's note.
-5. **One offer**, only while checkout is on and the collection is on sale: a few of the collection's recipes, "every recipe we add later is yours too", and the price next to "See what's inside". While checkout is off, this place shows two more free recipes from the Kitchen instead.
-6. **Questions.** Free? Allergies? What's in the collection? New recipes?
-7. **The way back.** "Not today? Comment COLLECTION on any of our posts", only once the DM tool answers that keyword.
+1. **Right place.** The post's promise and photo, how many free recipes are waiting, one button down to them, "Picked by Bhagyashree · Recipes by Tiny Soho".
+2. **Your recipes.** The promised recipes in the post's order. Each card opens the recipe page. The layout follows the count, from one wide card to rows of four.
+3. **Meet Bhagyashree & Anaika.** Five moments of one kitchen scene (Prep, Mix, Shape, Top, Taste), pinned and moved by scroll on large screens and stacked like prints on phones, then Bhagyashree's note.
+4. **More for this moment.** The themed pack, only while checkout is on and it is on sale.
+5. **The larger collection.** Only while on sale: its name, size, a few recipes, what "added later" means, and a free / pack / collection comparison.
+6. **More from the kitchen.** Other free recipes.
+7. **Good to know.** Free? Account? Print? Allergens? Pack and collection questions only when they're shown.
+8. **Closing.** "Made in our kitchen. Shared with yours.", Explore all recipes, Instagram (once the handle is set), My Curated Haven, and the way back keyword once the DM tool answers it.
 
-The sticky button only ever leads to the recipe. It appears when the card's button is off screen and disappears once the recipe is reached, so it never follows the reader down to the offer.
-
-Never on these pages: pop-ups, email gates, countdowns, crossed-out "value" prices, refund talk, sign-in, or any mention of the parenting app.
+Commerce only appears after the free recipes and the story. Never on these pages: pop-ups, email gates, countdowns, crossed-out "value" prices, scarcity, refund talk, sign-in, or any mention of the parenting app.
 
 ## Why it's shaped this way
 
@@ -45,28 +44,35 @@ Never on these pages: pop-ups, email gates, countdowns, crossed-out "value" pric
 
 ## What's built
 
-In `my-curated-haven-web/`:
+In `my-curated-haven-web/` (details in [CAMPAIGNS.md](CAMPAIGNS.md)):
 
-- `src/config/stories.ts`: one entry per post. The first is `frittata-fingers` for Sweet Potato & Spinach Frittata Fingers. A local sample story on the seeded recipe lets local runs and CI render every block; it is never served on Vercel.
-- `src/app/stories/[slug]/page.tsx`: built on its first visit and served from the cache for an hour after that. Not listed by search engines; its canonical address is the recipe page.
-- `src/lib/data/load-story.ts`: reads the recipe as an anonymous visitor (`src/lib/supabase/public.ts`), so RLS decides what is shown. A story whose recipe isn't free returns 404. The offer appears only when checkout is on and the collection is on sale.
-- `src/components/stories/`: the card and blocks, the view tracker and the sticky button. `src/styles/stories.css` holds the clay card.
-- `src/components/recipe/RecipeSections.tsx`: the recipe page's Ingredients, Method & Instructions and Storage & Preparation Notes sections, moved out of the recipe page so both pages share them. "More from the Kitchen" uses the same `RecipeCard` as `/recipes`.
-- Analytics: route key `story`, events `story_view` and `story_action_clicked` with fixed values, the `comment_dm` campaign, and the landing page remembered for the visit (`entry_story` in PostHog) so later recipe opens and purchases can be tied to the post.
+- `src/config/campaigns.ts`: one entry per post. `frittata-fingers` (published, the first post's address) and `little-hands` (draft, three recipes). Two local samples on the seeded recipes let local runs and CI render every section; they are never served on Vercel.
+- `src/config/kitchen-story.ts` and `public/images/campaigns/kitchen-story/`: Bhagyashree and Anaika's five moments and the note.
+- `src/lib/campaigns/`: the campaign shapes, validation and the layout plan. `src/lib/data/campaigns.ts` is the one place campaigns are read from, so an admin can replace the config later.
+- `src/lib/data/load-campaign.ts`: reads the promised recipes from the free catalog as an anonymous visitor, so RLS decides what is shown. Offers appear only when checkout is on and they are on sale.
+- `src/app/stories/[slug]/page.tsx`: built on its first visit and served from the cache for an hour after that. Not listed by search engines. A one-recipe page names the recipe page as canonical.
+- `src/components/campaign/` and `src/styles/campaign.css`: the sections, the analytics tracker, and the pinned story (GSAP, large screens only).
+- Analytics: `story_view`, `story_action_clicked` and the new `story_section_viewed`, all with fixed values, plus `entry_story` for the visit.
 - `src/lib/house-light.ts`: the homepage painting is preloaded on the homepage only.
 
 ## Adding a page
 
-Add an entry to `STORIES` in `src/config/stories.ts`: the address, the recipe's slug, the post's words, the post's photo (or leave it to use the recipe's photo), who it's for, and the room. Everything else comes from the recipe. Then add the post's links to [INSTAGRAM-LINKS.md](../../INSTAGRAM-LINKS.md).
+Add an entry to `CAMPAIGNS` in `src/config/campaigns.ts` as a draft, check it on the preview, then publish it. Step by step in [CAMPAIGNS.md](CAMPAIGNS.md#adding-a-campaign). Then add the post's links to [INSTAGRAM-LINKS.md](../../INSTAGRAM-LINKS.md).
 
 ## Before the first post
 
 - Confirm the facts in Bhagyashree's note and the byline, and how Tiny Soho is credited.
-- Add the photo of Bhagyashree and Anaika (`about.photo` in the story entry).
-- The real post's photo and words for `frittata-fingers`.
+- Replace the five kitchen story frames with the original photos (1600px wide or more); they were cut from a 1536 × 1024 collage.
+- Set Tiny Soho's Instagram handle in `src/config/kitchen-story.ts` (`BRAND_LINKS.instagram`). The closing link stays hidden until then.
+- The real post's photo and words for `frittata-fingers`, and the post and words for `little-hands` before publishing it.
 - Parent messages (with permission) can go above the price once the offer is live.
 - Set up the comment-keyword DM tool, then turn on the way back for each story.
 - Test from a real Instagram DM on one iPhone and one Android phone.
+
+## Open decisions
+
+- **More than three free recipes.** `free_recipe_slots` allows three, and a campaign only shows free recipes, so a "5 breakfasts" post can't be fully free today. Options: widen the slots, or let a campaign mark some recipes "in the pack" instead of free.
+- **Packs as products.** A pack is a small `recipe_collections` row with its own offer. None exist yet; the first one (for example the Halloween Treat Pack) needs its recipes, release and price.
 
 ## Later
 

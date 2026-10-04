@@ -180,3 +180,61 @@ test("[stories] landing page events accept only fixed values", () => {
     }).ok
   ).toBe(false);
 });
+
+test("[stories] campaign page events add only fixed values and small counts", () => {
+  expect(
+    validateAnalyticsEvent("story_view", {
+      story_slug: "halloween-treats",
+      room: "kitchen",
+      recipe_count: 5,
+      offer_state: "both",
+      story_series: "halloween-2026",
+    }).ok
+  ).toBe(true);
+  expect(
+    validateAnalyticsEvent("story_action_clicked", {
+      story_slug: "halloween-treats",
+      story_action: "campaign_recipe",
+      story_placement: "recipes",
+      recipe_id: "10000000-0000-0000-0000-000000000001",
+      recipe_position: 2,
+    }).ok
+  ).toBe(true);
+  for (const [story_action, story_placement] of [
+    ["pack", "pack"],
+    ["collection", "collection"],
+    ["instagram", "closing"],
+    ["recipes_index", "closing"],
+    ["recipe_jump", "hero"],
+    ["more_recipe", "related"],
+  ]) {
+    expect(
+      validateAnalyticsEvent("story_action_clicked", { story_slug: "halloween-treats", story_action, story_placement }).ok,
+      `${story_action}/${story_placement}`
+    ).toBe(true);
+  }
+  for (const story_section of ["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing"]) {
+    expect(validateAnalyticsEvent("story_section_viewed", { story_slug: "halloween-treats", story_section }).ok).toBe(true);
+  }
+
+  expect(validateAnalyticsEvent("story_section_viewed", { story_slug: "halloween-treats", story_section: "footer" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", offer_state: "upsell" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", story_series: "Halloween 2026" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", recipe_count: 500 }).ok).toBe(false);
+  expect(
+    validateAnalyticsEvent("story_action_clicked", {
+      story_slug: "x",
+      story_action: "campaign_recipe",
+      story_placement: "recipes",
+      recipe_position: 0,
+    }).ok
+  ).toBe(false);
+  expect(
+    validateAnalyticsEvent("story_action_clicked", {
+      story_slug: "x",
+      story_action: "campaign_recipe",
+      story_placement: "recipes",
+      recipe_id: "sweet-potato-frittata",
+    }).ok
+  ).toBe(false);
+});

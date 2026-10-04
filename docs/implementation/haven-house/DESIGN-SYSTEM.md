@@ -173,6 +173,7 @@ Checked against the state of web tooling on 2026-10-02. Each layer has a fallbac
 | Alternative to Rive | dotLottie with state machines | Lottie Creator now supports state machines, theming and data binding, and Figma prototypes export to interactive dotLottie. Choose it if the illustrator works in Figma or After Effects rather than Rive |
 | Room zoom and page changes | Browser View Transitions API | Same-document view transitions work in Chrome, Edge, Safari 18+ and Firefox 144+. The Kitchen window can grow into the recipe page's header photo |
 | UI pieces (cards, sample panels) | Motion (the renamed framer-motion), already installed | One animation library is enough. GSAP is now free but would duplicate it |
+| Campaign pages' pinned story (`/stories/<slug>`, added 2026-10-04) | GSAP ScrollTrigger, loaded only on large screens with motion allowed | The one scroll-scrubbed sequence on the site. Motion isn't loaded on those pages, phones never download GSAP, and everything else there is CSS. See [CAMPAIGNS.md](../instagram-landing/CAMPAIGNS.md#the-kitchen-story) |
 | Scroll effects | CSS scroll-driven animations as an enhancement only | Not yet default in stable Firefox, so nothing may depend on them |
 | 3D | Not used on the homepage | WebGPU now works across major browsers including iOS 26, but a 3D house or Gaussian splat scene costs far more to load inside Instagram's browser and is harder to make accessible |
 

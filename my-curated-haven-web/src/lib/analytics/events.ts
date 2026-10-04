@@ -25,8 +25,47 @@ export type HomepageDestination =
   | "support";
 export type HomepagePresentationState = "preparation" | "free_ready" | "collection_ready";
 export type StoryRoomKey = "kitchen";
-export type StoryAction = "recipe_jump" | "full_recipe" | "more_recipe" | "collection" | "about";
-export type StoryPlacement = "card" | "sticky" | "recipe" | "next" | "offer" | "about";
+/**
+ * Taps on a campaign page (/stories/<slug>). The first five values come from the
+ * single-recipe pages and stay valid so older events keep their meaning.
+ */
+export type StoryAction =
+  | "recipe_jump"
+  | "full_recipe"
+  | "more_recipe"
+  | "collection"
+  | "about"
+  | "campaign_recipe"
+  | "pack"
+  | "instagram"
+  | "recipes_index"
+  | "home";
+export type StoryPlacement =
+  | "card"
+  | "sticky"
+  | "recipe"
+  | "next"
+  | "offer"
+  | "about"
+  | "hero"
+  | "recipes"
+  | "story"
+  | "pack"
+  | "collection"
+  | "related"
+  | "closing";
+/** Which paid options the campaign page showed. */
+export type StoryOfferState = "none" | "pack" | "collection" | "both";
+/** Parts of a campaign page, in page order. story_end is the last moment of the kitchen story. */
+export type StorySection =
+  | "recipes"
+  | "story"
+  | "story_end"
+  | "pack"
+  | "collection"
+  | "related"
+  | "questions"
+  | "closing";
 
 export type CanonicalRouteKey =
   | "home"
@@ -164,12 +203,27 @@ export interface HomepagePreviewViewedPayload {
 export interface StoryViewPayload {
   story_slug: string;
   room: StoryRoomKey;
+  /** How many promised recipes the page showed. */
+  recipe_count?: number;
+  offer_state?: StoryOfferState;
+  /** Groups several posts, for example "halloween-2026". */
+  story_series?: string;
 }
 
 export interface StoryActionClickedPayload {
   story_slug: string;
   story_action: StoryAction;
   story_placement: StoryPlacement;
+  /** The recipe opened, for campaign_recipe and more_recipe taps. */
+  recipe_id?: string;
+  /** Its 1-based place in the list the parent tapped. */
+  recipe_position?: number;
+}
+
+/** A part of a campaign page came into view, once per page view. */
+export interface StorySectionViewedPayload {
+  story_slug: string;
+  story_section: StorySection;
 }
 
 export type AnalyticsEventMap = {
@@ -194,6 +248,7 @@ export type AnalyticsEventMap = {
   homepage_preview_viewed: HomepagePreviewViewedPayload;
   story_view: StoryViewPayload;
   story_action_clicked: StoryActionClickedPayload;
+  story_section_viewed: StorySectionViewedPayload;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;

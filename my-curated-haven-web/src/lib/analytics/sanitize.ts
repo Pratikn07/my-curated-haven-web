@@ -60,8 +60,38 @@ const HOMEPAGE_DESTINATIONS = new Set([
 const HOMEPAGE_PRESENTATION_STATES = new Set(["preparation", "free_ready", "collection_ready"]);
 const STORY_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const STORY_ROOMS = new Set(["kitchen"]);
-const STORY_ACTIONS = new Set(["recipe_jump", "full_recipe", "more_recipe", "collection", "about"]);
-const STORY_PLACEMENTS = new Set(["card", "sticky", "recipe", "next", "offer", "about"]);
+const STORY_ACTIONS = new Set([
+  "recipe_jump",
+  "full_recipe",
+  "more_recipe",
+  "collection",
+  "about",
+  "campaign_recipe",
+  "pack",
+  "instagram",
+  "recipes_index",
+  "home",
+]);
+const STORY_PLACEMENTS = new Set([
+  "card",
+  "sticky",
+  "recipe",
+  "next",
+  "offer",
+  "about",
+  "hero",
+  "recipes",
+  "story",
+  "pack",
+  "collection",
+  "related",
+  "closing",
+]);
+const STORY_OFFER_STATES = new Set(["none", "pack", "collection", "both"]);
+const STORY_SECTIONS = new Set(["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing"]);
+const STORY_SERIES_REGEX = /^[a-z0-9][a-z0-9-]{0,39}$/;
+/** Small counts on campaign pages; anything larger is a bug, not data. */
+const SMALL_COUNT_FIELDS: Record<string, [number, number]> = { recipe_count: [0, 50], recipe_position: [1, 50] };
 
 const UUID_FIELDS = new Set([
   "recipe_id",
@@ -123,6 +153,9 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
   if (key === "story_action" && !STORY_ACTIONS.has(value)) return fail("story_action");
   if (key === "story_placement" && !STORY_PLACEMENTS.has(value)) return fail("story_placement");
+  if (key === "offer_state" && !STORY_OFFER_STATES.has(value)) return fail("offer_state");
+  if (key === "story_section" && !STORY_SECTIONS.has(value)) return fail("story_section");
+  if (key === "story_series" && !STORY_SERIES_REGEX.test(value)) return fail("story_series");
   if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");
   }
@@ -173,6 +206,8 @@ export function validateAnalyticsEvent(
       if ((key === "refunded_minor" || key === "paid_minor") && value <= 0) {
         return fail(key);
       }
+      const range = SMALL_COUNT_FIELDS[key];
+      if (range && (value < range[0] || value > range[1])) return fail(key);
       sanitized[key] = value;
     } else if (typeof value === "boolean") {
       if (key !== "zero_results") return fail(key);
