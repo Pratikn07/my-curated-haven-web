@@ -4,7 +4,10 @@ import { STORY_ROOM_LABEL, type StoryConfig } from "@/config/stories";
 import type { StoryOfferData } from "@/lib/data/load-story";
 import type { RecipeCatalogItem, RecipeWithBody } from "@/lib/data/recipes";
 import { getAllergenDisplay } from "@/lib/recipes/allergen-display";
-import { formatIngredient, normalizeInstructions, usableImageSrc } from "@/lib/recipes/format";
+import AllergenInformation from "@/components/recipe/AllergenInformation";
+import RecipeCard from "@/components/recipe/RecipeCard";
+import { RecipeIngredients, RecipeMethod, RecipeStorageNotes } from "@/components/recipe/RecipeSections";
+import { formatIngredient, usableImageSrc } from "@/lib/recipes/format";
 
 function recipeCount(count: number): string {
   return `${count} ${count === 1 ? "recipe" : "recipes"}`;
@@ -30,12 +33,11 @@ function metaLine(story: StoryConfig, recipe: RecipeWithBody): string {
   return parts.join(" · ");
 }
 
-/** 1 and 2: the post's photo and words on a clay recipe card, with the recipe right inside it. */
+/** 1: the post's photo and words on a clay recipe card. */
 export function StoryCard({ story, recipe }: { story: StoryConfig; recipe: RecipeWithBody }) {
-  const { catalog, body } = recipe;
+  const { catalog } = recipe;
   const cover = story.cover ?? (usableImageSrc(catalog.previewImagePath) ? { src: catalog.previewImagePath, alt: catalog.title } : null);
   const allergens = allergenLine(recipe);
-  const steps = normalizeInstructions(body.instructions);
 
   return (
     <div className="story-stage" data-has-photo={cover ? "true" : "false"}>
@@ -79,36 +81,28 @@ export function StoryCard({ story, recipe }: { story: StoryConfig; recipe: Recip
           {recipeActionLabel(recipe)} <span aria-hidden="true">↓</span>
         </a>
 
-        <section id="story-recipe" className="story-recipe" aria-labelledby="story-recipe-heading">
-          <h2 id="story-recipe-heading">{catalog.title}</h2>
-          <h3>Ingredients</h3>
-          <ul>
-            {body.ingredients.map((ingredient, index) => (
-              <li key={index}>{formatIngredient(ingredient)}</li>
-            ))}
-          </ul>
-          <h3>Steps</h3>
-          <ol>
-            {steps.map((step) => (
-              <li key={step.step}>{step.text}</li>
-            ))}
-          </ol>
-          {body.storageNotes ? (
-            <>
-              <h3>Storing it</h3>
-              <p className="story-storage">{body.storageNotes}</p>
-            </>
-          ) : null}
-          <Link
-            href={`/recipes/${catalog.slug}`}
-            className="story-text-link"
-            data-story-action="full_recipe"
-            data-story-placement="recipe"
-          >
-            Open the full recipe page to print or save it <span aria-hidden="true">→</span>
-          </Link>
-        </section>
       </article>
+    </div>
+  );
+}
+
+/** 2: the recipe itself, in the same sections as the recipe page. Save and Print stay on the recipe page, because both fail inside Instagram's browser. */
+export function StoryRecipe({ recipe }: { recipe: RecipeWithBody }) {
+  const { catalog, body } = recipe;
+  return (
+    <div id="story-recipe" className="story-recipe">
+      <RecipeIngredients ingredients={body.ingredients} />
+      <RecipeMethod instructions={body.instructions} />
+      <AllergenInformation reviewState={body.allergenReviewState} allergens={body.allergens} />
+      <RecipeStorageNotes storageNotes={body.storageNotes} reviewedNotes={body.reviewedNotes} />
+      <Link
+        href={`/recipes/${catalog.slug}`}
+        className="story-text-link"
+        data-story-action="full_recipe"
+        data-story-placement="recipe"
+      >
+        Open the full recipe page to print or save it <span aria-hidden="true">→</span>
+      </Link>
     </div>
   );
 }
@@ -201,9 +195,7 @@ export function StoryOffer({ story, offer }: { story: StoryConfig; offer: StoryO
         <div className="story-offer-price">
           <b>{offer.collectionTitle}</b>
           <span>
-            {recipeCount(offer.recipeCount)} · {offer.formattedPrice}
-            <br />
-            one-time purchase
+            {recipeCount(offer.recipeCount)} · {offer.formattedPrice} · one-time purchase
           </span>
         </div>
         <Link
@@ -219,28 +211,17 @@ export function StoryOffer({ story, offer }: { story: StoryConfig; offer: StoryO
   );
 }
 
-/** 5, while checkout is off: more free recipes from the Kitchen as the soft next step. */
+/** 5, while checkout is off: more free recipes from the Kitchen, as the same cards /recipes uses. */
 export function StoryMoreFromKitchen({ recipes }: { recipes: RecipeCatalogItem[] }) {
   if (recipes.length === 0) return null;
   return (
     <section className="story-block" aria-labelledby="story-more-heading">
       <h2 id="story-more-heading" className="story-block-label">More from the Kitchen</h2>
-      <ul className="story-more">
-        {recipes.map((recipe) => {
-          const src = usableImageSrc(recipe.previewImagePath);
-          return (
-            <li key={recipe.id}>
-              <Link href={`/recipes/${recipe.slug}`} data-story-action="more_recipe" data-story-placement="next">
-                <span className="story-more-photo">{src ? <Image src={src} alt="" fill sizes="72px" /> : null}</span>
-                <span>
-                  <b>{recipe.title}</b>
-                  {recipe.totalMinutes ? <span>{recipe.totalMinutes} min</span> : null}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="story-more" data-story-action="more_recipe" data-story-placement="next">
+        {recipes.map((recipe) => (
+          <RecipeCard key={recipe.id} recipe={recipe} showSaveButton={false} />
+        ))}
+      </div>
     </section>
   );
 }

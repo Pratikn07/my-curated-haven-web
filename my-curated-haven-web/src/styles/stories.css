@@ -1,6 +1,6 @@
 /*
  * Instagram landing pages (/stories/<slug>): the post's photo with a clay recipe
- * card resting on it. Phone first; on wider screens the page stays one column.
+ * card resting on it, then the recipe in the recipe page's own sections. Phone first; on wider screens the page stays one column.
  * The card's slight tilt and its settling as you scroll are an enhancement for
  * browsers with scroll-driven animations; everywhere else it simply sits straight.
  */
@@ -230,59 +230,19 @@
 .story-button:focus-visible,
 .story-sticky:focus-visible,
 .story-text-link:focus-visible,
-.story-door:focus-visible,
-.story-more a:focus-visible {
+.story-door:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
 
-/* The recipe, inside the card */
+/* The recipe, in the same sections as the recipe page */
 .story-recipe {
-  margin-top: 1.75rem;
-  scroll-margin-top: calc(var(--header-offset) + 1rem);
-}
-
-.story-recipe h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: var(--story-card-text);
-}
-
-.story-recipe h3 {
-  margin: 1.25rem 0 0.4rem;
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--story-card-muted);
-}
-
-.story-recipe ul,
-.story-recipe ol {
+  position: relative;
+  z-index: 1;
   display: grid;
-  gap: 0.45rem;
-  margin: 0;
-  padding-left: 1.25rem;
-}
-
-.story-recipe ul {
-  list-style: disc;
-}
-
-.story-recipe ol {
-  list-style: decimal;
-}
-
-.story-recipe li::marker {
-  font-weight: 600;
-  color: var(--story-clay);
-}
-
-.story-storage {
-  margin: 0;
+  gap: 1rem;
+  padding: 1.75rem 1rem 0;
+  scroll-margin-top: var(--header-offset);
 }
 
 .story-text-link {
@@ -295,10 +255,6 @@
   color: var(--action);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.story-card .story-text-link {
-  color: var(--story-clay);
 }
 
 /* Blocks after the card */
@@ -493,10 +449,8 @@
 }
 
 .story-offer-price {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
+  display: grid;
+  gap: 0.25rem;
   margin-top: 1.125rem;
   padding-top: 0.875rem;
   border-top: 1px solid rgb(163 79 59 / 0.25);
@@ -509,57 +463,13 @@
 }
 
 .story-offer-price span {
-  font-size: 0.85rem;
-  text-align: right;
+  font-size: 0.95rem;
   color: var(--text-muted);
 }
 
 .story-more {
   display: grid;
-  gap: 0.625rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.story-more a {
-  display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 5.5rem;
-  padding: 0.5rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: 0.875rem;
-  color: inherit;
-  text-decoration: none;
-  background: var(--surface);
-}
-
-.story-more-photo {
-  position: relative;
-  width: 4.5rem;
-  height: 4.5rem;
-  overflow: hidden;
-  border-radius: 0.625rem;
-  background: var(--surface-muted);
-}
-
-.story-more-photo img {
-  object-fit: cover;
-}
-
-.story-more b {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.story-more a span span {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  gap: 1rem;
 }
 
 .story-questions {

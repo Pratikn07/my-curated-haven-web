@@ -7,6 +7,7 @@ import {
   StoryMoreFromKitchen,
   StoryOffer,
   StoryQuestions,
+  StoryRecipe,
   StorySaveCard,
   StoryWayBack,
   recipeActionLabel,
@@ -71,6 +72,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
       <StoryTracker slug={story.slug} room={story.room} />
       <StoryCard story={story} recipe={recipe} />
       <div className="story-after">
+        <StoryRecipe recipe={recipe} />
         <StorySaveCard recipe={recipe} />
         <StoryAbout story={story} />
         {offer ? <StoryOffer story={story} offer={offer} /> : <StoryMoreFromKitchen recipes={moreRecipes} />}

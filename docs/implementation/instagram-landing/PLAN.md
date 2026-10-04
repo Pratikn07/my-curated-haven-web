@@ -12,7 +12,7 @@ Prototypes (private to the owner): the three looks compared, https://claude.ai/a
 | --- | --- |
 | Look | C, the clay recipe card resting on the post's photo |
 | Where links go | Story link stickers and DMs go to the post's page. The bio link is still the homepage for now |
-| Recipe posts | The full recipe sits on the landing page, with a link to the recipe page for printing and saving. Only free recipes can be landing pages |
+| Recipe posts | The full recipe sits on the landing page, drawn by the same components as the recipe page so it looks the same everywhere, with a link to the recipe page for printing and saving. Only free recipes can be landing pages |
 | About | Bhagyashree's note in her own voice (draft 1), naming Anaika. A photo of Bhagyashree and Anaika will follow |
 | Refunds | None, and the landing page doesn't mention them. The collection page and checkout must say so plainly |
 | Future recipes (C08) | One purchase includes recipes added later. The page says so |
@@ -24,7 +24,7 @@ Prototypes (private to the owner): the three looks compared, https://claude.ai/a
 ## The page, top to bottom
 
 1. **Right place.** The post's photo and words, who it's for, time, yield, diet labels, allergens, "Picked by Bhagyashree · recipe by Tiny Soho", and "Get the recipe · 40 min".
-2. **The recipe**, inside the card: ingredients, steps, storage, and "Open the full recipe page to print or save it".
+2. **The recipe**, in the recipe page's own sections (Ingredients, Method & Instructions, Allergen Information, Storage & Preparation Notes with the feeding tips), then "Open the full recipe page to print or save it". Save and Print stay on the recipe page, because both fail inside Instagram's browser.
 3. **Keep the shopping list.** A card made to be screenshotted, and how to print from inside Instagram.
 4. **Who's behind this kitchen.** Bhagyashree's note.
 5. **One offer**, only while checkout is on and the collection is on sale: a few of the collection's recipes, "every recipe we add later is yours too", and the price next to "See what's inside". While checkout is off, this place shows two more free recipes from the Kitchen instead.
@@ -51,6 +51,7 @@ In `my-curated-haven-web/`:
 - `src/app/stories/[slug]/page.tsx`: built on its first visit and served from the cache for an hour after that. Not listed by search engines; its canonical address is the recipe page.
 - `src/lib/data/load-story.ts`: reads the recipe as an anonymous visitor (`src/lib/supabase/public.ts`), so RLS decides what is shown. A story whose recipe isn't free returns 404. The offer appears only when checkout is on and the collection is on sale.
 - `src/components/stories/`: the card and blocks, the view tracker and the sticky button. `src/styles/stories.css` holds the clay card.
+- `src/components/recipe/RecipeSections.tsx`: the recipe page's Ingredients, Method & Instructions and Storage & Preparation Notes sections, moved out of the recipe page so both pages share them. "More from the Kitchen" uses the same `RecipeCard` as `/recipes`.
 - Analytics: route key `story`, events `story_view` and `story_action_clicked` with fixed values, the `comment_dm` campaign, and the landing page remembered for the visit (`entry_story` in PostHog) so later recipe opens and purchases can be tied to the post.
 - `src/lib/house-light.ts`: the homepage painting is preloaded on the homepage only.
 
