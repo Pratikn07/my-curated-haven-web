@@ -128,9 +128,12 @@
   color: var(--cp-accent);
 }
 
+/*
+ * Letters stay inline, never inline-block: Safari allows a line break between
+ * neighbouring inline blocks, which split each hero word after its first letter.
+ */
 .cp-char {
-  display: inline-block;
-  transition: font-variation-settings 0.5s var(--cp-ease), translate 0.5s var(--cp-ease);
+  transition: font-variation-settings 0.5s var(--cp-ease);
 }
 
 .cp-kicker {
