@@ -28,8 +28,12 @@ export function StoryTracker({ slug, room }: { slug: string; room: StoryRoomKey 
     }
 
     const onClick = (event: MouseEvent) => {
-      const target = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-story-action]") : null;
+      const element = event.target instanceof Element ? event.target : null;
+      const target = element?.closest<HTMLElement>("[data-story-action]") ?? null;
       if (!target) return;
+      // A marked list (More from the Kitchen) counts only taps on one of its links, not on blank card space.
+      const link = element?.closest("a");
+      if (!link || !target.contains(link)) return;
       const action = target.dataset.storyAction as StoryAction | undefined;
       const placement = target.dataset.storyPlacement as StoryPlacement | undefined;
       if (!action || !placement || !STORY_ACTIONS.includes(action) || !STORY_PLACEMENTS.includes(placement)) return;
