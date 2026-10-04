@@ -80,7 +80,8 @@ function mapCatalogRow(row: {
 }
 
 /**
- * Fetch all published catalog items safe for visitors.
+ * Fetch catalog items visible under the caller's database policies.
+ * Visitors and customers see published items; admins can also inspect drafts.
  * Enforces strict DTO boundaries: no bodies or sensitive fields are ever fetched here.
  */
 export async function getPublishedCatalog(

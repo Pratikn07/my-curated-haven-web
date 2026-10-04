@@ -15,6 +15,7 @@ type QueryResult = {
 };
 
 interface Scenario {
+  admin?: boolean;
   single?: Record<string, QueryResult>;
   rows?: Record<string, QueryResult>;
   user?: {
@@ -79,6 +80,7 @@ function makeClient(scenario: Scenario = {}) {
       };
       return query;
     },
+    rpc: async () => ({ data: scenario.admin ?? false, error: null }),
     auth: {
       getUser: async () =>
         scenario.user ?? { data: { user: null }, error: null },
@@ -180,6 +182,16 @@ test.describe("Phase 7 save access guard", () => {
     expect(calls).toContain("from:access_entitlements");
     expect(calls).toContain("from:collection_recipes");
     expect(calls).toContain("upsert:saved_recipes");
+  });
+
+  test("allows an admin to save a recipe without a free slot or purchase", async () => {
+    const { client, calls } = makeClient({
+      user: { data: { user: { id: userId } }, error: null },
+      admin: true,
+    });
+    expect(await saveRecipe(client, userId, recipeId)).toMatchObject({ status: "ok", isSaved: true });
+    expect(calls).toContain("upsert:saved_recipes");
+    expect(calls).not.toContain("from:access_entitlements");
   });
 
   test("keeps removal available without rechecking recipe access", async () => {

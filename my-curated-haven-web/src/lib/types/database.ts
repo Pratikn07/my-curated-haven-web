@@ -1405,6 +1405,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          granted_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1414,6 +1432,7 @@ export type Database = {
         Args: { product_id_input: string }
         Returns: undefined
       }
+      is_recipe_admin: { Args: never; Returns: boolean }
       search_shop_products: {
         Args: { query_text: string; result_limit?: number }
         Returns: {
