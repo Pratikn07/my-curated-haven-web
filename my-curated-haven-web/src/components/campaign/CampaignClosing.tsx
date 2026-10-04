@@ -2,31 +2,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { BRAND_LINKS } from "@/config/kitchen-story";
 import type { CampaignPageData } from "@/lib/data/load-campaign";
+import { Motif, Orbit, SplitTitle } from "./CampaignParts";
 
 /** 8. The page ends on who made it, not on a price. */
 export default function CampaignClosing({ data }: { data: CampaignPageData }) {
   const { campaign, story, pack, collection } = data;
   const portrait = story.moments[story.moments.length - 1]?.image;
   const instagram = BRAND_LINKS.instagram;
+  const signers = `${story.note.signature}${story.note.with ? ` ${story.note.with}` : ""}`;
   // The way back only makes sense once the DM tool answers the keyword and something is on sale.
   const wayBack = campaign.wayBackKeyword && (pack || collection) ? campaign.wayBackKeyword : null;
 
   return (
     <section className="cp-closing" aria-labelledby="cp-closing-title" data-story-section="closing">
-      {portrait ? (
-        <div className="cp-closing-photo">
-          <Image src={portrait.src} alt={portrait.alt} fill sizes="10rem" style={{ objectPosition: "50% 30%" }} />
-        </div>
-      ) : null}
-      <h2 id="cp-closing-title" className="cp-closing-title">
-        Made in our kitchen. <em>Shared with yours.</em>
+      <div className="cp-closing-mark" data-reveal="pop">
+        <Orbit id="cp-orbit-closing" className="cp-closing-orbit" text={`${signers} · Tiny Soho · cooked at home · `} />
+        {portrait ? (
+          <div className="cp-closing-photo">
+            <Image src={portrait.src} alt={portrait.alt} fill sizes="10rem" style={{ objectPosition: "50% 30%" }} />
+          </div>
+        ) : null}
+        <Motif motif={campaign.motif} placement="closing" />
+      </div>
+      <h2 id="cp-closing-title" className="cp-closing-title" data-reveal="words">
+        <SplitTitle text="Made in our kitchen. *Shared with yours.*" />
       </h2>
-      <p className="cp-closing-sign">
-        {story.note.signature}
-        {story.note.with ? ` ${story.note.with}` : ""} · Tiny Soho
+      <p className="cp-closing-sign" data-reveal="rise">
+        {signers} · Tiny Soho
       </p>
 
-      <nav className="cp-closing-links" aria-label="Keep exploring">
+      <nav className="cp-closing-links" aria-label="Keep exploring" data-reveal="rise">
         <Link
           href="/recipes"
           className="cp-button"
@@ -34,7 +39,10 @@ export default function CampaignClosing({ data }: { data: CampaignPageData }) {
           data-story-action="recipes_index"
           data-story-placement="closing"
         >
-          Explore all recipes <span className="cp-arrow" aria-hidden="true">→</span>
+          <span className="cp-button-label">Explore all recipes</span>
+          <span className="cp-button-icon" aria-hidden="true">
+            →
+          </span>
         </Link>
         {instagram ? (
           <a
@@ -53,7 +61,7 @@ export default function CampaignClosing({ data }: { data: CampaignPageData }) {
       </nav>
 
       {wayBack ? (
-        <p className="cp-wayback">
+        <p className="cp-wayback" data-reveal="rise">
           <b>Not today?</b> Comment <span className="cp-keyword">{wayBack}</span> on any of our posts and we’ll send you
           the link.
         </p>

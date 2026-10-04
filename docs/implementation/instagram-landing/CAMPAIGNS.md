@@ -1,6 +1,6 @@
 # Campaign pages
 
-Updated 2026-10-04. How the Instagram campaign pages at `/stories/<slug>` are built, and how to add one. The product decisions are in [PLAN.md](PLAN.md).
+Updated 2026-10-04 (redesign: editorial motion, recipe dock, filmstrip). How the Instagram campaign pages at `/stories/<slug>` are built, and how to add one. The product decisions are in [PLAN.md](PLAN.md).
 
 One campaign is one Instagram post or selection. It can promise one recipe or many. Every campaign uses the same page; only its content changes.
 
@@ -8,16 +8,18 @@ One campaign is one Instagram post or selection. It can promise one recipe or ma
 
 | # | Section | What it does | Shown when |
 | --- | --- | --- | --- |
-| 1 | Hero | The post's promise, its photo, how many free recipes wait below, one button down to them, "Picked by Bhagyashree · Recipes by Tiny Soho" | Always |
-| 2 | Your recipes | The promised recipes, in order. Each card opens the recipe's permanent page. The layout follows the count (see below) | Always |
-| 3 | Meet Bhagyashree & Anaika | Five moments of one kitchen scene, then Bhagyashree's note | Always |
+| 1 | Hero | The post's promise (rising word by word), its photo in an arch, a ring with how many free recipes wait below, one button down to them, "Picked by Bhagyashree · Recipes by Tiny Soho", and a band of short facts | Always |
+| 2 | Your recipes | The promised recipes, in order, with what waits on each recipe page (ingredients, steps, allergens, print). Each card opens the recipe's permanent page. The layout follows the count (see below) | Always |
+| 3 | Meet Bhagyashree & Anaika | Five moments of one kitchen scene, then Bhagyashree's note, read along as it scrolls | Always |
 | 4 | Pack | "Want more …?", the pack's name, recipe count, a few of its recipes, one price, "See what's inside" | Checkout on, and the pack is on sale |
 | 5 | Collection | The collection's name, count, sample recipes, what "added later" means, one price, "See the collection", and the free / pack / collection comparison | Checkout on, and the collection is on sale |
-| 6 | More from the kitchen | Other free recipes, as the `/recipes` cards, on a shelf with previous/next buttons | There are other free recipes |
+| 6 | More from the kitchen | Other free recipes, as the `/recipes` cards, on a shelf with previous/next buttons (and mouse drag), ending on a card to every free recipe | There are other free recipes |
 | 7 | Good to know | Free? Account? Print? Allergens? Pack and collection questions only when those are shown | Always |
 | 8 | Closing | "Made in our kitchen. Shared with yours.", Explore all recipes, Instagram, My Curated Haven, and the way back keyword | Always (Instagram once the handle is set) |
 
 The full recipe (ingredients, steps, allergens, storage, print, save) is only ever on `/recipes/<slug>`. The campaign page never copies it.
+
+Once the promised recipes have scrolled past, a small dock at the bottom of the screen keeps them one tap away: "Open recipe" for one recipe, "Jump to them" for several. It steps aside while the hero, the recipes, an offer, the closing or the footer is on screen, so it never covers what it points to or sits next to a price. It needs the script and never shows without it.
 
 Never on these pages: pop-ups, email gates, countdowns, crossed-out prices, scarcity, refund talk, sign-in, or the parenting app.
 
@@ -39,14 +41,19 @@ The database allows three free recipes today (`free_recipe_slots.slot` is 1 to 3
 The supplied photos of Bhagyashree and Anaika are one scene in five moments: Prep, Mix, Shape, Top, Taste. They live in `public/images/campaigns/kitchen-story/`, cropped to one 6:5 frame so the camera never seems to jump. The words and photos are in `src/config/kitchen-story.ts`; a campaign can bring its own story instead.
 
 - **Phones, reduced motion, and before any script runs:** the moments are prints stacked by CSS (`position: sticky`). Each new moment slides over the last as the parent scrolls. Where the browser supports scroll-driven animations, each photo settles slightly as its print arrives.
-- **Large screens (1024 × 620 or more) with motion allowed:** `KitchenStoryMotion` loads GSAP and ScrollTrigger, then pins the stage under the header. Scrolling opens each next moment through a circle that grows from where the hands are, while the moment before leans back a little. The line beside it changes with each moment, and a progress line fills under the step names. The last moment rests briefly, then the stage lets go and Bhagyashree's note follows.
-- Scroll position drives everything; nothing plays on its own. `gsap.matchMedia` undoes the pin if the screen shrinks or motion is turned off. Phones never download GSAP (checked: no GSAP chunk on a 390px screen).
-
-The supplied file was a 1536 × 1024 collage, so the frames are 460 to 690px wide. Replace them with the original photos at 1600px or wider, keeping the file names, and nothing else changes.
+- **Large screens (1024 × 620 or more) with motion allowed:** `CampaignMotion` loads GSAP and ScrollTrigger (`motion/story.ts`), then pins the stage under the header. Scrolling opens each next moment through a circle that grows from where the hands are, while the moment before leans back a little. A large counter rolls from 01 to 05, the line beside it changes with each moment, and a progress line fills over a filmstrip of the five moments. Each frame of the filmstrip is a button that scrolls to its moment. The last moment rests briefly, then the stage lets go and Bhagyashree's note follows.
+- Scroll position drives everything; nothing plays on its own. `gsap.matchMedia` undoes the pin if the screen shrinks or motion is turned off. Phones never download GSAP: it is imported only once the large-screen query matches.
+- Bhagyashree's note: each word darkens from a lighter ink (still 5:1 on the card) as the parent reads down, using a CSS view timeline. Elsewhere it is simply ink.
 
 ## Motion rules
 
-One easing curve (`--cp-ease`). Only position and scale move. Text a parent needs never fades in from nothing, except the moment lines inside the pinned story, which stay in the page for screen readers. Ambient motion (the drawn berries, leaves or oats) loops slowly, at 9 seconds or more. The load moment on the first screen is under 1.6 seconds and starts from a visible state. Scroll effects other than the pinned story are CSS scroll-driven animations where the browser supports them, and static elsewhere. With reduced motion everything simply sits in place.
+One easing curve (`--cp-ease`). Three layers, each optional:
+
+1. **CSS, always:** the first screen's load moment (the headline rises word by word from behind a mask, the italic phrase gets a marker stroke, the photo settles, the count ring spins in, all under 1.6 seconds), hover states, and scroll-driven effects where the browser supports them (reading progress line, photo drift in recipe cards, the dark collection panel opening to full width, the shelf's progress line).
+2. **`CampaignMotion` on every screen:** sections rise into place as they arrive (`data-reveal`), the recipe dock, the cooking time counting up, and a mouse drag on the related shelf.
+3. **Mouse only:** buttons lean toward the pointer and fill from where it enters, recipe cards tilt, a round "Open" or "Drag" label follows the pointer over things it can open or drag, the hero's letters thicken under the pointer (Fraunces is variable, so only its weight changes), drawn ingredients lean with it, and on large screens a WebGL lens follows it across the hero photo (`motion/ripple.ts`; if WebGL fails the photo simply stays).
+
+Text a parent reads is never faded in: reveals move it from behind a mask or a little below its place. The one exception is the moment lines inside the pinned story, which stay in the page for screen readers. Anything already on screen when the script starts stays exactly where it is. Ambient loops are quiet: the drawn ingredients, the count ring and the band of facts take 9 seconds or more per cycle, the two small dots pulse every 3 seconds, and the band pauses under the pointer. With reduced motion nothing moves and nothing waits on an animation; without the script the page is complete and still. Both are covered by browser tests.
 
 ## Adding a campaign
 
@@ -106,7 +113,7 @@ Campaign
 | `src/config/kitchen-story.ts` | Bhagyashree and Anaika's story, and the brand's Instagram link |
 | `src/lib/data/campaigns.ts` | `CampaignSource`: where campaigns come from, and which are served where |
 | `src/lib/data/load-campaign.ts` | Everything one page needs, read as an anonymous visitor so the page can be cached |
-| `src/components/campaign/` | One component per section, plus `CampaignTracker` (analytics) and `KitchenStoryMotion` (GSAP) |
+| `src/components/campaign/` | One component per section, plus `CampaignDock` (the recipe dock), `CampaignTracker` (analytics) and `CampaignMotion` with `motion/` (reveals, dock, pointer details, WebGL lens, and the pinned story with GSAP) |
 | `src/styles/campaign.css` | Tokens, themes, layouts and motion for these pages |
 
 ### When an admin arrives

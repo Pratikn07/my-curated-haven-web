@@ -5,14 +5,19 @@ import type { CampaignCollectionCopy, CampaignPackCopy } from "@/lib/campaigns/t
 import { recipeCountLabel } from "@/lib/campaigns/validate";
 import type { CampaignOfferData } from "@/lib/data/load-campaign";
 import { usableImageSrc } from "@/lib/recipes/format";
-import { Kicker } from "./CampaignParts";
+import { Kicker, SplitTitle } from "./CampaignParts";
 
 function Checklist({ items, tone }: { items: string[]; tone?: "light" }) {
   if (items.length === 0) return null;
   return (
     <ul className="cp-checklist" data-tone={tone}>
-      {items.map((item) => (
-        <li key={item}>{item}</li>
+      {items.map((item, index) => (
+        <li key={item} style={{ "--k": index } as CSSProperties}>
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M3 8.5l3 3 7-7" />
+          </svg>
+          {item}
+        </li>
       ))}
     </ul>
   );
@@ -71,11 +76,11 @@ export function OfferLadder({ freeCount, pack, collection }: LadderProps) {
       : []),
   ];
   return (
-    <div className="cp-ladder">
+    <div className="cp-ladder" data-reveal="rise">
       <h3 className="cp-ladder-title">Free, pack or collection?</h3>
       <ol className="cp-ladder-steps" style={{ "--steps": steps.length } as CSSProperties}>
-        {steps.map((step) => (
-          <li key={step.key} data-step={step.key}>
+        {steps.map((step, index) => (
+          <li key={step.key} data-step={step.key} style={{ "--k": index } as CSSProperties}>
             <span className="cp-ladder-name">{step.name}</span>
             <span className="cp-ladder-price">{step.price}</span>
             <span className="cp-ladder-count">{step.count}</span>
@@ -92,21 +97,25 @@ export function CampaignPack({
   copy,
   offer,
   ladder,
+  index,
 }: {
   copy: CampaignPackCopy;
   offer: CampaignOfferData;
   ladder?: React.ReactNode;
+  index?: string;
 }) {
   return (
     <section className="cp-pack" aria-labelledby="cp-pack-title" data-story-section="pack">
       <div className="cp-pack-inner">
         <div className="cp-pack-copy">
-          <Kicker>{copy.eyebrow}</Kicker>
-          <h2 id="cp-pack-title" className="cp-h2">
-            {copy.heading}
+          <Kicker index={index}>{copy.eyebrow}</Kicker>
+          <h2 id="cp-pack-title" className="cp-h2" data-reveal="words">
+            <SplitTitle text={copy.heading} />
           </h2>
-          <p className="cp-lead">{copy.lead}</p>
-          <div className="cp-ticket">
+          <p className="cp-lead" data-reveal="rise">
+            {copy.lead}
+          </p>
+          <div className="cp-ticket" data-reveal="rise">
             <div className="cp-ticket-head">
               <h3 className="cp-ticket-name">{offer.title}</h3>
               <p className="cp-ticket-price">
@@ -123,12 +132,20 @@ export function CampaignPack({
               data-story-action="pack"
               data-story-placement="pack"
             >
-              See what’s inside <span className="cp-arrow" aria-hidden="true">→</span>
+              <span className="cp-button-label">See what’s inside</span>
+              <span className="cp-button-icon" aria-hidden="true">
+                →
+              </span>
             </Link>
           </div>
         </div>
         {offer.preview.length > 0 ? (
-          <ul className="cp-fan" aria-label={`Some recipes in ${offer.title}`} style={{ "--cards": offer.preview.length } as CSSProperties}>
+          <ul
+            className="cp-fan"
+            aria-label={`Some recipes in ${offer.title}`}
+            data-fan
+            style={{ "--cards": offer.preview.length } as CSSProperties}
+          >
             {offer.preview.map((recipe, index) => (
               <li key={recipe.id} className="cp-fan-card" style={{ "--k": index } as CSSProperties}>
                 <PreviewCard title={recipe.title} imagePath={recipe.previewImagePath} sizes="(min-width: 1024px) 15rem, 40vw" />
@@ -147,23 +164,34 @@ export function CampaignCollection({
   copy,
   offer,
   ladder,
+  index,
 }: {
   copy: CampaignCollectionCopy;
   offer: CampaignOfferData;
   ladder?: React.ReactNode;
+  index?: string;
 }) {
   return (
     <section className="cp-collection" aria-labelledby="cp-collection-title" data-story-section="collection">
       <div className="cp-collection-inner">
         <div className="cp-collection-copy">
-          <Kicker tone="light">{copy.eyebrow}</Kicker>
-          <h2 id="cp-collection-title" className="cp-h2">
-            {offer.title}
+          <Kicker tone="light" index={index}>
+            {copy.eyebrow}
+          </Kicker>
+          <h2 id="cp-collection-title" className="cp-h2" data-reveal="words">
+            <SplitTitle text={offer.title} />
           </h2>
-          <p className="cp-collection-lead">{copy.lead}</p>
-          <p className="cp-collection-grows">{copy.growsLine}</p>
-          <Checklist items={copy.includes} tone="light" />
-          <div className="cp-collection-buy">
+          <p className="cp-collection-lead" data-reveal="rise">
+            {copy.lead}
+          </p>
+          <p className="cp-collection-grows" data-reveal="rise">
+            <span className="cp-grow-dot" aria-hidden="true" />
+            {copy.growsLine}
+          </p>
+          <div data-reveal="rise">
+            <Checklist items={copy.includes} tone="light" />
+          </div>
+          <div className="cp-collection-buy" data-reveal="rise">
             <p>
               <b>{offer.formattedPrice}</b>
               <span>
@@ -179,17 +207,28 @@ export function CampaignCollection({
               data-story-action="collection"
               data-story-placement="collection"
             >
-              See the collection <span className="cp-arrow" aria-hidden="true">→</span>
+              <span className="cp-button-label">See the collection</span>
+              <span className="cp-button-icon" aria-hidden="true">
+                →
+              </span>
             </Link>
           </div>
         </div>
-        <ul className="cp-shelf-wall" aria-label={`Some recipes in ${offer.title}`}>
+        <ul
+          className="cp-shelf-wall"
+          aria-label={`Some recipes in ${offer.title}`}
+          style={{ "--n": offer.preview.length + 1 } as CSSProperties}
+        >
           {offer.preview.map((recipe, index) => (
-            <li key={recipe.id} style={{ "--k": index } as CSSProperties}>
+            <li key={recipe.id} data-reveal="rise" style={{ "--k": index, "--i": index % 3 } as CSSProperties}>
               <PreviewCard title={recipe.title} imagePath={recipe.previewImagePath} sizes="(min-width: 1024px) 12rem, 30vw" />
             </li>
           ))}
-          <li className="cp-shelf-later">
+          <li
+            className="cp-shelf-later"
+            data-reveal="rise"
+            style={{ "--k": offer.preview.length, "--i": offer.preview.length % 3 } as CSSProperties}
+          >
             <span aria-hidden="true">+</span>
             New recipes as we add them
           </li>

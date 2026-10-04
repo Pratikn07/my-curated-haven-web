@@ -51,7 +51,7 @@ In `my-curated-haven-web/` (details in [CAMPAIGNS.md](CAMPAIGNS.md)):
 - `src/lib/campaigns/`: the campaign shapes, validation and the layout plan. `src/lib/data/campaigns.ts` is the one place campaigns are read from, so an admin can replace the config later.
 - `src/lib/data/load-campaign.ts`: reads the promised recipes from the free catalog as an anonymous visitor, so RLS decides what is shown. Offers appear only when checkout is on and they are on sale.
 - `src/app/stories/[slug]/page.tsx`: built on its first visit and served from the cache for an hour after that. Not listed by search engines. A one-recipe page names the recipe page as canonical.
-- `src/components/campaign/` and `src/styles/campaign.css`: the sections, the analytics tracker, and the pinned story (GSAP, large screens only).
+- `src/components/campaign/` and `src/styles/campaign.css`: the sections, the analytics tracker, the recipe dock, and the motion layer (reveals and pointer details everywhere; the pinned story with GSAP on large screens only). Redesigned 2026-10-04 as an editorial, interactive page; the motion rules are in [CAMPAIGNS.md](CAMPAIGNS.md#motion-rules).
 - Analytics: `story_view`, `story_action_clicked` and the new `story_section_viewed`, all with fixed values, plus `entry_story` for the visit.
 - `src/lib/house-light.ts`: the homepage painting is preloaded on the homepage only.
 

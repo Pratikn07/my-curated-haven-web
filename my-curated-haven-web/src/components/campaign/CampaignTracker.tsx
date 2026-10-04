@@ -56,7 +56,7 @@ interface CampaignTrackerProps {
  *   recipe opened or a purchase later in the visit is tied back to the post;
  * - story_action_clicked for links marked data-story-action;
  * - story_section_viewed the first time each part of the page is reached.
- * Also gives the main buttons a slight pull toward a mouse pointer.
+ * Motion and pointer details live in CampaignMotion.
  */
 export default function CampaignTracker({ slug, room, recipeCount, offerState, series }: CampaignTrackerProps) {
   useEffect(() => {
@@ -120,34 +120,9 @@ export default function CampaignTracker({ slug, room, recipeCount, offerState, s
     );
     document.querySelectorAll("[data-story-section]").forEach((element) => sections?.observe(element));
 
-    const magnets = window.matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches
-      ? Array.from(document.querySelectorAll<HTMLElement>(".campaign [data-magnetic]"))
-      : [];
-    const pull = (event: PointerEvent) => {
-      const target = event.currentTarget as HTMLElement;
-      const box = target.getBoundingClientRect();
-      const x = ((event.clientX - box.left) / box.width - 0.5) * 10;
-      const y = ((event.clientY - box.top) / box.height - 0.5) * 8;
-      target.style.setProperty("--cp-mx", `${x.toFixed(1)}px`);
-      target.style.setProperty("--cp-my", `${y.toFixed(1)}px`);
-    };
-    const release = (event: PointerEvent) => {
-      const target = event.currentTarget as HTMLElement;
-      target.style.removeProperty("--cp-mx");
-      target.style.removeProperty("--cp-my");
-    };
-    for (const magnet of magnets) {
-      magnet.addEventListener("pointermove", pull);
-      magnet.addEventListener("pointerleave", release);
-    }
-
     return () => {
       document.removeEventListener("click", onClick);
       sections?.disconnect();
-      for (const magnet of magnets) {
-        magnet.removeEventListener("pointermove", pull);
-        magnet.removeEventListener("pointerleave", release);
-      }
     };
   }, [slug, room, recipeCount, offerState, series]);
 

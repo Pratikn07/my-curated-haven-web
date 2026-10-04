@@ -2,7 +2,9 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CampaignClosing from "@/components/campaign/CampaignClosing";
+import CampaignDock from "@/components/campaign/CampaignDock";
 import CampaignHero from "@/components/campaign/CampaignHero";
+import CampaignMotion from "@/components/campaign/CampaignMotion";
 import { CampaignCollection, CampaignPack, OfferLadder } from "@/components/campaign/CampaignOffers";
 import CampaignQuestions from "@/components/campaign/CampaignQuestions";
 import CampaignRecipes from "@/components/campaign/CampaignRecipes";
@@ -74,9 +76,20 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
     showPack || showCollection ? (
       <OfferLadder freeCount={recipes.length} pack={showPack ? pack : null} collection={showCollection ? collection : null} />
     ) : null;
+  // Chapter numbers for the kickers, counted over the sections this page actually shows.
+  const chapters = [
+    "recipes",
+    "story",
+    ...(showPack ? ["pack"] : []),
+    ...(showCollection ? ["collection"] : []),
+    ...(related.length > 0 ? ["related"] : []),
+    "questions",
+  ];
+  const chapter = (key: string) => String(chapters.indexOf(key) + 1).padStart(2, "0");
 
   return (
     <div className="campaign" data-theme={campaign.theme} data-campaign={campaign.slug}>
+      <span className="cp-progress" aria-hidden="true" />
       <CampaignTracker
         slug={campaign.slug}
         room={campaign.room}
@@ -85,13 +98,19 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
         series={campaign.analytics?.series}
       />
       <CampaignHero data={data} />
-      <CampaignRecipes data={data} />
-      <KitchenStory story={story} motif={campaign.motif} />
-      {showPack ? <CampaignPack copy={campaign.featuredPack!} offer={pack!} ladder={showCollection ? null : ladder} /> : null}
-      {showCollection ? <CampaignCollection copy={campaign.featuredCollection!} offer={collection!} ladder={ladder} /> : null}
-      <CampaignRelated recipes={related} />
-      <CampaignQuestions data={data} />
+      <CampaignRecipes data={data} index={chapter("recipes")} />
+      <KitchenStory story={story} motif={campaign.motif} index={chapter("story")} />
+      {showPack ? (
+        <CampaignPack copy={campaign.featuredPack!} offer={pack!} ladder={showCollection ? null : ladder} index={chapter("pack")} />
+      ) : null}
+      {showCollection ? (
+        <CampaignCollection copy={campaign.featuredCollection!} offer={collection!} ladder={ladder} index={chapter("collection")} />
+      ) : null}
+      <CampaignRelated recipes={related} index={chapter("related")} />
+      <CampaignQuestions data={data} index={chapter("questions")} />
       <CampaignClosing data={data} />
+      <CampaignDock data={data} />
+      <CampaignMotion />
     </div>
   );
 }
