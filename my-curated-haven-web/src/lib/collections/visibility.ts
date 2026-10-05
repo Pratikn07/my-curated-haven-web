@@ -35,7 +35,7 @@ export function collectionFacts(collection: Pick<ShowroomCollection, "recipes">)
   if (timed.length === recipes.length && underHour === recipes.length) facts.push("all under an hour");
   else if (underHour > 0) facts.push(`${underHour} under an hour`);
   const freeze = recipes.filter((recipe) => recipe.freezes).length;
-  if (freeze === recipes.length) facts.push("every one freezes");
+  if (freeze === recipes.length) facts.push("all freeze");
   else if (freeze > 0) facts.push(`${freeze} freeze`);
   return facts;
 }

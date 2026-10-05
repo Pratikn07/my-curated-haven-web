@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, Clock, Snowflake } from "lucide-react";
 import { BookCover } from "@/components/collections/Book";
-import { FreeRecipeCard } from "@/components/collections/Showroom";
+import { FreeRecipeCard, MaskedWords } from "@/components/collections/Showroom";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 import { collectionFacts, recipeCount } from "@/lib/collections/visibility";
@@ -65,7 +65,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
 
           <div className="cl-dhero-text">
             <h1 className="cl-dhero-title" id="collection-title">
-              {model.title}
+              <MaskedWords text={model.title} />
             </h1>
             {model.tagline ? <p className="cl-tagline">{model.tagline}</p> : null}
             <p className="cl-story">{model.story}</p>

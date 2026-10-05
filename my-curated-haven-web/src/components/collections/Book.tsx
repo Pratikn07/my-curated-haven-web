@@ -40,6 +40,9 @@ export function BookCover({ book, sizes, priority = false, tilt = false }: BookC
   );
 }
 
+/** Lines that fit on the first page, even on a phone. */
+const PAGE_LINES = 6;
+
 interface OpeningBookProps {
   collection: ShowroomCollection;
 }
@@ -55,13 +58,16 @@ export function OpeningBook({ collection }: OpeningBookProps) {
       <div className="cl-book3d-page" aria-hidden="true">
         <h3>Contents</h3>
         <ol>
-          {collection.recipes.map((recipe, index) => (
+          {collection.recipes.slice(0, PAGE_LINES).map((recipe, index) => (
             <li key={recipe.slug}>
               <span>{index + 1}</span>
               <span>{recipe.title}</span>
             </li>
           ))}
         </ol>
+        {collection.recipes.length > PAGE_LINES ? (
+          <p className="cl-book3d-more">and {collection.recipes.length - PAGE_LINES} more overleaf</p>
+        ) : null}
       </div>
       <div className="cl-book3d-cover">
         <BookCover book={collection} sizes="(min-width: 1024px) 19rem, 62vw" />

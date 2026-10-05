@@ -38,7 +38,13 @@ test("the header offers Collections and Free Recipes", async ({ page }) => {
   await page.goto("/", LOAD);
   const header = page.locator("header").first();
   const menu = header.getByRole("button", { name: "Open menu" });
-  if (await menu.isVisible()) await menu.click();
+  if (await menu.isVisible()) {
+    // The menu answers only once the page has hydrated; tap until it opens.
+    await expect(async () => {
+      if (await menu.isVisible()) await menu.click();
+      await expect(header.getByRole("button", { name: "Close menu" })).toBeVisible({ timeout: 1000 });
+    }).toPass();
+  }
   await expect(header.getByRole("link", { name: "Collections" }).first()).toHaveAttribute("href", "/collections");
   await expect(header.getByRole("link", { name: "Free Recipes" }).first()).toHaveAttribute("href", "/recipes");
 });
@@ -88,4 +94,35 @@ test("collections pages have no serious accessibility violations", async ({ page
     const serious = results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""));
     expect(serious.map((violation) => violation.id), path).toEqual([]);
   }
+});
+
+test("a recipe page turns over on a tap to show its details, one at a time", async ({ page }) => {
+  await page.goto("/collections", LOAD);
+  const pages = page.locator("#meal-prep .cl-page");
+  await pages.nth(1).scrollIntoViewIfNeeded();
+  await pages.nth(1).click();
+  await expect(pages.nth(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(pages.nth(1)).toHaveAccessibleName(/Veggie-Packed Lasagna: 75 min, freezes 2 months, contains wheat, milk, egg/);
+  await pages.nth(2).click();
+  await expect(pages.nth(1)).toHaveAttribute("aria-pressed", "false");
+  await expect(pages.nth(2)).toHaveAttribute("aria-pressed", "true");
+});
+
+test("scroll scenes run with motion allowed and stay off with reduced motion", async ({ page }) => {
+  await page.goto("/collections", LOAD);
+  await expect(page.locator(".cl")).toHaveAttribute("data-scenes", "");
+  await expect(page.locator(".cl-chapters")).toHaveAttribute("data-ink", "");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections", LOAD);
+  await page.waitForTimeout(1500);
+  await expect(page.locator(".cl")).not.toHaveAttribute("data-scenes", "");
+});
+
+test("tapping a book lands in its chapter", async ({ page }) => {
+  await page.goto("/collections", LOAD);
+  await page.locator('.cl-stack-book[data-flood-to="protein-packs"]').click();
+  await expect(page).toHaveURL(/#protein-packs$/);
+  await expect(page.locator("#protein-packs .cl-chapter-title")).toBeInViewport();
+  await expect(page.locator(".cl-tap-ink")).toHaveCount(0);
 });

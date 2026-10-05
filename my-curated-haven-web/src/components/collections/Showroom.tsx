@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import { BookCover, OpeningBook } from "@/components/collections/Book";
-import type { ShowroomCollection } from "@/lib/collections/types";
+import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
 import { collectionFacts } from "@/lib/collections/visibility";
 import { usableImageSrc } from "@/lib/recipes/format";
@@ -15,7 +15,7 @@ export interface ShowroomEntry {
 }
 
 /** Splits a line into masked words; `em` words get the italic accent. */
-function MaskedWords({ text, em = [], offset = 0 }: { text: string; em?: string[]; offset?: number }) {
+export function MaskedWords({ text, em = [], offset = 0 }: { text: string; em?: string[]; offset?: number }) {
   return (
     <>
       {text.split(" ").map((word, index) => {
@@ -35,6 +35,21 @@ function MaskedWords({ text, em = [], offset = 0 }: { text: string; em?: string[
   );
 }
 
+function minutesText(minutes: number): string {
+  if (minutes < 90) return `${minutes} min`;
+  return `${Math.round((minutes / 60) * 2) / 2} hours`;
+}
+
+/** What a screen reader hears for a page: both faces at once. */
+function pageLabel(recipe: CollectionRecipe): string {
+  const facts = [
+    recipe.minutes !== null ? minutesText(recipe.minutes) : null,
+    recipe.freezes ? `freezes ${recipe.freezes}` : null,
+    recipe.allergens.length > 0 ? `contains ${recipe.allergens.join(", ")}` : "no listed allergens",
+  ].filter(Boolean);
+  return `${recipe.title}: ${facts.join(", ")}`;
+}
+
 export function ShowroomHero({ entries }: { entries: readonly ShowroomEntry[] }) {
   const first = entries[0]?.collection;
   return (
@@ -52,7 +67,7 @@ export function ShowroomHero({ entries }: { entries: readonly ShowroomEntry[] })
         <ul className="cl-stack" aria-label="Collections on the shelf">
           {entries.map(({ collection, price }, index) => (
             <li key={collection.slug} style={{ display: "contents" }}>
-              <a className="cl-stack-book" href={`#${collection.slug}`} aria-label={`${collection.title}: ${collection.recipes.length} recipes, ${price}`}>
+              <a className="cl-stack-book" href={`#${collection.slug}`} data-flood-to={collection.slug} aria-label={`${collection.title}: ${collection.recipes.length} recipes, ${price}`}>
                 <BookCover book={collection} sizes="(min-width: 1024px) 17rem, 46vw" priority={index < 3} tilt />
                 <span className="cl-stack-label" aria-hidden="true">
                   {collection.recipes.length} recipes · {price}
@@ -64,7 +79,7 @@ export function ShowroomHero({ entries }: { entries: readonly ShowroomEntry[] })
 
         <div className="cl-hero-actions">
           {first ? (
-            <a className="cl-button" href={`#${first.slug}`} data-magnetic>
+            <a className="cl-button" href={`#${first.slug}`} data-flood-to={first.slug} data-magnetic>
               Browse the collections
               <ArrowRight className="cl-button-arrow" aria-hidden="true" />
             </a>
@@ -86,16 +101,19 @@ export function ShowroomHero({ entries }: { entries: readonly ShowroomEntry[] })
 export function ShelfRail({ entries }: { entries: readonly ShowroomEntry[] }) {
   return (
     <nav className="cl-rail" aria-label="Jump to a collection">
-      <ul className="cl-rail-list">
-        {entries.map(({ collection }, index) => (
-          <li key={collection.slug}>
-            <a className="cl-rail-link" href={`#${collection.slug}`} data-rail={collection.slug} aria-current={index === 0 ? "true" : undefined}>
-              <span className="cl-rail-swatch" data-cloth={collection.cloth} aria-hidden="true" />
-              {collection.title}
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div className="cl-rail-track">
+        <span className="cl-rail-pill" aria-hidden="true" />
+        <ul className="cl-rail-list">
+          {entries.map(({ collection }, index) => (
+            <li key={collection.slug}>
+              <a className="cl-rail-link" href={`#${collection.slug}`} data-rail={collection.slug} aria-current={index === 0 ? "true" : undefined}>
+                <span className="cl-rail-swatch" data-cloth={collection.cloth} aria-hidden="true" />
+                {collection.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </nav>
   );
 }
@@ -116,8 +134,8 @@ export function Chapter({ entry, index }: { entry: ShowroomEntry; index: number 
         </div>
 
         <div className="cl-chapter-text">
-          <h2 className="cl-chapter-title" id={headingId}>
-            {collection.title}
+          <h2 className="cl-chapter-title" id={headingId} tabIndex={-1}>
+            <MaskedWords text={collection.title} />
           </h2>
           <p className="cl-tagline">{collection.tagline}</p>
           <p className="cl-story">{collection.story}</p>
@@ -132,16 +150,31 @@ export function Chapter({ entry, index }: { entry: ShowroomEntry; index: number 
           <ul className="cl-fan" aria-label={`Some of the recipes in ${collection.title}`}>
             {fan.map((recipe, cardIndex) => (
               <li className="cl-fan-card" key={recipe.slug} style={{ "--i": cardIndex } as CSSProperties}>
-                <div className="cl-fan-photo">
-                  <Image src={recipe.image} alt="" fill sizes="(min-width: 1024px) 10rem, 30vw" />
-                </div>
-                <p className="cl-fan-caption">
-                  <span>{recipe.title}</span>
-                </p>
+                <button type="button" className="cl-page" aria-pressed="false" aria-label={pageLabel(recipe)}>
+                  <span className="cl-page-front" aria-hidden="true">
+                    <span className="cl-fan-photo">
+                      <Image src={recipe.image} alt="" fill sizes="(min-width: 1024px) 10rem, 30vw" />
+                    </span>
+                    <span className="cl-fan-caption">
+                      <span>{recipe.title}</span>
+                    </span>
+                  </span>
+                  <span className="cl-page-back" aria-hidden="true">
+                    <span className="cl-page-title">{recipe.title}</span>
+                    <span className="cl-page-facts">
+                      {recipe.minutes !== null ? <span>{minutesText(recipe.minutes)}</span> : null}
+                      {recipe.protein ? <span>Built around {recipe.protein.toLowerCase()}</span> : null}
+                      {recipe.freezes ? <span>Freezes {recipe.freezes}</span> : null}
+                      <span>{recipe.allergens.length > 0 ? `Contains ${recipe.allergens.join(", ")}` : "No listed allergens"}</span>
+                    </span>
+                  </span>
+                </button>
               </li>
             ))}
           </ul>
-          {rest > 0 ? <p className="cl-chapter-more">and {rest} more inside</p> : null}
+          <p className="cl-chapter-more">
+            Tap a page to turn it over{rest > 0 ? ` · ${rest} more inside` : ""}
+          </p>
         </div>
 
         <div className="cl-chapter-buy">

@@ -65,7 +65,12 @@ export default async function CollectionsPage() {
     <div className="cl">
       <ShowroomHero entries={entries} />
       <div className="cl-chapters" data-cloth={entries[0].collection.cloth}>
-        <span className="cl-cloth" aria-hidden="true" />
+        <span className="cl-cloth" aria-hidden="true">
+          {/* One layer per book: on scroll, each spreads over the last like dye (scenes.ts). */}
+          {entries.map(({ collection }) => (
+            <span key={collection.slug} className="cl-ink" data-cloth={collection.cloth} data-ink={collection.slug} />
+          ))}
+        </span>
         <ShelfRail entries={entries} />
         {entries.map((entry, index) => (
           <Chapter key={entry.collection.slug} entry={entry} index={index} />
