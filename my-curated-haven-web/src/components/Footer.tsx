@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { footerLinks } from "@/config/site-navigation";
+import { footerLinks, type NavLink } from "@/config/site-navigation";
 
-export default function Footer() {
+export default function Footer({ links = footerLinks }: { links?: NavLink[] }) {
   const year = new Date().getFullYear();
 
   return (
@@ -19,7 +19,7 @@ export default function Footer() {
           </p>
         </div>
         <ul className="grid gap-2">
-          {footerLinks.map((link) => (
+          {links.map((link) => (
             <li key={link.href}>
               <Link href={link.href} className="inline-flex min-h-11 items-center font-semibold">
                 {link.label}
