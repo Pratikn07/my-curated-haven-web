@@ -3,10 +3,10 @@ import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/typ
 /**
  * The collections the showroom (/collections) and each collection page show.
  *
- * All three are drafts: they render locally and on previews, never on
- * production, until the owner approves their membership, prices and refresh
- * promise (docs/implementation/recipe-collections, RC-01 to RC-05). Publishing
- * one is a one-word change to `status` once its offer exists.
+ * All three are published (owner decision, 2026-10-04) with placeholder prices
+ * and refresh promises still awaiting approval (docs/implementation/
+ * recipe-collections, RC-01 to RC-05). Until a commerce offer exists for a
+ * slug, its page shows the placeholder price and "Opening soon".
  *
  * Recipe facts (title, minutes, allergens, freezer note, photo) are a snapshot
  * of the catalog taken on 2026-10-04 from ../recipe-review. Membership moves into
@@ -64,7 +64,7 @@ function recipes(slugs: readonly string[]): CollectionRecipe[] {
 export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
   {
     slug: "halloween",
-    status: "draft",
+    status: "published",
     title: "Halloween",
     tagline: "A festive table for little hands. Nothing scary.",
     story:
@@ -87,7 +87,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
   },
   {
     slug: "meal-prep",
-    status: "draft",
+    status: "published",
     title: "Meal Prep",
     tagline: "Cook once on Sunday. Eat well on Wednesday.",
     story:
@@ -112,7 +112,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
   },
   {
     slug: "protein-packs",
-    status: "draft",
+    status: "published",
     title: "Protein Packs",
     tagline: "Meals built around one protein, in shapes little hands can manage.",
     story:

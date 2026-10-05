@@ -2,9 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 /**
- * The collections showroom and collection pages. The three collections are
- * drafts in src/config/collections.ts, so they render locally and in CI but
- * never on production.
+ * The collections showroom and collection pages (src/config/collections.ts).
  */
 
 /** The DOM is enough: waiting for every remote recipe photo makes a cold first run slow. */
@@ -53,7 +51,7 @@ test("a collection page lists every recipe with its allergens and is honest abou
   await expect(page.getByText("Contains wheat, milk, egg").first()).toBeVisible();
   await expect(page.getByText("One-time purchase")).toBeVisible();
   await expect(page.getByText(/all sales are final/i).first()).toBeVisible();
-  // No live offer for a draft: no checkout control, a plain statement instead.
+  // No live offer yet: no checkout control, a plain statement instead.
   await expect(page.getByRole("button", { name: /Buy Collection/ })).toHaveCount(0);
   await expect(page.getByText("Opening soon")).toBeVisible();
   await expect(page.getByRole("link", { name: "Next on the shelf Protein Packs" })).toBeVisible();
