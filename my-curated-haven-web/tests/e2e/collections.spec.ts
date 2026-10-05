@@ -2,7 +2,8 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 /**
- * The collections showroom and collection pages (src/config/collections.ts).
+ * The collections showroom (/collections/test while the real /collections is
+ * designed) and the collection pages (src/config/collections.ts).
  */
 
 /** The DOM is enough: waiting for every remote recipe photo makes a cold first run slow. */
@@ -15,7 +16,7 @@ const COLLECTIONS = [
 ];
 
 test("the showroom shows each collection as a chapter with its price and a way in", async ({ page }) => {
-  const response = await page.goto("/collections", LOAD);
+  const response = await page.goto("/collections/test", LOAD);
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Little cookbooks for the moments that fill the week.");
 
@@ -70,7 +71,7 @@ test("an unknown collection is a 404", async ({ page }) => {
 
 test("collections pages fit a 320px screen", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 });
-  for (const path of ["/collections", "/collections/protein-packs"]) {
+  for (const path of ["/collections/test", "/collections/protein-packs"]) {
     await page.goto(path, LOAD);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, path).toBeLessThanOrEqual(1);
@@ -79,7 +80,7 @@ test("collections pages fit a 320px screen", async ({ page }) => {
 
 test("with reduced motion every recipe card rests in its fanned place", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/collections", LOAD);
+  await page.goto("/collections/test", LOAD);
   const card = page.locator("#halloween .cl-fan-card").first();
   const transform = await card.evaluate((element) => getComputedStyle(element).transform);
   // The first card leans left: a rotation, not the identity matrix of the stacked state.
@@ -88,7 +89,7 @@ test("with reduced motion every recipe card rests in its fanned place", async ({
 });
 
 test("collections pages have no serious accessibility violations", async ({ page }) => {
-  for (const path of ["/collections", "/collections/halloween"]) {
+  for (const path of ["/collections/test", "/collections/halloween"]) {
     await page.goto(path, LOAD);
     const results = await new AxeBuilder({ page }).analyze();
     const serious = results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""));
@@ -97,7 +98,7 @@ test("collections pages have no serious accessibility violations", async ({ page
 });
 
 test("a recipe page turns over on a tap to show its details, one at a time", async ({ page }) => {
-  await page.goto("/collections", LOAD);
+  await page.goto("/collections/test", LOAD);
   const pages = page.locator("#meal-prep .cl-page");
   await pages.nth(1).scrollIntoViewIfNeeded();
   await pages.nth(1).click();
@@ -109,20 +110,27 @@ test("a recipe page turns over on a tap to show its details, one at a time", asy
 });
 
 test("scroll scenes run with motion allowed and stay off with reduced motion", async ({ page }) => {
-  await page.goto("/collections", LOAD);
+  await page.goto("/collections/test", LOAD);
   await expect(page.locator(".cl")).toHaveAttribute("data-scenes", "");
   await expect(page.locator(".cl-chapters")).toHaveAttribute("data-ink", "");
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/collections", LOAD);
+  await page.goto("/collections/test", LOAD);
   await page.waitForTimeout(1500);
   await expect(page.locator(".cl")).not.toHaveAttribute("data-scenes", "");
 });
 
 test("tapping a book lands in its chapter", async ({ page }) => {
-  await page.goto("/collections", LOAD);
+  await page.goto("/collections/test", LOAD);
   await page.locator('.cl-stack-book[data-flood-to="protein-packs"]').click();
   await expect(page).toHaveURL(/#protein-packs$/);
   await expect(page.locator("#protein-packs .cl-chapter-title")).toBeInViewport();
   await expect(page.locator(".cl-tap-ink")).toHaveCount(0);
+});
+
+test("/collections sends visitors to the showroom for now, which search engines skip", async ({ page }) => {
+  const response = await page.goto("/collections", LOAD);
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/collections\/test$/);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
 });
