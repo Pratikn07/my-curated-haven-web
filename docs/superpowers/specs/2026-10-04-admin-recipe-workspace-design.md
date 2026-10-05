@@ -1,7 +1,7 @@
 # Admin recipe workspace: Phase 1 design
 
 - Date: 2026-10-04, America/Los_Angeles.
-- Status: written design for owner review. The conversational workflow is approved; this document is not yet approved for implementation.
+- Status: written design approved by the owner in this conversation; Phase 1 implementation planning is authorised. Implementation awaits review of that plan.
 - Source baseline: main at e0cc25b816efa30665080741b03fbdc3e61019fe.
 - Delivery state: design only; no application, database, provider or production changes.
 
@@ -379,8 +379,8 @@ A console flag rollback stops new console operations while retaining current rec
 
 ## 14. Written-review checkpoint
 
-Author review completed: D1–D6 are covered by the written artifact. All nine repository references resolve. The draft contains no unresolved implementation-decision markers, and source-confirmed findings are distinguished from proposed behaviour. The implementation gates R1–R12 remain not run; owner review of this written design remains pending.
+Author review completed: D1–D6 are covered by the written artifact. All nine repository references resolve. The draft contains no unresolved implementation-decision markers, and source-confirmed findings are distinguished from proposed behaviour. The implementation gates R1–R12 remain not run. The owner approved this written design in the conversation and authorised the Phase 1 implementation plan.
 
-The owner approved the conversational workflow and authorised preparation of this design. Review this written artifact before producing its implementation plan. That review can amend scope, screens, permissions or invariants.
+The approved workflow, scope, permissions and invariants are the baseline for the implementation plan. Any material departure must be brought back to the owner with its effect on the agreed workflow.
 
 The next artifact after written-design approval is a Phase 1 implementation plan with concrete migrations, service/component responsibilities, ordered tasks and runnable acceptance gates. Design approval alone does not claim code, a passing build, deployment or production verification.
