@@ -2369,7 +2369,9 @@
   --ledge-y: calc(0.6rem + var(--book-w) * 1.3577);
 
   display: flex;
-  align-items: flex-end;
+  /* Tops aligned: every cover is the same height, so every book stands on the ledge
+     however many lines its title takes underneath. */
+  align-items: flex-start;
   gap: var(--gap);
   margin: 0 calc(var(--cl-gutter) * -1);
   padding: 0.6rem var(--cl-gutter) 0.3rem;
@@ -2425,6 +2427,13 @@ a.bk-book:focus-visible {
   transition: transform 0.5s var(--cl-ease);
 }
 
+/* On the bookcase the drop-shadow filter painted a lighter square around each book
+   (its filter layer over the paper texture), so books cast a plain box shadow here. */
+.bk .cl-book {
+  filter: none;
+  box-shadow: 0 1px 1px rgb(20 10 4 / 0.28), 0 16px 18px -10px rgb(20 10 4 / 0.42), 0 30px 34px -24px rgb(20 10 4 / 0.38);
+}
+
 a.bk-book:hover .bk-book-cover > .cl-book,
 a.bk-book:focus-visible .bk-book-cover > .cl-book {
   transform: translateY(-7px) rotate(-1.5deg);
@@ -2442,7 +2451,8 @@ a.bk-book:focus-visible .bk-book-cover > .cl-book {
 }
 
 .bk-book[data-soon] .bk-book-cover > .cl-book {
-  filter: grayscale(0.55) opacity(0.6);
+  filter: grayscale(0.55);
+  opacity: 0.6;
 }
 
 .bk-book[data-soon] .bk-book-title {
@@ -2663,7 +2673,8 @@ a.bk-volume-link:focus-visible {
 }
 
 .bk-volume[data-soon] .bk-volume-cover > .cl-book {
-  filter: saturate(0.7) opacity(0.85);
+  filter: saturate(0.7);
+  opacity: 0.85;
 }
 
 .bk-volume-label {

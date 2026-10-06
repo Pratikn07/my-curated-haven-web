@@ -192,3 +192,14 @@ test("the first showroom keeps its three chapters at /collections/test", async (
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.locator(".cl-chapter-title")).toHaveCount(3);
 });
+
+test("every book stands level on its shelf, whatever the length of its title", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections", LOAD);
+  const rows = page.locator(".bk-row");
+  await expect(rows.first()).toBeVisible();
+  for (const row of await rows.all()) {
+    const tops = await row.locator(".cl-book").evaluateAll((books) => books.map((book) => Math.round(book.getBoundingClientRect().top)));
+    expect(new Set(tops).size, (await row.getAttribute("aria-labelledby")) ?? "shelf").toBe(1);
+  }
+});
