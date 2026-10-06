@@ -122,7 +122,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
       "Chicken, salmon, tuna, red lentils, tofu, turkey and black beans. Each recipe is built around one of them and comes as a bite, a cake, a bowl or a pinwheel.",
     forWhen: "For the plate that keeps coming back with only the pasta eaten.",
     cloth: "plum",
-    cover: { src: "/images/collections/cover-protein-packs-1040.webp", width: 1040, height: 1414, alt: "A plum cloth cookbook with a gold-foil egg cup, lentils and beans on its cover" },
+    cover: { src: "/images/collections/cover-protein-packs-1040.webp", width: 1040, height: 1422, alt: "A plum cloth cookbook with a gold-foil fish on a plate, a bowl of lentils, beans and tofu cubes on its cover" },
     refresh: "New recipes join through the year.",
     placeholderPrice: "$12.99",
     recipes: recipes([
