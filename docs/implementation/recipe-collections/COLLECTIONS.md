@@ -1,6 +1,6 @@
 # Collections and recipe tags: spec for the admin panel
 
-Status: collection list agreed with the owner on 2026-10-05. Recipes are being uploaded and tagged through the admin panel (in progress, built separately). This document is what the admin panel builds against. The same list is in [collections.seed.json](collections.seed.json) for import.
+Status: collection list agreed with the owner on 2026-10-05. Recipes are being uploaded and tagged through the admin panel (in progress, built separately). This document is what the admin panel builds against. The same list is in [collections.seed.json](collections.seed.json) for import. A first pass tagging all 70 catalog recipes against this vocabulary, with each collection's recipes, is in [RECIPE-TAGS.md](RECIPE-TAGS.md) ([recipe-tags.json](recipe-tags.json)).
 
 **In short:** 20 collections. Each collection is **a stage plus a theme**, holds 8–12 recipes, and sits on one of 6 shelves. Breakfast and Meal Prep are **series**: numbered volumes that follow the child as they grow. Recipes are tagged with a finer stage, a meal, goals, practical notes and free-from labels; the website's filters are built from those tags. A recipe can belong to several collections.
 

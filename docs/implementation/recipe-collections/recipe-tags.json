@@ -1,0 +1,3055 @@
+{
+  "$comment": "Proposed tags and collection placement for the 70 catalog recipes. Review copy: RECIPE-TAGS.md. Vocabulary and rules: COLLECTIONS.md / collections.seed.json. Proposed 2026-10-05; owner review pending.",
+  "version": 1,
+  "source": "Reviewed catalog data (recipe-review fix-output + free recipes), matching production as of 2026-10-05",
+  "recipes": [
+    {
+      "slug": "apple-prune-fiber-friendly-pure",
+      "title": "Apple Prune Fiber Friendly Purée",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 24,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "snack"
+        ],
+        "goal": [
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "asian-pear-rice-congee-pure",
+      "title": "Asian Pear Rice Congee Purée",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 18,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "breakfast",
+          "dinner"
+        ],
+        "goal": [
+          "sick-days"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "first-breakfasts"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "banana-avocado-breakfast-pure-with-yogurt",
+      "title": "Banana Avocado Breakfast Purée with Yogurt",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 18,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "breakfast",
+          "snack"
+        ],
+        "goal": [],
+        "practical": [
+          "under-15-min",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "first-breakfasts"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "comforting-sweet-potato-lentil-khichdi-pure",
+      "title": "Comforting Sweet Potato Lentil Khichdi Purée",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 18,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "iron-rich-first-foods",
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "indian-rice-mung-dal-spinach-pure",
+      "title": "Indian Rice Mung Dal Spinach Purée",
+      "free_sample": false,
+      "age_min_months": 7,
+      "age_max_months": 24,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "iron-rich-first-foods",
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": [
+        "In First Tastes but suits from 7 months, not 6: show 'from 7 months' on the card.",
+        "In Iron-Rich First Foods but suits from 7 months, not 6: show 'from 7 months' on the card.",
+        "In Batch & Freeze for Babies but suits from 7 months, not 6: show 'from 7 months' on the card."
+      ]
+    },
+    {
+      "slug": "italian-tomato-vegetable-pure-with-tiny-pasta",
+      "title": "Italian Tomato Vegetable Purée with Tiny Pasta",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 24,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": [
+        "In Batch & Freeze for Babies but suits from 9 months, not 6: show 'from 9 months' on the card."
+      ]
+    },
+    {
+      "slug": "mediterranean-red-lentil-carrot-pure",
+      "title": "Mediterranean Red Lentil Carrot Purée",
+      "free_sample": false,
+      "age_min_months": 7,
+      "age_max_months": 24,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "iron-rich-first-foods",
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": [
+        "In First Tastes but suits from 7 months, not 6: show 'from 7 months' on the card.",
+        "In Iron-Rich First Foods but suits from 7 months, not 6: show 'from 7 months' on the card.",
+        "In Batch & Freeze for Babies but suits from 7 months, not 6: show 'from 7 months' on the card."
+      ]
+    },
+    {
+      "slug": "mild-mexican-black-bean-sweet-corn-pure",
+      "title": "Mild Mexican Black Bean Sweet Corn Purée",
+      "free_sample": false,
+      "age_min_months": 8,
+      "age_max_months": 24,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "iron-rich-first-foods",
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": [
+        "In First Tastes but suits from 8 months, not 6: show 'from 8 months' on the card.",
+        "In Iron-Rich First Foods but suits from 8 months, not 6: show 'from 8 months' on the card.",
+        "In Batch & Freeze for Babies but suits from 8 months, not 6: show 'from 8 months' on the card."
+      ]
+    },
+    {
+      "slug": "silky-carrot-apple-starter-pure",
+      "title": "Silky Carrot Apple Starter Purée",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [
+          "thanksgiving"
+        ],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "batch-and-freeze-for-babies",
+        "thanksgiving-table"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "zucchini-chickpea-mediterranean-pure",
+      "title": "Zucchini Chickpea Mediterranean Purée",
+      "free_sample": false,
+      "age_min_months": 7,
+      "age_max_months": 18,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "puree"
+      },
+      "collections": [
+        "first-tastes",
+        "iron-rich-first-foods",
+        "batch-and-freeze-for-babies"
+      ],
+      "notes": [
+        "In First Tastes but suits from 7 months, not 6: show 'from 7 months' on the card.",
+        "In Iron-Rich First Foods but suits from 7 months, not 6: show 'from 7 months' on the card.",
+        "In Batch & Freeze for Babies but suits from 7 months, not 6: show 'from 7 months' on the card."
+      ]
+    },
+    {
+      "slug": "mild-vegetable-curry-with-rice",
+      "title": "Mild Vegetable Curry with Rice",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "freezer-dinners",
+        "family-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "one-pot-chicken-and-vegetable-rice",
+      "title": "One-Pot Chicken and Vegetable Rice",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "batch-and-freeze-for-babies",
+        "meal-prep"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "slow-cooker-beef-and-vegetable-stew",
+      "title": "Slow Cooker Beef and Vegetable Stew",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "iron-rich-first-foods",
+        "batch-and-freeze-for-babies",
+        "meal-prep"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "vegetable-noodle-soup",
+      "title": "Vegetable Noodle Soup",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "veg-packed",
+          "sick-days"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "freezer-dinners",
+        "family-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "baked-fish-tacos-with-slaw",
+      "title": "Baked Fish Tacos with Slaw",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "family-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "tofu-and-vegetable-stir-fry",
+      "title": "Tofu and Vegetable Stir-Fry",
+      "free_sample": false,
+      "age_min_months": 8,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "freezer-dinners",
+        "family-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "vegetable-pasta-primavera",
+      "title": "Vegetable Pasta Primavera",
+      "free_sample": false,
+      "age_min_months": 8,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "fiber",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "freezer-dinners",
+        "family-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "bean-and-veggie-burrito-bowl",
+      "title": "Bean and Veggie Burrito Bowl",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "iron-rich-first-foods",
+        "freezer-dinners"
+      ],
+      "notes": [
+        "In Iron-Rich First Foods but suits from 9 months, not 6: show 'from 9 months' on the card."
+      ]
+    },
+    {
+      "slug": "mediterranean-baked-chicken-with-quinoa",
+      "title": "Mediterranean Baked Chicken with Quinoa",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "gluten-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "freezer-dinners",
+        "family-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "veggie-packed-lasagna",
+      "title": "Veggie-Packed Lasagna",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "whole-family"
+        ],
+        "free_from": [
+          "nut-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "meal-prep"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "avocado-and-black-bean-quesadilla-strips",
+      "title": "Avocado & Black Bean Quesadilla Strips",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 60,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "picky-friendly"
+        ],
+        "practical": [
+          "under-15-min",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school",
+          "birthday"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "first-finger-foods",
+        "lunchbox-and-daycare",
+        "picky-eater-favorites",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "cheesy-broccoli-and-quinoa-bites",
+      "title": "Cheesy Broccoli & Quinoa Bites",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 60,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bites"
+      },
+      "collections": [
+        "first-finger-foods",
+        "meal-prep",
+        "on-the-go-snacks"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "mild-curried-red-lentil-cakes",
+      "title": "Mild Curried Red Lentil Cakes",
+      "free_sample": false,
+      "age_min_months": 10,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bites"
+      },
+      "collections": [
+        "first-finger-foods",
+        "iron-rich-first-foods",
+        "protein-packs",
+        "freezer-dinners"
+      ],
+      "notes": [
+        "In First Finger Foods but suits from 10 months, not 9: show 'from 10 months' on the card.",
+        "In Iron-Rich First Foods but suits from 10 months, not 6: show 'from 10 months' on the card."
+      ]
+    },
+    {
+      "slug": "mini-turkey-and-apple-meatloaf-muffins",
+      "title": "Mini Turkey & Apple Meatloaf Muffins",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 36,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y"
+        ],
+        "meal": [
+          "dinner",
+          "lunch"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [
+          "thanksgiving"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "first-finger-foods",
+        "iron-rich-first-foods",
+        "meal-prep",
+        "thanksgiving-table"
+      ],
+      "notes": [
+        "In Iron-Rich First Foods but suits from 9 months, not 6: show 'from 9 months' on the card."
+      ]
+    },
+    {
+      "slug": "pumpkin-and-ricotta-gnocchi-pillows",
+      "title": "Pumpkin & Ricotta Gnocchi Pillows",
+      "free_sample": false,
+      "age_min_months": 8,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "picky-friendly"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "nut-free"
+        ],
+        "occasion": [
+          "halloween",
+          "thanksgiving"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "first-finger-foods",
+        "halloween",
+        "picky-eater-favorites",
+        "thanksgiving-table"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "sesame-tofu-and-veggie-cubes",
+      "title": "Sesame Tofu & Veggie Cubes",
+      "free_sample": false,
+      "age_min_months": 6,
+      "age_max_months": 36,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y"
+        ],
+        "meal": [
+          "dinner",
+          "lunch"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "first-finger-foods",
+        "protein-packs"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "zucchini-and-feta-fritters",
+      "title": "Zucchini & Feta Fritters",
+      "free_sample": false,
+      "age_min_months": 8,
+      "age_max_months": 60,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "veg-packed"
+        ],
+        "practical": [],
+        "free_from": [
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "first-finger-foods"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "baked-sweet-potato-with-black-beans-and-avocado",
+      "title": "Baked Sweet Potato with Black Beans and Avocado",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "thanksgiving"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [
+        "family-dinners",
+        "thanksgiving-table"
+      ],
+      "notes": [
+        "Inferred: soft mashed beans and sweet potato suit from about 12 months."
+      ]
+    },
+    {
+      "slug": "chicken-and-vegetable-stir-fry-with-brown-rice",
+      "title": "Chicken and Vegetable Stir-Fry with Brown Rice",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "fiber",
+          "veg-packed"
+        ],
+        "practical": [
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "protein-packs",
+        "family-dinners"
+      ],
+      "notes": [
+        "Inferred: stir-fry with soy and sesame, cut small, from 12 months."
+      ]
+    },
+    {
+      "slug": "folate-rich-lentil-and-spinach-soup",
+      "title": "Folate-Rich Lentil and Spinach Soup",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber",
+          "sick-days"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "meal-prep"
+      ],
+      "notes": [
+        "Inferred: blended lentil soup suits from about 9 months."
+      ]
+    },
+    {
+      "slug": "greek-yogurt-parfait-with-berries-and-almonds",
+      "title": "Greek Yogurt Parfait with Berries and Almonds",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "breakfast",
+          "snack"
+        ],
+        "goal": [],
+        "practical": [
+          "under-15-min",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "big-kid-breakfasts"
+      ],
+      "notes": [
+        "Inferred: contains honey (not before 12 months). Leave out or finely grind the almonds for under-4s."
+      ]
+    },
+    {
+      "slug": "lentil-and-vegetable-curry-with-coconut-milk",
+      "title": "Lentil and Vegetable Curry with Coconut Milk",
+      "free_sample": false,
+      "age_min_months": 9,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "one-pot",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "meal-prep",
+        "family-dinners"
+      ],
+      "notes": [
+        "Inferred: soft lentil curry, mashed, from about 9 months."
+      ]
+    },
+    {
+      "slug": "mediterranean-chicken-and-chickpea-salad",
+      "title": "Mediterranean Chicken and Chickpea Salad",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "protein",
+          "iron"
+        ],
+        "practical": [
+          "make-ahead",
+          "no-cook",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "gluten-free"
+        ],
+        "occasion": [
+          "back-to-school",
+          "summer"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [
+        "protein-packs",
+        "lunchbox-and-daycare"
+      ],
+      "notes": [
+        "Inferred: quarter chickpeas and olives; from about 18 months.",
+        "In Protein Packs but suits from 18 months, not 12: show 'from 18 months' on the card."
+      ]
+    },
+    {
+      "slug": "overnight-oats-with-chia-and-berries",
+      "title": "Overnight Oats with Chia and Berries",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "breakfast"
+        ],
+        "goal": [
+          "fiber"
+        ],
+        "practical": [
+          "make-ahead",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "big-kid-breakfasts"
+      ],
+      "notes": [
+        "Inferred: contains honey or maple (honey not before 12 months)."
+      ]
+    },
+    {
+      "slug": "quinoa-and-black-bean-burrito-bowl",
+      "title": "Quinoa and Black Bean Burrito Bowl",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber"
+        ],
+        "practical": [
+          "make-ahead",
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "protein-packs"
+      ],
+      "notes": [
+        "Inferred: from about 12 months."
+      ]
+    },
+    {
+      "slug": "salmon-and-sweet-potato-bowl-with-avocado",
+      "title": "Salmon and Sweet Potato Bowl with Avocado",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "whole-family"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "protein-packs",
+        "family-dinners"
+      ],
+      "notes": [
+        "Inferred: flaked salmon and mashed sweet potato, from about 12 months."
+      ]
+    },
+    {
+      "slug": "spinach-and-feta-egg-muffins",
+      "title": "Spinach and Feta Egg Muffins",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": true,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "breakfast",
+          "snack"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "protein-packs",
+        "big-kid-breakfasts"
+      ],
+      "notes": [
+        "Inferred: egg muffins cut into fingers, from about 12 months."
+      ]
+    },
+    {
+      "slug": "baked-samosa-puffs",
+      "title": "Baked Samosa Puffs",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [],
+        "practical": [
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school",
+          "birthday"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "lunchbox-and-daycare",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "mini-baked-chicken-nuggets",
+      "title": "Mini Baked Chicken Nuggets",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "protein",
+          "picky-friendly"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [
+          "birthday"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "protein-packs",
+        "picky-eater-favorites",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "onigiri-rice-triangles",
+      "title": "Onigiri Rice Triangles",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "on-the-go"
+        ],
+        "free_from": [
+          "dairy-free",
+          "nut-free",
+          "gluten-free"
+        ],
+        "occasion": [
+          "back-to-school"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "lunchbox-and-daycare"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "rainbow-pesto-pasta-salad",
+      "title": "Rainbow Pesto Pasta Salad",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [],
+        "practical": [
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "summer"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [],
+      "notes": []
+    },
+    {
+      "slug": "savory-corn-and-cheddar-muffins",
+      "title": "Savory Corn & Cheddar Muffins",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "snack"
+        ],
+        "goal": [
+          "picky-friendly"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school",
+          "halloween",
+          "holidays"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "halloween",
+        "on-the-go-snacks",
+        "lunchbox-and-daycare",
+        "holiday-baking"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "spinach-and-cheese-pizza-scrolls",
+      "title": "Spinach & Cheese Pizza Scrolls",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "veg-packed",
+          "picky-friendly"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school",
+          "birthday",
+          "halloween"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "halloween",
+        "lunchbox-and-daycare",
+        "picky-eater-favorites",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "turkey-and-hummus-pinwheels",
+      "title": "Turkey & Hummus Pinwheels",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "under-15-min",
+          "no-cook",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [
+          "back-to-school",
+          "birthday"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "protein-packs",
+        "lunchbox-and-daycare",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "cold-sesame-noodle-salad",
+      "title": "Cold Sesame Noodle Salad",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [],
+        "practical": [
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [
+          "summer"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [],
+      "notes": []
+    },
+    {
+      "slug": "greek-pita-bento-box",
+      "title": "Greek Pita Bento Box",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [],
+        "practical": [
+          "under-15-min",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "lunchbox-and-daycare"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "mini-bean-and-cheese-burritos",
+      "title": "Mini Bean & Cheese Burritos",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 120,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch"
+        ],
+        "goal": [
+          "picky-friendly"
+        ],
+        "practical": [
+          "under-15-min",
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "meal-prep",
+        "on-the-go-snacks",
+        "lunchbox-and-daycare",
+        "picky-eater-favorites"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "apple-cinnamon-oat-toddler-porridge",
+      "title": "Apple Cinnamon Oat Toddler Porridge",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "breakfast"
+        ],
+        "goal": [
+          "fiber",
+          "sick-days"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "thanksgiving"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "thanksgiving-table"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "banana-peanut-butter-chia-pudding",
+      "title": "Banana Peanut Butter Chia Pudding",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "breakfast",
+          "snack",
+          "treat"
+        ],
+        "goal": [
+          "protein",
+          "fiber"
+        ],
+        "practical": [
+          "make-ahead",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "everyday-treats",
+        "big-kid-breakfasts"
+      ],
+      "notes": [
+        "In Toddler Breakfasts but suits from 18 months, not 12: show 'from 18 months' on the card.",
+        "In Everyday Treats but suits from 18 months, not 12: show 'from 18 months' on the card."
+      ]
+    },
+    {
+      "slug": "cheesy-veggie-quinoa-toddler-bites",
+      "title": "Cheesy Veggie Quinoa Toddler Bites",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y"
+        ],
+        "meal": [
+          "lunch",
+          "snack"
+        ],
+        "goal": [
+          "veg-packed",
+          "picky-friendly"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bites"
+      },
+      "collections": [
+        "on-the-go-snacks",
+        "picky-eater-favorites"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "creamy-hummus-yogurt-veggie-dippers",
+      "title": "Creamy Hummus Yogurt Veggie Dippers",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "lunch"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "back-to-school"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "lunchbox-and-daycare"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "deconstructed-soft-taco-toddler-bowl",
+      "title": "Deconstructed Soft Taco Toddler Bowl",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "iron",
+          "picky-friendly"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "picky-eater-favorites"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "salmon-potato-veggie-mash",
+      "title": "Salmon Potato Veggie Mash",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "nut-free"
+        ],
+        "occasion": [],
+        "texture": "mash"
+      },
+      "collections": [
+        "protein-packs"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "soft-chicken-veggie-rice-bowl",
+      "title": "Soft Chicken Veggie Rice Bowl",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [
+        "freezer-dinners"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "soft-tofu-veggie-stir-fry-with-rice",
+      "title": "Soft Tofu Veggie Stir Fry with Rice",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "bowl"
+      },
+      "collections": [],
+      "notes": []
+    },
+    {
+      "slug": "turkey-veggie-mini-meatballs-with-pasta",
+      "title": "Turkey Veggie Mini Meatballs with Pasta",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "lunch",
+          "dinner"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed",
+          "picky-friendly"
+        ],
+        "practical": [],
+        "free_from": [
+          "nut-free"
+        ],
+        "occasion": [
+          "thanksgiving"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [
+        "picky-eater-favorites",
+        "thanksgiving-table"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "veggie-lentil-pancakes",
+      "title": "Veggie Lentil Pancakes",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y"
+        ],
+        "meal": [
+          "breakfast",
+          "lunch"
+        ],
+        "goal": [
+          "protein",
+          "iron",
+          "fiber",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "meal-prep"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "apple-sunflower-snack-rounds",
+      "title": "Apple Sunflower Snack Rounds",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack"
+        ],
+        "goal": [],
+        "practical": [
+          "under-15-min",
+          "no-cook",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [
+          "halloween"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "halloween",
+        "on-the-go-snacks"
+      ],
+      "notes": [
+        "In On-the-Go Snacks but suits from 18 months, not 12: show 'from 18 months' on the card."
+      ]
+    },
+    {
+      "slug": "cheesy-veggie-mini-muffins",
+      "title": "Cheesy Veggie Mini Muffins",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "lunch"
+        ],
+        "goal": [
+          "veg-packed",
+          "picky-friendly"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "meal-prep",
+        "on-the-go-snacks",
+        "picky-eater-favorites"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "chickpea-cookie-dough-fruit-dip",
+      "title": "Chickpea Cookie Dough Fruit Dip",
+      "free_sample": false,
+      "age_min_months": 18,
+      "age_max_months": 60,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "treat"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "under-15-min",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "birthday"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "everyday-treats",
+        "birthday-party"
+      ],
+      "notes": [
+        "In Everyday Treats but suits from 18 months, not 12: show 'from 18 months' on the card."
+      ]
+    },
+    {
+      "slug": "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "title": "Cinnamon Sweet Potato Snack Fries with Yogurt Dip",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "treat"
+        ],
+        "goal": [
+          "picky-friendly"
+        ],
+        "practical": [],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "birthday",
+          "halloween",
+          "thanksgiving"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "halloween",
+        "everyday-treats",
+        "picky-eater-favorites",
+        "thanksgiving-table",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "mango-lassi-chia-pudding-cups",
+      "title": "Mango Lassi Chia Pudding Cups",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "breakfast",
+          "treat"
+        ],
+        "goal": [
+          "fiber"
+        ],
+        "practical": [
+          "make-ahead",
+          "no-cook"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "summer"
+        ],
+        "texture": "bowl"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "everyday-treats"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "mini-berry-yogurt-pops",
+      "title": "Mini Berry Yogurt Pops",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "treat"
+        ],
+        "goal": [],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "birthday",
+          "halloween",
+          "summer"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "halloween",
+        "everyday-treats",
+        "birthday-party"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "soft-banana-oat-toddler-cookies",
+      "title": "Soft Banana Oat Toddler Cookies",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "breakfast",
+          "treat"
+        ],
+        "goal": [
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [
+          "halloween",
+          "holidays"
+        ],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "toddler-breakfasts",
+        "halloween",
+        "everyday-treats",
+        "on-the-go-snacks",
+        "holiday-baking"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "soft-date-almond-cocoa-bites",
+      "title": "Soft Date Almond Cocoa Bites",
+      "free_sample": false,
+      "age_min_months": 24,
+      "age_max_months": 72,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "treat"
+        ],
+        "goal": [],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "gluten-free",
+          "vegetarian",
+          "vegan"
+        ],
+        "occasion": [
+          "birthday",
+          "halloween",
+          "holidays"
+        ],
+        "texture": "bites"
+      },
+      "collections": [
+        "halloween",
+        "everyday-treats",
+        "holiday-baking",
+        "birthday-party"
+      ],
+      "notes": [
+        "In Everyday Treats but suits from 24 months, not 12: show 'from 2 years' on the card."
+      ]
+    },
+    {
+      "slug": "soft-peanut-butter-oat-energy-balls",
+      "title": "Soft Peanut Butter Oat Energy Balls",
+      "free_sample": false,
+      "age_min_months": 24,
+      "age_max_months": 60,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "treat"
+        ],
+        "goal": [
+          "fiber"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [
+          "holidays"
+        ],
+        "texture": "bites"
+      },
+      "collections": [
+        "everyday-treats",
+        "holiday-baking"
+      ],
+      "notes": [
+        "In Everyday Treats but suits from 24 months, not 12: show 'from 2 years' on the card."
+      ]
+    },
+    {
+      "slug": "veggie-rice-snack-fritters",
+      "title": "Veggie Rice Snack Fritters",
+      "free_sample": false,
+      "age_min_months": 12,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack"
+        ],
+        "goal": [
+          "veg-packed",
+          "picky-friendly"
+        ],
+        "practical": [
+          "on-the-go"
+        ],
+        "free_from": [
+          "dairy-free",
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [
+        "on-the-go-snacks",
+        "picky-eater-favorites"
+      ],
+      "notes": []
+    },
+    {
+      "slug": "sweet-potato-and-spinach-frittata-fingers",
+      "title": "Sweet Potato & Spinach Frittata Fingers",
+      "free_sample": true,
+      "age_min_months": 6,
+      "age_max_months": 24,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y"
+        ],
+        "meal": [
+          "breakfast",
+          "lunch"
+        ],
+        "goal": [
+          "protein",
+          "veg-packed"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead",
+          "on-the-go"
+        ],
+        "free_from": [
+          "nut-free",
+          "gluten-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [],
+      "notes": []
+    },
+    {
+      "slug": "soft-baked-blueberry-and-oat-bars",
+      "title": "Soft-Baked Blueberry & Oat Bars",
+      "free_sample": true,
+      "age_min_months": 6,
+      "age_max_months": 48,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "6-8m",
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "snack",
+          "breakfast"
+        ],
+        "goal": [
+          "fiber"
+        ],
+        "practical": [
+          "on-the-go"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free",
+          "vegetarian"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [],
+      "notes": []
+    },
+    {
+      "slug": "salmon-and-pea-fish-cakes",
+      "title": "Salmon & Pea Fish Cakes",
+      "free_sample": true,
+      "age_min_months": 9,
+      "age_max_months": 60,
+      "age_inferred": false,
+      "tags": {
+        "stage": [
+          "9-12m",
+          "1-2y",
+          "2-3y",
+          "3-5y"
+        ],
+        "meal": [
+          "dinner"
+        ],
+        "goal": [
+          "protein"
+        ],
+        "practical": [
+          "freezes",
+          "make-ahead"
+        ],
+        "free_from": [
+          "egg-free",
+          "dairy-free",
+          "nut-free"
+        ],
+        "occasion": [],
+        "texture": "finger-food"
+      },
+      "collections": [],
+      "notes": []
+    }
+  ],
+  "collections": {
+    "first-tastes": [
+      "apple-prune-fiber-friendly-pure",
+      "asian-pear-rice-congee-pure",
+      "banana-avocado-breakfast-pure-with-yogurt",
+      "comforting-sweet-potato-lentil-khichdi-pure",
+      "indian-rice-mung-dal-spinach-pure",
+      "mediterranean-red-lentil-carrot-pure",
+      "mild-mexican-black-bean-sweet-corn-pure",
+      "silky-carrot-apple-starter-pure",
+      "zucchini-chickpea-mediterranean-pure"
+    ],
+    "first-finger-foods": [
+      "avocado-and-black-bean-quesadilla-strips",
+      "cheesy-broccoli-and-quinoa-bites",
+      "mild-curried-red-lentil-cakes",
+      "mini-turkey-and-apple-meatloaf-muffins",
+      "pumpkin-and-ricotta-gnocchi-pillows",
+      "sesame-tofu-and-veggie-cubes",
+      "zucchini-and-feta-fritters"
+    ],
+    "iron-rich-first-foods": [
+      "comforting-sweet-potato-lentil-khichdi-pure",
+      "indian-rice-mung-dal-spinach-pure",
+      "mediterranean-red-lentil-carrot-pure",
+      "mild-mexican-black-bean-sweet-corn-pure",
+      "zucchini-chickpea-mediterranean-pure",
+      "slow-cooker-beef-and-vegetable-stew",
+      "bean-and-veggie-burrito-bowl",
+      "mild-curried-red-lentil-cakes",
+      "mini-turkey-and-apple-meatloaf-muffins"
+    ],
+    "first-breakfasts": [
+      "asian-pear-rice-congee-pure",
+      "banana-avocado-breakfast-pure-with-yogurt"
+    ],
+    "batch-and-freeze-for-babies": [
+      "apple-prune-fiber-friendly-pure",
+      "comforting-sweet-potato-lentil-khichdi-pure",
+      "indian-rice-mung-dal-spinach-pure",
+      "italian-tomato-vegetable-pure-with-tiny-pasta",
+      "mediterranean-red-lentil-carrot-pure",
+      "mild-mexican-black-bean-sweet-corn-pure",
+      "silky-carrot-apple-starter-pure",
+      "zucchini-chickpea-mediterranean-pure",
+      "one-pot-chicken-and-vegetable-rice",
+      "slow-cooker-beef-and-vegetable-stew"
+    ],
+    "toddler-breakfasts": [
+      "overnight-oats-with-chia-and-berries",
+      "spinach-and-feta-egg-muffins",
+      "savory-corn-and-cheddar-muffins",
+      "apple-cinnamon-oat-toddler-porridge",
+      "banana-peanut-butter-chia-pudding",
+      "veggie-lentil-pancakes",
+      "mango-lassi-chia-pudding-cups",
+      "soft-banana-oat-toddler-cookies"
+    ],
+    "meal-prep": [
+      "one-pot-chicken-and-vegetable-rice",
+      "slow-cooker-beef-and-vegetable-stew",
+      "veggie-packed-lasagna",
+      "cheesy-broccoli-and-quinoa-bites",
+      "mini-turkey-and-apple-meatloaf-muffins",
+      "folate-rich-lentil-and-spinach-soup",
+      "lentil-and-vegetable-curry-with-coconut-milk",
+      "mini-bean-and-cheese-burritos",
+      "veggie-lentil-pancakes",
+      "cheesy-veggie-mini-muffins"
+    ],
+    "protein-packs": [
+      "mild-curried-red-lentil-cakes",
+      "sesame-tofu-and-veggie-cubes",
+      "chicken-and-vegetable-stir-fry-with-brown-rice",
+      "mediterranean-chicken-and-chickpea-salad",
+      "quinoa-and-black-bean-burrito-bowl",
+      "salmon-and-sweet-potato-bowl-with-avocado",
+      "spinach-and-feta-egg-muffins",
+      "mini-baked-chicken-nuggets",
+      "turkey-and-hummus-pinwheels",
+      "salmon-potato-veggie-mash"
+    ],
+    "everyday-treats": [
+      "banana-peanut-butter-chia-pudding",
+      "chickpea-cookie-dough-fruit-dip",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "mango-lassi-chia-pudding-cups",
+      "mini-berry-yogurt-pops",
+      "soft-banana-oat-toddler-cookies",
+      "soft-date-almond-cocoa-bites",
+      "soft-peanut-butter-oat-energy-balls"
+    ],
+    "fruit-gummies": [],
+    "on-the-go-snacks": [
+      "cheesy-broccoli-and-quinoa-bites",
+      "savory-corn-and-cheddar-muffins",
+      "mini-bean-and-cheese-burritos",
+      "cheesy-veggie-quinoa-toddler-bites",
+      "apple-sunflower-snack-rounds",
+      "cheesy-veggie-mini-muffins",
+      "soft-banana-oat-toddler-cookies",
+      "veggie-rice-snack-fritters"
+    ],
+    "big-kid-breakfasts": [
+      "greek-yogurt-parfait-with-berries-and-almonds",
+      "overnight-oats-with-chia-and-berries",
+      "spinach-and-feta-egg-muffins",
+      "banana-peanut-butter-chia-pudding"
+    ],
+    "freezer-dinners": [
+      "mild-vegetable-curry-with-rice",
+      "vegetable-noodle-soup",
+      "tofu-and-vegetable-stir-fry",
+      "vegetable-pasta-primavera",
+      "bean-and-veggie-burrito-bowl",
+      "mediterranean-baked-chicken-with-quinoa",
+      "mild-curried-red-lentil-cakes",
+      "soft-chicken-veggie-rice-bowl"
+    ],
+    "lunchbox-and-daycare": [
+      "avocado-and-black-bean-quesadilla-strips",
+      "mediterranean-chicken-and-chickpea-salad",
+      "baked-samosa-puffs",
+      "onigiri-rice-triangles",
+      "savory-corn-and-cheddar-muffins",
+      "spinach-and-cheese-pizza-scrolls",
+      "turkey-and-hummus-pinwheels",
+      "greek-pita-bento-box",
+      "mini-bean-and-cheese-burritos",
+      "creamy-hummus-yogurt-veggie-dippers"
+    ],
+    "picky-eater-favorites": [
+      "avocado-and-black-bean-quesadilla-strips",
+      "pumpkin-and-ricotta-gnocchi-pillows",
+      "mini-baked-chicken-nuggets",
+      "spinach-and-cheese-pizza-scrolls",
+      "mini-bean-and-cheese-burritos",
+      "cheesy-veggie-quinoa-toddler-bites",
+      "deconstructed-soft-taco-toddler-bowl",
+      "turkey-veggie-mini-meatballs-with-pasta",
+      "cheesy-veggie-mini-muffins",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "veggie-rice-snack-fritters"
+    ],
+    "family-dinners": [
+      "mild-vegetable-curry-with-rice",
+      "vegetable-noodle-soup",
+      "baked-fish-tacos-with-slaw",
+      "tofu-and-vegetable-stir-fry",
+      "vegetable-pasta-primavera",
+      "mediterranean-baked-chicken-with-quinoa",
+      "baked-sweet-potato-with-black-beans-and-avocado",
+      "chicken-and-vegetable-stir-fry-with-brown-rice",
+      "lentil-and-vegetable-curry-with-coconut-milk",
+      "salmon-and-sweet-potato-bowl-with-avocado"
+    ],
+    "halloween": [
+      "pumpkin-and-ricotta-gnocchi-pillows",
+      "savory-corn-and-cheddar-muffins",
+      "spinach-and-cheese-pizza-scrolls",
+      "apple-sunflower-snack-rounds",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "mini-berry-yogurt-pops",
+      "soft-banana-oat-toddler-cookies",
+      "soft-date-almond-cocoa-bites"
+    ],
+    "thanksgiving-table": [
+      "silky-carrot-apple-starter-pure",
+      "mini-turkey-and-apple-meatloaf-muffins",
+      "pumpkin-and-ricotta-gnocchi-pillows",
+      "baked-sweet-potato-with-black-beans-and-avocado",
+      "apple-cinnamon-oat-toddler-porridge",
+      "turkey-veggie-mini-meatballs-with-pasta",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip"
+    ],
+    "holiday-baking": [
+      "savory-corn-and-cheddar-muffins",
+      "soft-banana-oat-toddler-cookies",
+      "soft-date-almond-cocoa-bites",
+      "soft-peanut-butter-oat-energy-balls"
+    ],
+    "birthday-party": [
+      "avocado-and-black-bean-quesadilla-strips",
+      "baked-samosa-puffs",
+      "mini-baked-chicken-nuggets",
+      "spinach-and-cheese-pizza-scrolls",
+      "turkey-and-hummus-pinwheels",
+      "chickpea-cookie-dough-fruit-dip",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "mini-berry-yogurt-pops",
+      "soft-date-almond-cocoa-bites"
+    ]
+  }
+}
