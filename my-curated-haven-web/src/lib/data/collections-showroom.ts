@@ -6,6 +6,8 @@ export {
   collectionFacts,
   getShowroomCollection,
   hasShowroomCollections,
+  listOpenCollections,
+  listShowroomChapters,
   listShowroomCollections,
 } from "@/lib/collections/visibility";
 
