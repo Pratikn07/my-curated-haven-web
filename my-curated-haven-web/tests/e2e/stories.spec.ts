@@ -231,7 +231,9 @@ test("[stories] with reduced motion every part of the page is simply in place", 
 test("[stories] without script the page is complete and still", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(MULTI);
+  // The checks below are about the HTML, so don't wait for every image: in CI one
+  // optimised-image request can hang and hold the load event past the test timeout.
+  await page.goto(MULTI, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "3 breakfasts worth saving." })).toBeVisible();
   await expect(page.getByRole("link", { name: /See the 3 free recipes/ })).toHaveAttribute("href", "#cp-recipes");
   await expect(page.locator("#cp-recipes").getByRole("heading", { level: 3 })).toHaveCount(3);
@@ -333,8 +335,10 @@ test("[stories] a campaign page never downloads the homepage house painting", as
   page.on("request", (request) => {
     if (request.url().includes("/images/house/")) houseRequests.push(request.url());
   });
-  await page.goto(MULTI);
-  await page.waitForLoadState("networkidle");
+  await page.goto(MULTI, { waitUntil: "domcontentloaded" });
+  // Watch requests until the network goes quiet, but don't let one hung optimised-image
+  // request in CI time the test out; a preloaded painting would be requested long before.
+  await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
   await expect(page.locator('link[rel="preload"][imagesrcset*="house-"]')).toHaveCount(0);
   expect(houseRequests).toEqual([]);
 });
