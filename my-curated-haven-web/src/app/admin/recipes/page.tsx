@@ -15,7 +15,7 @@ export default async function AdminRecipesPage({
           Object.entries(resolved).flatMap(([key, value]) =>
             Array.isArray(value)
               ? value.map((v) => [key, v ?? ""] as [string, string])
-              : [[key, value ?? ""] as [string, string]]
+              : [[key, value ?? ""]]
           )
         );
   const parsed = parseLibraryQuery(params);
@@ -26,6 +26,9 @@ export default async function AdminRecipesPage({
   if (!result.ok) {
     return <p role="status">Library unavailable ({result.code}). Try again.</p>;
   }
+  const returnTo = `/admin/recipes?${params.toString()}`;
   void safeAdminReturn(params.get("returnTo"));
-  return <AdminLibrary result={result.value} />;
+  return (
+    <AdminLibrary result={result.value} returnTo={returnTo} selectedId={params.get("selected")} />
+  );
 }

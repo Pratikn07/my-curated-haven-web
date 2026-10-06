@@ -1,12 +1,20 @@
 import Link from "next/link";
+import AdminLibraryFocus from "./AdminLibraryFocus";
 import type { LibraryResult } from "@/lib/admin/contracts";
 
-export default function AdminLibrary({ result }: { result: LibraryResult }) {
+export default function AdminLibrary({
+  result,
+  returnTo,
+  selectedId,
+}: {
+  result: LibraryResult;
+  returnTo: string;
+  selectedId: string | null;
+}) {
   return (
+    <AdminLibraryFocus selectedId={selectedId}>
     <div>
-      <p>
-        {result.filteredTotal} matching recipes
-      </p>
+      <p>{result.filteredTotal} matching recipes</p>
       {result.dependencyChecks.some((check) => check.state === "unknown") ? (
         <p role="status">Some checks need verification. Retry before making a change.</p>
       ) : null}
@@ -23,7 +31,12 @@ export default function AdminLibrary({ result }: { result: LibraryResult }) {
             {result.rows.map((row) => (
               <tr key={row.id}>
                 <td>
-                  <Link href={`/admin/recipes/${row.id}`}>{row.title}</Link>
+                  <Link
+                    href={`/admin/recipes/${row.id}?returnTo=${encodeURIComponent(returnTo)}&selected=${row.id}`}
+                    data-selected={selectedId === row.id ? "true" : undefined}
+                  >
+                    {row.title}
+                  </Link>
                 </td>
                 <td>{row.publication}</td>
                 <td>{row.changedAt}</td>
@@ -35,7 +48,12 @@ export default function AdminLibrary({ result }: { result: LibraryResult }) {
       <div className="grid gap-3 md:hidden">
         {result.rows.map((row) => (
           <article key={row.id} aria-label={row.title}>
-            <Link href={`/admin/recipes/${row.id}`}>{row.title}</Link>
+            <Link
+              href={`/admin/recipes/${row.id}?returnTo=${encodeURIComponent(returnTo)}&selected=${row.id}`}
+              data-selected={selectedId === row.id ? "true" : undefined}
+            >
+              {row.title}
+            </Link>
             <p>
               {row.publication} · {row.changedAt}
             </p>
@@ -43,5 +61,6 @@ export default function AdminLibrary({ result }: { result: LibraryResult }) {
         ))}
       </div>
     </div>
+    </AdminLibraryFocus>
   );
 }

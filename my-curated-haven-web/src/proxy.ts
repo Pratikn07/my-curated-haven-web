@@ -84,6 +84,9 @@ export async function proxy(request: NextRequest) {
       redirectResponse.cookies.set(c);
     });
     redirectResponse.headers.set("Cache-Control", "no-store, private");
+    if (isAdminRoute) {
+      redirectResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
     return redirectResponse;
   }
 

@@ -34,4 +34,21 @@ Owner membership cannot be removed or downgraded through Team or ordinary SQL up
 
 Use an owned local Supabase stack for tests. `node my-curated-haven-web/scripts/test-admin-db.mjs --workdir <owned-local-project> 11_admin_console_access.test.sql 10_recipe_admin_access.test.sql` bundles the rollback-only SQL fixture into pgTAP inputs, since the CLI test container does not copy sibling fixture directories. It uses `--local` and accepts no linked or remote database option. Never reset a stack that contains personal data.
 
+## Browser fixtures
+
+Admin browser specs run against the owned stack with real Auth users (never the default stack, never production):
+
+- Build and start the app pointed at the owned stack (`NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54341`,
+  `COMMERCE_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54342/postgres`).
+- Provide `SUPABASE_SERVICE_ROLE_KEY` (local test key) and `ADMIN_TEST_DATABASE_URL` (loopback Postgres URL) in the
+  environment. Fixtures refuse non-loopback targets and fail with a clear message when keys are missing.
+- Run admin specs serially on one worker:
+  `npx playwright test tests/e2e/admin-access.spec.ts tests/e2e/admin-inspection.spec.ts tests/e2e/admin-privacy.spec.ts --project=chromium-desktop --workers=1`.
+  Parallel workers would violate the singleton active-owner invariant.
+- The privacy spec needs an instrumented build: `NEXT_PUBLIC_ANALYTICS_ENABLED=true NEXT_PUBLIC_APP_ENV=staging
+  NEXT_PUBLIC_POSTHOG_KEY=test-key-staging NEXT_PUBLIC_POSTHOG_HOST=http://127.0.0.1:54349/sink` (loopback sink
+  intercepted by Playwright; nothing listens there).
+- Fixture users, memberships and synthetic recipes are removed on dispose; the append-only audit log is intentionally
+  retained, so the pgTAP audit assertion is baseline-relative.
+
 Append-only audit records carry actor, action, target references, operation ID and result. They do not contain recipe snapshots, credentials, payment identities or Auth payloads. Restricted operators remain responsible for selecting a verified account and recording a truthful reason.

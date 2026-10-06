@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 
 export default function AdminMfa({ onVerified }: { onVerified: () => void }) {
-  const router = useRouter();
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -41,7 +39,6 @@ export default function AdminMfa({ onVerified }: { onVerified: () => void }) {
         return;
       }
       onVerified();
-      router.refresh();
     } finally {
       setPending(false);
     }

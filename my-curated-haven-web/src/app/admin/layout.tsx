@@ -1,6 +1,6 @@
 import { getAdminContext } from "@/lib/admin/context";
 import AdminShell from "@/components/admin/AdminShell";
-import AdminMfa from "@/components/admin/AdminMfa";
+import AdminMfaGate from "@/components/admin/AdminMfaGate";
 import AdminPrivacyBoundary from "@/components/analytics/AdminPrivacyBoundary";
 import { redirect } from "next/navigation";
 
@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
   if (context.value.assurance !== "aal2") {
-    return <AdminMfa onVerified={() => {}} />;
+    return <AdminMfaGate />;
   }
   return (
     <AdminPrivacyBoundary>

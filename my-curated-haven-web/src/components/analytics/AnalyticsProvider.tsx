@@ -30,7 +30,9 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
   const pathname = usePathname();
 
   // Unlink on sign-out, and link sign-ins that happen in this browser tab.
+  // Never runs on admin: the SDK must not initialise there.
   useEffect(() => {
+    if (pathname && isAdminPath(pathname)) return;
     getAnalyticsProvider();
     if (!isPostHogActive()) return;
 
@@ -47,7 +49,7 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [pathname]);
 
   // Sign-in completes in a server action, which sets the session cookie and
   // redirects without telling this tab. Re-read the session on every page.

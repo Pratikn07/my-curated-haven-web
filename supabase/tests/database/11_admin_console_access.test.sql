@@ -1,6 +1,7 @@
 BEGIN;
 SELECT no_plan();
 \ir ../../test-fixtures/admin-console.sql
+CREATE TEMP TABLE audit_baseline AS SELECT count(*)::int AS n FROM private.admin_audit WHERE action='staff.assign';
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001','aal1');
 SET LOCAL ROLE authenticated;
 SELECT is(public.admin_console_context()->>'assurance','aal1','only own pre-MFA eligibility');
@@ -85,6 +86,6 @@ SELECT ok(NOT has_table_privilege('authenticated','public.recipe_catalog','UPDAT
 SELECT ok(NOT has_table_privilege('authenticated','private.admin_audit','SELECT'),'audit table is private');
 SELECT ok(NOT has_table_privilege('authenticated','private.admin_console_settings','UPDATE'),'client cannot enable stage');
 SELECT throws_ok($$DELETE FROM private.admin_memberships WHERE role='owner'$$,'42501','ADM_OWNER_PROTECTED','owner protected even from accidental operator deletion');
-SELECT is((SELECT count(*)::int FROM private.admin_audit WHERE action='staff.assign'),1,'replay creates no duplicate audit');
+SELECT is((SELECT count(*)::int FROM private.admin_audit WHERE action='staff.assign') - (SELECT n FROM audit_baseline),1,'replay creates no duplicate audit');
 SELECT * FROM finish();
 ROLLBACK;
