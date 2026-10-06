@@ -1,103 +1,323 @@
-import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
+import { PHOTO_BASE, RECIPE_SNAPSHOT } from "@/config/recipe-snapshot";
+import type { CollectionRecipe, SeriesKey, ShelfKey, ShowroomCollection } from "@/lib/collections/types";
 
 /**
- * The collections the showroom (/collections) and each collection page show.
+ * Every collection on the bookcase (/collections), in shelf order. The list,
+ * shelves and series come from docs/implementation/recipe-collections/
+ * COLLECTIONS.md; each collection's recipes from recipe-tags.json.
  *
- * All three are published (owner decision, 2026-10-04) with placeholder prices
- * and refresh promises still awaiting approval (docs/implementation/
- * recipe-collections, RC-01 to RC-05). Until a commerce offer exists for a
- * slug, its page shows the placeholder price and "Opening soon".
+ * Collections with 8-12 recipes are "open": they have a page, with a PLACEHOLDER
+ * price and "Opening soon" until a commerce offer exists for the slug (plan
+ * RC-01 to RC-05). The rest are "coming-soon": they stand on the shelf greyed
+ * out and have no page. Halloween, Meal Prep and Protein Packs are also the
+ * chapters of the first showroom, /collections/test.
  *
- * Recipe facts (title, minutes, allergens, freezer note, photo) are a snapshot
- * of the catalog taken on 2026-10-04 from ../recipe-review. On 2026-10-05 seven
- * adult recipes (written for pregnancy, no child steps) were swapped for reviewed
- * children's recipes: docs/implementation/recipe-collections/RECIPE-TAGS.md.
- * Membership moves into
- * collection_releases / collection_recipes when RC-02 is decided. The recipes
- * are drafts in the catalog, so they carry no link until they are published.
+ * Recipe facts are a catalog snapshot (src/config/recipe-snapshot.ts). The
+ * recipes are drafts in the catalog, so they carry no link until published.
+ * On 2026-10-05 seven adult recipes (written for pregnancy, no child steps)
+ * were swapped out of the live books; those recipes were then rewritten for
+ * children (RECIPE-TAGS.md).
  */
-
-const PHOTO_BASE = "https://ccrgvammglkvdlaojgzv.supabase.co/storage/v1/object/public/recipe-images/";
-
-type Fact = Omit<CollectionRecipe, "slug" | "image"> & { image: string };
-
-/** Catalog snapshot, 2026-10-04. */
-const CATALOG: Record<string, Fact> = {
-  // Halloween
-  "pumpkin-and-ricotta-gnocchi-pillows": { title: "Pumpkin & Ricotta Gnocchi Pillows", minutes: 25, image: "770831df-41e7-4151-9bea-5aac6150f852-v2.png", allergens: ["wheat", "milk"], freezes: null },
-  "cinnamon-sweet-potato-snack-fries-with-yogurt-dip": { title: "Cinnamon Sweet Potato Snack Fries with Yogurt Dip", minutes: 45, image: "11cffa39-83c4-4b5e-bfe1-c39cc3b092fe-v2.png", allergens: ["milk"], freezes: null },
-  "soft-date-almond-cocoa-bites": { title: "Soft Date Almond Cocoa Bites", minutes: 55, image: "8314fde7-7891-4037-b664-92009ebd6d56-v2.png", allergens: ["tree nuts"], freezes: "2 months" },
-  "mini-berry-yogurt-pops": { title: "Mini Berry Yogurt Pops", minutes: 205, image: "13b1d1ef-1b87-4ea8-8e28-2febceda8fa3-v2.png", allergens: ["milk"], freezes: "1 month" },
-  "savory-corn-and-cheddar-muffins": { title: "Savory Corn & Cheddar Muffins", minutes: 45, image: "8a3701eb-8331-4e75-b32c-f9c3b4afc4af-v2.png", allergens: ["wheat", "milk", "egg"], freezes: "3 months" },
-  "spinach-and-cheese-pizza-scrolls": { title: "Spinach & Cheese Pizza Scrolls", minutes: 40, image: "c5085fd7-a4f1-4e1d-ac61-d1ce36dff926-v2.png", allergens: ["wheat", "milk"], freezes: "3 months" },
-  "soft-banana-oat-toddler-cookies": { title: "Soft Banana Oat Toddler Cookies", minutes: 40, image: "247073b9-7581-456a-bfb7-00e0190d20ae-v2.png", allergens: [], freezes: "2 months" },
-  "apple-sunflower-snack-rounds": { title: "Apple Sunflower Snack Rounds", minutes: 10, image: "8f8f5616-2f3f-486a-8eb0-aa5036f11429-v2.png", allergens: [], freezes: null },
-  // Meal Prep
-  "slow-cooker-beef-and-vegetable-stew": { title: "Slow Cooker Beef and Vegetable Stew", minutes: 480, image: "95ea00e4-b591-4bf9-a888-7d58e9443538-v2.png", allergens: [], freezes: "2 months" },
-  "veggie-packed-lasagna": { title: "Veggie-Packed Lasagna", minutes: 75, image: "c1fd76c2-ba4f-4845-bfb8-4cd3f133a39f-v2.png", allergens: ["wheat", "milk", "egg"], freezes: "2 months" },
-  "mini-turkey-and-apple-meatloaf-muffins": { title: "Mini Turkey & Apple Meatloaf Muffins", minutes: 45, image: "ffe850af-331e-41e0-90ed-403ab3cd6f5c-v2.png", allergens: ["egg", "wheat"], freezes: "2 months" },
-  "mild-vegetable-curry-with-rice": { title: "Mild Vegetable Curry with Rice", minutes: 40, image: "97bf9e64-ca84-4855-b0d5-90336e1939fb-v3.png", allergens: [], freezes: "2 months" },
-  "one-pot-chicken-and-vegetable-rice": { title: "One-Pot Chicken and Vegetable Rice", minutes: 40, image: "5771fc64-2543-4023-8a2c-915343898ee4-v2.png", allergens: [], freezes: "2 months" },
-  "cheesy-broccoli-and-quinoa-bites": { title: "Cheesy Broccoli & Quinoa Bites", minutes: 45, image: "4cbf26da-f8c0-4644-b2ea-f227c0c08f9b-v2.png", allergens: ["egg", "milk"], freezes: "2 months" },
-  "cheesy-veggie-quinoa-toddler-bites": { title: "Cheesy Veggie Quinoa Toddler Bites", minutes: 60, image: "2bbb6f71-cee5-4b70-8db3-655da31ecf88-v2.png", allergens: ["milk", "egg", "wheat"], freezes: "2 months" },
-  "mini-bean-and-cheese-burritos": { title: "Mini Bean & Cheese Burritos", minutes: 10, image: "d4e758fb-1ea5-4b0c-b230-d2948fe63c1e-v2.png", allergens: ["wheat", "milk"], freezes: "1 month" },
-  "veggie-lentil-pancakes": { title: "Veggie Lentil Pancakes", minutes: 60, image: "0b1f8518-adf5-4209-b1bd-f77ae9d354f6-v2.png", allergens: [], freezes: "2 months" },
-  "cheesy-veggie-mini-muffins": { title: "Cheesy Veggie Mini Muffins", minutes: 40, image: "558d4bb7-4811-443f-aedc-1ff390e336ba-v2.png", allergens: ["milk", "egg", "wheat"], freezes: "2 months" },
-  // Protein Packs
-  "mini-baked-chicken-nuggets": { title: "Mini Baked Chicken Nuggets", minutes: 40, image: "04ecc68a-752c-4b65-a003-af419cda610b-v2.png", allergens: ["egg", "wheat"], freezes: "2 months", protein: "Chicken" },
-  "onigiri-rice-triangles": { title: "Onigiri Rice Triangles", minutes: 45, image: "7c7a9197-9384-40bd-b623-8d7a49812faa-v3.png", allergens: ["egg", "fish"], freezes: null, protein: "Tuna or salmon" },
-  "soft-chicken-veggie-rice-bowl": { title: "Soft Chicken Veggie Rice Bowl", minutes: 40, image: "1af3ef26-5ca1-4678-8a31-bac8666d1b01-v2.png", allergens: [], freezes: "2 months", protein: "Chicken" },
-  "mild-curried-red-lentil-cakes": { title: "Mild Curried Red Lentil Cakes", minutes: 45, image: "a3cd52f0-7652-4fe1-a543-7d4072d92e50-v2.png", allergens: [], freezes: "2 months", protein: "Red lentils" },
-  "sesame-tofu-and-veggie-cubes": { title: "Sesame Tofu & Veggie Cubes", minutes: 30, image: "268cee74-16e6-491a-8d80-760aeb0be0e7-v2.png", allergens: ["soy", "sesame"], freezes: null, protein: "Tofu" },
-  "turkey-and-hummus-pinwheels": { title: "Turkey & Hummus Pinwheels", minutes: 15, image: "e7ac0613-5e18-44ce-bdbf-02f4ac591de0-v2.png", allergens: ["wheat", "sesame"], freezes: null, protein: "Turkey" },
-  "bean-and-veggie-burrito-bowl": { title: "Bean and Veggie Burrito Bowl", minutes: 55, image: "af5f3ff1-bbf1-43f4-a367-4c234656404f-v2.png", allergens: [], freezes: null, protein: "Black beans" },
-  "salmon-potato-veggie-mash": { title: "Salmon Potato Veggie Mash", minutes: 40, image: "ab9d4c8d-f997-4664-9416-35d2f8a763bc-v2.png", allergens: ["milk", "fish"], freezes: null, protein: "Salmon" },
-  "soft-tofu-veggie-stir-fry-with-rice": { title: "Soft Tofu Veggie Stir Fry with Rice", minutes: 25, image: "f803dcc2-ce11-4838-b6af-8fe4476fcc18-v2.png", allergens: ["soy"], freezes: null, protein: "Tofu" },
-  "turkey-veggie-mini-meatballs-with-pasta": { title: "Turkey Veggie Mini Meatballs with Pasta", minutes: 45, image: "2938abd9-3dab-41b5-a8cb-cc15c9fc9ec5-v2.png", allergens: ["milk", "egg", "wheat"], freezes: null, protein: "Turkey" },
-};
 
 function recipes(slugs: readonly string[]): CollectionRecipe[] {
   return slugs.map((slug) => {
-    const fact = CATALOG[slug];
+    const fact = RECIPE_SNAPSHOT[slug];
     if (!fact) throw new Error(`[collections] Unknown recipe in config: ${slug}`);
     return { ...fact, slug, image: `${PHOTO_BASE}${fact.image}` };
   });
 }
 
+function cover(slug: string, height: number, alt: string): ShowroomCollection["cover"] {
+  return { src: `/images/collections/cover-${slug}-1040.webp`, width: 1040, height, alt };
+}
+
+export const SHELVES: readonly { key: ShelfKey; title: string }[] = [
+  { key: "mornings", title: "Mornings" },
+  { key: "everyday-meals", title: "Everyday meals" },
+  { key: "cook-once", title: "Cook once" },
+  { key: "nourish", title: "Nourish" },
+  { key: "snacks-and-treats", title: "Snacks & treats" },
+  { key: "seasons-and-parties", title: "Seasons & parties" },
+];
+
+export const SERIES: Record<SeriesKey, { title: string; heading: string; lede: string; bundlePrice: string | null }> = {
+  breakfast: {
+    title: "Breakfast series",
+    heading: "Breakfast, from first bites to big kids",
+    lede: "Three volumes that grow with your child.",
+    // PLACEHOLDER bundle price (concept, 2026-10-06).
+    bundlePrice: "$19.99",
+  },
+  "meal-prep": {
+    title: "Meal Prep series",
+    heading: "Cook once, from first purées to family dinners",
+    lede: "Three volumes of make-ahead food that grow with your child.",
+    bundlePrice: null,
+  },
+};
+
+const BABY = { min: 6, max: 12 };
+const TODDLER = { min: 12, max: 24 };
+const KID = { min: 24, max: 48 };
+const ALL_STAGES = { min: null, max: null };
+
 export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
+  // ---------- Mornings: the Breakfast series ----------
   {
-    slug: "halloween",
+    slug: "first-breakfasts",
     status: "published",
-    title: "Halloween",
-    tagline: "A festive table for little hands. Nothing scary.",
-    story:
-      "Pumpkin, cocoa and berries: the colours of the season, in food a toddler can hold. Gnocchi pillows for dinner, snack fries for the walk around the block, yogurt pops for after.",
-    forWhen: "For the week the costumes come out, and the party where you said you'd bring something.",
-    cloth: "ember",
-    cover: { src: "/images/collections/cover-halloween-1040.webp", width: 1040, height: 1412, alt: "A pumpkin-orange cloth cookbook with a gold-foil pumpkin on its cover" },
-    refresh: "New recipes join each October, before the costumes come out.",
-    placeholderPrice: "$6.99",
+    availability: "coming-soon",
+    shelf: "mornings",
+    stage: BABY,
+    series: { key: "breakfast", volume: 1 },
+    title: "First Breakfasts",
+    tagline: "Soft pancakes, oat fingers and fruit for the first mornings.",
+    story: "",
+    forWhen: "",
+    cloth: "ochre",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$7.99",
+    recipes: recipes(["asian-pear-rice-congee-pure", "banana-avocado-breakfast-pure-with-yogurt", "spinach-and-feta-egg-muffins"]),
+  },
+  {
+    slug: "toddler-breakfasts",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "mornings",
+    stage: TODDLER,
+    series: { key: "breakfast", volume: 2 },
+    title: "Toddler Breakfasts",
+    tagline: "Breakfasts they can hold, made ahead.",
+    story: "",
+    forWhen: "",
+    cloth: "ochre",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$7.99",
     recipes: recipes([
+      "overnight-oats-with-chia-and-berries",
+      "spinach-and-feta-egg-muffins",
+      "apple-cinnamon-oat-toddler-porridge",
+      "banana-peanut-butter-chia-pudding",
+      "veggie-lentil-pancakes",
+      "mango-lassi-chia-pudding-cups",
+    ]),
+  },
+  {
+    slug: "big-kid-breakfasts",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "mornings",
+    stage: KID,
+    series: { key: "breakfast", volume: 3 },
+    title: "Big-Kid Breakfasts",
+    tagline: "Fuller, faster school-morning breakfasts.",
+    story: "",
+    forWhen: "",
+    cloth: "ochre",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$7.99",
+    recipes: recipes([
+      "greek-yogurt-parfait-with-berries-and-almonds",
+      "overnight-oats-with-chia-and-berries",
+      "spinach-and-feta-egg-muffins",
+      "banana-peanut-butter-chia-pudding",
+    ]),
+  },
+
+  // ---------- Everyday meals ----------
+  {
+    slug: "first-tastes",
+    status: "published",
+    availability: "open",
+    shelf: "everyday-meals",
+    stage: { min: 6, max: 8 },
+    title: "First Tastes",
+    tagline: "Smooth first spoonfuls, one new flavour at a time.",
+    story:
+      "Eight simple purées for the first weeks of solids: fruit, vegetables, rice and lentils, blended smooth and sieved for the youngest babies. Short ingredient lists, no added salt or sugar.",
+    forWhen: "For the week the high chair arrives and every spoonful is new.",
+    cloth: "sage",
+    cover: cover("first-tastes", 1415, "A sage-green cloth cookbook with a gold-foil baby spoon, a bowl of purée, a pear and a carrot on its cover"),
+    refresh: "New first tastes join through the year.",
+    placeholderPrice: "$9.99",
+    recipes: recipes([
+      "silky-carrot-apple-starter-pure",
+      "apple-prune-fiber-friendly-pure",
+      "asian-pear-rice-congee-pure",
+      "banana-avocado-breakfast-pure-with-yogurt",
+      "comforting-sweet-potato-lentil-khichdi-pure",
+      "indian-rice-mung-dal-spinach-pure",
+      "mediterranean-red-lentil-carrot-pure",
+      "zucchini-chickpea-mediterranean-pure",
+    ]),
+  },
+  {
+    slug: "first-finger-foods",
+    status: "published",
+    availability: "open",
+    shelf: "everyday-meals",
+    stage: { min: 9, max: 12 },
+    title: "First Finger Foods",
+    tagline: "Soft food babies can pick up themselves.",
+    story:
+      "Strips, fritters, cakes and soft bites shaped for a baby's grip, with a cutting note for each age. Every one is soft enough to squash between your fingers.",
+    forWhen: "For when your baby grabs the spoon and wants to do it alone.",
+    cloth: "terracotta",
+    cover: null,
+    refresh: "New finger foods join through the year.",
+    placeholderPrice: "$9.99",
+    recipes: recipes([
+      "avocado-and-black-bean-quesadilla-strips",
+      "cheesy-broccoli-and-quinoa-bites",
+      "mild-curried-red-lentil-cakes",
+      "mini-turkey-and-apple-meatloaf-muffins",
       "pumpkin-and-ricotta-gnocchi-pillows",
-      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
-      "mini-berry-yogurt-pops",
-      "spinach-and-cheese-pizza-scrolls",
-      "soft-date-almond-cocoa-bites",
+      "sesame-tofu-and-veggie-cubes",
+      "zucchini-and-feta-fritters",
+      "salmon-and-sweet-potato-bowl-with-avocado",
+    ]),
+  },
+  {
+    slug: "lunchbox-and-daycare",
+    status: "published",
+    availability: "open",
+    shelf: "everyday-meals",
+    stage: KID,
+    title: "Lunchbox & Daycare",
+    tagline: "Lunches that travel. No nuts.",
+    story:
+      "Strips, muffins, wraps and bento boxes that taste good cold and pack flat. Every recipe is nut-free, for daycares that ban nuts.",
+    forWhen: "For the 7am scramble before drop-off.",
+    cloth: "navy",
+    cover: cover("lunchbox-and-daycare", 1402, "A navy cloth cookbook with a gold-foil bento lunchbox and a small thermos on its cover"),
+    refresh: "New lunches join before each school term.",
+    placeholderPrice: "$12.99",
+    recipes: recipes([
+      "avocado-and-black-bean-quesadilla-strips",
+      "zucchini-and-feta-fritters",
+      "mediterranean-chicken-and-chickpea-salad",
+      "baked-samosa-puffs",
+      "mini-baked-chicken-nuggets",
+      "onigiri-rice-triangles",
       "savory-corn-and-cheddar-muffins",
-      "soft-banana-oat-toddler-cookies",
-      "apple-sunflower-snack-rounds",
+      "spinach-and-cheese-pizza-scrolls",
+      "turkey-and-hummus-pinwheels",
+      "greek-pita-bento-box",
+      "mini-bean-and-cheese-burritos",
+      "creamy-hummus-yogurt-veggie-dippers",
+    ]),
+  },
+  {
+    slug: "picky-eater-favorites",
+    status: "published",
+    availability: "open",
+    shelf: "everyday-meals",
+    stage: KID,
+    title: "Picky Eater Favorites",
+    tagline: "Gentle wins for the “won't eat it” years.",
+    story:
+      "Nuggets, fries, pizza scrolls and quesadillas, with vegetables tucked inside and dips on the side. Familiar shapes first, new flavours after.",
+    forWhen: "For the plate that comes back with only the bread eaten.",
+    cloth: "rose",
+    cover: cover("picky-eater-favorites", 1418, "A dusty-rose cloth cookbook with a gold-foil child's plate of broccoli, fries and a dip on its cover"),
+    refresh: "New favourites join through the year.",
+    placeholderPrice: "$12.99",
+    recipes: recipes([
+      "mini-baked-chicken-nuggets",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "spinach-and-cheese-pizza-scrolls",
+      "avocado-and-black-bean-quesadilla-strips",
+      "mini-bean-and-cheese-burritos",
+      "veggie-packed-lasagna",
+      "turkey-veggie-mini-meatballs-with-pasta",
+      "cheesy-veggie-quinoa-toddler-bites",
+      "cheesy-veggie-mini-muffins",
+      "creamy-hummus-yogurt-veggie-dippers",
+      "deconstructed-soft-taco-toddler-bowl",
+      "veggie-rice-snack-fritters",
+    ]),
+  },
+  {
+    slug: "family-dinners",
+    status: "published",
+    availability: "open",
+    shelf: "everyday-meals",
+    stage: ALL_STAGES,
+    title: "Family Dinners",
+    tagline: "One dinner for everyone, with a portion for the smallest.",
+    story:
+      "Curries, stews, tacos and pasta the whole table eats. Each recipe says how to purée, mash or cut the little one's portion, and takes it out before the salt goes in.",
+    forWhen: "For the night you refuse to cook twice.",
+    cloth: "walnut",
+    cover: cover("family-dinners", 1413, "A walnut-brown cloth cookbook with a gold-foil casserole pot, a ladle and three spoons on its cover"),
+    refresh: "New family dinners join each season.",
+    placeholderPrice: "$12.99",
+    recipes: recipes([
+      "mild-vegetable-curry-with-rice",
+      "one-pot-chicken-and-vegetable-rice",
+      "slow-cooker-beef-and-vegetable-stew",
+      "vegetable-noodle-soup",
+      "baked-fish-tacos-with-slaw",
+      "tofu-and-vegetable-stir-fry",
+      "vegetable-pasta-primavera",
+      "bean-and-veggie-burrito-bowl",
+      "mediterranean-baked-chicken-with-quinoa",
+      "veggie-packed-lasagna",
+      "chicken-and-vegetable-stir-fry-with-brown-rice",
+      "turkey-veggie-mini-meatballs-with-pasta",
+    ]),
+  },
+
+  // ---------- Cook once: the Meal Prep series ----------
+  {
+    slug: "batch-and-freeze-for-babies",
+    status: "published",
+    availability: "open",
+    shelf: "cook-once",
+    stage: BABY,
+    series: { key: "meal-prep", volume: 1 },
+    title: "Batch & Freeze for Babies",
+    tagline: "One afternoon of cooking, a freezer full of baby meals.",
+    story:
+      "Purées and mashes that freeze in ice-cube trays: fruit, vegetables, lentils, chicken and beef. Thaw two cubes and a meal is ready.",
+    forWhen: "For the parent who would rather cook once than every night.",
+    cloth: "forest",
+    cover: cover("batch-and-freeze-for-babies", 1414, "A forest-green cloth cookbook with a gold-foil ice-cube tray of purée, a snowflake and a spoon on its cover"),
+    refresh: "New freezer recipes join each season.",
+    placeholderPrice: "$9.99",
+    recipes: recipes([
+      "silky-carrot-apple-starter-pure",
+      "apple-prune-fiber-friendly-pure",
+      "asian-pear-rice-congee-pure",
+      "comforting-sweet-potato-lentil-khichdi-pure",
+      "indian-rice-mung-dal-spinach-pure",
+      "mediterranean-red-lentil-carrot-pure",
+      "zucchini-chickpea-mediterranean-pure",
+      "mild-mexican-black-bean-sweet-corn-pure",
+      "italian-tomato-vegetable-pure-with-tiny-pasta",
+      "lentil-and-vegetable-curry-with-coconut-milk",
+      "one-pot-chicken-and-vegetable-rice",
+      "slow-cooker-beef-and-vegetable-stew",
     ]),
   },
   {
     slug: "meal-prep",
     status: "published",
+    availability: "open",
+    inShowroom: true,
+    shelf: "cook-once",
+    stage: TODDLER,
+    series: { key: "meal-prep", volume: 2 },
     title: "Meal Prep",
     tagline: "Cook once on Sunday. Eat well on Wednesday.",
     story:
       "Ten recipes that keep: a slow-cooker stew, a lasagna, a vegetable curry, and muffins, bites and burritos that go from freezer to plate on a tired evening. Every one of them freezes.",
     forWhen: "For the evenings when the only plan is the one you made at the weekend.",
     cloth: "forest",
-    cover: { src: "/images/collections/cover-meal-prep-1040.webp", width: 1040, height: 1400, alt: "A forest-green cloth cookbook with gold-foil stacked food containers on its cover" },
+    cover: cover("meal-prep", 1400, "A forest-green cloth cookbook with gold-foil stacked food containers on its cover"),
     refresh: "New make-ahead recipes join each season.",
     placeholderPrice: "$12.99",
     recipes: recipes([
@@ -114,15 +334,76 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     ]),
   },
   {
+    slug: "freezer-dinners",
+    status: "published",
+    availability: "open",
+    shelf: "cook-once",
+    stage: KID,
+    series: { key: "meal-prep", volume: 3 },
+    title: "Freezer Dinners",
+    tagline: "Batch, freeze, reheat on the busy nights.",
+    story:
+      "Curries, soups, a lasagna and rice bowls that freeze for up to three months and reheat well. Cook at the weekend, and dinner on a Wednesday takes ten minutes.",
+    forWhen: "For the nights when there's no time to cook and no appetite for takeout.",
+    cloth: "forest",
+    cover: null,
+    refresh: "New freezer dinners join each season.",
+    placeholderPrice: "$12.99",
+    recipes: recipes([
+      "veggie-packed-lasagna",
+      "mild-vegetable-curry-with-rice",
+      "lentil-and-vegetable-curry-with-coconut-milk",
+      "folate-rich-lentil-and-spinach-soup",
+      "slow-cooker-beef-and-vegetable-stew",
+      "one-pot-chicken-and-vegetable-rice",
+      "soft-chicken-veggie-rice-bowl",
+      "mediterranean-baked-chicken-with-quinoa",
+    ]),
+  },
+
+  // ---------- Nourish ----------
+  {
+    slug: "iron-rich-first-foods",
+    status: "published",
+    availability: "open",
+    shelf: "nourish",
+    stage: BABY,
+    title: "Iron-Rich First Foods",
+    tagline: "Iron for growing babies, paired with vitamin C.",
+    story:
+      "Lentils, beans, beef and spinach, cooked soft and paired with tomato, lemon or sweet potato, which help the iron absorb. Purées first, then mashes and bowls.",
+    forWhen: "For the six-month check-up when the doctor mentions iron.",
+    cloth: "slate",
+    cover: cover("iron-rich-first-foods", 1385, "A slate-blue cloth cookbook with a gold-foil bowl of lentils, spinach leaves and a halved lemon on its cover"),
+    refresh: "New iron-rich recipes join through the year.",
+    placeholderPrice: "$9.99",
+    recipes: recipes([
+      "comforting-sweet-potato-lentil-khichdi-pure",
+      "indian-rice-mung-dal-spinach-pure",
+      "mediterranean-red-lentil-carrot-pure",
+      "zucchini-chickpea-mediterranean-pure",
+      "mild-mexican-black-bean-sweet-corn-pure",
+      "slow-cooker-beef-and-vegetable-stew",
+      "folate-rich-lentil-and-spinach-soup",
+      "baked-sweet-potato-with-black-beans-and-avocado",
+      "bean-and-veggie-burrito-bowl",
+      "mild-curried-red-lentil-cakes",
+    ]),
+  },
+  {
     slug: "protein-packs",
     status: "published",
+    availability: "open",
+    inShowroom: true,
+    shelf: "nourish",
+    stage: TODDLER,
     title: "Protein Packs",
     tagline: "Meals built around one protein, in shapes little hands can manage.",
     story:
       "Chicken, salmon, tuna, red lentils, tofu, turkey and black beans. Each recipe is built around one of them and comes as a bite, a cake, a bowl or a pinwheel.",
     forWhen: "For the plate that keeps coming back with only the pasta eaten.",
     cloth: "plum",
-    cover: { src: "/images/collections/cover-protein-packs-1040.webp", width: 1040, height: 1422, alt: "A plum cloth cookbook with a gold-foil fish on a plate, a bowl of lentils, beans and tofu cubes on its cover" },
+    cover: cover("protein-packs", 1422, "A plum cloth cookbook with a gold-foil fish on a plate, a bowl of lentils, beans and tofu cubes on its cover"),
     refresh: "New recipes join through the year.",
     placeholderPrice: "$12.99",
     recipes: recipes([
@@ -137,5 +418,152 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
       "soft-tofu-veggie-stir-fry-with-rice",
       "turkey-veggie-mini-meatballs-with-pasta",
     ]),
+  },
+
+  // ---------- Snacks & treats ----------
+  {
+    slug: "everyday-treats",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "snacks-and-treats",
+    stage: { min: 12, max: null },
+    title: "Everyday Treats",
+    tagline: "Desserts with no added sugar.",
+    story: "",
+    forWhen: "",
+    cloth: "clay",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$6.99",
+    recipes: recipes([
+      "banana-peanut-butter-chia-pudding",
+      "chickpea-cookie-dough-fruit-dip",
+      "mango-lassi-chia-pudding-cups",
+      "mini-berry-yogurt-pops",
+      "soft-banana-oat-toddler-cookies",
+      "soft-date-almond-cocoa-bites",
+      "soft-peanut-butter-oat-energy-balls",
+    ]),
+  },
+  {
+    slug: "fruit-gummies",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "snacks-and-treats",
+    stage: { min: 12, max: null },
+    title: "Fruit Gummies",
+    tagline: "Real-fruit gummies.",
+    story: "",
+    forWhen: "",
+    cloth: "berry",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$6.99",
+    recipes: [],
+  },
+  {
+    slug: "on-the-go-snacks",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "snacks-and-treats",
+    stage: TODDLER,
+    title: "On-the-Go Snacks",
+    tagline: "For the bag, the car and the park.",
+    story: "",
+    forWhen: "",
+    cloth: "sky",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$6.99",
+    recipes: recipes([
+      "cheesy-broccoli-and-quinoa-bites",
+      "savory-corn-and-cheddar-muffins",
+      "cheesy-veggie-quinoa-toddler-bites",
+      "cheesy-veggie-mini-muffins",
+      "soft-banana-oat-toddler-cookies",
+      "veggie-rice-snack-fritters",
+    ]),
+  },
+
+  // ---------- Seasons & parties ----------
+  {
+    slug: "halloween",
+    status: "published",
+    availability: "open",
+    inShowroom: true,
+    shelf: "seasons-and-parties",
+    stage: ALL_STAGES,
+    title: "Halloween",
+    tagline: "A festive table for little hands. Nothing scary.",
+    story:
+      "Pumpkin, cocoa and berries: the colours of the season, in food a toddler can hold. Gnocchi pillows for dinner, snack fries for the walk around the block, yogurt pops for after.",
+    forWhen: "For the week the costumes come out, and the party where you said you'd bring something.",
+    cloth: "ember",
+    cover: cover("halloween", 1412, "A pumpkin-orange cloth cookbook with a gold-foil pumpkin on its cover"),
+    refresh: "New recipes join each October, before the costumes come out.",
+    placeholderPrice: "$6.99",
+    recipes: recipes([
+      "pumpkin-and-ricotta-gnocchi-pillows",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      "mini-berry-yogurt-pops",
+      "spinach-and-cheese-pizza-scrolls",
+      "soft-date-almond-cocoa-bites",
+      "savory-corn-and-cheddar-muffins",
+      "soft-banana-oat-toddler-cookies",
+      "apple-sunflower-snack-rounds",
+    ]),
+  },
+  {
+    slug: "thanksgiving-table",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "seasons-and-parties",
+    stage: ALL_STAGES,
+    title: "Thanksgiving Table",
+    tagline: "A seat at the big table, with food they can eat.",
+    story: "",
+    forWhen: "",
+    cloth: "rust",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$6.99",
+    recipes: recipes([
+      "mini-turkey-and-apple-meatloaf-muffins",
+      "pumpkin-and-ricotta-gnocchi-pillows",
+      "savory-corn-and-cheddar-muffins",
+      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+    ]),
+  },
+  {
+    slug: "holiday-baking",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "seasons-and-parties",
+    stage: ALL_STAGES,
+    title: "Holiday Baking",
+    tagline: "December baking little hands can help with.",
+    story: "",
+    forWhen: "",
+    cloth: "crimson",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$6.99",
+    recipes: recipes(["soft-date-almond-cocoa-bites"]),
+  },
+  {
+    slug: "birthday-party",
+    status: "published",
+    availability: "coming-soon",
+    shelf: "seasons-and-parties",
+    stage: ALL_STAGES,
+    title: "Birthday Party",
+    tagline: "Party food for small guests. No nuts.",
+    story: "",
+    forWhen: "",
+    cloth: "teal",
+    cover: null,
+    refresh: "",
+    placeholderPrice: "$6.99",
+    recipes: recipes(["baked-samosa-puffs", "mini-baked-chicken-nuggets", "spinach-and-cheese-pizza-scrolls", "mini-berry-yogurt-pops"]),
   },
 ];

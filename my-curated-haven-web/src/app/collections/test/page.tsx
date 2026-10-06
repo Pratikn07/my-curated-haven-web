@@ -11,14 +11,14 @@ import {
   type ShowroomEntry,
 } from "@/components/collections/Showroom";
 import { SITE_ORIGIN } from "@/config/site-navigation";
-import { listShowroomCollections, loadLiveOffer } from "@/lib/data/collections-showroom";
+import { listShowroomChapters, loadLiveOffer } from "@/lib/data/collections-showroom";
 import { getFreeRecipeCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
 import { createPublicClient } from "@/lib/supabase/public";
 
 /**
- * The first collections showroom, kept at /collections/test while the real
- * /collections page is designed (/collections redirects here until then).
- * Not listed by search engines.
+ * The first collections showroom, kept at /collections/test beside the real
+ * bookcase at /collections: Halloween, Meal Prep and Protein Packs as cloth
+ * chapters. Not listed by search engines.
  *
  * The showroom: a fanned hand of cloth cookbooks, then one chapter
  * per collection whose cloth floods the page, how buying works, and the free
@@ -54,7 +54,7 @@ async function loadFreeRecipes(): Promise<RecipeCatalogItem[]> {
 }
 
 export default async function CollectionsPage() {
-  const collections = listShowroomCollections();
+  const collections = listShowroomChapters();
   if (collections.length === 0) notFound();
 
   const [offers, freeRecipes] = await Promise.all([

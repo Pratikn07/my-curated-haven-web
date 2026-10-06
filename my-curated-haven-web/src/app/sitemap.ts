@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
 import { SITE_ORIGIN, indexableRoutes, linksFor } from "@/config/site-navigation";
-import { listShowroomCollections } from "@/lib/collections/visibility";
+import { SERIES } from "@/config/collections";
+import { listOpenCollections } from "@/lib/collections/visibility";
 import { createClient } from "@/lib/supabase/server";
 import { getFreeRecipeCatalog } from "@/lib/data/recipes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const defaultDate = new Date("2026-09-22");
 
-  const collections = listShowroomCollections();
+  const collections = listOpenCollections();
   const staticEntries: MetadataRoute.Sitemap = [
     ...linksFor(indexableRoutes, collections.length > 0).map((route) => ({
       url: `${SITE_ORIGIN}${route.path}`,
@@ -21,6 +22,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),
+    ...(collections.length > 0
+      ? Object.keys(SERIES).map((series) => ({
+          url: `${SITE_ORIGIN}/collections/series/${series}`,
+          lastModified: defaultDate,
+          changeFrequency: "monthly" as const,
+          priority: 0.5,
+        }))
+      : []),
   ];
 
   try {

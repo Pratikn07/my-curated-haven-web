@@ -16,9 +16,24 @@ export function listShowroomCollections(): readonly ShowroomCollection[] {
   return SHOWROOM_COLLECTIONS.filter((collection) => collection.status === "published" || !isProduction());
 }
 
+/** Collections with their own page: enough recipes to open. */
+export function listOpenCollections(): readonly ShowroomCollection[] {
+  return listShowroomCollections().filter((collection) => collection.availability === "open");
+}
+
+/** The chapters of the first showroom (/collections/test), in its original order. */
+const SHOWROOM_ORDER = ["halloween", "meal-prep", "protein-packs"];
+
+export function listShowroomChapters(): readonly ShowroomCollection[] {
+  return [...listOpenCollections().filter((collection) => collection.inShowroom)].sort(
+    (a, b) => SHOWROOM_ORDER.indexOf(a.slug) - SHOWROOM_ORDER.indexOf(b.slug)
+  );
+}
+
+/** An open collection by slug. Coming-soon collections have no page. */
 export function getShowroomCollection(slug: string): ShowroomCollection | null {
   if (!SLUG_PATTERN.test(slug)) return null;
-  return listShowroomCollections().find((collection) => collection.slug === slug) ?? null;
+  return listOpenCollections().find((collection) => collection.slug === slug) ?? null;
 }
 
 /** Whether the header, footer and sitemap should offer /collections in this environment. */

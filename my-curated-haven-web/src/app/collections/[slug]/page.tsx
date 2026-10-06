@@ -12,7 +12,7 @@ import {
 import CollectionsMotion from "@/components/collections/CollectionsMotion";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import type { ShowroomCollection } from "@/lib/collections/types";
-import { getShowroomCollection, listShowroomCollections, loadLiveOffer } from "@/lib/data/collections-showroom";
+import { getShowroomCollection, listOpenCollections, loadLiveOffer } from "@/lib/data/collections-showroom";
 import { getFreeRecipeSlots, type RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 import { usableImageSrc } from "@/lib/recipes/format";
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     return { title: "Collection Not Found", robots: { index: false, follow: false } };
   }
 
-  const title = `${model.title} | Toddler Recipe Collection | My Curated Haven`;
+  const title = `${model.title} | Baby & Toddler Recipe Collection | My Curated Haven`;
   const description = `${model.tagline ?? model.story} ${model.recipes.length} recipes. One-time purchase of ${model.price}. Includes printable recipe pages.`;
   const canonicalUrl = `${SITE_ORIGIN}/collections/${slug}`;
 
@@ -116,7 +116,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   const model = buildModel(slug, config, offer);
   if (!model) notFound();
 
-  const shelf = listShowroomCollections();
+  const shelf = listOpenCollections();
   const position = shelf.findIndex((collection) => collection.slug === slug);
   const next = shelf.length > 1 ? shelf[(position + 1) % shelf.length] : position === -1 ? shelf[0] : null;
 
