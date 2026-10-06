@@ -869,15 +869,17 @@
    },
    "collections": [
     "freezer-dinners",
-    "family-dinners"
+    "family-dinners",
+    "meal-prep"
    ],
    "collection_reasons": {
     "freezer-dinners": "Freezes 2 months, batch tip",
-    "family-dinners": "One pot, texture by age"
+    "family-dinners": "One pot, texture by age",
+    "meal-prep": "Added 2026-10-05: freezes 2 months"
    },
    "after_rewrite": [],
    "flags": [
-    "PUBLISHED TEXT BUG: step 9 is an internal note to reviewers ('Manually inspect the blocked image...'). Remove it.",
+    "Fixed 2026-10-05: the internal reviewer note (step 9) was deleted.",
     "Coconut milk: not a tree nut under current FDA guidance, but some parents avoid it; say 'contains coconut'.",
     "Curry powder: check label for wheat fillers to keep gluten-free."
    ],
@@ -1200,8 +1202,7 @@
     ]
    },
    "catalog_allergens": [
-    "fish",
-    "wheat"
+    "fish"
    ],
    "tags": {
     "stage": [
@@ -1234,7 +1235,7 @@
    },
    "after_rewrite": [],
    "flags": [
-    "ALLERGEN MISMATCH: catalog lists wheat, but the recipe uses corn tortillas. Either the list is wrong or flour tortillas were meant. Not tagged gluten-free until fixed."
+    "Fixed 2026-10-05: allergen list is now fish only, and the tortilla ingredient says to check the label for wheat."
    ],
    "source": {
     "catalog_age": [
@@ -1247,7 +1248,7 @@
     ],
     "ingredients": [
      "1 lb white fish fillets",
-     "8 corn tortillas",
+     "8 corn tortillas (check the label for wheat)",
      "2 cups, finely shredded cabbage",
      "2, juiced lime",
      "1 tsp cumin",
@@ -1286,6 +1287,7 @@
     ]
    },
    "catalog_allergens": [
+    "wheat",
     "soy",
     "sesame"
    ],
@@ -1326,7 +1328,7 @@
    },
    "after_rewrite": [],
    "flags": [
-    "ALLERGEN MISMATCH: soy sauce normally contains wheat; catalog lists only soy and sesame. Add wheat, or specify tamari.",
+    "Fixed 2026-10-05: wheat added to the allergen list.",
     "Left out of Freezer Dinners: frozen tofu stir-fry goes spongy; storage only allows 1 month."
    ],
    "source": {
@@ -1489,11 +1491,13 @@
    },
    "collections": [
     "iron-rich-first-foods",
-    "family-dinners"
+    "family-dinners",
+    "protein-packs"
    ],
    "collection_reasons": {
     "iron-rich-first-foods": "Black beans with tomato and lime (vitamin C)",
-    "family-dinners": "Build-your-own bowls, toppings separate"
+    "family-dinners": "Build-your-own bowls, toppings separate",
+    "protein-packs": "Added 2026-10-05: black beans, mashed for babies"
    },
    "after_rewrite": [],
    "flags": [
@@ -2458,19 +2462,15 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [
-    "protein-packs"
-   ],
-   "collection_reasons": {
-    "protein-packs": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "family-dinners"
    ],
    "flags": [
     "WRITTEN FOR PREGNANCY, NOT CHILDREN (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
-    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written it suits 2 years and up. Add a toddler step (soft vegetables, small chicken) or move it.",
-    "Gluten-free relies on the wheat-free tamari it names; catalog diet tags miss gluten-free."
+    "Gluten-free relies on the wheat-free tamari it names; catalog diet tags miss gluten-free.",
+    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
    ],
    "source": {
     "catalog_age": [
@@ -2552,12 +2552,8 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [
-    "meal-prep"
-   ],
-   "collection_reasons": {
-    "meal-prep": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "freezer-dinners",
     "family-dinners"
@@ -2565,7 +2561,8 @@
    "flags": [
     "WRITTEN FOR PREGNANCY, NOT CHILDREN; title says folate-rich (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
     "Broth: use low-sodium and check its label for gluten.",
-    "Title says 'folate-rich': a nutrition claim the review flagged on other titles."
+    "Title says 'folate-rich': a nutrition claim the review flagged on other titles.",
+    "Removed from the live Meal Prep on 2026-10-05 (adult recipe)."
    ],
    "source": {
     "catalog_age": [
@@ -2725,19 +2722,16 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [
-    "meal-prep"
-   ],
-   "collection_reasons": {
-    "meal-prep": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "freezer-dinners",
     "family-dinners"
    ],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip says 'if sensitive to spices during pregnancy'. It is live in Meal Prep.",
-    "Coconut milk: say 'contains coconut'."
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip says 'if sensitive to spices during pregnancy'.",
+    "Coconut milk: say 'contains coconut'.",
+    "Removed from the live Meal Prep on 2026-10-05 (adult recipe)."
    ],
    "source": {
     "catalog_age": [
@@ -2817,18 +2811,14 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [
-    "protein-packs"
-   ],
-   "collection_reasons": {
-    "protein-packs": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "lunchbox-and-daycare"
    ],
    "flags": [
     "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions pregnancy fatigue.",
-    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 3 years and up."
+    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
    ],
    "source": {
     "catalog_age": [
@@ -2991,19 +2981,15 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [
-    "protein-packs"
-   ],
-   "collection_reasons": {
-    "protein-packs": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "lunchbox-and-daycare",
     "family-dinners"
    ],
    "flags": [
     "Same no-age adult set as #28-37 (no pregnancy words in this one, but no child steps).",
-    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 2 years and up."
+    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
    ],
    "source": {
     "catalog_age": [
@@ -3085,18 +3071,14 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [
-    "protein-packs"
-   ],
-   "collection_reasons": {
-    "protein-packs": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "family-dinners"
    ],
    "flags": [
     "Same adult set as #28-37 (mercury tip suggests the pregnancy set).",
-    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 2 years and up."
+    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
    ],
    "source": {
     "catalog_age": [
@@ -3180,18 +3162,15 @@
     "occasion": [],
     "texture": "finger-food"
    },
-   "collections": [
-    "protein-packs"
-   ],
-   "collection_reasons": {
-    "protein-packs": "Live member (see flag)"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [
     "toddler-breakfasts",
     "big-kid-breakfasts"
    ],
    "flags": [
-    "WRITTEN FOR PREGNANCY: tip says 'when morning sickness makes hot foods unappealing'. Light rewrite only: replace that tip and add a cutting step for 12 m."
+    "WRITTEN FOR PREGNANCY: tip says 'when morning sickness makes hot foods unappealing'. Light rewrite only: replace that tip and add a cutting step for 12 m.",
+    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
    ],
    "source": {
     "catalog_age": [
@@ -3448,10 +3427,12 @@
     "texture": "finger-food"
    },
    "collections": [
-    "lunchbox-and-daycare"
+    "lunchbox-and-daycare",
+    "protein-packs"
    ],
    "collection_reasons": {
-    "lunchbox-and-daycare": "Written for the lunchbox, kept cold"
+    "lunchbox-and-daycare": "Written for the lunchbox, kept cold",
+    "protein-packs": "Added 2026-10-05: tuna or salmon, written for 12 m+"
    },
    "after_rewrite": [],
    "flags": [
@@ -4324,11 +4305,13 @@
    },
    "collections": [
     "on-the-go-snacks",
-    "picky-eater-favorites"
+    "picky-eater-favorites",
+    "meal-prep"
    ],
    "collection_reasons": {
     "on-the-go-snacks": "Freezes, travels",
-    "picky-eater-favorites": "Carrot and spinach hidden in cheese"
+    "picky-eater-favorites": "Carrot and spinach hidden in cheese",
+    "meal-prep": "Added 2026-10-05: freezes 2 months"
    },
    "after_rewrite": [],
    "flags": [],
@@ -4648,10 +4631,12 @@
     "texture": "bowl"
    },
    "collections": [
-    "freezer-dinners"
+    "freezer-dinners",
+    "protein-packs"
    ],
    "collection_reasons": {
-    "freezer-dinners": "Freezes 2 months, portion tip"
+    "freezer-dinners": "Freezes 2 months, portion tip",
+    "protein-packs": "Added 2026-10-05: chicken, written for 1-3 years"
    },
    "after_rewrite": [],
    "flags": [
@@ -4728,12 +4713,14 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [],
-   "flags": [
-    "Not placed: Protein Packs is live with fixed members. This recipe suits 1-2 years better than #29 (Chicken Stir-Fry), which is in Protein Packs but suits 2+ as written. Consider swapping."
+   "collections": [
+    "protein-packs"
    ],
+   "collection_reasons": {
+    "protein-packs": "Added 2026-10-05: tofu, written for 1-3 years"
+   },
+   "after_rewrite": [],
+   "flags": [],
    "source": {
     "catalog_age": [
      12,
@@ -4820,11 +4807,13 @@
    },
    "collections": [
     "family-dinners",
-    "picky-eater-favorites"
+    "picky-eater-favorites",
+    "protein-packs"
    ],
    "collection_reasons": {
     "family-dinners": "Summary: same meal for the whole family",
-    "picky-eater-favorites": "Hidden zucchini and carrot; dip option"
+    "picky-eater-favorites": "Hidden zucchini and carrot; dip option",
+    "protein-packs": "Added 2026-10-05: turkey meatballs cut small"
    },
    "after_rewrite": [],
    "flags": [
@@ -4986,7 +4975,7 @@
    },
    "after_rewrite": [],
    "flags": [
-    "GLUTEN-FREE CLAIM WRONG: catalog says gluten-free, but the oat cereal is not named gluten-free. Specify certified gluten-free oats or drop the tag.",
+    "Fixed 2026-10-05: the gluten-free tag was removed.",
     "Left out of On-the-Go Snacks: keeps only 4 hours in the fridge."
    ],
    "source": {
@@ -4996,7 +4985,6 @@
     ],
     "catalog_diet": [
      "dairy-free",
-     "gluten-free",
      "nut-free",
      "vegetarian",
      "vegan",
@@ -6131,14 +6119,14 @@
    "title": "Meal Prep for Toddlers",
    "live": true,
    "recipes": [
+    "mild-vegetable-curry-with-rice",
     "one-pot-chicken-and-vegetable-rice",
     "slow-cooker-beef-and-vegetable-stew",
     "veggie-packed-lasagna",
     "cheesy-broccoli-and-quinoa-bites",
     "mini-turkey-and-apple-meatloaf-muffins",
-    "folate-rich-lentil-and-spinach-soup",
-    "lentil-and-vegetable-curry-with-coconut-milk",
     "mini-bean-and-cheese-burritos",
+    "cheesy-veggie-quinoa-toddler-bites",
     "veggie-lentil-pancakes",
     "cheesy-veggie-mini-muffins"
    ],
@@ -6151,16 +6139,16 @@
    "title": "Protein Packs",
    "live": true,
    "recipes": [
+    "bean-and-veggie-burrito-bowl",
     "mild-curried-red-lentil-cakes",
     "sesame-tofu-and-veggie-cubes",
-    "chicken-and-vegetable-stir-fry-with-brown-rice",
-    "mediterranean-chicken-and-chickpea-salad",
-    "quinoa-and-black-bean-burrito-bowl",
-    "salmon-and-sweet-potato-bowl-with-avocado",
-    "spinach-and-feta-egg-muffins",
     "mini-baked-chicken-nuggets",
+    "onigiri-rice-triangles",
     "turkey-and-hummus-pinwheels",
-    "salmon-potato-veggie-mash"
+    "salmon-potato-veggie-mash",
+    "soft-chicken-veggie-rice-bowl",
+    "soft-tofu-veggie-stir-fry-with-rice",
+    "turkey-veggie-mini-meatballs-with-pasta"
    ],
    "count": 10,
    "status": "ready",

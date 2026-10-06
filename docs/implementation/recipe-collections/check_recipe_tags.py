@@ -21,8 +21,8 @@ vocab = {group: {v["key"] for v in values} for group, values in seed["recipe_tag
 
 # Live collections keep these exact recipes (src/config/collections.ts).
 LIVE = {
-    "meal-prep": {"slow-cooker-beef-and-vegetable-stew", "veggie-packed-lasagna", "folate-rich-lentil-and-spinach-soup", "mini-turkey-and-apple-meatloaf-muffins", "one-pot-chicken-and-vegetable-rice", "lentil-and-vegetable-curry-with-coconut-milk", "cheesy-broccoli-and-quinoa-bites", "mini-bean-and-cheese-burritos", "veggie-lentil-pancakes", "cheesy-veggie-mini-muffins"},
-    "protein-packs": {"mini-baked-chicken-nuggets", "salmon-and-sweet-potato-bowl-with-avocado", "spinach-and-feta-egg-muffins", "mild-curried-red-lentil-cakes", "sesame-tofu-and-veggie-cubes", "turkey-and-hummus-pinwheels", "quinoa-and-black-bean-burrito-bowl", "salmon-potato-veggie-mash", "chicken-and-vegetable-stir-fry-with-brown-rice", "mediterranean-chicken-and-chickpea-salad"},
+    "meal-prep": {"slow-cooker-beef-and-vegetable-stew", "veggie-packed-lasagna", "mild-vegetable-curry-with-rice", "mini-turkey-and-apple-meatloaf-muffins", "one-pot-chicken-and-vegetable-rice", "cheesy-veggie-quinoa-toddler-bites", "cheesy-broccoli-and-quinoa-bites", "mini-bean-and-cheese-burritos", "veggie-lentil-pancakes", "cheesy-veggie-mini-muffins"},
+    "protein-packs": {"mini-baked-chicken-nuggets", "onigiri-rice-triangles", "soft-chicken-veggie-rice-bowl", "mild-curried-red-lentil-cakes", "sesame-tofu-and-veggie-cubes", "turkey-and-hummus-pinwheels", "bean-and-veggie-burrito-bowl", "salmon-potato-veggie-mash", "soft-tofu-veggie-stir-fry-with-rice", "turkey-veggie-mini-meatballs-with-pasta"},
     "halloween": {"pumpkin-and-ricotta-gnocchi-pillows", "cinnamon-sweet-potato-snack-fries-with-yogurt-dip", "mini-berry-yogurt-pops", "spinach-and-cheese-pizza-scrolls", "soft-date-almond-cocoa-bites", "savory-corn-and-cheddar-muffins", "soft-banana-oat-toddler-cookies", "apple-sunflower-snack-rounds"},
 }
 
