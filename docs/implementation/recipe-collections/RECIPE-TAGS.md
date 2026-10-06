@@ -26,7 +26,7 @@ Example: *Overnight Oats with Chia and Berries* (#34) was a pregnancy recipe wit
 | #69 Soft-Baked Blueberry & Oat Bars | Rejected by the review gate over its 6-month minimum age | Owner confirmed it has been reviewed and is fine; approval recorded in the review log | Done 2026-10-05 |
 | #70 Salmon & Pea Fish Cakes | Flagged: smashing the peas only a tip | Already step 4 in the live recipe; the first review read an older copy of the 3 free recipes | No change needed |
 
-The fixes were guarded database changes: each edited recipe moved to a new content version with a new review record, so the review gate still passes. Backups: `~/MyCuratedHavenBackups/2026-10-05-before-recipe-tag-fixes` and `2026-10-05-before-child-rewrite-28-37`; SQL and the rewrite source: `recipe-review/apply-tag-review-fixes.sql`, `apply-child-rewrite-28-37.sql`, `rewrite-28-37.py` (private, outside this repository). The rewrites are an AI review; a human or feeding-expert read is still recommended before any of them are published.
+The fixes were guarded database changes: each edited recipe moved to a new content version with a new review record, so the review gate still passes. Backups: `~/MyCuratedHavenBackups/2026-10-05-before-recipe-tag-fixes` and `2026-10-05-before-child-rewrite-28-37`; SQL and the rewrite source: `recipe-review/apply-tag-review-fixes.sql`, `apply-child-rewrite-28-37.sql`, `rewrite-28-37.py` (private, outside this repository). The owner read and approved the 10 rewrites on 2026-10-06; that approval is recorded in the review log.
 
 Smaller gaps: 19 recipes qualify for gluten-free, vegan or vegetarian but the catalog does not tag them, so the free-from tags here add them. Puff pastry (#38) and the broths (#6, #12, #13, #30) need a label check.
 
@@ -495,7 +495,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: mashed for 9-12 m, skin removed under 2, beans mashed under 2 and flattened after, no salt in the child portion. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner · protein, iron, fiber, veg-packed · whole-family, make-ahead · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Iron-Rich First Foods
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Also fits Family Dinners, which is full at 12.
 
 ### #29 Chicken and Vegetable Stir-Fry with Brown Rice
@@ -504,7 +504,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: vegetables cooked soft, chicken shredded under 2, child portion taken out before the sauce. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · dinner · protein, veg-packed · whole-family · egg-free, dairy-free, nut-free, gluten-free · bowl
 - **Collections:** Family Dinners
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Gluten-free relies on the wheat-free tamari it names.
 
 ### #30 Folate-Rich Lentil and Spinach Soup
@@ -513,7 +513,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: blended for 9-12 m, no-salt broth, salt only for adults. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner · iron, protein, fiber, veg-packed, sick-days · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Freezer Dinners, Iron-Rich First Foods
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - The title still says 'Folate-Rich', a nutrition claim. Changing it needs a URL redirect.
 - Broth: check the label for gluten.
 
@@ -523,7 +523,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: no honey, almonds finely ground, berries flattened or quartered under 4, chia soaked. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · breakfast, snack · protein · no-cook · egg-free, gluten-free, vegetarian · bowl
 - **Collections:** Big-Kid Breakfasts
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Gluten-free relies on the certified gluten-free oats it names. A nut-free version is in the tips.
 
 ### #32 Lentil and Vegetable Curry with Coconut Milk
@@ -532,7 +532,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: milder curry powder, mashed for 9-12 m, salt only for adults. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · dinner · iron, protein, fiber, veg-packed · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Freezer Dinners, Batch & Freeze for Babies
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Coconut milk: say 'contains coconut'.
 
 ### #33 Mediterranean Chicken and Chickpea Salad
@@ -541,7 +541,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: chickpeas flattened, tomatoes quartered, plain chicken shredded, no raw onion or leaves under 2. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch · protein · make-ahead, no-cook · egg-free, nut-free, gluten-free · bowl · back-to-school
 - **Collections:** Lunchbox & Daycare
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 
 ### #34 Overnight Oats with Chia and Berries
 
@@ -549,7 +549,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: no honey or syrup (banana only), no almonds, berries flattened or quartered under 4. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · breakfast · fiber · make-ahead, no-cook · egg-free, nut-free, vegetarian · bowl
 - **Collections:** Toddler Breakfasts, Big-Kid Breakfasts
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Regular oats: not gluten-free.
 
 ### #35 Quinoa and Black Bean Burrito Bowl
@@ -558,7 +558,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: beans and corn mashed under 2, beans flattened after, tomatoes quartered, salt only for adults. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch, dinner · protein, iron, fiber, veg-packed · make-ahead, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** none
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Not placed: fits Lunchbox & Daycare and Family Dinners, both full at 12. A swap candidate.
 
 ### #36 Salmon and Sweet Potato Bowl with Avocado
@@ -567,7 +567,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: baked salmon checked for bones, mashed or soft pieces for 9-12 m, no kale under 2, no salt in the child portion. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner · protein · whole-family · egg-free, dairy-free, nut-free, gluten-free · finger-food
 - **Collections:** First Finger Foods
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 
 ### #37 Spinach and Feta Egg Muffins
 
@@ -575,7 +575,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: finger-length strips for 9-12 m, tomatoes finely diced, no added salt, less feta for babies. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · breakfast, snack · protein, veg-packed · freezes, make-ahead, on-the-go · nut-free, gluten-free, vegetarian · finger-food
 - **Collections:** First Breakfasts, Toddler Breakfasts, Big-Kid Breakfasts
-- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.
+- Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 
 ### #38 Baked Samosa Puffs
 
