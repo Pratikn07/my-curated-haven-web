@@ -10,6 +10,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 24,
    "age_source": "catalog, checked",
@@ -86,6 +87,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 18,
    "age_source": "catalog, checked",
@@ -166,6 +168,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 18,
    "age_source": "catalog, checked",
@@ -244,6 +247,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 18,
    "age_source": "catalog, checked",
@@ -329,6 +333,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 7,
    "age_max_months": 24,
    "age_source": "catalog, checked",
@@ -414,6 +419,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 9,
    "age_max_months": 24,
    "age_source": "catalog, checked",
@@ -498,6 +504,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 7,
    "age_max_months": 24,
    "age_source": "catalog, checked",
@@ -581,6 +588,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 8,
    "age_max_months": 24,
    "age_source": "catalog, checked",
@@ -665,6 +673,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 12,
    "age_source": "catalog, checked",
@@ -745,6 +754,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 7,
    "age_max_months": 18,
    "age_source": "catalog, checked",
@@ -829,6 +839,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -920,6 +931,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1008,6 +1020,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1099,6 +1112,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1192,6 +1206,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1270,6 +1285,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 8,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1366,6 +1382,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 8,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1451,6 +1468,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 9,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1539,6 +1557,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1623,6 +1642,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -1718,6 +1738,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 9,
    "age_max_months": 60,
    "age_source": "catalog, checked",
@@ -1805,6 +1826,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 9,
    "age_max_months": 60,
    "age_source": "catalog, checked",
@@ -1897,6 +1919,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 10,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -1983,6 +2006,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 9,
    "age_max_months": 36,
    "age_source": "catalog, checked",
@@ -2070,6 +2094,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 8,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -2158,6 +2183,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 36,
    "age_source": "catalog, checked",
@@ -2249,6 +2275,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 8,
    "age_max_months": 60,
    "age_source": "catalog, checked",
@@ -2335,15 +2362,17 @@
    "title": "Baked Sweet Potato with Black Beans and Avocado",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 12,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 9,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Written as an adult recipe: salt in the beans, whole beans and corn. From 12 m if beans are mashed, corn flattened and salt left out for the child's portion. The recipe does not say this.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: mashed for 9-12 m, skin removed under 2, beans mashed under 2 and flattened after, no salt in the child portion. Fine from 9 m.",
    "allergens": {},
    "catalog_allergens": [],
    "tags": {
     "stage": [
+     "9-12m",
      "1-2y",
      "2-3y",
      "3-5y"
@@ -2373,45 +2402,46 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
-    "family-dinners"
+   "collections": [
+    "iron-rich-first-foods"
    ],
+   "collection_reasons": {
+    "iron-rich-first-foods": "Black beans with lime (vitamin C), mashed from 9 m"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
-    "Needs a child-portion step (mash beans, flatten corn, no salt) before it suits under-3s.",
-    "Catalog diet tags miss vegan.",
-    "Left out of Thanksgiving Table: Tex-Mex stuffed sweet potato, not a Thanksgiving dish."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "Also fits Family Dinners, which is full at 12."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     9,
+     120
     ],
     "catalog_diet": [
+     "dairy-free",
+     "egg-free",
      "gluten-free",
      "nut-free",
      "vegetarian",
-     "egg-free"
+     "vegan"
     ],
     "ingredients": [
      "4 large sweet potatoes",
-     "2 cups black beans, cooked or canned",
-     "2 ripe avocados, diced",
+     "2 cups no-salt-added black beans, cooked or canned and rinsed",
+     "2 ripe avocados",
      "1 cup corn kernels, fresh or frozen",
      "2 limes",
-     "1/4 cup fresh cilantro, chopped",
+     "1/4 cup fresh cilantro, finely chopped (optional)",
      "1 tsp ground cumin",
      "1 tbsp olive oil",
-     "to taste salt and pepper"
+     "to taste, adult portions only salt and pepper"
     ],
-    "storage": "Refrigerate baked sweet potatoes within 2 hours; remove the foil before chilling and use within 3–4 days. Store bean topping and avocado separately in airtight containers for up to 3 days (toss avocado with lime juice to prevent browning). Reheat potato in microwave for 2-3 minutes, then add fresh toppings before serving.",
-    "summary": "Baked sweet potato topped with black beans and avocado.",
+    "storage": "Refrigerate baked sweet potatoes and the bean mixture separately within 2 hours. Use within 3 to 4 days, or within 1 to 2 days for children under 2. Keep avocado with lime juice and add it just before serving. Reheat until steaming, then cool to warm before serving.",
+    "summary": "Soft baked sweet potatoes with black beans, corn and avocado. Mash it all together for babies, or serve it as a build-your-own family dinner.",
     "tips": [
-     "Bake sweet potatoes ahead of time on meal prep day and reheat in microwave for 3-4 minutes for even faster assembly",
-     "Add a dollop of unsweetened plant-based yogurt (check the label for milk, soy and tree nuts) or a sprinkle of pepitas (pumpkin seeds) for extra protein and nutrients",
-     "Leftover bean mixture can be used as a taco filling or stirred into scrambled eggs"
+     "Bake the sweet potatoes ahead; they keep in the fridge for 3 to 4 days and reheat in a few minutes.",
+     "Offer the toppings in separate piles for children who like to choose."
     ]
    }
   },
@@ -2421,11 +2451,12 @@
    "title": "Chicken and Vegetable Stir-Fry with Brown Rice",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 24,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 12,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. As written: crisp-tender broccoli, snap peas, raw-ish pepper strips, no child steps. Firm and fibrous for under-2s. From 24 m as written; from 12 m only with a step to cook vegetables soft and cut chicken small.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: vegetables cooked soft, chicken shredded under 2, child portion taken out before the sauce. Fine from 12 m.",
    "allergens": {
     "soy": [
      "tamari"
@@ -2440,6 +2471,7 @@
    ],
    "tags": {
     "stage": [
+     "1-2y",
      "2-3y",
      "3-5y"
     ],
@@ -2462,46 +2494,47 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
     "family-dinners"
    ],
+   "collection_reasons": {
+    "family-dinners": "Family stir-fry with a soft child portion"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
-    "Gluten-free relies on the wheat-free tamari it names; catalog diet tags miss gluten-free.",
-    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "Gluten-free relies on the wheat-free tamari it names."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     12,
+     120
     ],
     "catalog_diet": [
      "dairy-free",
-     "nut-free",
-     "egg-free"
+     "egg-free",
+     "gluten-free",
+     "nut-free"
     ],
     "ingredients": [
-     "1 lb boneless skinless chicken breast, sliced",
-     "2 cups broccoli florets",
-     "1 cup snap peas",
-     "1 cup carrots, julienned",
-     "1 bell pepper, sliced",
-     "3 cups brown rice, cooked in advance",
+     "1 lb boneless skinless chicken breast or thighs",
+     "2 cups broccoli florets, cut small",
+     "1 cup snap peas, strings removed, thinly sliced",
+     "1 cup carrots, cut into thin matchsticks",
+     "1 red bell pepper, thinly sliced",
+     "3 cups cooked brown rice",
      "3 tbsp low-sodium, wheat-free tamari (check the label)",
      "1 tbsp fresh ginger, minced",
      "3 garlic cloves, minced",
      "2 tbsp sesame oil",
      "1 tsp cornstarch",
-     "2 tbsp water"
+     "2 tbsp plus 1/4 cup water"
     ],
-    "storage": "Refrigerate in airtight container for up to 3 days. Store rice separately for best texture. Reheat in microwave for 2-3 minutes or in skillet over medium heat for 5 minutes until heated through to 165°F.",
-    "summary": "Chicken and vegetables served with brown rice and a tamari-sesame sauce.",
+    "storage": "Refrigerate the stir-fry and the rice separately within 2 hours. Use within 3 days, or within 1 to 2 days for children under 2. Reheat to 165°F (74°C), then cool to warm before serving.",
+    "summary": "Tender chicken and soft-cooked vegetables over brown rice with a mild tamari-sesame sauce. The child's portion is cooked soft, cut small and taken out before the sauce.",
     "tips": [
-     "Use pre-cut vegetables from the grocery store to save even more prep time",
-     "Have all ingredients prepped and ready before you start cooking - stir-frying moves quickly",
-     "Double the recipe and pack leftovers for easy next-day lunches"
+     "Pre-cut vegetables save time, but still cook them until soft for young children.",
+     "Double the recipe and pack the leftovers for next-day lunches."
     ]
    }
   },
@@ -2511,15 +2544,17 @@
    "title": "Folate-Rich Lentil and Spinach Soup",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 12,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 9,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Soft soup, but salt to taste and regular broth. From 12 m as written; from 9 m if blended with no-salt broth and no added salt.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: blended for 9-12 m, no-salt broth, salt only for adults. Fine from 9 m.",
    "allergens": {},
    "catalog_allergens": [],
    "tags": {
     "stage": [
+     "9-12m",
      "1-2y",
      "2-3y",
      "3-5y"
@@ -2552,48 +2587,50 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
     "freezer-dinners",
-    "family-dinners"
+    "iron-rich-first-foods"
    ],
+   "collection_reasons": {
+    "freezer-dinners": "Freezes 3 months in portions",
+    "iron-rich-first-foods": "Red lentils and spinach, blended from 9 m"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN; title says folate-rich (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
-    "Broth: use low-sodium and check its label for gluten.",
-    "Title says 'folate-rich': a nutrition claim the review flagged on other titles.",
-    "Removed from the live Meal Prep on 2026-10-05 (adult recipe)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "The title still says 'Folate-Rich', a nutrition claim. Changing it needs a URL redirect.",
+    "Broth: check the label for gluten."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     9,
+     120
     ],
     "catalog_diet": [
      "dairy-free",
+     "egg-free",
+     "gluten-free",
      "nut-free",
      "vegetarian",
-     "vegan",
-     "egg-free"
+     "vegan"
     ],
     "ingredients": [
-     "1.5 cups red lentils",
+     "1.5 cups red lentils, rinsed",
      "4 cups fresh spinach",
-     "1 can (14 oz) diced tomatoes",
-     "6 cups vegetable broth",
-     "1 medium onion, diced",
+     "1 can (14 oz) no-salt-added diced tomatoes",
+     "6 cups no-salt-added vegetable broth or water (check the broth label for allergens and gluten)",
+     "1 medium onion, finely diced",
      "3 cloves garlic, minced",
-     "1 tsp cumin",
+     "1 tsp ground cumin",
      "2 tbsp olive oil",
      "2 tbsp lemon juice",
-     "to taste salt and pepper"
+     "to taste, adult portions only salt and pepper"
     ],
-    "storage": "Refrigerate promptly and use within 3–4 days. Freeze in portion-sized containers for up to 3 months. Thaw overnight in refrigerator and reheat on stovetop over medium heat.",
-    "summary": "Lentil and spinach soup with lemon.",
+    "storage": "Refrigerate within 2 hours and use within 3 to 4 days, or within 1 to 2 days for children under 2. Freeze in portions for up to 3 months. Reheat to 165°F (74°C), then cool before serving.",
+    "summary": "A thick red lentil and spinach soup with tomato and lemon. Blend it smooth for babies, or serve it as it is to the whole family.",
     "tips": [
-     "Make a double batch and freeze individual portions in freezer-safe containers for easy meals during busy weeks",
-     "The lemon juice is added at the end to preserve vitamin C content and bright flavor",
-     "If soup thickens too much when stored, add a splash of broth or water when reheating"
+     "Freeze the soup in small portions for quick lunches.",
+     "The soup thickens in the fridge; add a splash of water when reheating."
     ]
    }
   },
@@ -2603,17 +2640,18 @@
    "title": "Greek Yogurt Parfait with Berries and Almonds",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 48,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 12,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. As written: honey (not before 12 m) and sliced almonds (a choking risk under 4). From 48 m as written; from 12 m with almonds ground or left out.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: no honey, almonds finely ground, berries flattened or quartered under 4, chia soaked. Fine from 12 m.",
    "allergens": {
     "milk": [
      "Greek yogurt"
     ],
     "tree_nuts": [
-     "sliced almonds"
+     "finely ground almonds"
     ]
    },
    "catalog_allergens": [
@@ -2622,15 +2660,18 @@
    ],
    "tags": {
     "stage": [
+     "1-2y",
+     "2-3y",
      "3-5y"
     ],
     "meal": [
      "breakfast",
      "snack"
     ],
-    "goal": [],
+    "goal": [
+     "protein"
+    ],
     "practical": [
-     "under-15-min",
      "no-cook"
     ],
     "free_from": [
@@ -2641,39 +2682,41 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
     "big-kid-breakfasts"
    ],
+   "collection_reasons": {
+    "big-kid-breakfasts": "Quick no-cook breakfast"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions morning nausea.",
-    "Gluten-free relies on the certified gluten-free granola it names."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "Gluten-free relies on the certified gluten-free oats it names. A nut-free version is in the tips."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     12,
+     120
     ],
     "catalog_diet": [
+     "egg-free",
      "gluten-free",
      "vegetarian"
     ],
     "ingredients": [
-     "2 cups plain pasteurized Greek yogurt",
+     "2 cups plain pasteurized whole milk Greek yogurt",
      "1 cup fresh blueberries",
-     "1 cup fresh strawberries, sliced",
-     "1/4 cup sliced almonds",
-     "2 tbsp honey",
-     "2 tbsp chia seeds",
-     "1/2 cup certified gluten-free granola, label-checked for allergens"
+     "1 cup fresh strawberries, hulled",
+     "1 small ripe banana",
+     "2 tbsp finely ground almonds (almond flour); only if your child already eats tree nuts",
+     "1/4 cup certified gluten-free rolled oats, blended to a fine crumb",
+     "1 tbsp chia seeds"
     ],
-    "storage": "Best consumed fresh. Can refrigerate assembled parfait (without granola) for up to 4 hours. Add granola just before eating to prevent sogginess. Store components separately for up to 3 days.",
-    "summary": "Greek yogurt layered with berries, almonds, chia seeds, honey, and granola.",
+    "storage": "Best eaten fresh. Keep the yogurt, fruit and crumb in separate containers in the fridge for up to 2 days and layer just before serving.",
+    "summary": "Thick yogurt layered with soft berries and a fine almond-oat crumb. No honey and no whole nuts, so it suits toddlers as well as older children.",
     "tips": [
-     "Prep all ingredients the night before and store separately - assemble in the morning for fresh texture",
-     "Choose full-fat Greek yogurt for better absorption of fat-soluble vitamins",
-     "If experiencing morning nausea, keep parfait cold and eat slowly in small spoonfuls"
+     "For a nut-free version, for example for daycare, leave out the almonds; the oat crumb works well on its own.",
+     "Do not add honey or syrup for children under 2. Never give honey to babies under 12 months."
     ]
    }
   },
@@ -2683,15 +2726,17 @@
    "title": "Lentil and Vegetable Curry with Coconut Milk",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 12,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 9,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Soft curry, but salt and 2 tbsp curry powder. From 12 m with the child's portion taken before salt.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: milder curry powder, mashed for 9-12 m, salt only for adults. Fine from 9 m.",
    "allergens": {},
    "catalog_allergens": [],
    "tags": {
     "stage": [
+     "9-12m",
      "1-2y",
      "2-3y",
      "3-5y"
@@ -2722,51 +2767,53 @@
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
     "freezer-dinners",
-    "family-dinners"
+    "batch-and-freeze-for-babies"
    ],
+   "collection_reasons": {
+    "freezer-dinners": "Freezes 3 months",
+    "batch-and-freeze-for-babies": "Mashed portions freeze for 9-12 m"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip says 'if sensitive to spices during pregnancy'.",
-    "Coconut milk: say 'contains coconut'.",
-    "Removed from the live Meal Prep on 2026-10-05 (adult recipe)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "Coconut milk: say 'contains coconut'."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     9,
+     120
     ],
     "catalog_diet": [
      "dairy-free",
+     "egg-free",
      "gluten-free",
      "nut-free",
      "vegetarian",
-     "vegan",
-     "egg-free"
+     "vegan"
     ],
     "ingredients": [
      "1.5 cups red lentils",
      "1 can (14 oz) coconut milk",
-     "2 cups cauliflower florets",
-     "1 large sweet potato, cubed",
-     "1 can (14 oz) diced tomatoes",
-     "2 cups certified gluten-free, no-salt-added vegetable broth",
-     "1 medium onion, diced",
-     "4 garlic cloves, minced",
-     "2 tbsp curry powder",
-     "1 tsp turmeric",
+     "2 cups cauliflower florets, cut small",
+     "1 large sweet potato, peeled and cut into 1/2-inch cubes",
+     "1 can (14 oz) no-salt-added diced tomatoes",
+     "2 cups certified gluten-free, no-salt-added vegetable broth (check the label)",
+     "1 medium onion, finely diced",
+     "3 garlic cloves, minced",
+     "2 tsp mild curry powder",
+     "1/2 tsp ground turmeric",
      "2 tbsp olive oil",
-     "2 cups fresh spinach",
-     "to taste salt and pepper"
+     "2 cups fresh spinach, chopped",
+     "to taste, adult portions only salt",
+     "to serve cooked rice"
     ],
-    "storage": "Refrigerate within 2 hours in shallow containers and use within 3–4 days. Freeze up to 3 months. Reheat leftovers to 165°F.",
-    "summary": "A warming one-pot curry with red lentils, coconut milk, vegetables, spinach, and spices.",
+    "storage": "Refrigerate within 2 hours and use within 3 to 4 days, or within 1 to 2 days for children under 2. Freeze for up to 3 months. Reheat to 165°F (74°C), then cool before serving.",
+    "summary": "A mild one-pot curry of red lentils, sweet potato, cauliflower and spinach in coconut milk. Mash it for babies and serve it over rice for everyone else.",
     "tips": [
-     "Adjust curry powder to taste - use just 1 tablespoon if sensitive to spices during pregnancy",
-     "This freezes beautifully in portion-sized containers for quick future meals",
-     "The coconut milk adds creaminess and healthy fats that help absorb fat-soluble vitamins"
+     "This freezes well in portions for quick dinners.",
+     "For older children who like more spice, add extra curry powder to the adults' portion after taking out the child's."
     ]
    }
   },
@@ -2776,11 +2823,12 @@
    "title": "Mediterranean Chicken and Chickpea Salad",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 36,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 12,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. As written: whole chickpeas, halved (not quartered) cherry tomatoes, halved olives, raw onion, salad leaves, salt. Choking risks under 3. From 36 m as written.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: chickpeas flattened, tomatoes quartered, plain chicken shredded, no raw onion or leaves under 2. Fine from 12 m.",
    "allergens": {
     "milk": [
      "feta"
@@ -2791,6 +2839,8 @@
    ],
    "tags": {
     "stage": [
+     "1-2y",
+     "2-3y",
      "3-5y"
     ],
     "meal": [
@@ -2808,48 +2858,50 @@
      "nut-free",
      "gluten-free"
     ],
-    "occasion": [],
+    "occasion": [
+     "back-to-school"
+    ],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
     "lunchbox-and-daycare"
    ],
+   "collection_reasons": {
+    "lunchbox-and-daycare": "Cold, nut-free, tip says pack with an ice pack"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions pregnancy fatigue.",
-    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     12,
+     120
     ],
     "catalog_diet": [
+     "egg-free",
      "gluten-free",
-     "nut-free",
-     "egg-free"
+     "nut-free"
     ],
     "ingredients": [
-     "2 cups fully cooked rotisserie chicken, reheated to 165°F and shredded",
-     "1.5 cups chickpeas, cooked or canned",
-     "1 large cucumber, diced",
-     "2 cups cherry tomatoes, halved",
-     "1/4 cup red onion, thinly sliced",
-     "1/2 cup kalamata olives, halved",
+     "2 cups plain cooked chicken, finely shredded (rotisserie chicken is salty; use plain-cooked chicken for young children)",
+     "1.5 cups no-salt-added chickpeas, cooked or canned and rinsed",
+     "1 large cucumber, peeled and seeded",
+     "2 cups cherry tomatoes",
      "1/2 cup pasteurized feta cheese, crumbled",
      "1/4 cup extra virgin olive oil",
      "3 tbsp fresh lemon juice",
      "1 tsp dried oregano",
-     "4 cups mixed greens",
-     "to taste salt and pepper"
+     "1/2 cup, optional pitted kalamata olives (for children over 2 and adults)",
+     "1/4 cup, adults only red onion, finely chopped",
+     "4 cups, adults only mixed salad greens",
+     "to taste, adult portions only salt and pepper"
     ],
-    "storage": "Refrigerate chicken salad mixture in airtight container for up to 3 days. Store dressing and greens separately. Add greens and feta just before eating for best texture and freshness.",
-    "summary": "Chicken, chickpeas, greens, and feta with a lemon dressing.",
+    "storage": "Refrigerate the mixed salad, without greens or feta, for up to 3 days, or 1 to 2 days for children under 2. Keep the dressing separate and add the greens and feta just before eating.",
+    "summary": "Shredded chicken, chickpeas, cucumber and tomato with feta and a lemon dressing. The child's portion is cut small, with every round food flattened or quartered.",
     "tips": [
-     "Use pre-cooked rotisserie chicken to save time and energy - perfect for pregnancy fatigue",
-     "Pack salad without greens in a container for travel-friendly lunches at work",
-     "This salad actually improves in flavor after a few hours as ingredients marinate together"
+     "Pack the child's portion in a lunchbox with an ice pack.",
+     "If your child finds feta salty, swap it for a milder cheese such as mozzarella."
     ]
    }
   },
@@ -2859,27 +2911,25 @@
    "title": "Overnight Oats with Chia and Berries",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 48,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 12,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Sliced almond topping (a choking risk under 4) and honey or maple. From 48 m as written; from 12 m without the almonds.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: no honey or syrup (banana only), no almonds, berries flattened or quartered under 4. Fine from 12 m.",
    "allergens": {
     "milk": [
-     "milk",
+     "whole milk",
      "Greek yogurt"
-    ],
-    "tree_nuts": [
-     "sliced almonds",
-     "almond milk (option)"
     ]
    },
    "catalog_allergens": [
-    "milk",
-    "tree_nuts"
+    "milk"
    ],
    "tags": {
     "stage": [
+     "1-2y",
+     "2-3y",
      "3-5y"
     ],
     "meal": [
@@ -2894,47 +2944,50 @@
     ],
     "free_from": [
      "egg-free",
+     "nut-free",
      "vegetarian"
     ],
     "occasion": [],
     "texture": "bowl"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
     "toddler-breakfasts",
     "big-kid-breakfasts"
    ],
+   "collection_reasons": {
+    "toddler-breakfasts": "Made the night before",
+    "big-kid-breakfasts": "Grab-and-go jars"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions nausea.",
-    "3 tbsp honey or maple: added sugar, so never Everyday Treats.",
-    "Regular oats: not gluten-free (catalog agrees)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "Regular oats: not gluten-free."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     12,
+     120
     ],
     "catalog_diet": [
+     "egg-free",
+     "nut-free",
      "vegetarian"
     ],
     "ingredients": [
      "2 cups rolled oats",
-     "2 cups pasteurized milk or pasteurized unsweetened almond milk",
-     "1/2 cup plain pasteurized Greek yogurt",
-     "4 tbsp chia seeds",
-     "3 tbsp honey or maple syrup",
-     "1 tsp vanilla extract",
-     "1.5 cups fresh or frozen berries",
-     "1/4 cup sliced almonds",
-     "1/2 tsp ground cinnamon"
+     "2 cups pasteurized whole milk",
+     "1/2 cup plain pasteurized whole milk Greek yogurt",
+     "3 tbsp chia seeds",
+     "1 large ripe banana",
+     "1 tsp vanilla extract (optional)",
+     "1/2 tsp ground cinnamon",
+     "1.5 cups fresh or frozen berries"
     ],
-    "storage": "Refrigerate promptly in sealed containers and use within 3–4 days. Not suitable for freezing due to texture changes. Add fresh toppings like almonds just before eating for best texture.",
-    "summary": "A no-cook breakfast of oats, chia seeds, berries, and pasteurized yogurt chilled until creamy.",
+    "storage": "Refrigerate in sealed jars and use within 3 days, or within 1 to 2 days for children under 2. Not suitable for freezing.",
+    "summary": "Oats, chia and berries soaked overnight in milk and yogurt, sweetened only with banana. Ready in the fridge for busy mornings.",
     "tips": [
-     "Prep 4-5 jars on Sunday evening for grab-and-go breakfasts all week",
-     "Can be eaten straight from the fridge when nausea makes hot food unappealing",
-     "Customize with different fruits like sliced banana, diced apple, or mango for variety throughout the week"
+     "Make 4 jars on Sunday for the first part of the week.",
+     "This recipe has no nuts, so it suits a nut-free daycare; check the label of anything you add."
     ]
    }
   },
@@ -2944,15 +2997,17 @@
    "title": "Quinoa and Black Bean Burrito Bowl",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 24,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 12,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Whole beans and corn, halved cherry tomatoes, raw onion, salt. From 24 m as written; from 12 m with beans mashed, tomatoes quartered, no salt.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: beans and corn mashed under 2, beans flattened after, tomatoes quartered, salt only for adults. Fine from 12 m.",
    "allergens": {},
    "catalog_allergens": [],
    "tags": {
     "stage": [
+     "1-2y",
      "2-3y",
      "3-5y"
     ],
@@ -2983,47 +3038,43 @@
    },
    "collections": [],
    "collection_reasons": {},
-   "after_rewrite": [
-    "lunchbox-and-daycare",
-    "family-dinners"
-   ],
+   "after_rewrite": [],
    "flags": [
-    "Same no-age adult set as #28-37 (no pregnancy words in this one, but no child steps).",
-    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended.",
+    "Not placed: fits Lunchbox & Daycare and Family Dinners, both full at 12. A swap candidate."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     12,
+     120
     ],
     "catalog_diet": [
      "dairy-free",
+     "egg-free",
      "gluten-free",
      "nut-free",
      "vegetarian",
-     "vegan",
-     "egg-free"
+     "vegan"
     ],
     "ingredients": [
-     "1 cup quinoa, uncooked",
+     "1 cup quinoa",
      "2 cups water",
-     "2 cups black beans, cooked or canned",
-     "2 bell peppers, diced",
+     "2 cups no-salt-added black beans, cooked or canned and rinsed",
+     "2 bell peppers, finely diced",
      "1 cup corn kernels, fresh or frozen",
-     "1 cup cherry tomatoes, halved",
-     "1/2 red onion, diced",
+     "1 cup cherry tomatoes",
+     "1/2 red onion, finely diced",
      "2 limes",
-     "1/4 cup fresh cilantro, chopped",
-     "1 tsp cumin",
+     "1/4 cup fresh cilantro, finely chopped (optional)",
+     "1 tsp ground cumin",
      "2 tbsp olive oil",
-     "to taste salt and pepper"
+     "to taste, adult portions only salt and pepper"
     ],
-    "storage": "Refrigerate in airtight container for up to 4 days. Can be eaten cold or reheated in microwave for 1-2 minutes until warmed through. Store lime wedges separately and add fresh cilantro when serving.",
-    "summary": "A Mexican-inspired bowl of quinoa, black beans, peppers, corn, tomatoes, lime, and cilantro.",
+    "storage": "Refrigerate within 2 hours and use within 3 to 4 days, or within 1 to 2 days for children under 2. Eat cold, or reheat to 165°F (74°C) and cool before serving.",
+    "summary": "Quinoa, black beans, soft peppers, corn and tomato with lime. The child's portion is mashed or flattened and taken out before the salt goes in.",
     "tips": [
-     "Batch cook quinoa and beans on Sunday for quick weekday assembly throughout the week",
-     "Add optional toppings like diced avocado, pumpkin seeds, or a dollop of plant-based yogurt for extra flavor",
-     "This bowl tastes great cold, making it perfect for meal prep lunches"
+     "Cook the quinoa and beans on Sunday for quick bowls through the week.",
+     "Pack the child's portion cold in a lunchbox with an ice pack."
     ]
    }
   },
@@ -3033,11 +3084,12 @@
    "title": "Salmon and Sweet Potato Bowl with Avocado",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 24,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 9,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Salted sweet potato and salmon, raw massaged kale, no child steps or bone check. From 24 m as written; from 12 m with salmon flaked and checked for bones, kale chopped fine, no salt.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: baked salmon checked for bones, mashed or soft pieces for 9-12 m, no kale under 2, no salt in the child portion. Fine from 9 m.",
    "allergens": {
     "fish": [
      "salmon"
@@ -3048,6 +3100,8 @@
    ],
    "tags": {
     "stage": [
+     "9-12m",
+     "1-2y",
      "2-3y",
      "3-5y"
     ],
@@ -3059,7 +3113,6 @@
      "protein"
     ],
     "practical": [
-     "make-ahead",
      "whole-family"
     ],
     "free_from": [
@@ -3069,45 +3122,45 @@
      "gluten-free"
     ],
     "occasion": [],
-    "texture": "bowl"
+    "texture": "finger-food"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
-    "family-dinners"
+   "collections": [
+    "first-finger-foods"
    ],
+   "collection_reasons": {
+    "first-finger-foods": "Soft salmon flakes, sweet potato and avocado pieces from 9 m"
+   },
+   "after_rewrite": [],
    "flags": [
-    "Same adult set as #28-37 (mercury tip suggests the pregnancy set).",
-    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     9,
+     120
     ],
     "catalog_diet": [
      "dairy-free",
+     "egg-free",
      "gluten-free",
-     "nut-free",
-     "egg-free"
+     "nut-free"
     ],
     "ingredients": [
-     "12 oz wild salmon fillets",
-     "2 medium sweet potatoes, cubed",
-     "1 large avocado, sliced",
-     "2 cups baby kale",
+     "12 oz salmon fillets",
+     "2 medium sweet potatoes",
+     "1 large ripe avocado",
      "3 tbsp olive oil",
      "1 lemon",
      "1 tsp garlic powder",
-     "1/2 tsp paprika",
-     "to taste salt and pepper"
+     "1/2 tsp mild paprika",
+     "2 cups, for older children and adults baby kale or baby spinach",
+     "to taste, adult portions only salt and pepper"
     ],
-    "storage": "Refrigerate components separately in airtight containers for up to 3 days. Store avocado with lemon juice to prevent browning. Assemble fresh when ready to eat. Reheat salmon and sweet potatoes in oven at 350°F for 8-10 minutes.",
-    "summary": "Salmon, sweet potato, and avocado served with greens.",
+    "storage": "Refrigerate the components separately within 2 hours and use within 2 days, or within 1 to 2 days for children under 2. Keep avocado with lemon juice. Reheat the salmon and sweet potato until hot, then cool before serving.",
+    "summary": "Baked salmon, soft roasted sweet potato and avocado. Flake and mash it for babies, or serve soft pieces for toddlers to pick up.",
     "tips": [
-     "Choose salmon, a lower-mercury fish option.",
-     "Cook extra salmon to flake into salads or grain bowls throughout the week",
-     "If salmon skin sticks to pan, it's not ready to flip - give it another minute"
+     "Salmon is a lower-mercury fish and a good choice for young children.",
+     "Bake extra salmon and flake it into pasta or rice the next day."
     ]
    }
   },
@@ -3117,18 +3170,19 @@
    "title": "Spinach and Feta Egg Muffins",
    "free_sample": false,
    "review_gate": "passed",
-   "written_for": "adults (pregnancy set); needs a child rewrite",
-   "age_min_months": 12,
+   "written_for": "children",
+   "rewritten": "2026-10-05, from a pregnancy recipe",
+   "age_min_months": 9,
    "age_max_months": 120,
-   "age_source": "judged: the catalog has no age",
-   "age_note": "NO AGE IN CATALOG. Soft baked egg, tomatoes quartered, little salt: fine from 12 m cut into strips.",
+   "age_source": "catalog, checked",
+   "age_note": "Rewritten: finger-length strips for 9-12 m, tomatoes finely diced, no added salt, less feta for babies. Fine from 9 m.",
    "allergens": {
     "eggs": [
      "eggs"
     ],
     "milk": [
      "feta",
-     "milk"
+     "whole milk"
     ]
    },
    "catalog_allergens": [
@@ -3137,6 +3191,7 @@
    ],
    "tags": {
     "stage": [
+     "9-12m",
      "1-2y",
      "2-3y",
      "3-5y"
@@ -3162,20 +3217,24 @@
     "occasion": [],
     "texture": "finger-food"
    },
-   "collections": [],
-   "collection_reasons": {},
-   "after_rewrite": [
+   "collections": [
+    "first-breakfasts",
     "toddler-breakfasts",
     "big-kid-breakfasts"
    ],
+   "collection_reasons": {
+    "first-breakfasts": "Egg strips for 9-12 m",
+    "toddler-breakfasts": "Freezes for quick mornings",
+    "big-kid-breakfasts": "Whole muffins for older children"
+   },
+   "after_rewrite": [],
    "flags": [
-    "WRITTEN FOR PREGNANCY: tip says 'when morning sickness makes hot foods unappealing'. Light rewrite only: replace that tip and add a cutting step for 12 m.",
-    "Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written)."
+    "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. A human or feeding-expert read is still recommended."
    ],
    "source": {
     "catalog_age": [
-     0,
-     0
+     9,
+     120
     ],
     "catalog_diet": [
      "gluten-free",
@@ -3184,21 +3243,19 @@
     ],
     "ingredients": [
      "10 large eggs",
-     "2 cups fresh spinach, chopped",
-     "1/2 cup pasteurized feta cheese, crumbled",
-     "1 cup cherry tomatoes, quartered",
-     "1/4 cup milk",
+     "2 cups fresh spinach, finely chopped",
+     "1/2 cup pasteurized feta cheese, crumbled (for babies under 12 months, use 1/4 cup or a milder, lower-salt cheese)",
+     "1 cup cherry tomatoes, finely diced",
+     "1/4 cup whole milk",
      "1/2 tsp onion powder",
      "1/2 tsp garlic powder",
-     "to taste salt and pepper",
-     "for muffin tin olive oil cooking spray"
+     "for the muffin tin olive oil cooking spray"
     ],
-    "storage": "Refrigerate promptly in an airtight container and use within 3–4 days. Discard if left at room temperature for over 2 hours. Freeze individually wrapped in plastic wrap then in freezer bag for up to 2 months. Thaw overnight in refrigerator or microwave for 30-45 seconds until warmed through.",
-    "summary": "Portable baked egg muffins with spinach, tomatoes, and feta.",
+    "storage": "Refrigerate within 2 hours in an airtight container and use within 3 to 4 days, or within 1 to 2 days for children under 2. Freeze individually wrapped for up to 2 months. Thaw overnight in the fridge, reheat until hot, then cool before serving.",
+    "summary": "Baked egg muffins with spinach, tomato and feta, cut into strips for babies and halves for toddlers. They freeze well for quick breakfasts.",
     "tips": [
-     "Make a double batch on Sunday and freeze individually wrapped in plastic wrap then placed in a freezer bag for grab-and-go breakfasts",
-     "These are perfect for eating cold when morning sickness makes hot foods unappealing",
-     "Customize with your favorite vegetables like diced bell peppers, mushrooms, or zucchini"
+     "Make a double batch at the weekend and freeze for quick breakfasts.",
+     "Finely chopped zucchini or mushrooms also work; cook them first so they are soft."
     ]
    }
   },
@@ -3209,6 +3266,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3293,6 +3351,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3385,6 +3444,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3469,6 +3529,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3551,6 +3612,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3652,6 +3714,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3745,6 +3808,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3830,6 +3894,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -3919,6 +3984,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -4004,6 +4070,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 120,
    "age_source": "catalog, checked",
@@ -4094,6 +4161,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -4172,6 +4240,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -4258,6 +4327,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 36,
    "age_source": "catalog, checked",
@@ -4349,6 +4419,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -4435,6 +4506,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -4517,6 +4589,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -4597,6 +4670,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 36,
    "age_source": "catalog, checked",
@@ -4675,6 +4749,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 36,
    "age_source": "catalog, checked",
@@ -4758,6 +4833,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -4855,6 +4931,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 36,
    "age_source": "catalog, checked",
@@ -4938,6 +5015,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5010,6 +5088,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5105,6 +5184,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 18,
    "age_max_months": 60,
    "age_source": "catalog, checked",
@@ -5190,6 +5270,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5275,6 +5356,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5358,6 +5440,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5443,6 +5526,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5529,6 +5613,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 24,
    "age_max_months": 72,
    "age_source": "catalog, checked",
@@ -5616,6 +5701,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 24,
    "age_max_months": 60,
    "age_source": "catalog, checked",
@@ -5699,6 +5785,7 @@
    "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 12,
    "age_max_months": 48,
    "age_source": "catalog, checked",
@@ -5782,6 +5869,7 @@
    "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 6,
    "age_max_months": 24,
    "age_source": "catalog, checked",
@@ -5829,7 +5917,8 @@
    "collection_reasons": {},
    "after_rewrite": [],
    "flags": [
-    "Free sample: tagged, kept out of paid collections."
+    "Free sample: tagged, kept out of paid collections.",
+    "Re-reviewed 2026-10-05 against the live text; the first review used an older copy."
    ],
    "source": {
     "catalog_age": [
@@ -5850,7 +5939,7 @@
      "1/4 cup mild cheddar cheese, shredded"
     ],
     "storage": "Store in an airtight container in the fridge for up to 3 days. Freeze with parchment paper between layers for up to 2 months.",
-    "summary": "These protein-packed egg strips are soft, easy to hold, and a perfect way to introduce leafy greens. They store beautifully, making them a breakfast lifesaver for busy mornings.",
+    "summary": "Soft-baked egg and spinach frittata, cooled and cut into strips your child can hold.",
     "tips": [
      "Steam the sweet potato in the microwave for 5 minutes for a quick prep hack."
     ]
@@ -5861,16 +5950,18 @@
    "slug": "soft-baked-blueberry-and-oat-bars",
    "title": "Soft-Baked Blueberry & Oat Bars",
    "free_sample": true,
-   "review_gate": "rejected",
+   "review_gate": "passed",
    "written_for": "children",
-   "age_min_months": 9,
+   "rewritten": null,
+   "age_min_months": 6,
    "age_max_months": 48,
-   "age_source": "changed from the catalog (6–48 m)",
-   "age_note": "UNRESOLVED. Catalog says 6 m, and the review gate rejects this recipe over that age. Firm centre, whole oats and 16 squares read as 9 m+ to me; an expert should decide.",
+   "age_source": "catalog, checked",
+   "age_note": "Owner confirmed on 2026-10-05 that the recipe has been reviewed and is fine, including the 6-month minimum. Blueberries are flattened or quartered.",
    "allergens": {},
    "catalog_allergens": [],
    "tags": {
     "stage": [
+     "6-8m",
      "9-12m",
      "1-2y",
      "2-3y",
@@ -5904,7 +5995,7 @@
    "after_rewrite": [],
    "flags": [
     "Free sample: tagged, kept out of paid collections.",
-    "REJECTED by the review gate (minimum age and shape). Published as a free recipe today.",
+    "Owner approval recorded in the review log on 2026-10-05; the review gate now passes.",
     "Coconut oil: say 'contains coconut'.",
     "Catalog diet tags miss vegan."
    ],
@@ -5922,12 +6013,12 @@
     "ingredients": [
      "1.5 cups rolled oats",
      "2 medium ripe bananas, mashed",
-     "1/2 cup blueberries (fresh or frozen)",
+     "1/2 cup blueberries (fresh, or frozen and thawed), flattened or quartered lengthwise",
      "2 tbsp coconut oil, melted",
      "1/2 tsp vanilla extract"
     ],
-    "storage": "Store in airtight container at room temperature for 2 days, fridge for 5 days, or freeze for 3 months.",
-    "summary": "Ideally textured for babies transitioning to solids, these bars hold together but melt in the mouth. They are naturally sweetened with bananas and blueberries, perfect for snacks or breakfast.",
+    "storage": "Refrigerate within 2 hours of baking and use within 3 to 4 days, or freeze for up to 2 months.",
+    "summary": "Soft oat bars sweetened with banana and blueberries. Check they are soft enough for your child and cut them to a size your child can manage.",
     "tips": [
      "Use very ripe bananas (brown spots are good!) for the best sweetness and binding texture."
     ]
@@ -5940,16 +6031,17 @@
    "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
+   "rewritten": null,
    "age_min_months": 9,
    "age_max_months": 60,
    "age_source": "catalog, checked",
-   "age_note": "Cut into strips, bones checked; peas only smashed in a tip. Fine from 9 m if peas are smashed.",
+   "age_note": "Flattening the peas is step 4 of the live recipe; bones checked; strips for younger babies. Fine from 9 m.",
    "allergens": {
     "fish": [
      "salmon"
     ],
     "wheat": [
-     "flour for dusting"
+     "wheat flour (for dusting)"
     ]
    },
    "catalog_allergens": [
@@ -5986,7 +6078,7 @@
    "after_rewrite": [],
    "flags": [
     "Free sample: tagged, kept out of paid collections.",
-    "Pea smashing is only a tip; for 9 m it should be a step."
+    "Re-reviewed 2026-10-05 against the live text: the pea step is already there (the first review used an older copy)."
    ],
    "source": {
     "catalog_age": [
@@ -6001,14 +6093,14 @@
     "ingredients": [
      "8 oz fresh salmon fillet, boneless",
      "2 medium potatoes, peeled and cubed",
-     "1/4 cup frozen peas, thawed",
+     "1/4 cup frozen peas, cooked until very soft",
      "1 tsp lemon juice",
-     "2 tbsp flour (for dusting)"
+     "2 tbsp wheat flour (for dusting)"
     ],
     "storage": "Refrigerate for up to 2 days. Freeze cooked patties for up to 1 month.",
-    "summary": "A gentle introduction to fish, packed with Omega-3s. The potato base keeps these cakes moist and fluffy, while the peas add a pop of sweetness and color.",
+    "summary": "Soft salmon and pea fish cakes, cooked through and served in pieces your child can manage.",
     "tips": [
-     "Smash the peas slightly with a fork before mixing if your baby is still learning to chew round textures."
+     "Flatten every pea before mixing: whole peas are a choking risk for babies and young toddlers."
     ]
    }
   }
@@ -6043,11 +6135,12 @@
     "mini-turkey-and-apple-meatloaf-muffins",
     "pumpkin-and-ricotta-gnocchi-pillows",
     "sesame-tofu-and-veggie-cubes",
-    "zucchini-and-feta-fritters"
+    "zucchini-and-feta-fritters",
+    "salmon-and-sweet-potato-bowl-with-avocado"
    ],
-   "count": 7,
-   "status": "short",
-   "needs": "1+ soft finger food for 9–12 months"
+   "count": 8,
+   "status": "ready",
+   "needs": null
   },
   {
    "slug": "iron-rich-first-foods",
@@ -6061,9 +6154,11 @@
     "zucchini-chickpea-mediterranean-pure",
     "slow-cooker-beef-and-vegetable-stew",
     "bean-and-veggie-burrito-bowl",
-    "mild-curried-red-lentil-cakes"
+    "mild-curried-red-lentil-cakes",
+    "baked-sweet-potato-with-black-beans-and-avocado",
+    "folate-rich-lentil-and-spinach-soup"
    ],
-   "count": 8,
+   "count": 10,
    "status": "ready",
    "needs": null
   },
@@ -6073,11 +6168,12 @@
    "live": false,
    "recipes": [
     "asian-pear-rice-congee-pure",
-    "banana-avocado-breakfast-pure-with-yogurt"
+    "banana-avocado-breakfast-pure-with-yogurt",
+    "spinach-and-feta-egg-muffins"
    ],
-   "count": 2,
+   "count": 3,
    "status": "short",
-   "needs": "6+ breakfasts for 6–12 months (soft pancakes, oat fingers, porridges). The free Frittata Fingers stay free"
+   "needs": "5+ breakfasts for 6–12 months (soft pancakes, oat fingers, porridges). The free Frittata Fingers stay free"
   },
   {
    "slug": "batch-and-freeze-for-babies",
@@ -6094,9 +6190,10 @@
     "silky-carrot-apple-starter-pure",
     "zucchini-chickpea-mediterranean-pure",
     "one-pot-chicken-and-vegetable-rice",
-    "slow-cooker-beef-and-vegetable-stew"
+    "slow-cooker-beef-and-vegetable-stew",
+    "lentil-and-vegetable-curry-with-coconut-milk"
    ],
-   "count": 11,
+   "count": 12,
    "status": "ready",
    "needs": null
   },
@@ -6105,14 +6202,16 @@
    "title": "Toddler Breakfasts",
    "live": false,
    "recipes": [
+    "overnight-oats-with-chia-and-berries",
+    "spinach-and-feta-egg-muffins",
     "apple-cinnamon-oat-toddler-porridge",
     "banana-peanut-butter-chia-pudding",
     "veggie-lentil-pancakes",
     "mango-lassi-chia-pudding-cups"
    ],
-   "count": 4,
+   "count": 6,
    "status": "short",
-   "needs": "4+ toddler breakfasts. Spinach and Feta Egg Muffins (#37) joins after a light rewrite"
+   "needs": "2+ toddler breakfasts (the Instagram waffle and pancake guides)"
   },
   {
    "slug": "meal-prep",
@@ -6201,11 +6300,14 @@
    "title": "Big-Kid Breakfasts",
    "live": false,
    "recipes": [
+    "greek-yogurt-parfait-with-berries-and-almonds",
+    "overnight-oats-with-chia-and-berries",
+    "spinach-and-feta-egg-muffins",
     "banana-peanut-butter-chia-pudding"
    ],
-   "count": 1,
+   "count": 4,
    "status": "short",
-   "needs": "7+ breakfasts for 2–4 years. #31, #34 and #37 can join after a rewrite"
+   "needs": "4+ breakfasts for 2–4 years"
   },
   {
    "slug": "freezer-dinners",
@@ -6217,11 +6319,13 @@
     "slow-cooker-beef-and-vegetable-stew",
     "mediterranean-baked-chicken-with-quinoa",
     "veggie-packed-lasagna",
+    "folate-rich-lentil-and-spinach-soup",
+    "lentil-and-vegetable-curry-with-coconut-milk",
     "soft-chicken-veggie-rice-bowl"
    ],
-   "count": 6,
-   "status": "short",
-   "needs": "2+ freezer dinners. #30 and #32 can join after a rewrite"
+   "count": 8,
+   "status": "ready",
+   "needs": null
   },
   {
    "slug": "lunchbox-and-daycare",
@@ -6230,6 +6334,7 @@
    "recipes": [
     "avocado-and-black-bean-quesadilla-strips",
     "zucchini-and-feta-fritters",
+    "mediterranean-chicken-and-chickpea-salad",
     "baked-samosa-puffs",
     "mini-baked-chicken-nuggets",
     "onigiri-rice-triangles",
@@ -6240,7 +6345,7 @@
     "mini-bean-and-cheese-burritos",
     "creamy-hummus-yogurt-veggie-dippers"
    ],
-   "count": 11,
+   "count": 12,
    "status": "ready",
    "needs": null
   },
@@ -6281,9 +6386,10 @@
     "bean-and-veggie-burrito-bowl",
     "mediterranean-baked-chicken-with-quinoa",
     "veggie-packed-lasagna",
+    "chicken-and-vegetable-stir-fry-with-brown-rice",
     "turkey-veggie-mini-meatballs-with-pasta"
    ],
-   "count": 11,
+   "count": 12,
    "status": "ready",
    "needs": null
   },
