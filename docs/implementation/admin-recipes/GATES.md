@@ -8,19 +8,19 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- access
   EXPECT: ADMIN_GATE_ACCESS_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: local DB 11 (43) + 10 (21) PASS via test-admin-db.mjs; guard denies aal1/anon/stale; browser MFA/access specs written (admin-access.spec.ts) but not run against live server — gate stays unmet
 
 - [ ] R2: Confirmed staff assignment, owner protection and immediate revocation work
   CHECK: npm run test:admin:gate -- team
   EXPECT: ADMIN_GATE_TEAM_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: local DB assign/revoke/replay + owner-protect PASS; Team UI built (AdminTeam + actions); browser lookup→assign→revoke spec written but fixtures are stubs — gate stays unmet
 
 - [ ] R3: Library counts, filters, readiness and dependency failures match fixtures
   CHECK: npm run test:admin:gate -- reads
   EXPECT: ADMIN_GATE_READS_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: local DB 12 (26 tests: literal %/_/unicode/UUID, 25+2 pagination, views, usage) PASS; admin units 9/9; build renders /admin/recipes + [recipeId]; inspection browser spec written but not run — gate stays unmet
 
 - [ ] R4: Private draft edits preserve active public content and rights
   CHECK: npm run test:admin:gate -- revisions
@@ -56,7 +56,7 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- privacy
   EXPECT: ADMIN_GATE_PRIVACY_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: privacy units 2/2 (segment-safe prefix, returnTo context); AnalyticsProvider gates identify/page_view on admin, proxy sets private/no-store + noindex, AdminPrivacyBoundary isolation; SDK payload browser spec written but not run with live sink — gate stays unmet
 
 - [ ] R10: Full keyboard workflow and narrow layouts retain recoverable state
   CHECK: npm run test:admin:gate -- workflow

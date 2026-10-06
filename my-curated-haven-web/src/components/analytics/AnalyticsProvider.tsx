@@ -6,9 +6,15 @@ import { createClient } from "@/lib/supabase/browser";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getAnalyticsProvider } from "@/lib/analytics/provider";
 import { isPostHogActive, posthog, syncSessionRecording } from "@/lib/analytics/posthog";
+import { isAdminNavigationContext, isAdminPath } from "@/lib/analytics/private-paths";
 import { pathToCanonicalRouteKey, toDeviceClass } from "@/lib/analytics/schema";
 
 function identifyUser(user: { id: string; email?: string }) {
+  try {
+    if (typeof window !== "undefined" && isAdminNavigationContext(window.location.href)) return;
+  } catch {
+    return;
+  }
   if (posthog.get_distinct_id() === user.id) return;
   posthog.identify(user.id, user.email ? { email: user.email } : undefined);
 }
@@ -47,9 +53,15 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
   // redirects without telling this tab. Re-read the session on every page.
   useEffect(() => {
     if (!isPostHogActive()) return;
+    if (pathname && isAdminPath(pathname)) return;
     void createClient()
       .auth.getSession()
       .then(({ data: { session } }) => {
+        try {
+          if (typeof window !== "undefined" && isAdminNavigationContext(window.location.href)) return;
+        } catch {
+          return;
+        }
         if (session?.user) identifyUser(session.user);
       })
       .catch(() => {
@@ -60,6 +72,7 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
   // PostHog records its own $pageview; page_view carries the canonical route key.
   useEffect(() => {
     if (!pathname) return;
+    if (isAdminPath(pathname)) return;
     syncSessionRecording(pathname);
 
     const routeKey = pathToCanonicalRouteKey(pathname);

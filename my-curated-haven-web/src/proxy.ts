@@ -71,6 +71,7 @@ export async function proxy(request: NextRequest) {
   const isSignInRoute = pathname === "/sign-in";
   const isCheckoutReturn = pathname === "/checkout/return";
   const isAuthCallback = pathname === "/auth/callback";
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
 
   if ((isAccountRoute || isCheckoutReturn) && !user) {
     const returnTarget = pathname + (request.nextUrl.search || "");
@@ -86,8 +87,12 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  if (isAccountRoute || isSignInRoute || isCheckoutReturn || isAuthCallback) {
+  if (isAccountRoute || isSignInRoute || isCheckoutReturn || isAuthCallback || isAdminRoute) {
     supabaseResponse.headers.set("Cache-Control", "no-store, private");
+  }
+
+  if (isAdminRoute) {
+    supabaseResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
 
   return supabaseResponse;

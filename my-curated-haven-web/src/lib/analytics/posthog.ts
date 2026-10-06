@@ -1,6 +1,6 @@
 import posthog from "posthog-js";
 import { remoteAnalyticsAllowed } from "./environment";
-import { isPrivatePath } from "./private-paths";
+import { isAdminPath, isPrivatePath } from "./private-paths";
 
 let initialized = false;
 
@@ -41,10 +41,23 @@ export function isPostHogActive(): boolean {
 
 export function syncSessionRecording(pathname: string): void {
   if (!initialized) return;
-  if (isPrivatePath(pathname)) {
+  if (isPrivatePath(pathname) || isAdminPath(pathname)) {
     posthog.stopSessionRecording();
   } else {
     posthog.startSessionRecording();
+  }
+}
+
+export function syncAdminPrivacy(pathname: string): void {
+  if (typeof window === "undefined") return;
+  if (!isAdminPath(pathname)) return;
+  try {
+    if (initialized) {
+      posthog.stopSessionRecording();
+      posthog.opt_out_capturing();
+    }
+  } catch {
+    // Privacy must never break admin.
   }
 }
 
