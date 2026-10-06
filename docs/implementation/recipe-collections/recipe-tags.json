@@ -1,0 +1,6360 @@
+{
+ "$comment": "Recipe tags and collection placement for the 70 catalog recipes, reviewed one recipe at a time on 2026-10-05. Readable copy: RECIPE-TAGS.md. Vocabulary and rules: COLLECTIONS.md / collections.seed.json. Check with: python3 check_recipe_tags.py",
+ "version": 2,
+ "source": "Reviewed catalog data as applied to production (recipe-review fix-output, the free recipes, and the two later step edits in apply-six-recipe-image-followup.sql)",
+ "recipes": [
+  {
+   "n": 1,
+   "slug": "apple-prune-fiber-friendly-pure",
+   "title": "Apple Prune Fiber Friendly Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 24,
+   "age_source": "catalog, checked",
+   "age_note": "Smooth purée, no honey: fine from 6 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "snack",
+     "breakfast"
+    ],
+    "goal": [
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Two-fruit smooth purée, from 6 m",
+    "batch-and-freeze-for-babies": "Freezes 2 months in small portions"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     6,
+     24
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/4 cup dried prunes (pitted)",
+     "1/2 cup apple, peeled, cored, and chopped",
+     "3/4 cup water"
+    ],
+    "storage": "Refrigerate in a sealed container for up to 3 days. Freeze in small containers for up to 2 months.",
+    "summary": "A smooth apple and prune purée with no added sweetener.",
+    "tips": [
+     "Keep a small container of soaked, softened prunes in the fridge to speed up prep."
+    ]
+   }
+  },
+  {
+   "n": 2,
+   "slug": "asian-pear-rice-congee-pure",
+   "title": "Asian Pear Rice Congee Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 18,
+   "age_source": "catalog, checked",
+   "age_note": "Blended rice and pear, strained for 6-7 m: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "breakfast",
+     "dinner"
+    ],
+    "goal": [
+     "sick-days"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "first-breakfasts",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Simple rice and pear purée from 6 m",
+    "first-breakfasts": "Porridge purée for breakfast",
+    "batch-and-freeze-for-babies": "Freezes 1 month"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free; rice, pear and water are gluten-free."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     18
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 tablespoons short grain white rice, rinsed",
+     "1/2 cup ripe Asian pear, peeled, cored, and chopped",
+     "1 1/2 cups water"
+    ],
+    "storage": "Refrigerate promptly in shallow covered portions and use within 1–2 days; freeze up to 1 month. Discard food left at room temperature over 2 hours. Reheat leftovers to 165°F, then cool before serving.",
+    "summary": "This gentle Asian style rice porridge purée blends soft rice with sweet pear. Parents will like the simple ingredient list and how well it works for breakfast or a light dinner.",
+    "tips": [
+     "Prepare congee as part of family breakfast, then blend a portion for baby to reduce extra cooking.",
+     "Thin leftovers with a little warm water when reheating, since rice thickens in the fridge."
+    ]
+   }
+  },
+  {
+   "n": 3,
+   "slug": "banana-avocado-breakfast-pure-with-yogurt",
+   "title": "Banana Avocado Breakfast Purée with Yogurt",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 18,
+   "age_source": "catalog, checked",
+   "age_note": "Mashed and strained; yogurt fine from 6 m, recipe warns against cow's milk as a drink.",
+   "allergens": {
+    "milk": [
+     "whole milk yogurt"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "breakfast",
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "first-breakfasts"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Three-ingredient no-cook purée from 6 m",
+    "first-breakfasts": "Named as a breakfast purée"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     6,
+     18
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/2 medium ripe banana, peeled and sliced",
+     "1/4 medium ripe avocado, peeled and pitted",
+     "2 tablespoons plain, unsweetened, pasteurized whole milk yogurt",
+     "1–2 tablespoons breast milk or prepared formula for thinning (optional)"
+    ],
+    "storage": "Refrigerate untouched leftovers promptly in a covered container for up to 24 hours; press plastic wrap directly on the surface to reduce browning. Stir well before serving and discard if color or smell changes.",
+    "summary": "This creamy breakfast bowl brings together banana, avocado, and yogurt. Parents will like the no-cook method and quick prep on busy mornings.",
+    "tips": [
+     "Use a fork with a wide base for faster mashing when mornings feel busy.",
+     "Mix the purée right before serving, since avocado darkens over time even in the fridge."
+    ]
+   }
+  },
+  {
+   "n": 4,
+   "slug": "comforting-sweet-potato-lentil-khichdi-pure",
+   "title": "Comforting Sweet Potato Lentil Khichdi Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 18,
+   "age_source": "catalog, checked",
+   "age_note": "Blended smooth, oil only for 9 m+: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "iron",
+     "protein",
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "iron-rich-first-foods",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Smooth purée from 6 m",
+    "iron-rich-first-foods": "Red lentils with sweet potato",
+    "batch-and-freeze-for-babies": "Freezes 1 month, tip says double batch"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     6,
+     18
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 tablespoons uncooked white rice, rinsed",
+     "2 tablespoons red lentils (masoor dal), rinsed until water runs clear",
+     "1/2 cup sweet potato, peeled and chopped into 1/2 inch cubes",
+     "1 small pinch (optional) turmeric powder",
+     "1 1/2 cups water",
+     "1/2 teaspoon olive oil (optional, for older babies)"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze up to 1 month. Reheat leftovers to 165°F, then cool before serving.",
+    "summary": "This Indian inspired purée combines soft rice, red lentils, and sweet potato for a filling meal in one bowl. Parents will like the mild flavor and smooth texture that works for both lunch and dinner.",
+    "tips": [
+     "Prepare a double batch and freeze in small portions so you have quick lunches and dinners ready.",
+     "Label each container with the cooking date so you rotate older portions first."
+    ]
+   }
+  },
+  {
+   "n": 5,
+   "slug": "indian-rice-mung-dal-spinach-pure",
+   "title": "Indian Rice Mung Dal Spinach Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 7,
+   "age_max_months": 24,
+   "age_source": "catalog, checked",
+   "age_note": "Blended and sieved for 7 m: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "iron",
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "iron-rich-first-foods",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Smooth purée from 7 m",
+    "iron-rich-first-foods": "Mung dal and spinach",
+    "batch-and-freeze-for-babies": "Freezes 1 month"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     7,
+     24
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 tablespoons uncooked white rice, rinsed",
+     "2 tablespoons split mung dal (moong dal), rinsed",
+     "1/2 cup fresh baby spinach leaves, tightly packed",
+     "1 small pinch (optional) turmeric powder",
+     "1 3/4 cups water",
+     "1/2 teaspoon olive oil (optional for older babies)"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze up to 1 month. Reheat leftovers to 165°F, then cool before serving.",
+    "summary": "This Indian style purée blends soft rice, mung dal, and spinach into a smooth green bowl. Parents will like the mix of grains, lentils, and greens in one filling meal.",
+    "tips": [
+     "Make this recipe in a small pressure cooker to save time, then blend portions for baby.",
+     "Serve a thicker version for toddlers while keeping a smoother batch for younger siblings."
+    ]
+   }
+  },
+  {
+   "n": 6,
+   "slug": "italian-tomato-vegetable-pure-with-tiny-pasta",
+   "title": "Italian Tomato Vegetable Purée with Tiny Pasta",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 24,
+   "age_source": "catalog, checked",
+   "age_note": "Pasta blended smooth: fine from 9 m.",
+   "allergens": {
+    "wheat": [
+     "egg-free wheat pasta"
+    ],
+    "milk": [
+     "Parmesan (optional)"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "batch-and-freeze-for-babies": "Freezes 1 month; tip says freeze the vegetable base"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Parmesan is usually made with animal rennet; vegetarian only with a vegetarian hard cheese. Broth must be checked for allergens."
+   ],
+   "source": {
+    "catalog_age": [
+     9,
+     24
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 tablespoons small egg-free wheat pasta shapes such as pastina or tiny stars (check the label for egg)",
+     "1/2 cup ripe tomato, peeled and chopped (or no-salt canned crushed tomato)",
+     "1/4 cup carrot, peeled and chopped into 1/4 inch pieces",
+     "1/4 cup zucchini, chopped into 1/2 inch pieces",
+     "1 cup water or no-salt-added vegetable broth (check the label for allergens)",
+     "1 small pinch dried basil",
+     "1 teaspoon grated Parmesan cheese (optional for older babies)"
+    ],
+    "storage": "Refrigerate purée in a sealed container for up to 2 days. Freeze in small portions for up to 1 month.",
+    "summary": "This Italian inspired bowl blends soft vegetables with tiny pasta for a comforting spoon meal. Parents will like that it offers new flavors while still staying smooth.",
+    "tips": [
+     "Cook a larger batch of the vegetable base without pasta, freeze in portions, and cook fresh pasta to blend in on serving days.",
+     "For younger babies closer to 9 months, blend slightly longer to keep the texture silky."
+    ]
+   }
+  },
+  {
+   "n": 7,
+   "slug": "mediterranean-red-lentil-carrot-pure",
+   "title": "Mediterranean Red Lentil Carrot Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 7,
+   "age_max_months": 24,
+   "age_source": "catalog, checked",
+   "age_note": "Smooth, sieved for younger babies: fine from 7 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "iron",
+     "protein",
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "iron-rich-first-foods",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Two-ingredient purée from 7 m",
+    "iron-rich-first-foods": "Red lentils",
+    "batch-and-freeze-for-babies": "Freezes 2 months, tip says silicone trays"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     7,
+     24
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/4 cup red lentils, rinsed until water looks mostly clear",
+     "1/2 cup carrot, peeled and chopped into 1/4 inch pieces",
+     "1 1/4 cups water or no-salt-added vegetable broth (check the label for allergens)",
+     "1/2 teaspoon extra virgin olive oil"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze up to 2 months. Reheat leftovers to 165°F and cool before serving.",
+    "summary": "A smooth purée of red lentils and carrots, with no added salt.",
+    "tips": [
+     "Double the recipe and freeze in silicone trays for quick meals on busy days.",
+     "Serve a slightly thicker version for older babies to help them practice new textures."
+    ]
+   }
+  },
+  {
+   "n": 8,
+   "slug": "mild-mexican-black-bean-sweet-corn-pure",
+   "title": "Mild Mexican Black Bean Sweet Corn Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 8,
+   "age_max_months": 24,
+   "age_source": "catalog, checked",
+   "age_note": "Fully blended and strained: fine from 8 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "iron",
+     "protein",
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "iron-rich-first-foods",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "iron-rich-first-foods": "Black beans with tomato (vitamin C)",
+    "batch-and-freeze-for-babies": "Freezes 2 months in ice cube trays"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of First Tastes: a spiced bean purée from 8 m is a second-stage purée, not a first spoonful."
+   ],
+   "source": {
+    "catalog_age": [
+     8,
+     24
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/2 cup no-salt cooked black beans, rinsed well",
+     "1/4 cup frozen or fresh sweet corn kernels",
+     "1/4 cup small tomato, seeded and chopped",
+     "1 small pinch ground cumin",
+     "3/4 cup water or no-salt-added vegetable broth (check the label for allergens)"
+    ],
+    "storage": "Refrigerate promptly in a sealed container and use within 1–2 days. Freeze in ice cube trays or small jars for up to 2 months.",
+    "summary": "This hearty purée combines black beans, sweet corn, and a hint of mild spice in a smooth texture. Parents will like the familiar taco night flavors in a gentle, baby ready form.",
+    "tips": [
+     "Use canned low-sodium beans on busy nights, rinsing for at least 30 seconds to lower sodium.",
+     "Pair this purée with a simple fruit purée for a mix of sweet and savory flavors."
+    ]
+   }
+  },
+  {
+   "n": 9,
+   "slug": "silky-carrot-apple-starter-pure",
+   "title": "Silky Carrot Apple Starter Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 12,
+   "age_source": "catalog, checked",
+   "age_note": "Starter purée from 6 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Written as a first-spoon purée",
+    "batch-and-freeze-for-babies": "Freezes 2 months, tips cover tray freezing"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Thanksgiving Table: a carrot-apple baby purée has no Thanksgiving link."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     12
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 medium carrot, peeled and sliced into 1/4 inch coins",
+     "1 small sweet apple, peeled, cored, chopped into 1/2 inch cubes",
+     "1/2 cup, plus more as needed water",
+     "1–3 tablespoons breast milk, formula, or water for thinning (optional)"
+    ],
+    "storage": "Refrigerate in an airtight container for up to 3 days. Freeze in small portions for up to 2 months.",
+    "summary": "This smooth orange purée brings together the gentle sweetness of carrots and apples for a first spoon feed. Parents will appreciate the short ingredient list and soft flavor for first tastes.",
+    "tips": [
+     "Start solids around 6 months, when your baby can sit up with support, hold their head steady, and shows interest in food. Ask your pediatrician if you are unsure your baby is ready.",
+     "Steam extra carrot and apple, then blend in separate batches to freeze individual servings for busy weekdays.",
+     "Use silicone freezer trays or ice cube trays to portion purée, then move frozen cubes to a labeled freezer bag for easy thawing."
+    ]
+   }
+  },
+  {
+   "n": 10,
+   "slug": "zucchini-chickpea-mediterranean-pure",
+   "title": "Zucchini Chickpea Mediterranean Purée",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 7,
+   "age_max_months": 18,
+   "age_source": "catalog, checked",
+   "age_note": "Smooth, sieved for 7-8 m: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "puree"
+   },
+   "collections": [
+    "first-tastes",
+    "iron-rich-first-foods",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "first-tastes": "Two-ingredient purée from 7 m",
+    "iron-rich-first-foods": "Chickpeas (legume iron)",
+    "batch-and-freeze-for-babies": "Freezes 2 months in cubes"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     7,
+     18
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 small (about 1 cup) zucchini, washed and chopped into 1/2 inch pieces",
+     "1/3 cup cooked, no-salt chickpeas, rinsed well",
+     "1/2 cup water",
+     "1/2 teaspoon extra virgin olive oil (for babies over 6 months)"
+    ],
+    "storage": "Refrigerate promptly in an airtight container and use within 1–2 days. Freeze in small cubes or containers for up to 2 months.",
+    "summary": "A smooth purée of zucchini and chickpeas.",
+    "tips": [
+     "Use canned low-sodium chickpeas for speed, rinsing under running water for at least 30 seconds to reduce extra salt.",
+     "Freeze extra portions in ice cube trays so you have ready single servings for fast lunches."
+    ]
+   }
+  },
+  {
+   "n": 11,
+   "slug": "mild-vegetable-curry-with-rice",
+   "title": "Mild Vegetable Curry with Rice",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Puréed or mashed for babies, whole peas only for older children: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner",
+     "lunch"
+    ],
+    "goal": [
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "freezer-dinners",
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "freezer-dinners": "Freezes 2 months, batch tip",
+    "family-dinners": "One pot, texture by age"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "PUBLISHED TEXT BUG: step 9 is an internal note to reviewers ('Manually inspect the blocked image...'). Remove it.",
+    "Coconut milk: not a tree nut under current FDA guidance, but some parents avoid it; say 'contains coconut'.",
+    "Curry powder: check label for wheat fillers to keep gluten-free."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     120
+    ],
+    "catalog_diet": [
+     "vegan",
+     "gluten-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "2, peeled and cubed potatoes",
+     "2, sliced carrots",
+     "1 cup, frozen peas",
+     "1 can (14 oz) coconut milk",
+     "1 tsp, mild curry powder",
+     "1, chopped onion",
+     "1 clove, minced garlic",
+     "1 cup no-salt-added vegetable broth or water",
+     "1 tbsp olive oil",
+     "2 cups cooked rice"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze up to 2 months.",
+    "summary": "A mild vegetable curry with rice, served at a texture appropriate to each age.",
+    "tips": [
+     "Make a large batch and portion for lunches.",
+     "Adjust spices gradually as kids grow accustomed."
+    ]
+   }
+  },
+  {
+   "n": 12,
+   "slug": "one-pot-chicken-and-vegetable-rice",
+   "title": "One-Pot Chicken and Vegetable Rice",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Puréed smooth for babies; chicken to 165°F: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner",
+     "lunch"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "meal-prep",
+    "family-dinners",
+    "freezer-dinners",
+    "batch-and-freeze-for-babies"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; one pot, double batch tip",
+    "family-dinners": "Whole family, purée for babies",
+    "freezer-dinners": "Freezes 2 months",
+    "batch-and-freeze-for-babies": "Puréed chicken and rice freezes; adds a meat option among the vegetable purées"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Broth: use no-salt broth and check its label for allergens and gluten."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     120
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 lb, diced boneless chicken thighs",
+     "1 cup long-grain rice",
+     "2, peeled and finely chopped carrots",
+     "1 cup, frozen peas",
+     "2 cups water or no-salt-added chicken broth",
+     "1, finely diced onion",
+     "2 cloves, minced garlic",
+     "1 tbsp olive oil",
+     "to taste, for older servings only pepper"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze for up to 2 months.",
+    "summary": "This hearty one-pot chicken and vegetable rice is a comforting American classic packed with tender chicken, colorful veggies, and fluffy rice that the whole family can enjoy together. Parents will love how it's nutritious, easy to prepare, and can be easily pureed for babies or served as is for older kids, making mealtime stress-free.",
+    "tips": [
+     "Prepare a double batch on weekends for quick weekday reheats.",
+     "Customize veggies based on what's in your fridge to reduce waste."
+    ]
+   }
+  },
+  {
+   "n": 13,
+   "slug": "slow-cooker-beef-and-vegetable-stew",
+   "title": "Slow Cooker Beef and Vegetable Stew",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Puréed for babies after removing tough pieces: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "iron"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "meal-prep",
+    "iron-rich-first-foods",
+    "batch-and-freeze-for-babies",
+    "freezer-dinners",
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; slow cooker batch",
+    "iron-rich-first-foods": "Beef, puréed from 6 m",
+    "batch-and-freeze-for-babies": "Tip says freeze baby portions in ice cube trays",
+    "freezer-dinners": "Freezes 2 months",
+    "family-dinners": "One stew for everyone"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "In 5 collections, the most of any recipe.",
+    "Beef broth is not low-sodium in the ingredient list; babies need no-salt broth.",
+    "Broth: check label for gluten."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     120
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 lb, cubed beef chuck",
+     "3, peeled and cubed potatoes",
+     "3, sliced carrots",
+     "2 stalks, chopped celery",
+     "4 cups beef broth",
+     "1, chopped onion",
+     "1 tsp thyme",
+     "1 bay leaf"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze up to 2 months.",
+    "summary": "This tender American beef and vegetable stew slow-cooks carrots, potatoes, and beef into a rich, comforting broth that's perfect for chilly nights. Parents will love the set-it-and-forget-it ease, allowing pureeing for babies or hearty chunks for the family, saving precious time.",
+    "tips": [
+     "Prep veggies the night before for morning start.",
+     "Freeze leftovers in ice cube trays for baby portions."
+    ]
+   }
+  },
+  {
+   "n": 14,
+   "slug": "vegetable-noodle-soup",
+   "title": "Vegetable Noodle Soup",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Infant portion taken before soy sauce, puréed: fine.",
+   "allergens": {
+    "soy": [
+     "low-sodium soy sauce (older servings)"
+    ],
+    "wheat": [
+     "soy sauce"
+    ]
+   },
+   "catalog_allergens": [
+    "soy",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner",
+     "lunch"
+    ],
+    "goal": [
+     "veg-packed",
+     "sick-days"
+    ],
+    "practical": [
+     "one-pot",
+     "whole-family",
+     "freezes"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "family-dinners": "One pot, infant portion set aside"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Freezer Dinners: rice noodles go mushy when frozen; better freezer options exist.",
+    "Gluten-free if tamari replaces soy sauce."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     120
+    ],
+    "catalog_diet": [
+     "vegan",
+     "dairy-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "4 oz rice noodles",
+     "2, sliced thin carrots",
+     "2 cups, chopped bok choy",
+     "6 cups no-salt-added vegetable broth",
+     "1 inch, grated ginger",
+     "2 cloves, minced garlic",
+     "1 tbsp, for older servings only low-sodium soy sauce",
+     "2, sliced green onions"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze up to 2 months.",
+    "summary": "A mild vegetable noodle soup with soft vegetables and age-appropriate noodle pieces.",
+    "tips": [
+     "Add protein like tofu for heartier version.",
+     "Use pre-sliced veggies for faster prep."
+    ]
+   }
+  },
+  {
+   "n": 15,
+   "slug": "baked-fish-tacos-with-slaw",
+   "title": "Baked Fish Tacos with Slaw",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Fish flaked, tortillas cut small, slaw softened: fine from 12 m.",
+   "allergens": {
+    "fish": [
+     "white fish"
+    ]
+   },
+   "catalog_allergens": [
+    "fish",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "family-dinners": "Build-your-own family tacos"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "ALLERGEN MISMATCH: catalog lists wheat, but the recipe uses corn tortillas. Either the list is wrong or flour tortillas were meant. Not tagged gluten-free until fixed."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 lb white fish fillets",
+     "8 corn tortillas",
+     "2 cups, finely shredded cabbage",
+     "2, juiced lime",
+     "1 tsp cumin",
+     "1 tbsp olive oil",
+     "1/4 cup, chopped cilantro"
+    ],
+    "storage": "Refrigerate fish and slaw separately for up to 2 days. Do not freeze assembled tacos.",
+    "summary": "Baked fish tacos with finely shredded slaw; cook fish to 145°F and serve in age-appropriate pieces.",
+    "tips": [
+     "Let kids build their own tacos for engagement.",
+     "Use mild fish like cod for less fishy taste."
+    ]
+   }
+  },
+  {
+   "n": 16,
+   "slug": "tofu-and-vegetable-stir-fry",
+   "title": "Tofu and Vegetable Stir-Fry",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 8,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Tofu and vegetables mashed for infants, no firm cubes: fine from 8 m.",
+   "allergens": {
+    "soy": [
+     "firm tofu",
+     "soy sauce"
+    ],
+    "sesame": [
+     "sesame oil"
+    ],
+    "wheat": [
+     "soy sauce"
+    ]
+   },
+   "catalog_allergens": [
+    "soy",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "whole-family",
+     "freezes"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "family-dinners": "Infant portion set aside before soy sauce"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "ALLERGEN MISMATCH: soy sauce normally contains wheat; catalog lists only soy and sesame. Add wheat, or specify tamari.",
+    "Left out of Freezer Dinners: frozen tofu stir-fry goes spongy; storage only allows 1 month."
+   ],
+   "source": {
+    "catalog_age": [
+     8,
+     120
+    ],
+    "catalog_diet": [
+     "vegan",
+     "dairy-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "14 oz, cubed firm tofu",
+     "2 cups, florets broccoli",
+     "2, julienned carrots",
+     "2 tbsp, low-sodium, for older servings only soy sauce",
+     "1 tsp, grated ginger",
+     "1 clove, minced garlic",
+     "1 tbsp sesame oil",
+     "1 cup, cooked rice"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days; freeze tofu mixture for up to 1 month.",
+    "summary": "This quick Asian tofu stir-fry blends crispy tofu with broccoli and carrots in a light soy sauce, providing protein and veggies in every bite. Parents will value its speed and health benefits, easily adaptable by mashing for babies or chopping small for toddlers, fostering healthy eating habits early.",
+    "tips": [
+     "Use pre-cut veggies to cut down on prep time.",
+     "Swap tofu for chicken if preferred for non-vegan option."
+    ]
+   }
+  },
+  {
+   "n": 17,
+   "slug": "vegetable-pasta-primavera",
+   "title": "Vegetable Pasta Primavera",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 8,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Mashed or puréed for young children, tomatoes quartered: fine.",
+   "allergens": {
+    "wheat": [
+     "whole wheat pasta"
+    ],
+    "milk": [
+     "parmesan"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "veg-packed"
+    ],
+    "practical": [
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "family-dinners": "One pasta, texture by age"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Freezer Dinners: storage says only the sauce freezes, not the dish."
+   ],
+   "source": {
+    "catalog_age": [
+     8,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free"
+    ],
+    "ingredients": [
+     "8 oz whole wheat pasta",
+     "2, sliced thin zucchini",
+     "2, diced bell peppers",
+     "1 cup, quartered lengthwise cherry tomatoes",
+     "2 cloves, minced garlic",
+     "2 tbsp olive oil",
+     "1/4 cup, grated parmesan cheese made with vegetarian rennet",
+     "1/4 cup, chopped basil"
+    ],
+    "storage": "Refrigerate promptly and use baby portions within 1–2 days; freeze sauce up to 1 month.",
+    "summary": "This vibrant Italian pasta primavera features fresh seasonal vegetables tossed with whole wheat pasta in a light sauce, offering a burst of colors and flavors that appeal to all ages. Busy parents will appreciate its quick assembly and how it can be mashed for toddlers or pureed for infants, ensuring everyone at the table is happy and nourished.",
+    "tips": [
+     "Use frozen veggies if fresh aren't available to save prep time.",
+     "Involve kids in chopping soft veggies with safe tools for fun family bonding."
+    ]
+   }
+  },
+  {
+   "n": 18,
+   "slug": "bean-and-veggie-burrito-bowl",
+   "title": "Bean and Veggie Burrito Bowl",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Beans and corn flattened, all mashed for babies: fine from 9 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner",
+     "lunch"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber",
+     "veg-packed"
+    ],
+    "practical": [
+     "whole-family",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "iron-rich-first-foods",
+    "family-dinners"
+   ],
+   "collection_reasons": {
+    "iron-rich-first-foods": "Black beans with tomato and lime (vitamin C)",
+    "family-dinners": "Build-your-own bowls, toppings separate"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Freezer Dinners: only the rice and beans freeze; avocado and tomato are fresh."
+   ],
+   "source": {
+    "catalog_age": [
+     9,
+     120
+    ],
+    "catalog_diet": [
+     "vegan",
+     "gluten-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 can (15 oz), drained black beans",
+     "1 cup, cooked brown rice",
+     "1, diced avocado",
+     "1 cup, frozen corn",
+     "2, diced tomatoes",
+     "1, juiced lime",
+     "1 tsp cumin",
+     "1 tbsp olive oil",
+     "1/4 cup, chopped cilantro"
+    ],
+    "storage": "Refrigerate promptly and use baby portions within 1–2 days; freeze rice and beans up to 2 months.",
+    "summary": "A customizable bowl of black beans, brown rice, avocado, corn, and tomatoes.",
+    "tips": [
+     "Prep ingredients ahead and assemble in minutes after work.",
+     "Offer toppings separately for picky eaters to choose."
+    ]
+   }
+  },
+  {
+   "n": 19,
+   "slug": "mediterranean-baked-chicken-with-quinoa",
+   "title": "Mediterranean Baked Chicken with Quinoa",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Chicken in tiny pieces; olives sliced. Fine from 12 m, but quarter olives lengthwise for under-2s.",
+   "allergens": {
+    "milk": [
+     "feta"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "family-dinners",
+    "freezer-dinners"
+   ],
+   "collection_reasons": {
+    "family-dinners": "One-dish bake",
+    "freezer-dinners": "Freezes 2 months, tip says bake extra"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Olives are only 'sliced': say 'quartered lengthwise' for young children."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 lb, cubed chicken breast",
+     "1 cup quinoa",
+     "1 cup, quartered lengthwise cherry tomatoes",
+     "1/2 cup, pitted and sliced kalamata olives",
+     "1/4 cup, crumbled feta cheese",
+     "2 tbsp olive oil",
+     "1 tsp oregano",
+     "1, juiced lemon"
+    ],
+    "storage": "Refrigerate in airtight container for up to 3 days. Freeze for up to 2 months.",
+    "summary": "This wholesome Mediterranean baked chicken with quinoa incorporates olives, tomatoes, and feta for a tangy, satisfying dinner. Parents will enjoy its hands-off baking method and nutritional balance, with options to blend for babies or serve in small bites for toddlers, promoting family unity at meals.",
+    "tips": [
+     "Bake extra for meal prep lunches.",
+     "Use dairy-free feta for allergies."
+    ]
+   }
+  },
+  {
+   "n": 20,
+   "slug": "veggie-packed-lasagna",
+   "title": "Veggie-Packed Lasagna",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Soft small squares: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "lasagna noodles"
+    ],
+    "milk": [
+     "ricotta",
+     "mozzarella"
+    ],
+    "eggs": [
+     "egg"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk",
+    "eggs"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "whole-family"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "meal-prep",
+    "freezer-dinners",
+    "family-dinners",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; assemble ahead",
+    "freezer-dinners": "Freezes unbaked 2 months: the classic freezer dinner",
+    "family-dinners": "One dish for everyone",
+    "picky-eater-favorites": "Spinach and zucchini hidden in cheese"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss vegetarian; no meat in the recipe. Marinara: check label."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "nut-free"
+    ],
+    "ingredients": [
+     "9 sheets lasagna noodles",
+     "2 cups, chopped spinach",
+     "2, grated zucchini",
+     "15 oz ricotta cheese",
+     "3 cups marinara sauce",
+     "2 cups, shredded mozzarella cheese",
+     "1 egg",
+     "2 cloves, minced garlic"
+    ],
+    "storage": "Refrigerate in airtight container for up to 3 days. Freeze unbaked for up to 2 months.",
+    "summary": "This layered Italian veggie lasagna stacks spinach, zucchini, and ricotta between noodles for a cheesy, vegetable-rich delight. Parents will appreciate its make-ahead potential and how it hides veggies for picky eaters, with soft textures safe for mashing or small bites.",
+    "tips": [
+     "Assemble the night before and bake when ready.",
+     "Use no-boil noodles to save time."
+    ]
+   }
+  },
+  {
+   "n": 21,
+   "slug": "avocado-and-black-bean-quesadilla-strips",
+   "title": "Avocado & Black Bean Quesadilla Strips",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 60,
+   "age_source": "catalog, checked",
+   "age_note": "Finger-width soft strips, beans mashed flat: fine from 9 m.",
+   "allergens": {
+    "wheat": [
+     "wheat flour tortilla"
+    ],
+    "milk": [
+     "shredded cheese"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "protein",
+     "picky-friendly"
+    ],
+    "practical": [
+     "under-15-min"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "first-finger-foods",
+    "lunchbox-and-daycare",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "first-finger-foods": "Written as finger-width strips from 9 m",
+    "lunchbox-and-daycare": "Nut-free, eaten cold, made that morning",
+    "picky-eater-favorites": "Cheese and tortilla, familiar shape"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Birthday Party: an everyday lunch, not party food."
+   ],
+   "source": {
+    "catalog_age": [
+     9,
+     60
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 soft wheat flour tortilla (or soft corn tortilla; check the label for wheat)",
+     "2 tbsp canned black beans, rinsed and mashed completely flat",
+     "2 tbsp ripe avocado, mashed",
+     "1 tbsp mild shredded cheese"
+    ],
+    "storage": "Best served fresh. Can be refrigerated for 24 hours but tortilla may become soft.",
+    "summary": "Quick, easy-to-handle quesadilla strips filled with mashed black beans, avocado and cheese. The creamy avocado acts as a binder to keep the beans in place.",
+    "tips": [
+     "Smashing the black beans is crucial for safety and helps them stick inside the quesadilla."
+    ]
+   }
+  },
+  {
+   "n": 22,
+   "slug": "cheesy-broccoli-and-quinoa-bites",
+   "title": "Cheesy Broccoli & Quinoa Bites",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 60,
+   "age_source": "catalog, checked",
+   "age_note": "Crumbled or cut small under 12 m, no stems: fine.",
+   "allergens": {
+    "eggs": [
+     "eggs"
+    ],
+    "milk": [
+     "cheddar"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner",
+     "snack"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bites"
+   },
+   "collections": [
+    "meal-prep",
+    "first-finger-foods",
+    "on-the-go-snacks"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; freezes 2 months",
+    "first-finger-foods": "Soft bites, crumbled for babies",
+    "on-the-go-snacks": "Holds its shape at room temperature"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "If cooked in broth (tip), check the broth label for gluten."
+   ],
+   "source": {
+    "catalog_age": [
+     9,
+     60
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "2 cups cooked quinoa",
+     "1 cup broccoli florets, steamed and finely chopped",
+     "1 cup shredded cheddar cheese",
+     "2 large eggs, beaten",
+     "1/2 tsp onion powder"
+    ],
+    "storage": "Refrigerate promptly and use baby portions within 1–2 days. Freeze flat on a baking sheet, then transfer to a bag for up to 2 months.",
+    "summary": "A vegetarian bite made with quinoa, broccoli and cheddar. The savory broccoli flavor is mild and the texture is soft and crumbly.",
+    "tips": [
+     "Cook the quinoa in low-sodium vegetable broth instead of water for extra flavor."
+    ]
+   }
+  },
+  {
+   "n": 23,
+   "slug": "mild-curried-red-lentil-cakes",
+   "title": "Mild Curried Red Lentil Cakes",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 10,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Soft inside, cut into strips under 12 m: fine.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner",
+     "lunch"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "protein-packs",
+    "first-finger-foods",
+    "iron-rich-first-foods"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member",
+    "first-finger-foods": "Strips from 10 m",
+    "iron-rich-first-foods": "Red lentils, from 10 m"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss vegan; no animal products.",
+    "Left out of Freezer Dinners: a side cake, not a dinner."
+   ],
+   "source": {
+    "catalog_age": [
+     10,
+     48
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1/2 cup red lentils, dried",
+     "1.5 cups water",
+     "1/2 cup carrot, grated finely",
+     "2 tbsp chickpea flour (besan)",
+     "1/4 tsp mild curry powder",
+     "1/4 tsp cumin powder",
+     "1-2 tsp olive oil, for the pan"
+    ],
+    "storage": "Refrigerate promptly and use baby portions within 1–2 days. Freeze in a single layer for up to 2 months.",
+    "summary": "Mild red lentil cakes with curry spices.",
+    "tips": [
+     "Red lentils cook much faster and softer than brown/green ones, making them perfect for baby food."
+    ]
+   }
+  },
+  {
+   "n": 24,
+   "slug": "mini-turkey-and-apple-meatloaf-muffins",
+   "title": "Mini Turkey & Apple Meatloaf Muffins",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 36,
+   "age_source": "catalog, checked",
+   "age_note": "Cut by chewing ability, turkey to 165°F: fine from 9 m.",
+   "allergens": {
+    "eggs": [
+     "egg"
+    ],
+    "wheat": [
+     "breadcrumbs"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "dinner",
+     "lunch"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "dairy-free",
+     "nut-free"
+    ],
+    "occasion": [
+     "thanksgiving"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "meal-prep",
+    "first-finger-foods",
+    "thanksgiving-table"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; freezes 2 months",
+    "first-finger-foods": "Soft mini meatloaf pieces from 9 m",
+    "thanksgiving-table": "Turkey and apple: a small-hands Thanksgiving plate"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Iron-Rich First Foods: ground turkey is a modest iron source."
+   ],
+   "source": {
+    "catalog_age": [
+     9,
+     36
+    ],
+    "catalog_diet": [
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 lb ground turkey",
+     "1 medium apple, peeled and grated",
+     "1/2 cup wheat breadcrumbs (panko or regular) with no milk or soy ingredients; check the label",
+     "1 large egg",
+     "1/2 tsp dried thyme",
+     "1/2 tsp garlic powder",
+     "1-2 tsp olive oil, for greasing"
+    ],
+    "storage": "Refrigerate promptly and use within 1–2 days. Freeze individually on a tray before bagging for up to 2 months.",
+    "summary": "Savory turkey meets sweet apple in these moist mini meatloaves. The muffin tin shape makes neat portions that you cut to suit your child's age.",
+    "tips": [
+     "Grating the apple adds natural sweetness and keeps the turkey moist without needing extra fat."
+    ]
+   }
+  },
+  {
+   "n": 25,
+   "slug": "pumpkin-and-ricotta-gnocchi-pillows",
+   "title": "Pumpkin & Ricotta Gnocchi Pillows",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 8,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Pressed flat and cut into strips for 8-12 m: fine.",
+   "allergens": {
+    "wheat": [
+     "all-purpose flour"
+    ],
+    "milk": [
+     "ricotta",
+     "parmesan"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free"
+    ],
+    "occasion": [
+     "halloween",
+     "thanksgiving"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween",
+    "first-finger-foods",
+    "thanksgiving-table"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member; pumpkin",
+    "first-finger-foods": "Soft strips from 8 m",
+    "thanksgiving-table": "Pumpkin"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Parmesan usually uses animal rennet, so not tagged vegetarian."
+   ],
+   "source": {
+    "catalog_age": [
+     8,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1/2 cup pumpkin puree (canned or homemade)",
+     "1/2 cup ricotta cheese",
+     "3/4 cup all-purpose flour",
+     "2 tbsp parmesan cheese, grated"
+    ],
+    "storage": "Refrigerate cooked gnocchi promptly and use baby portions within 1–2 days. Freeze uncooked gnocchi on a tray, then bag; boil from frozen.",
+    "summary": "Homemade gnocchi sounds hard, but these are simple drop-style dumplings. They are very soft and combine the sweetness of pumpkin with creamy cheese; adapt the size and texture to your child's eating ability.",
+    "tips": [
+     "If the dough is too sticky to roll, simply scoop small amounts with a teaspoon directly into the boiling water."
+    ]
+   }
+  },
+  {
+   "n": 26,
+   "slug": "sesame-tofu-and-veggie-cubes",
+   "title": "Sesame Tofu & Veggie Cubes",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 36,
+   "age_source": "catalog, checked",
+   "age_note": "Strips for 6-9 m, cubes with pincer grasp, vegetables squashable: fine.",
+   "allergens": {
+    "soy": [
+     "firm tofu"
+    ],
+    "sesame": [
+     "sesame oil"
+    ]
+   },
+   "catalog_allergens": [
+    "soy",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "protein-packs",
+    "first-finger-foods"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member",
+    "first-finger-foods": "Strips from 6 m, cubes from 9 m"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free; no wheat (cornstarch, no soy sauce)."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     36
+    ],
+    "catalog_diet": [
+     "vegan",
+     "vegetarian",
+     "dairy-free",
+     "egg-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 block (14oz) firm tofu, drained",
+     "1 tsp sesame oil",
+     "1/4 tsp garlic powder",
+     "1 tbsp cornstarch",
+     "1 medium carrot, peeled",
+     "1 small zucchini"
+    ],
+    "storage": "Refrigerate in airtight container for up to 3 days. Freezing changes the texture of tofu significantly, so fresh is best.",
+    "summary": "Soft tofu and steamed vegetables with mild sesame and garlic flavors. The pieces are easy for little hands to pick up.",
+    "tips": [
+     "Firm tofu is easier for babies to hold than silken tofu, which falls apart too easily."
+    ]
+   }
+  },
+  {
+   "n": 27,
+   "slug": "zucchini-and-feta-fritters",
+   "title": "Zucchini & Feta Fritters",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 8,
+   "age_max_months": 60,
+   "age_source": "catalog, checked",
+   "age_note": "Soft, set fritters cut into finger-width strips under 12 m: fine.",
+   "allergens": {
+    "eggs": [
+     "egg"
+    ],
+    "wheat": [
+     "all-purpose flour"
+    ],
+    "milk": [
+     "feta"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "on-the-go"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "first-finger-foods",
+    "lunchbox-and-daycare"
+   ],
+   "collection_reasons": {
+    "first-finger-foods": "Finger-width strips from 8 m",
+    "lunchbox-and-daycare": "Served cold, nut-free"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     8,
+     60
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 medium zucchini, grated",
+     "1 large egg",
+     "3 tbsp all-purpose flour",
+     "2 tbsp feta cheese, crumbled",
+     "1 tsp fresh dill or mint (optional)",
+     "1-2 tbsp olive oil, for the pan"
+    ],
+    "storage": "Refrigerate promptly and use baby portions within 1–2 days. Reheat in a dry pan or toaster oven to restore texture.",
+    "summary": "These Mediterranean-style fritters are a tasty way to serve vegetables. The feta adds a nice savory kick, and the interior stays soft and spongy.",
+    "tips": [
+     "If the batter is too runny, add another teaspoon of flour. If too dry, let it sit for a minute to hydrate."
+    ]
+   }
+  },
+  {
+   "n": 28,
+   "slug": "baked-sweet-potato-with-black-beans-and-avocado",
+   "title": "Baked Sweet Potato with Black Beans and Avocado",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Written as an adult recipe: salt in the beans, whole beans and corn. From 12 m if beans are mashed, corn flattened and salt left out for the child's portion. The recipe does not say this.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber",
+     "veg-packed"
+    ],
+    "practical": [
+     "whole-family",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [
+    "family-dinners"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
+    "Needs a child-portion step (mash beans, flatten corn, no salt) before it suits under-3s.",
+    "Catalog diet tags miss vegan.",
+    "Left out of Thanksgiving Table: Tex-Mex stuffed sweet potato, not a Thanksgiving dish."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "4 large sweet potatoes",
+     "2 cups black beans, cooked or canned",
+     "2 ripe avocados, diced",
+     "1 cup corn kernels, fresh or frozen",
+     "2 limes",
+     "1/4 cup fresh cilantro, chopped",
+     "1 tsp ground cumin",
+     "1 tbsp olive oil",
+     "to taste salt and pepper"
+    ],
+    "storage": "Refrigerate baked sweet potatoes within 2 hours; remove the foil before chilling and use within 3–4 days. Store bean topping and avocado separately in airtight containers for up to 3 days (toss avocado with lime juice to prevent browning). Reheat potato in microwave for 2-3 minutes, then add fresh toppings before serving.",
+    "summary": "Baked sweet potato topped with black beans and avocado.",
+    "tips": [
+     "Bake sweet potatoes ahead of time on meal prep day and reheat in microwave for 3-4 minutes for even faster assembly",
+     "Add a dollop of unsweetened plant-based yogurt (check the label for milk, soy and tree nuts) or a sprinkle of pepitas (pumpkin seeds) for extra protein and nutrients",
+     "Leftover bean mixture can be used as a taco filling or stirred into scrambled eggs"
+    ]
+   }
+  },
+  {
+   "n": 29,
+   "slug": "chicken-and-vegetable-stir-fry-with-brown-rice",
+   "title": "Chicken and Vegetable Stir-Fry with Brown Rice",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 24,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. As written: crisp-tender broccoli, snap peas, raw-ish pepper strips, no child steps. Firm and fibrous for under-2s. From 24 m as written; from 12 m only with a step to cook vegetables soft and cut chicken small.",
+   "allergens": {
+    "soy": [
+     "tamari"
+    ],
+    "sesame": [
+     "sesame oil"
+    ]
+   },
+   "catalog_allergens": [
+    "soy",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "protein-packs"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "family-dinners"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
+    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written it suits 2 years and up. Add a toddler step (soft vegetables, small chicken) or move it.",
+    "Gluten-free relies on the wheat-free tamari it names; catalog diet tags miss gluten-free."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 lb boneless skinless chicken breast, sliced",
+     "2 cups broccoli florets",
+     "1 cup snap peas",
+     "1 cup carrots, julienned",
+     "1 bell pepper, sliced",
+     "3 cups brown rice, cooked in advance",
+     "3 tbsp low-sodium, wheat-free tamari (check the label)",
+     "1 tbsp fresh ginger, minced",
+     "3 garlic cloves, minced",
+     "2 tbsp sesame oil",
+     "1 tsp cornstarch",
+     "2 tbsp water"
+    ],
+    "storage": "Refrigerate in airtight container for up to 3 days. Store rice separately for best texture. Reheat in microwave for 2-3 minutes or in skillet over medium heat for 5 minutes until heated through to 165°F.",
+    "summary": "Chicken and vegetables served with brown rice and a tamari-sesame sauce.",
+    "tips": [
+     "Use pre-cut vegetables from the grocery store to save even more prep time",
+     "Have all ingredients prepped and ready before you start cooking - stir-frying moves quickly",
+     "Double the recipe and pack leftovers for easy next-day lunches"
+    ]
+   }
+  },
+  {
+   "n": 30,
+   "slug": "folate-rich-lentil-and-spinach-soup",
+   "title": "Folate-Rich Lentil and Spinach Soup",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Soft soup, but salt to taste and regular broth. From 12 m as written; from 9 m if blended with no-salt broth and no added salt.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "iron",
+     "protein",
+     "fiber",
+     "veg-packed",
+     "sick-days"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "meal-prep"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "freezer-dinners",
+    "family-dinners"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN; title says folate-rich (same no-age set as #31-37): rewrite with child steps before adding to any new collection.",
+    "Broth: use low-sodium and check its label for gluten.",
+    "Title says 'folate-rich': a nutrition claim the review flagged on other titles."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1.5 cups red lentils",
+     "4 cups fresh spinach",
+     "1 can (14 oz) diced tomatoes",
+     "6 cups vegetable broth",
+     "1 medium onion, diced",
+     "3 cloves garlic, minced",
+     "1 tsp cumin",
+     "2 tbsp olive oil",
+     "2 tbsp lemon juice",
+     "to taste salt and pepper"
+    ],
+    "storage": "Refrigerate promptly and use within 3–4 days. Freeze in portion-sized containers for up to 3 months. Thaw overnight in refrigerator and reheat on stovetop over medium heat.",
+    "summary": "Lentil and spinach soup with lemon.",
+    "tips": [
+     "Make a double batch and freeze individual portions in freezer-safe containers for easy meals during busy weeks",
+     "The lemon juice is added at the end to preserve vitamin C content and bright flavor",
+     "If soup thickens too much when stored, add a splash of broth or water when reheating"
+    ]
+   }
+  },
+  {
+   "n": 31,
+   "slug": "greek-yogurt-parfait-with-berries-and-almonds",
+   "title": "Greek Yogurt Parfait with Berries and Almonds",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 48,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. As written: honey (not before 12 m) and sliced almonds (a choking risk under 4). From 48 m as written; from 12 m with almonds ground or left out.",
+   "allergens": {
+    "milk": [
+     "Greek yogurt"
+    ],
+    "tree_nuts": [
+     "sliced almonds"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "tree_nuts"
+   ],
+   "tags": {
+    "stage": [
+     "3-5y"
+    ],
+    "meal": [
+     "breakfast",
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [
+    "big-kid-breakfasts"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions morning nausea.",
+    "Gluten-free relies on the certified gluten-free granola it names."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "2 cups plain pasteurized Greek yogurt",
+     "1 cup fresh blueberries",
+     "1 cup fresh strawberries, sliced",
+     "1/4 cup sliced almonds",
+     "2 tbsp honey",
+     "2 tbsp chia seeds",
+     "1/2 cup certified gluten-free granola, label-checked for allergens"
+    ],
+    "storage": "Best consumed fresh. Can refrigerate assembled parfait (without granola) for up to 4 hours. Add granola just before eating to prevent sogginess. Store components separately for up to 3 days.",
+    "summary": "Greek yogurt layered with berries, almonds, chia seeds, honey, and granola.",
+    "tips": [
+     "Prep all ingredients the night before and store separately - assemble in the morning for fresh texture",
+     "Choose full-fat Greek yogurt for better absorption of fat-soluble vitamins",
+     "If experiencing morning nausea, keep parfait cold and eat slowly in small spoonfuls"
+    ]
+   }
+  },
+  {
+   "n": 32,
+   "slug": "lentil-and-vegetable-curry-with-coconut-milk",
+   "title": "Lentil and Vegetable Curry with Coconut Milk",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Soft curry, but salt and 2 tbsp curry powder. From 12 m with the child's portion taken before salt.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "iron",
+     "protein",
+     "fiber",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "meal-prep"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "freezer-dinners",
+    "family-dinners"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip says 'if sensitive to spices during pregnancy'. It is live in Meal Prep.",
+    "Coconut milk: say 'contains coconut'."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1.5 cups red lentils",
+     "1 can (14 oz) coconut milk",
+     "2 cups cauliflower florets",
+     "1 large sweet potato, cubed",
+     "1 can (14 oz) diced tomatoes",
+     "2 cups certified gluten-free, no-salt-added vegetable broth",
+     "1 medium onion, diced",
+     "4 garlic cloves, minced",
+     "2 tbsp curry powder",
+     "1 tsp turmeric",
+     "2 tbsp olive oil",
+     "2 cups fresh spinach",
+     "to taste salt and pepper"
+    ],
+    "storage": "Refrigerate within 2 hours in shallow containers and use within 3–4 days. Freeze up to 3 months. Reheat leftovers to 165°F.",
+    "summary": "A warming one-pot curry with red lentils, coconut milk, vegetables, spinach, and spices.",
+    "tips": [
+     "Adjust curry powder to taste - use just 1 tablespoon if sensitive to spices during pregnancy",
+     "This freezes beautifully in portion-sized containers for quick future meals",
+     "The coconut milk adds creaminess and healthy fats that help absorb fat-soluble vitamins"
+    ]
+   }
+  },
+  {
+   "n": 33,
+   "slug": "mediterranean-chicken-and-chickpea-salad",
+   "title": "Mediterranean Chicken and Chickpea Salad",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 36,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. As written: whole chickpeas, halved (not quartered) cherry tomatoes, halved olives, raw onion, salad leaves, salt. Choking risks under 3. From 36 m as written.",
+   "allergens": {
+    "milk": [
+     "feta"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "protein-packs"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "lunchbox-and-daycare"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions pregnancy fatigue.",
+    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 3 years and up."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 cups fully cooked rotisserie chicken, reheated to 165°F and shredded",
+     "1.5 cups chickpeas, cooked or canned",
+     "1 large cucumber, diced",
+     "2 cups cherry tomatoes, halved",
+     "1/4 cup red onion, thinly sliced",
+     "1/2 cup kalamata olives, halved",
+     "1/2 cup pasteurized feta cheese, crumbled",
+     "1/4 cup extra virgin olive oil",
+     "3 tbsp fresh lemon juice",
+     "1 tsp dried oregano",
+     "4 cups mixed greens",
+     "to taste salt and pepper"
+    ],
+    "storage": "Refrigerate chicken salad mixture in airtight container for up to 3 days. Store dressing and greens separately. Add greens and feta just before eating for best texture and freshness.",
+    "summary": "Chicken, chickpeas, greens, and feta with a lemon dressing.",
+    "tips": [
+     "Use pre-cooked rotisserie chicken to save time and energy - perfect for pregnancy fatigue",
+     "Pack salad without greens in a container for travel-friendly lunches at work",
+     "This salad actually improves in flavor after a few hours as ingredients marinate together"
+    ]
+   }
+  },
+  {
+   "n": 34,
+   "slug": "overnight-oats-with-chia-and-berries",
+   "title": "Overnight Oats with Chia and Berries",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 48,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Sliced almond topping (a choking risk under 4) and honey or maple. From 48 m as written; from 12 m without the almonds.",
+   "allergens": {
+    "milk": [
+     "milk",
+     "Greek yogurt"
+    ],
+    "tree_nuts": [
+     "sliced almonds",
+     "almond milk (option)"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "tree_nuts"
+   ],
+   "tags": {
+    "stage": [
+     "3-5y"
+    ],
+    "meal": [
+     "breakfast"
+    ],
+    "goal": [
+     "fiber"
+    ],
+    "practical": [
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [
+    "toddler-breakfasts",
+    "big-kid-breakfasts"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions nausea.",
+    "3 tbsp honey or maple: added sugar, so never Everyday Treats.",
+    "Regular oats: not gluten-free (catalog agrees)."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "vegetarian"
+    ],
+    "ingredients": [
+     "2 cups rolled oats",
+     "2 cups pasteurized milk or pasteurized unsweetened almond milk",
+     "1/2 cup plain pasteurized Greek yogurt",
+     "4 tbsp chia seeds",
+     "3 tbsp honey or maple syrup",
+     "1 tsp vanilla extract",
+     "1.5 cups fresh or frozen berries",
+     "1/4 cup sliced almonds",
+     "1/2 tsp ground cinnamon"
+    ],
+    "storage": "Refrigerate promptly in sealed containers and use within 3–4 days. Not suitable for freezing due to texture changes. Add fresh toppings like almonds just before eating for best texture.",
+    "summary": "A no-cook breakfast of oats, chia seeds, berries, and pasteurized yogurt chilled until creamy.",
+    "tips": [
+     "Prep 4-5 jars on Sunday evening for grab-and-go breakfasts all week",
+     "Can be eaten straight from the fridge when nausea makes hot food unappealing",
+     "Customize with different fruits like sliced banana, diced apple, or mango for variety throughout the week"
+    ]
+   }
+  },
+  {
+   "n": 35,
+   "slug": "quinoa-and-black-bean-burrito-bowl",
+   "title": "Quinoa and Black Bean Burrito Bowl",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 24,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Whole beans and corn, halved cherry tomatoes, raw onion, salt. From 24 m as written; from 12 m with beans mashed, tomatoes quartered, no salt.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber",
+     "veg-packed"
+    ],
+    "practical": [
+     "make-ahead",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "protein-packs"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "lunchbox-and-daycare",
+    "family-dinners"
+   ],
+   "flags": [
+    "Same no-age adult set as #28-37 (no pregnancy words in this one, but no child steps).",
+    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 2 years and up."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup quinoa, uncooked",
+     "2 cups water",
+     "2 cups black beans, cooked or canned",
+     "2 bell peppers, diced",
+     "1 cup corn kernels, fresh or frozen",
+     "1 cup cherry tomatoes, halved",
+     "1/2 red onion, diced",
+     "2 limes",
+     "1/4 cup fresh cilantro, chopped",
+     "1 tsp cumin",
+     "2 tbsp olive oil",
+     "to taste salt and pepper"
+    ],
+    "storage": "Refrigerate in airtight container for up to 4 days. Can be eaten cold or reheated in microwave for 1-2 minutes until warmed through. Store lime wedges separately and add fresh cilantro when serving.",
+    "summary": "A Mexican-inspired bowl of quinoa, black beans, peppers, corn, tomatoes, lime, and cilantro.",
+    "tips": [
+     "Batch cook quinoa and beans on Sunday for quick weekday assembly throughout the week",
+     "Add optional toppings like diced avocado, pumpkin seeds, or a dollop of plant-based yogurt for extra flavor",
+     "This bowl tastes great cold, making it perfect for meal prep lunches"
+    ]
+   }
+  },
+  {
+   "n": 36,
+   "slug": "salmon-and-sweet-potato-bowl-with-avocado",
+   "title": "Salmon and Sweet Potato Bowl with Avocado",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 24,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Salted sweet potato and salmon, raw massaged kale, no child steps or bone check. From 24 m as written; from 12 m with salmon flaked and checked for bones, kale chopped fine, no salt.",
+   "allergens": {
+    "fish": [
+     "salmon"
+    ]
+   },
+   "catalog_allergens": [
+    "fish"
+   ],
+   "tags": {
+    "stage": [
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "make-ahead",
+     "whole-family"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "protein-packs"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "family-dinners"
+   ],
+   "flags": [
+    "Same adult set as #28-37 (mercury tip suggests the pregnancy set).",
+    "LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 2 years and up."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "12 oz wild salmon fillets",
+     "2 medium sweet potatoes, cubed",
+     "1 large avocado, sliced",
+     "2 cups baby kale",
+     "3 tbsp olive oil",
+     "1 lemon",
+     "1 tsp garlic powder",
+     "1/2 tsp paprika",
+     "to taste salt and pepper"
+    ],
+    "storage": "Refrigerate components separately in airtight containers for up to 3 days. Store avocado with lemon juice to prevent browning. Assemble fresh when ready to eat. Reheat salmon and sweet potatoes in oven at 350°F for 8-10 minutes.",
+    "summary": "Salmon, sweet potato, and avocado served with greens.",
+    "tips": [
+     "Choose salmon, a lower-mercury fish option.",
+     "Cook extra salmon to flake into salads or grain bowls throughout the week",
+     "If salmon skin sticks to pan, it's not ready to flip - give it another minute"
+    ]
+   }
+  },
+  {
+   "n": 37,
+   "slug": "spinach-and-feta-egg-muffins",
+   "title": "Spinach and Feta Egg Muffins",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "adults (pregnancy set); needs a child rewrite",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "judged: the catalog has no age",
+   "age_note": "NO AGE IN CATALOG. Soft baked egg, tomatoes quartered, little salt: fine from 12 m cut into strips.",
+   "allergens": {
+    "eggs": [
+     "eggs"
+    ],
+    "milk": [
+     "feta",
+     "milk"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "breakfast",
+     "snack"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "protein-packs"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member (see flag)"
+   },
+   "after_rewrite": [
+    "toddler-breakfasts",
+    "big-kid-breakfasts"
+   ],
+   "flags": [
+    "WRITTEN FOR PREGNANCY: tip says 'when morning sickness makes hot foods unappealing'. Light rewrite only: replace that tip and add a cutting step for 12 m."
+   ],
+   "source": {
+    "catalog_age": [
+     0,
+     0
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "10 large eggs",
+     "2 cups fresh spinach, chopped",
+     "1/2 cup pasteurized feta cheese, crumbled",
+     "1 cup cherry tomatoes, quartered",
+     "1/4 cup milk",
+     "1/2 tsp onion powder",
+     "1/2 tsp garlic powder",
+     "to taste salt and pepper",
+     "for muffin tin olive oil cooking spray"
+    ],
+    "storage": "Refrigerate promptly in an airtight container and use within 3–4 days. Discard if left at room temperature for over 2 hours. Freeze individually wrapped in plastic wrap then in freezer bag for up to 2 months. Thaw overnight in refrigerator or microwave for 30-45 seconds until warmed through.",
+    "summary": "Portable baked egg muffins with spinach, tomatoes, and feta.",
+    "tips": [
+     "Make a double batch on Sunday and freeze individually wrapped in plastic wrap then placed in a freezer bag for grab-and-go breakfasts",
+     "These are perfect for eating cold when morning sickness makes hot foods unappealing",
+     "Customize with your favorite vegetables like diced bell peppers, mushrooms, or zucchini"
+    ]
+   }
+  },
+  {
+   "n": 38,
+   "slug": "baked-samosa-puffs",
+   "title": "Baked Samosa Puffs",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Peas flattened, cut into soft pieces, cooled: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "puff pastry"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "birthday"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "lunchbox-and-daycare",
+    "birthday-party"
+   ],
+   "collection_reasons": {
+    "lunchbox-and-daycare": "Nut-free, eaten at room temperature",
+    "birthday-party": "Hand-held party pastry"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Puff pastry: some brands contain butter (milk). Not tagged dairy-free; label check needed."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 frozen egg-free, soy-free puff pastry sheet, thawed; verify the package label",
+     "1 cup potato, boiled and mashed",
+     "1/4 cup frozen peas, thawed",
+     "1/2 tsp mild curry powder",
+     "1/4 tsp cumin"
+    ],
+    "storage": "Refrigerate for 3 days. Re-crisp in toaster oven. Freeze unbaked for 1 month.",
+    "summary": "A mild, toddler-friendly take on the Indian classic. Using puff pastry simplifies the process, and baking avoids the grease of deep frying.",
+    "tips": [
+     "Flatten the peas completely in the filling to prevent them from rolling out while eating."
+    ]
+   }
+  },
+  {
+   "n": 39,
+   "slug": "mini-baked-chicken-nuggets",
+   "title": "Mini Baked Chicken Nuggets",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Cut into soft pieces, 165°F: fine from 12 m.",
+   "allergens": {
+    "eggs": [
+     "egg"
+    ],
+    "wheat": [
+     "breadcrumbs"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "dairy-free",
+     "nut-free"
+    ],
+    "occasion": [
+     "birthday"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "protein-packs",
+    "picky-eater-favorites",
+    "lunchbox-and-daycare",
+    "birthday-party"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member",
+    "picky-eater-favorites": "Nuggets: the classic safe food",
+    "lunchbox-and-daycare": "Steps say pack into a lunchbox",
+    "birthday-party": "Kids' party staple"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "In 4 collections."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "dairy-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 lb ground chicken",
+     "1/2 cup dairy-free, soy-free breadcrumbs",
+     "1 large egg",
+     "1/2 tsp garlic powder",
+     "1/2 tsp onion powder",
+     "1/4 tsp paprika"
+    ],
+    "storage": "Refrigerate for 3 days. Freeze for up to 2 months.",
+    "summary": "Oven-baked chicken nuggets with a crisp coating.",
+    "tips": [
+     "Make a double batch and freeze raw or cooked for busy weeks."
+    ]
+   }
+  },
+  {
+   "n": 40,
+   "slug": "onigiri-rice-triangles",
+   "title": "Onigiri Rice Triangles",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Loose soft rice, no salt for the child, nori only if soft: fine from 12 m.",
+   "allergens": {
+    "eggs": [
+     "mayonnaise"
+    ],
+    "fish": [
+     "tuna or salmon"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "fish"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "on-the-go"
+    ],
+    "free_from": [
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [
+     "back-to-school"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "lunchbox-and-daycare"
+   ],
+   "collection_reasons": {
+    "lunchbox-and-daycare": "Written for the lunchbox, kept cold"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Same-day only: storage says use the same day."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "dairy-free",
+     "nut-free"
+    ],
+    "ingredients": [
+     "1 cup dry sushi rice (short grain white rice)",
+     "1.25 cups water",
+     "1/4 cup canned tuna or cooked salmon",
+     "1 tsp mayonnaise, label-checked for soy",
+     "1 sheet nori (seaweed) sheets"
+    ],
+    "storage": "Refrigerate cooked rice and assembled portions within 2 hours and use the same day; transport cold with an ice pack. Reheat leftovers to 165°F.",
+    "summary": "Soft rice portions with a tuna or salmon filling and a small strip of nori.",
+    "tips": [
+     "You can buy inexpensive onigiri molds online to make shaping instant and uniform."
+    ]
+   }
+  },
+  {
+   "n": 41,
+   "slug": "rainbow-pesto-pasta-salad",
+   "title": "Rainbow Pesto Pasta Salad",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Soft pasta, tomatoes quartered lengthwise, peas pressed flat (later fix): fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "pasta"
+    ],
+    "milk": [
+     "mozzarella",
+     "pesto cheese"
+    ],
+    "tree_nuts": [
+     "pesto"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk",
+    "tree_nuts"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [
+     "veg-packed"
+    ],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "summer"
+    ],
+    "texture": "bowl"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [],
+   "flags": [
+    "Not placed: contains tree nuts, so it cannot go in Lunchbox & Daycare; no other book fits a cold pasta salad. A nut-free pesto version would fit Lunchbox."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "2 cups dry egg-free, soy-free fusilli or rotini pasta",
+     "1 cup cherry tomatoes",
+     "1/3 cup mild basil pesto made with vegetarian-rennet cheese and no egg or soy (contains tree nuts)",
+     "1/2 cup fresh mozzarella pearls",
+     "1/4 cup frozen peas, thawed"
+    ],
+    "storage": "Refrigerate promptly and use portions for the youngest children within 1–2 days; other portions within 3–4 days. Do not freeze.",
+    "summary": "A vibrant, cold lunch option that's visually appealing and easy for toddlers to eat with a fork or their fingers.",
+    "tips": [
+     "Use chickpea or lentil pasta for an extra protein boost."
+    ]
+   }
+  },
+  {
+   "n": 42,
+   "slug": "savory-corn-and-cheddar-muffins",
+   "title": "Savory Corn & Cheddar Muffins",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Corn finely mashed, small soft pieces under 4: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "all-purpose flour"
+    ],
+    "milk": [
+     "milk",
+     "butter",
+     "cheddar"
+    ],
+    "eggs": [
+     "egg"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk",
+    "eggs"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween",
+     "thanksgiving"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween",
+    "lunchbox-and-daycare",
+    "on-the-go-snacks",
+    "thanksgiving-table"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member",
+    "lunchbox-and-daycare": "Summary says it holds up in a lunchbox",
+    "on-the-go-snacks": "Freezes, travels without crumbling",
+    "thanksgiving-table": "Corn muffins: a Thanksgiving side"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Holiday Baking: a savory corn muffin, not a festive bake.",
+    "In 4 collections."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 cup all-purpose flour",
+     "1/2 cup cornmeal",
+     "2 tsp baking powder",
+     "1 cup milk",
+     "1 large egg",
+     "1/4 cup soy-free butter, melted",
+     "3/4 cup canned corn kernels, drained and finely mashed",
+     "1/2 cup soy-free cheddar cheese, shredded"
+    ],
+    "storage": "Refrigerate promptly and use within 3–4 days; freeze for up to 3 months.",
+    "summary": "These savory muffins are moist, cheesy, and packed with soft mashed corn kernels. They hold up well in a lunchbox without crumbling.",
+    "tips": [
+     "Serve with a small container of cream cheese for spreading."
+    ]
+   }
+  },
+  {
+   "n": 43,
+   "slug": "spinach-and-cheese-pizza-scrolls",
+   "title": "Spinach & Cheese Pizza Scrolls",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Cut into narrow soft strips, never whole scrolls: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "pizza dough"
+    ],
+    "milk": [
+     "mozzarella"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween",
+     "birthday"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween",
+    "lunchbox-and-daycare",
+    "picky-eater-favorites",
+    "birthday-party"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member",
+    "lunchbox-and-daycare": "Written for packing, good cold",
+    "picky-eater-favorites": "Pizza with spinach hidden inside",
+    "birthday-party": "Pizza for a party"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "In 4 collections."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "soy-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 lb egg-free, soy-free pizza dough made without animal fat",
+     "1/2 cup soy-free marinara sauce",
+     "1.5 cups mozzarella cheese made with vegetarian rennet",
+     "1/2 cup frozen spinach, thawed and squeezed dry"
+    ],
+    "storage": "Refrigerate promptly and keep chilled for a packed lunch; discard if left out longer than 2 hours. Freeze individually for up to 3 months.",
+    "summary": "A less messy alternative to pizza slices that tastes great cold or at room temperature. These savory buns are packed with spinach.",
+    "tips": [
+     "Serve with a side of extra marinara for dipping if your child enjoys dips."
+    ]
+   }
+  },
+  {
+   "n": 44,
+   "slug": "turkey-and-hummus-pinwheels",
+   "title": "Turkey & Hummus Pinwheels",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Unrolled and cut into soft strips: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "whole wheat tortilla"
+    ],
+    "sesame": [
+     "hummus"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free"
+    ],
+    "occasion": [
+     "back-to-school"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "protein-packs",
+    "lunchbox-and-daycare"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member",
+    "lunchbox-and-daycare": "Written for a chilled lunchbox"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Birthday Party: served as strips, not pinwheels, for young children."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "egg-free",
+     "dairy-free"
+    ],
+    "ingredients": [
+     "1 egg-free, dairy-free whole wheat tortilla (large)",
+     "2 tbsp dairy-free, egg-free hummus (contains sesame)",
+     "2 slices freshly cooked lower-sodium turkey",
+     "1/4 cup fresh spinach leaves, rinsed and dried",
+     "1 tbsp shredded carrots"
+    ],
+    "storage": "Keep refrigerated until packing and include an ice pack; discard if left out for over 2 hours. Best eaten the same day.",
+    "summary": "These colorful roll-ups hold together well in a lunchbox and can be served in soft, age-appropriate pieces.",
+    "tips": [
+     "Smash the filling slightly if your child tends to stuff too much food in their mouth."
+    ]
+   }
+  },
+  {
+   "n": 45,
+   "slug": "cold-sesame-noodle-salad",
+   "title": "Cold Sesame Noodle Salad",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Short soft noodles, smooth peanut butter thinned: fine from 18 m.",
+   "allergens": {
+    "wheat": [
+     "wheat spaghetti",
+     "soy sauce"
+    ],
+    "soy": [
+     "soy sauce"
+    ],
+    "peanuts": [
+     "peanut butter"
+    ],
+    "sesame": [
+     "sesame oil"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "soy",
+    "peanuts",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [
+     "summer"
+    ],
+    "texture": "bowl"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [],
+   "flags": [
+    "Not placed: contains peanuts, so not Lunchbox & Daycare; no other book fits."
+   ],
+   "source": {
+    "catalog_age": [
+     18,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "dairy-free",
+     "egg-free",
+     "vegan"
+    ],
+    "ingredients": [
+     "4 oz egg-free wheat spaghetti",
+     "2 tbsp smooth peanut butter",
+     "1 tbsp low-sodium soy sauce",
+     "1 tsp maple syrup",
+     "1 tsp sesame oil",
+     "1/4 cup cucumber, peeled and julienned"
+    ],
+    "storage": "Refrigerate promptly and use portions for children under 2 within 1–2 days; use other portions within 3 days. Sauce may thicken; add a drop of water when serving.",
+    "summary": "A refreshing Asian-inspired lunch that tastes best cold. The creamy sesame dressing clings to the noodles, making them easy to eat.",
+    "tips": [
+     "Use the specified peanut butter version for this recipe; do not substitute tahini or sunflower butter without rechecking allergens."
+    ]
+   }
+  },
+  {
+   "n": 46,
+   "slug": "greek-pita-bento-box",
+   "title": "Greek Pita Bento Box",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Soft narrow strips, peppers cooked soft under 18 m: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "pita"
+    ],
+    "milk": [
+     "feta"
+    ],
+    "sesame": [
+     "hummus"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "back-to-school"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "lunchbox-and-daycare"
+   ],
+   "collection_reasons": {
+    "lunchbox-and-daycare": "A packed bento lunch"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "soy-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 soft egg-free, soy-free mini pita bread",
+     "3 tbsp egg-free, soy-free hummus (contains sesame)",
+     "1/2 cup peeled cucumber cut into soft thin strips",
+     "2 tbsp feta cheese, crumbled",
+     "1/4 cup bell pepper strips, cooked soft for children under 18 months or thin strips for older children"
+    ],
+    "storage": "Keep refrigerated and pack with an ice pack; discard if left unrefrigerated for over 2 hours. Best prepared the morning of.",
+    "summary": "A deconstructed lunch that lets kids assemble their own bites. It's fresh, requires zero cooking, and offers a variety of textures.",
+    "tips": [
+     "Swap pita for soft naan bread for a texture change, checking its label for egg and soy."
+    ]
+   }
+  },
+  {
+   "n": 47,
+   "slug": "mini-bean-and-cheese-burritos",
+   "title": "Mini Bean & Cheese Burritos",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 120,
+   "age_source": "catalog, checked",
+   "age_note": "Opened, tortilla cut in soft strips for toddlers: fine from 12 m.",
+   "allergens": {
+    "wheat": [
+     "flour tortillas"
+    ],
+    "milk": [
+     "cheddar"
+    ]
+   },
+   "catalog_allergens": [
+    "wheat",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch"
+    ],
+    "goal": [
+     "protein",
+     "picky-friendly"
+    ],
+    "practical": [
+     "under-15-min",
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "back-to-school"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "meal-prep",
+    "lunchbox-and-daycare",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; freezes 1 month",
+    "lunchbox-and-daycare": "Stays good cold",
+    "picky-eater-favorites": "Beans and cheese in a tortilla"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of On-the-Go Snacks: a lunch, not a snack."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     120
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "4 small egg-free, soy-free flour tortillas (taco size)",
+     "1/2 cup vegetarian refried beans made without lard",
+     "1/4 cup mild cheddar cheese, shredded",
+     "1 tbsp egg-free, soy-free mild salsa (optional)"
+    ],
+    "storage": "Refrigerate promptly; use portions for children under 2 within 1–2 days and other portions within 3–4 days. Freeze wrapped portions up to 1 month.",
+    "summary": "Soft, simple, and filling. These mini burritos are easier to handle than a sandwich and stay delicious even when cold.",
+    "tips": [
+     "Use 'fajita' size or 'street taco' size tortillas for perfect toddler portions."
+    ]
+   }
+  },
+  {
+   "n": 48,
+   "slug": "apple-cinnamon-oat-toddler-porridge",
+   "title": "Apple Cinnamon Oat Toddler Porridge",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Cow's milk cooked in, soft oats: fine from 12 m.",
+   "allergens": {
+    "milk": [
+     "cow's milk"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "breakfast"
+    ],
+    "goal": [
+     "fiber"
+    ],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "toddler-breakfasts"
+   ],
+   "collection_reasons": {
+    "toddler-breakfasts": "Warm porridge from 12 m"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Thanksgiving Table: an everyday porridge.",
+    "A tip suggests optional nut butter; still nut-free as written."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/2 cup rolled oats",
+     "1 cup cow's milk",
+     "1/2 cup water",
+     "1 small apple, peeled and finely grated",
+     "1/4 teaspoon ground cinnamon"
+    ],
+    "storage": "Refrigerate in a sealed container for up to 3 days. Add extra liquid when reheating, as oats thicken over time.",
+    "summary": "This warm porridge blends oats, apple, and cinnamon into a cozy breakfast bowl. Parents will like the simple ingredients and easy way to adjust thickness for different stages.",
+    "tips": [
+     "Reheat leftovers with a splash of milk or water and stir over low heat until smooth.",
+     "For older toddlers who have already been introduced to nuts, stir a thin layer of smooth nut butter completely into the porridge; do not offer a spoonful."
+    ]
+   }
+  },
+  {
+   "n": 49,
+   "slug": "banana-peanut-butter-chia-pudding",
+   "title": "Banana Peanut Butter Chia Pudding",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Blended smooth, peanut butter stirred in: fine from 18 m.",
+   "allergens": {
+    "milk": [
+     "yogurt",
+     "milk"
+    ],
+    "peanuts": [
+     "peanut butter"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "peanuts"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "breakfast",
+     "snack",
+     "treat"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "toddler-breakfasts",
+    "big-kid-breakfasts",
+    "everyday-treats"
+   ],
+   "collection_reasons": {
+    "toddler-breakfasts": "Make-ahead breakfast from 18 m",
+    "big-kid-breakfasts": "Suits up to 4 years, ready in the fridge",
+    "everyday-treats": "Pudding with no added sugar (banana only)"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     18,
+     48
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "1 medium ripe banana, peeled",
+     "1 cup plain whole milk yogurt",
+     "2 tablespoons smooth peanut butter",
+     "2 tablespoons chia seeds",
+     "1/4 cup milk"
+    ],
+    "storage": "Refrigerate in a sealed container for up to 3 days. Stir well each time before serving to toddlers.",
+    "summary": "This pudding blends banana, yogurt, chia seeds, and peanut butter for a creamy snack or breakfast. Parents will like the no-cook method and the way it sits in the fridge ready for busy mornings.",
+    "tips": [
+     "Prepare this pudding in the evening so breakfast is ready in the fridge.",
+     "Do not add banana rounds or coarse peanut-butter topping; keep banana mashed into the pudding and peanut butter fully stirred in."
+    ]
+   }
+  },
+  {
+   "n": 50,
+   "slug": "cheesy-veggie-quinoa-toddler-bites",
+   "title": "Cheesy Veggie Quinoa Toddler Bites",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "catalog, checked",
+   "age_note": "Soft, cut or crumbled: fine from 12 m.",
+   "allergens": {
+    "milk": [
+     "cheddar"
+    ],
+    "eggs": [
+     "egg"
+    ],
+    "wheat": [
+     "breadcrumbs"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "eggs",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "lunch",
+     "snack"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bites"
+   },
+   "collections": [
+    "on-the-go-snacks",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "on-the-go-snacks": "Freezes, travels",
+    "picky-eater-favorites": "Carrot and spinach hidden in cheese"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "1/2 cup quinoa, rinsed",
+     "1 cup water",
+     "1/3 cup finely grated carrot",
+     "1/3 cup finely chopped spinach",
+     "1/2 cup mild cheddar cheese made with vegetarian rennet, shredded",
+     "1 large egg",
+     "1/4 cup breadcrumbs",
+     "1 teaspoon olive oil for greasing"
+    ],
+    "storage": "Refrigerate promptly and use portions for children under 2 within 1–2 days; freeze up to 2 months.",
+    "summary": "These soft baked bites pack vegetables, quinoa, and cheese into toddler-friendly finger shapes. Parents will like how easy they are to reheat for fast lunches and snacks.",
+    "tips": [
+     "Bake a double batch and freeze extra bites for fast weeknight dinners.",
+     "Serve with a small side of yogurt or tomato sauce for dipping if your toddler likes dipping."
+    ]
+   }
+  },
+  {
+   "n": 51,
+   "slug": "creamy-hummus-yogurt-veggie-dippers",
+   "title": "Creamy Hummus Yogurt Veggie Dippers",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Steamed soft, squish-tested sticks: fine from 18 m.",
+   "allergens": {
+    "milk": [
+     "whole milk yogurt"
+    ],
+    "sesame": [
+     "hummus"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "sesame"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "lunch"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "picky-eater-favorites",
+    "lunchbox-and-daycare"
+   ],
+   "collection_reasons": {
+    "picky-eater-favorites": "Dip makes vegetables easier",
+    "lunchbox-and-daycare": "Nut-free; pack cold"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free (hummus, yogurt, vegetables). Check hummus label."
+   ],
+   "source": {
+    "catalog_age": [
+     18,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/4 cup plain hummus",
+     "1/4 cup plain whole milk yogurt",
+     "1/2 cup steamed carrot sticks, 1/4 inch thick and 2 inches long",
+     "1/2 cup steamed broccoli florets, cut into small trees",
+     "1 to 2 tablespoons water"
+    ],
+    "storage": "Refrigerate dip in a sealed container for up to 2 days. Store steamed vegetables in a separate container for up to 2 days.",
+    "summary": "This snack pairs a smooth hummus yogurt dip with soft veggie sticks for a fun finger food plate. Parents will like the quick stir together dip and easy way to offer vegetables.",
+    "tips": [
+     "Steam extra vegetable sticks and keep them in the fridge so snacks come together fast.",
+     "Swap in soft pita strips for older toddlers who manage mixed textures well."
+    ]
+   }
+  },
+  {
+   "n": 52,
+   "slug": "deconstructed-soft-taco-toddler-bowl",
+   "title": "Deconstructed Soft Taco Toddler Bowl",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Mashed sweet potato and beans, small tortilla strips: fine from 18 m.",
+   "allergens": {
+    "milk": [
+     "shredded cheese"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber",
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "picky-eater-favorites": "Separate sections; tip for children unsure about beans"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free (corn tortilla)."
+   ],
+   "source": {
+    "catalog_age": [
+     18,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup sweet potato, peeled and cut into 1 inch cubes",
+     "1/2 cup cooked low-sodium black beans, rinsed",
+     "1 small soft corn tortilla",
+     "1/4 cup mild shredded cheese",
+     "1 cup water",
+     "1 teaspoon olive oil"
+    ],
+    "storage": "Refrigerate promptly; use portions for children under 2 within 1–2 days. Keep dry tortilla strips separate.",
+    "summary": "This Mexican style bowl uses soft sweet potato, black beans, and small tortilla strips for a finger friendly meal. Parents will like the flexible toppings that work for different ages at the table.",
+    "tips": [
+     "Serve plain sweet potato mash for toddlers who feel unsure about beans, then add small spoonfuls of beans over time.",
+     "Use extra tortillas to make strips for dipping into mashed sweet potato on busy nights."
+    ]
+   }
+  },
+  {
+   "n": 53,
+   "slug": "salmon-potato-veggie-mash",
+   "title": "Salmon Potato Veggie Mash",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Bones removed, peas mashed, small soft flakes: fine from 12 m.",
+   "allergens": {
+    "milk": [
+     "butter"
+    ],
+    "fish": [
+     "salmon"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "fish"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "mash"
+   },
+   "collections": [
+    "protein-packs"
+   ],
+   "collection_reasons": {
+    "protein-packs": "Live member"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "4 ounces boneless skinless salmon fillet",
+     "1 medium potato, peeled and chopped into 1 inch cubes",
+     "1/3 cup frozen peas",
+     "1 tablespoon unsalted butter",
+     "2 to 3 tablespoons water",
+     "as needed water for boiling"
+    ],
+    "storage": "Refrigerate in a sealed container for up to 2 days. Do not freeze fish and potato mash for toddlers, as texture changes after thawing.",
+    "summary": "This fork mash meal offers soft flakes of salmon with potato and peas for healthy fats and protein. Parents will like how smooth the texture feels while still offering gentle chunks for toddlers who practice chewing.",
+    "tips": [
+     "Bake extra salmon, flake it, and store in the fridge to stir into other grain or pasta dishes.",
+     "Serve leftovers in small patties the next day by pan warming spoonfuls in a nonstick pan."
+    ]
+   }
+  },
+  {
+   "n": 54,
+   "slug": "soft-chicken-veggie-rice-bowl",
+   "title": "Soft Chicken Veggie Rice Bowl",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "catalog, checked",
+   "age_note": "Shredded under 1/2 inch, vegetables soft: fine from 12 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "one-pot"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "freezer-dinners"
+   ],
+   "collection_reasons": {
+    "freezer-dinners": "Freezes 2 months, portion tip"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free. Broth: check label."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "4 ounces boneless skinless chicken breast, trimmed",
+     "1/2 cup white rice, rinsed",
+     "1/3 cup finely chopped carrot",
+     "1/3 cup finely chopped broccoli florets",
+     "1 3/4 cups water or no-salt-added chicken broth",
+     "1 teaspoon olive oil"
+    ],
+    "storage": "Refrigerate promptly and use portions for children under 2 within 1–2 days; freeze up to 2 months.",
+    "summary": "This bowl brings together tender chicken, rice, and vegetables in a mild, spoon ready mix. Parents will like the one pot method and how easily leftovers turn into quick lunches.",
+    "tips": [
+     "Portion leftovers into small containers so you have single toddler servings ready to reheat.",
+     "Use frozen chopped vegetables if evenings feel busy, then adjust cooking time by 2 to 3 extra minutes if needed."
+    ]
+   }
+  },
+  {
+   "n": 55,
+   "slug": "soft-tofu-veggie-stir-fry-with-rice",
+   "title": "Soft Tofu Veggie Stir Fry with Rice",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "catalog, checked",
+   "age_note": "Soft strips or crumbles, pieces under 1/2 inch: fine from 12 m.",
+   "allergens": {
+    "soy": [
+     "tofu",
+     "tamari"
+    ]
+   },
+   "catalog_allergens": [
+    "soy"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [],
+   "flags": [
+    "Not placed: Protein Packs is live with fixed members. This recipe suits 1-2 years better than #29 (Chicken Stir-Fry), which is in Protein Packs but suits 2+ as written. Consider swapping."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1/2 block (about 7 ounces) firm tofu, drained",
+     "1 1/2 cups cooked white rice, warm",
+     "1/4 cup finely chopped carrot",
+     "1/4 cup finely chopped green beans",
+     "1/4 cup finely chopped bell pepper, no skin pieces larger than 1/4 inch",
+     "1 teaspoon low-sodium, wheat-free tamari",
+     "2 tablespoons water",
+     "2 teaspoons neutral oil"
+    ],
+    "storage": "Refrigerate rice and tofu/vegetables promptly; use portions for children under 2 within 1–2 days. Reheat leftovers to 165°F.",
+    "summary": "This Asian inspired plate offers soft tofu cubes with finely chopped vegetables over rice. Parents will like the gentle flavors and simple sauce that stays mild for toddlers.",
+    "tips": [
+     "Use leftover rice from family dinner to speed up this meal the next day.",
+     "Mash some tofu and rice together with a fork for toddlers who still prefer softer textures."
+    ]
+   }
+  },
+  {
+   "n": 56,
+   "slug": "turkey-veggie-mini-meatballs-with-pasta",
+   "title": "Turkey Veggie Mini Meatballs with Pasta",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Meatballs quartered to under 1/2 inch: fine from 18 m.",
+   "allergens": {
+    "milk": [
+     "Parmesan"
+    ],
+    "eggs": [
+     "egg"
+    ],
+    "wheat": [
+     "breadcrumbs",
+     "pasta"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "eggs",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "lunch",
+     "dinner"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "make-ahead",
+     "whole-family",
+     "freezes"
+    ],
+    "free_from": [
+     "nut-free"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "family-dinners",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "family-dinners": "Summary: same meal for the whole family",
+    "picky-eater-favorites": "Hidden zucchini and carrot; dip option"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "'Freezes' comes from the tip (freeze baked meatballs); the storage note does not say it.",
+    "Left out of Thanksgiving Table: turkey meatballs are not a Thanksgiving dish."
+   ],
+   "source": {
+    "catalog_age": [
+     18,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free"
+    ],
+    "ingredients": [
+     "8 ounces lean ground turkey",
+     "1/3 cup finely grated zucchini, squeezed dry",
+     "1/4 cup finely grated carrot",
+     "1/4 cup breadcrumbs",
+     "2 tablespoons grated Parmesan cheese",
+     "1 large egg",
+     "1 cup small pasta shapes such as elbows or shells",
+     "1 cup no-salt tomato sauce",
+     "as needed water for boiling pasta",
+     "1 teaspoon olive oil for greasing"
+    ],
+    "storage": "Refrigerate promptly; use portions for children under 2 within 1–2 days and other portions within 3–4 days.",
+    "summary": "These mini meatballs combine ground turkey and vegetables in a tender texture with small pasta. Parents will like serving the same meal to the whole family while cutting pieces safely for toddlers.",
+    "tips": [
+     "Freeze half the baked meatballs for a future quick pasta night.",
+     "Serve meatball pieces alone with sauce on the side if your toddler prefers to dip."
+    ]
+   }
+  },
+  {
+   "n": 57,
+   "slug": "veggie-lentil-pancakes",
+   "title": "Veggie Lentil Pancakes",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "catalog, checked",
+   "age_note": "Soft, cut into 1/2-inch strips: fine from 12 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "breakfast",
+     "lunch"
+    ],
+    "goal": [
+     "protein",
+     "iron",
+     "fiber",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "meal-prep",
+    "toddler-breakfasts"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member; freezes 2 months",
+    "toddler-breakfasts": "Savory pancakes, batter can be made the night before"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free (lentils and vegetables only)."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "nut-free",
+     "egg-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "ingredients": [
+     "1/2 cup red lentils, rinsed",
+     "1 1/2 cups water for soaking",
+     "1/3 cup finely grated zucchini, squeezed dry",
+     "1/3 cup finely grated carrot",
+     "1/4 to 1/3 cup water for blending",
+     "2 teaspoons olive oil for cooking"
+    ],
+    "storage": "Refrigerate promptly and use portions for children under 2 within 1–2 days; freeze up to 2 months.",
+    "summary": "Soft lentil and vegetable pancakes with mild spices.",
+    "tips": [
+     "Keep soaked lentils in the fridge overnight if you want to blend fresh batter in the morning.",
+     "Serve with yogurt or tomato chutney on the side if your toddler enjoys dipping."
+    ]
+   }
+  },
+  {
+   "n": 58,
+   "slug": "apple-sunflower-snack-rounds",
+   "title": "Apple Sunflower Snack Rounds",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Steamed apple, thin spread, 1-inch pieces: fine from 18 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "GLUTEN-FREE CLAIM WRONG: catalog says gluten-free, but the oat cereal is not named gluten-free. Specify certified gluten-free oats or drop the tag.",
+    "Left out of On-the-Go Snacks: keeps only 4 hours in the fridge."
+   ],
+   "source": {
+    "catalog_age": [
+     18,
+     48
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 medium apple, washed, peeled, and cored",
+     "3 tablespoons sunflower seed butter, smooth and unsweetened",
+     "2 tablespoons finely ground oat cereal or plain oat crumbs"
+    ],
+    "storage": "Serve soon after slicing for best texture. If needed, refrigerate prepared rounds in an airtight container for up to 4 hours and pat away extra moisture before serving.",
+    "summary": "These soft apple rounds pair sunflower seed spread with finely ground oats for a simple sandwich style snack. Parents will like the soft texture and easy assembly.",
+    "tips": [
+     "Use pre ground oat cereal in place of granola so texture stays soft and safe.",
+     "Prepare the spread and cereal in advance so assembly moves faster during snack time."
+    ]
+   }
+  },
+  {
+   "n": 59,
+   "slug": "cheesy-veggie-mini-muffins",
+   "title": "Cheesy Veggie Mini Muffins",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Soft, halved or quartered: fine from 12 m.",
+   "allergens": {
+    "milk": [
+     "cheddar",
+     "milk"
+    ],
+    "eggs": [
+     "egg"
+    ],
+    "wheat": [
+     "all-purpose flour"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "eggs",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "lunch"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "meal-prep",
+    "on-the-go-snacks",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "meal-prep": "Live member",
+    "on-the-go-snacks": "Freezes, easy to hold",
+    "picky-eater-favorites": "Carrot and spinach inside a cheese muffin"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Also fits Lunchbox & Daycare (tip says lunchbox snacks); left out to limit overlap."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "3/4 cup all-purpose flour",
+     "1 teaspoon baking powder",
+     "1/3 cup finely grated carrot",
+     "1/3 cup finely chopped spinach",
+     "1/2 cup shredded mild cheddar cheese made with vegetarian rennet",
+     "1/2 cup milk",
+     "1 large egg",
+     "2 tablespoons neutral oil"
+    ],
+    "storage": "Refrigerate in an airtight container for up to 3 days. Freeze for up to 2 months and reheat at 300°F (150°C) for 5 to 7 minutes.",
+    "summary": "These mini muffins tuck vegetables and cheese into a soft, easy to hold shape. Parents will like serving them as a snack or side for soup and salads.",
+    "tips": [
+     "Freeze half the batch for lunchbox snacks on busy days.",
+     "Serve muffin pieces with cucumber slices or fruit for a more balanced snack plate."
+    ]
+   }
+  },
+  {
+   "n": 60,
+   "slug": "chickpea-cookie-dough-fruit-dip",
+   "title": "Chickpea Cookie Dough Fruit Dip",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 18,
+   "age_max_months": 60,
+   "age_source": "catalog, checked",
+   "age_note": "Smooth dip, small soft fruit pieces: fine from 18 m.",
+   "allergens": {
+    "milk": [
+     "yogurt"
+    ],
+    "peanuts": [
+     "peanut butter"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "peanuts"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [
+     "protein",
+     "fiber"
+    ],
+    "practical": [
+     "under-15-min",
+     "no-cook",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "bowl"
+   },
+   "collections": [
+    "everyday-treats"
+   ],
+   "collection_reasons": {
+    "everyday-treats": "Dessert-style dip sweetened only with banana or dates"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Birthday Party: peanut butter is a risk when other children may have allergies.",
+    "Catalog diet tags miss gluten-free."
+   ],
+   "source": {
+    "catalog_age": [
+     18,
+     60
+    ],
+    "catalog_diet": [
+     "vegetarian"
+    ],
+    "ingredients": [
+     "1 cup cooked chickpeas, no salt, rinsed",
+     "1/2 cup plain whole milk yogurt",
+     "2 tablespoons smooth peanut butter, unsweetened",
+     "1/3 cup ripe banana or soft dates, chopped",
+     "1/2 teaspoon vanilla extract",
+     "1 cup soft fruit for dipping, such as banana slices or steamed apple slices"
+    ],
+    "storage": "Refrigerate dip in a sealed container for up to 3 days. Prepare fresh fruit on the day of serving and discard any fruit pieces left on the plate.",
+    "summary": "This dip tastes like cookie dough but uses chickpeas, yogurt, and nut butter for a creamy snack. Parents will like pairing it with soft fruit for a fun dessert style plate.",
+    "tips": [
+     "Serve this dip on days when you plan a lighter dinner, since the snack feels filling.",
+     "Use leftover dip as a spread on toast fingers for a quick breakfast."
+    ]
+   }
+  },
+  {
+   "n": 61,
+   "slug": "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+   "title": "Cinnamon Sweet Potato Snack Fries with Yogurt Dip",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Soft-centre sticks, shortened for newer eaters: fine from 12 m.",
+   "allergens": {
+    "milk": [
+     "whole milk yogurt"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween",
+     "thanksgiving"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween",
+    "picky-eater-favorites",
+    "thanksgiving-table"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member",
+    "picky-eater-favorites": "Fries with a dip",
+    "thanksgiving-table": "Cinnamon sweet potato: a Thanksgiving flavour"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free.",
+    "Left out of Birthday Party: a side dish."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 medium sweet potato, peeled",
+     "1 tablespoon neutral oil",
+     "1/4 teaspoon ground cinnamon",
+     "1/3 cup plain whole milk yogurt",
+     "1 tablespoon water"
+    ],
+    "storage": "Refrigerate fries and dip in separate containers for up to 2 days. Reheat fries at 350°F (180°C) for 5 to 7 minutes until warm and soft.",
+    "summary": "These baked sweet potato sticks taste like fries but bake soft inside for safer chewing. Parents will like the simple sheet pan method and quick yogurt dip.",
+    "tips": [
+     "Serve leftovers with scrambled eggs or beans for a fast mini meal.",
+     "Use this snack during family snack time so your toddler practices dipping skills."
+    ]
+   }
+  },
+  {
+   "n": 62,
+   "slug": "mango-lassi-chia-pudding-cups",
+   "title": "Mango Lassi Chia Pudding Cups",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Blended, chia fully soaked, cow's milk cooked into food is fine from 12 m.",
+   "allergens": {
+    "milk": [
+     "yogurt",
+     "milk"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "breakfast",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "summer"
+    ],
+    "texture": "bowl"
+   },
+   "collections": [
+    "toddler-breakfasts",
+    "everyday-treats"
+   ],
+   "collection_reasons": {
+    "toddler-breakfasts": "Made the night before",
+    "everyday-treats": "Pudding with no added sugar (mango only)"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup ripe mango, peeled and chopped",
+     "3/4 cup plain whole milk yogurt",
+     "1/2 cup milk",
+     "3 tablespoons chia seeds",
+     "1 pinch ground cardamom (optional)"
+    ],
+    "storage": "Refrigerate in sealed containers for up to 3 days. Stir well before each serving.",
+    "summary": "These pudding cups taste like mango lassi in spoon form, made with mango, yogurt, and chia seeds. Parents will like prepping the cups the night before for ready to eat snacks.",
+    "tips": [
+     "Portion pudding in reusable yogurt pouches for toddlers who enjoy sucking smooth textures.",
+     "Top with tiny soft mango cubes or banana slices for older toddlers who handle small pieces with confidence."
+    ]
+   }
+  },
+  {
+   "n": 63,
+   "slug": "mini-berry-yogurt-pops",
+   "title": "Mini Berry Yogurt Pops",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Shavings in a bowl under 24 m, whole mini pop only from 24 m seated: fine.",
+   "allergens": {
+    "milk": [
+     "yogurt",
+     "milk (option)"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "summer",
+     "birthday"
+    ],
+    "texture": "bowl"
+   },
+   "collections": [
+    "halloween",
+    "everyday-treats",
+    "birthday-party"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member",
+    "everyday-treats": "Sweetened only by fruit",
+    "birthday-party": "Frozen party treat"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss gluten-free."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup plain whole milk yogurt",
+     "1/2 cup mixed berries, fresh or frozen, chopped if large",
+     "1/2 medium ripe banana, sliced",
+     "2 to 3 tablespoons milk or water"
+    ],
+    "storage": "Keep frozen in the molds or in a freezer bag for up to 1 month. Soften before serving as described in the instructions; do not serve straight from the freezer.",
+    "summary": "These mini pops taste like ice cream but rely on yogurt and fruit for sweetness. Parents will like the built in portion control and simple ingredient list.",
+    "tips": [
+     "Prepare pops the night before so snacks sit ready in the freezer.",
+     "Use single fruit flavors for toddlers who prefer simple tastes, such as only strawberry or only blueberry."
+    ]
+   }
+  },
+  {
+   "n": 64,
+   "slug": "soft-banana-oat-toddler-cookies",
+   "title": "Soft Banana Oat Toddler Cookies",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Soft, broken into 1/2-inch pieces: fine from 12 m.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "breakfast",
+     "treat"
+    ],
+    "goal": [
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween",
+    "everyday-treats",
+    "on-the-go-snacks"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member",
+    "everyday-treats": "No added sugar (banana)",
+    "on-the-go-snacks": "Freezes, travels"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Holiday Baking: a plain everyday cookie, not a festive bake.",
+    "Coconut oil is an option: say 'may contain coconut'."
+   ],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 large ripe banana, peeled",
+     "3/4 cup certified gluten-free rolled oats",
+     "1 tablespoon neutral oil or melted coconut oil",
+     "1/4 teaspoon ground cinnamon",
+     "1/4 teaspoon vanilla extract (optional)"
+    ],
+    "storage": "Refrigerate in an airtight container for up to 3 days. Freeze for up to 2 months and thaw at room temperature before serving.",
+    "summary": "These soft cookies use mashed banana and oats for a lightly sweet snack. Parents will like the no added sugar recipe and freezer friendly texture for busy afternoons.",
+    "tips": [
+     "Freeze cookies in a single layer, then move to a freezer bag for quick snacks.",
+     "Serve cookie pieces with fruit slices or yogurt for a more filling snack plate."
+    ]
+   }
+  },
+  {
+   "n": 65,
+   "slug": "soft-date-almond-cocoa-bites",
+   "title": "Soft Date Almond Cocoa Bites",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 24,
+   "age_max_months": 72,
+   "age_source": "catalog, checked",
+   "age_note": "Flattened discs, cut to 1/2 inch under 4, never balls: fine from 24 m.",
+   "allergens": {
+    "tree_nuts": [
+     "almond flour"
+    ]
+   },
+   "catalog_allergens": [
+    "tree_nuts"
+   ],
+   "tags": {
+    "stage": [
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [
+     "holidays"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween",
+    "everyday-treats",
+    "holiday-baking"
+   ],
+   "collection_reasons": {
+    "halloween": "Live member",
+    "everyday-treats": "Sweetened only by dates",
+    "holiday-baking": "Chocolate treat for December (no-bake)"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Left out of Birthday Party: tree nuts at a shared party.",
+    "Holiday Baking fit is loose: no oven involved."
+   ],
+   "source": {
+    "catalog_age": [
+     24,
+     72
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup, packed pitted soft dates",
+     "1/2 cup fine almond flour",
+     "2 tablespoons unsweetened cocoa powder",
+     "1 tablespoon neutral oil or coconut oil, melted",
+     "1 to 2 tablespoons water"
+    ],
+    "storage": "Refrigerate promptly in an airtight container with parchment between layers and use within 3 to 4 days. Freeze for up to 2 months and thaw in the fridge before serving.",
+    "summary": "These cocoa bites feel like brownie truffles with dates and almonds for sweetness and chew. Parents will like using them as a special treat with simple ingredients.",
+    "tips": [
+     "Serve one or two discs alongside fruit rather than alone to keep portions moderate.",
+     "Use these bites as a special weekend dessert to keep them feeling unique."
+    ]
+   }
+  },
+  {
+   "n": 66,
+   "slug": "soft-peanut-butter-oat-energy-balls",
+   "title": "Soft Peanut Butter Oat Energy Balls",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 24,
+   "age_max_months": 60,
+   "age_source": "catalog, checked",
+   "age_note": "Flattened discs, cut to 1/2 inch under 4, never balls: fine from 24 m.",
+   "allergens": {
+    "peanuts": [
+     "peanut butter"
+    ]
+   },
+   "catalog_allergens": [
+    "peanuts"
+   ],
+   "tags": {
+    "stage": [
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "bites"
+   },
+   "collections": [
+    "everyday-treats"
+   ],
+   "collection_reasons": {
+    "everyday-treats": "Sweetened only by banana"
+   },
+   "after_rewrite": [],
+   "flags": [
+    "Catalog diet tags miss egg-free, dairy-free and vegan.",
+    "Left out of On-the-Go Snacks: that book is 1-2 years and this starts at 24 m.",
+    "Left out of Holiday Baking and Birthday Party: no-bake everyday snack, and peanuts at a party."
+   ],
+   "source": {
+    "catalog_age": [
+     24,
+     60
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "1 cup certified gluten-free rolled oats",
+     "1/3 cup smooth peanut butter",
+     "1/2 medium ripe banana, mashed",
+     "1 tablespoon ground flaxseed (optional)",
+     "1/4 teaspoon vanilla extract",
+     "1 to 2 tablespoons water"
+    ],
+    "storage": "Refrigerate promptly in an airtight container with parchment between layers and use within 3 to 4 days. Freeze for up to 2 months and thaw in the fridge before serving.",
+    "summary": "These no bake balls mix oats, peanut butter, and banana into a soft, chewy snack. Parents will like the fridge friendly format for quick afternoon energy.",
+    "tips": [
+     "Store discs in a snack box for outings, packing an ice pack on warm days.",
+     "Offer half pieces at first for toddlers who feel unsure about new textures."
+    ]
+   }
+  },
+  {
+   "n": 67,
+   "slug": "veggie-rice-snack-fritters",
+   "title": "Veggie Rice Snack Fritters",
+   "free_sample": false,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 12,
+   "age_max_months": 48,
+   "age_source": "catalog, checked",
+   "age_note": "Set centre, soft pieces 1-1.5 inch: fine from 12 m.",
+   "allergens": {
+    "eggs": [
+     "egg"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "lunch"
+    ],
+    "goal": [
+     "veg-packed",
+     "picky-friendly"
+    ],
+    "practical": [
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "on-the-go-snacks",
+    "picky-eater-favorites"
+   ],
+   "collection_reasons": {
+    "on-the-go-snacks": "Tip says pack for lunchboxes and outings",
+    "picky-eater-favorites": "Rice with vegetables mixed in"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     48
+    ],
+    "catalog_diet": [
+     "dairy-free",
+     "gluten-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "ingredients": [
+     "1 cup cooked white rice, cooled and refrigerated within 2 hours of cooking",
+     "1/4 cup finely grated carrot",
+     "1/4 cup finely chopped spinach",
+     "1 large egg",
+     "2 tablespoons rice flour",
+     "2 teaspoons neutral oil"
+    ],
+    "storage": "Refrigerate fritters in a sealed container within 2 hours of cooking. Use within 3 days, or within 1 to 2 days for children under 2. Reheat in a skillet over low heat for 2 to 3 minutes per side or in the oven at 325°F (165°C) for 8 to 10 minutes, until the center reaches 165°F (74°C), then cool until warm before serving.",
+    "summary": "These pan cooked fritters mix rice and vegetables into soft, hand held pieces. Parents will like serving leftovers as a quick snack or side for soup.",
+    "tips": [
+     "Use leftover plain rice from dinner to speed up preparation, as long as it went into the fridge within 2 hours of cooking.",
+     "Pack cooled fritter pieces in lunchboxes with fruit and yogurt for variety."
+    ]
+   }
+  },
+  {
+   "n": 68,
+   "slug": "sweet-potato-and-spinach-frittata-fingers",
+   "title": "Sweet Potato & Spinach Frittata Fingers",
+   "free_sample": true,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 6,
+   "age_max_months": 24,
+   "age_source": "catalog, checked",
+   "age_note": "Soft strips 1x3 inch for grip, spinach finely chopped: fine from 6 m.",
+   "allergens": {
+    "eggs": [
+     "eggs"
+    ],
+    "milk": [
+     "milk",
+     "cheddar"
+    ]
+   },
+   "catalog_allergens": [
+    "eggs",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "6-8m",
+     "9-12m",
+     "1-2y"
+    ],
+    "meal": [
+     "breakfast",
+     "lunch"
+    ],
+    "goal": [
+     "protein",
+     "veg-packed"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [],
+   "flags": [
+    "Free sample: tagged, kept out of paid collections."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     24
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "gluten-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "6 large eggs",
+     "1/2 cup sweet potato, cooked and mashed",
+     "1/2 cup fresh spinach, finely chopped",
+     "2 tbsp milk (dairy or breastmilk)",
+     "1/4 cup mild cheddar cheese, shredded"
+    ],
+    "storage": "Store in an airtight container in the fridge for up to 3 days. Freeze with parchment paper between layers for up to 2 months.",
+    "summary": "These protein-packed egg strips are soft, easy to hold, and a perfect way to introduce leafy greens. They store beautifully, making them a breakfast lifesaver for busy mornings.",
+    "tips": [
+     "Steam the sweet potato in the microwave for 5 minutes for a quick prep hack."
+    ]
+   }
+  },
+  {
+   "n": 69,
+   "slug": "soft-baked-blueberry-and-oat-bars",
+   "title": "Soft-Baked Blueberry & Oat Bars",
+   "free_sample": true,
+   "review_gate": "rejected",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 48,
+   "age_source": "changed from the catalog (6–48 m)",
+   "age_note": "UNRESOLVED. Catalog says 6 m, and the review gate rejects this recipe over that age. Firm centre, whole oats and 16 squares read as 9 m+ to me; an expert should decide.",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "snack",
+     "breakfast",
+     "treat"
+    ],
+    "goal": [
+     "fiber"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "on-the-go"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [],
+   "flags": [
+    "Free sample: tagged, kept out of paid collections.",
+    "REJECTED by the review gate (minimum age and shape). Published as a free recipe today.",
+    "Coconut oil: say 'contains coconut'.",
+    "Catalog diet tags miss vegan."
+   ],
+   "source": {
+    "catalog_age": [
+     6,
+     48
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "dairy-free",
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1.5 cups rolled oats",
+     "2 medium ripe bananas, mashed",
+     "1/2 cup blueberries (fresh or frozen)",
+     "2 tbsp coconut oil, melted",
+     "1/2 tsp vanilla extract"
+    ],
+    "storage": "Store in airtight container at room temperature for 2 days, fridge for 5 days, or freeze for 3 months.",
+    "summary": "Ideally textured for babies transitioning to solids, these bars hold together but melt in the mouth. They are naturally sweetened with bananas and blueberries, perfect for snacks or breakfast.",
+    "tips": [
+     "Use very ripe bananas (brown spots are good!) for the best sweetness and binding texture."
+    ]
+   }
+  },
+  {
+   "n": 70,
+   "slug": "salmon-and-pea-fish-cakes",
+   "title": "Salmon & Pea Fish Cakes",
+   "free_sample": true,
+   "review_gate": "passed",
+   "written_for": "children",
+   "age_min_months": 9,
+   "age_max_months": 60,
+   "age_source": "catalog, checked",
+   "age_note": "Cut into strips, bones checked; peas only smashed in a tip. Fine from 9 m if peas are smashed.",
+   "allergens": {
+    "fish": [
+     "salmon"
+    ],
+    "wheat": [
+     "flour for dusting"
+    ]
+   },
+   "catalog_allergens": [
+    "fish",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "9-12m",
+     "1-2y",
+     "2-3y",
+     "3-5y"
+    ],
+    "meal": [
+     "dinner"
+    ],
+    "goal": [
+     "protein"
+    ],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free"
+    ],
+    "occasion": [],
+    "texture": "finger-food"
+   },
+   "collections": [],
+   "collection_reasons": {},
+   "after_rewrite": [],
+   "flags": [
+    "Free sample: tagged, kept out of paid collections.",
+    "Pea smashing is only a tip; for 9 m it should be a step."
+   ],
+   "source": {
+    "catalog_age": [
+     9,
+     60
+    ],
+    "catalog_diet": [
+     "nut-free",
+     "dairy-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "8 oz fresh salmon fillet, boneless",
+     "2 medium potatoes, peeled and cubed",
+     "1/4 cup frozen peas, thawed",
+     "1 tsp lemon juice",
+     "2 tbsp flour (for dusting)"
+    ],
+    "storage": "Refrigerate for up to 2 days. Freeze cooked patties for up to 1 month.",
+    "summary": "A gentle introduction to fish, packed with Omega-3s. The potato base keeps these cakes moist and fluffy, while the peas add a pop of sweetness and color.",
+    "tips": [
+     "Smash the peas slightly with a fork before mixing if your baby is still learning to chew round textures."
+    ]
+   }
+  }
+ ],
+ "collections": [
+  {
+   "slug": "first-tastes",
+   "title": "First Tastes",
+   "live": false,
+   "recipes": [
+    "apple-prune-fiber-friendly-pure",
+    "asian-pear-rice-congee-pure",
+    "banana-avocado-breakfast-pure-with-yogurt",
+    "comforting-sweet-potato-lentil-khichdi-pure",
+    "indian-rice-mung-dal-spinach-pure",
+    "mediterranean-red-lentil-carrot-pure",
+    "silky-carrot-apple-starter-pure",
+    "zucchini-chickpea-mediterranean-pure"
+   ],
+   "count": 8,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "first-finger-foods",
+   "title": "First Finger Foods",
+   "live": false,
+   "recipes": [
+    "avocado-and-black-bean-quesadilla-strips",
+    "cheesy-broccoli-and-quinoa-bites",
+    "mild-curried-red-lentil-cakes",
+    "mini-turkey-and-apple-meatloaf-muffins",
+    "pumpkin-and-ricotta-gnocchi-pillows",
+    "sesame-tofu-and-veggie-cubes",
+    "zucchini-and-feta-fritters"
+   ],
+   "count": 7,
+   "status": "short",
+   "needs": "1+ soft finger food for 9–12 months"
+  },
+  {
+   "slug": "iron-rich-first-foods",
+   "title": "Iron-Rich First Foods",
+   "live": false,
+   "recipes": [
+    "comforting-sweet-potato-lentil-khichdi-pure",
+    "indian-rice-mung-dal-spinach-pure",
+    "mediterranean-red-lentil-carrot-pure",
+    "mild-mexican-black-bean-sweet-corn-pure",
+    "zucchini-chickpea-mediterranean-pure",
+    "slow-cooker-beef-and-vegetable-stew",
+    "bean-and-veggie-burrito-bowl",
+    "mild-curried-red-lentil-cakes"
+   ],
+   "count": 8,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "first-breakfasts",
+   "title": "First Breakfasts",
+   "live": false,
+   "recipes": [
+    "asian-pear-rice-congee-pure",
+    "banana-avocado-breakfast-pure-with-yogurt"
+   ],
+   "count": 2,
+   "status": "short",
+   "needs": "6+ breakfasts for 6–12 months (soft pancakes, oat fingers, porridges). The free Frittata Fingers stay free"
+  },
+  {
+   "slug": "batch-and-freeze-for-babies",
+   "title": "Batch & Freeze for Babies",
+   "live": false,
+   "recipes": [
+    "apple-prune-fiber-friendly-pure",
+    "asian-pear-rice-congee-pure",
+    "comforting-sweet-potato-lentil-khichdi-pure",
+    "indian-rice-mung-dal-spinach-pure",
+    "italian-tomato-vegetable-pure-with-tiny-pasta",
+    "mediterranean-red-lentil-carrot-pure",
+    "mild-mexican-black-bean-sweet-corn-pure",
+    "silky-carrot-apple-starter-pure",
+    "zucchini-chickpea-mediterranean-pure",
+    "one-pot-chicken-and-vegetable-rice",
+    "slow-cooker-beef-and-vegetable-stew"
+   ],
+   "count": 11,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "toddler-breakfasts",
+   "title": "Toddler Breakfasts",
+   "live": false,
+   "recipes": [
+    "apple-cinnamon-oat-toddler-porridge",
+    "banana-peanut-butter-chia-pudding",
+    "veggie-lentil-pancakes",
+    "mango-lassi-chia-pudding-cups"
+   ],
+   "count": 4,
+   "status": "short",
+   "needs": "4+ toddler breakfasts. Spinach and Feta Egg Muffins (#37) joins after a light rewrite"
+  },
+  {
+   "slug": "meal-prep",
+   "title": "Meal Prep for Toddlers",
+   "live": true,
+   "recipes": [
+    "one-pot-chicken-and-vegetable-rice",
+    "slow-cooker-beef-and-vegetable-stew",
+    "veggie-packed-lasagna",
+    "cheesy-broccoli-and-quinoa-bites",
+    "mini-turkey-and-apple-meatloaf-muffins",
+    "folate-rich-lentil-and-spinach-soup",
+    "lentil-and-vegetable-curry-with-coconut-milk",
+    "mini-bean-and-cheese-burritos",
+    "veggie-lentil-pancakes",
+    "cheesy-veggie-mini-muffins"
+   ],
+   "count": 10,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "protein-packs",
+   "title": "Protein Packs",
+   "live": true,
+   "recipes": [
+    "mild-curried-red-lentil-cakes",
+    "sesame-tofu-and-veggie-cubes",
+    "chicken-and-vegetable-stir-fry-with-brown-rice",
+    "mediterranean-chicken-and-chickpea-salad",
+    "quinoa-and-black-bean-burrito-bowl",
+    "salmon-and-sweet-potato-bowl-with-avocado",
+    "spinach-and-feta-egg-muffins",
+    "mini-baked-chicken-nuggets",
+    "turkey-and-hummus-pinwheels",
+    "salmon-potato-veggie-mash"
+   ],
+   "count": 10,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "everyday-treats",
+   "title": "Everyday Treats",
+   "live": false,
+   "recipes": [
+    "banana-peanut-butter-chia-pudding",
+    "chickpea-cookie-dough-fruit-dip",
+    "mango-lassi-chia-pudding-cups",
+    "mini-berry-yogurt-pops",
+    "soft-banana-oat-toddler-cookies",
+    "soft-date-almond-cocoa-bites",
+    "soft-peanut-butter-oat-energy-balls"
+   ],
+   "count": 7,
+   "status": "short",
+   "needs": "1+ dessert with no added sugar"
+  },
+  {
+   "slug": "fruit-gummies",
+   "title": "Fruit Gummies",
+   "live": false,
+   "recipes": [],
+   "count": 0,
+   "status": "short",
+   "needs": "8+ real-fruit gummy recipes; none in the catalog (the Instagram GUMMIES guides have them)"
+  },
+  {
+   "slug": "on-the-go-snacks",
+   "title": "On-the-Go Snacks",
+   "live": false,
+   "recipes": [
+    "cheesy-broccoli-and-quinoa-bites",
+    "savory-corn-and-cheddar-muffins",
+    "cheesy-veggie-quinoa-toddler-bites",
+    "cheesy-veggie-mini-muffins",
+    "soft-banana-oat-toddler-cookies",
+    "veggie-rice-snack-fritters"
+   ],
+   "count": 6,
+   "status": "short",
+   "needs": "2+ snacks for 1–2 years that travel"
+  },
+  {
+   "slug": "big-kid-breakfasts",
+   "title": "Big-Kid Breakfasts",
+   "live": false,
+   "recipes": [
+    "banana-peanut-butter-chia-pudding"
+   ],
+   "count": 1,
+   "status": "short",
+   "needs": "7+ breakfasts for 2–4 years. #31, #34 and #37 can join after a rewrite"
+  },
+  {
+   "slug": "freezer-dinners",
+   "title": "Freezer Dinners",
+   "live": false,
+   "recipes": [
+    "mild-vegetable-curry-with-rice",
+    "one-pot-chicken-and-vegetable-rice",
+    "slow-cooker-beef-and-vegetable-stew",
+    "mediterranean-baked-chicken-with-quinoa",
+    "veggie-packed-lasagna",
+    "soft-chicken-veggie-rice-bowl"
+   ],
+   "count": 6,
+   "status": "short",
+   "needs": "2+ freezer dinners. #30 and #32 can join after a rewrite"
+  },
+  {
+   "slug": "lunchbox-and-daycare",
+   "title": "Lunchbox & Daycare",
+   "live": false,
+   "recipes": [
+    "avocado-and-black-bean-quesadilla-strips",
+    "zucchini-and-feta-fritters",
+    "baked-samosa-puffs",
+    "mini-baked-chicken-nuggets",
+    "onigiri-rice-triangles",
+    "savory-corn-and-cheddar-muffins",
+    "spinach-and-cheese-pizza-scrolls",
+    "turkey-and-hummus-pinwheels",
+    "greek-pita-bento-box",
+    "mini-bean-and-cheese-burritos",
+    "creamy-hummus-yogurt-veggie-dippers"
+   ],
+   "count": 11,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "picky-eater-favorites",
+   "title": "Picky Eater Favorites",
+   "live": false,
+   "recipes": [
+    "veggie-packed-lasagna",
+    "avocado-and-black-bean-quesadilla-strips",
+    "mini-baked-chicken-nuggets",
+    "spinach-and-cheese-pizza-scrolls",
+    "mini-bean-and-cheese-burritos",
+    "cheesy-veggie-quinoa-toddler-bites",
+    "creamy-hummus-yogurt-veggie-dippers",
+    "deconstructed-soft-taco-toddler-bowl",
+    "turkey-veggie-mini-meatballs-with-pasta",
+    "cheesy-veggie-mini-muffins",
+    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+    "veggie-rice-snack-fritters"
+   ],
+   "count": 12,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "family-dinners",
+   "title": "Family Dinners",
+   "live": false,
+   "recipes": [
+    "mild-vegetable-curry-with-rice",
+    "one-pot-chicken-and-vegetable-rice",
+    "slow-cooker-beef-and-vegetable-stew",
+    "vegetable-noodle-soup",
+    "baked-fish-tacos-with-slaw",
+    "tofu-and-vegetable-stir-fry",
+    "vegetable-pasta-primavera",
+    "bean-and-veggie-burrito-bowl",
+    "mediterranean-baked-chicken-with-quinoa",
+    "veggie-packed-lasagna",
+    "turkey-veggie-mini-meatballs-with-pasta"
+   ],
+   "count": 11,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "halloween",
+   "title": "Halloween",
+   "live": true,
+   "recipes": [
+    "pumpkin-and-ricotta-gnocchi-pillows",
+    "savory-corn-and-cheddar-muffins",
+    "spinach-and-cheese-pizza-scrolls",
+    "apple-sunflower-snack-rounds",
+    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+    "mini-berry-yogurt-pops",
+    "soft-banana-oat-toddler-cookies",
+    "soft-date-almond-cocoa-bites"
+   ],
+   "count": 8,
+   "status": "ready",
+   "needs": null
+  },
+  {
+   "slug": "thanksgiving-table",
+   "title": "Thanksgiving Table",
+   "live": false,
+   "recipes": [
+    "mini-turkey-and-apple-meatloaf-muffins",
+    "pumpkin-and-ricotta-gnocchi-pillows",
+    "savory-corn-and-cheddar-muffins",
+    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip"
+   ],
+   "count": 4,
+   "status": "short",
+   "needs": "4+ Thanksgiving recipes (turkey, pumpkin, stuffing, cranberry)"
+  },
+  {
+   "slug": "holiday-baking",
+   "title": "Holiday Baking",
+   "live": false,
+   "recipes": [
+    "soft-date-almond-cocoa-bites"
+   ],
+   "count": 1,
+   "status": "short",
+   "needs": "7+ baked holiday treats (cookies, breads, muffins)"
+  },
+  {
+   "slug": "birthday-party",
+   "title": "Birthday Party",
+   "live": false,
+   "recipes": [
+    "baked-samosa-puffs",
+    "mini-baked-chicken-nuggets",
+    "spinach-and-cheese-pizza-scrolls",
+    "mini-berry-yogurt-pops"
+   ],
+   "count": 4,
+   "status": "short",
+   "needs": "4+ nut-free party foods (cake, cupcakes, finger food)"
+  }
+ ]
+}

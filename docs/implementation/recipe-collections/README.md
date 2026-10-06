@@ -4,7 +4,7 @@ Status: plan documented 2026-10-04. Owner decisions pending. No application or d
 
 This is a **separate effort**, outside Phases 1–12. It turns the recipe area into a place to shop themed collections, sample free recipes and use what you bought. Task IDs use the `RC-` prefix. The detailed tasks are in [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md).
 
-The agreed list of 20 collections, their fields and the recipe tag vocabulary for the admin panel are in [COLLECTIONS.md](COLLECTIONS.md) (importable as [collections.seed.json](collections.seed.json)).
+The agreed list of 20 collections, their fields and the recipe tag vocabulary for the admin panel are in [COLLECTIONS.md](COLLECTIONS.md) (importable as [collections.seed.json](collections.seed.json)). Tags and collection placement for all 70 catalog recipes, reviewed one at a time: [RECIPE-TAGS.md](RECIPE-TAGS.md) ([recipe-tags.json](recipe-tags.json)); re-check with `python3 check_recipe_tags.py`.
 
 ## What we sell
 
