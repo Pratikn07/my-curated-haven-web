@@ -2,7 +2,7 @@
 
 Status: reviewed one recipe at a time on 2026-10-05, replacing the first batch pass. For owner review before the admin panel exists. The admin panel can import [recipe-tags.json](recipe-tags.json); this page is the readable copy. Vocabulary and rules: [COLLECTIONS.md](COLLECTIONS.md). Re-check any edit with `python3 check_recipe_tags.py`.
 
-**In short:** each of the 70 recipes was read in full (ingredients, steps, tips, storage) and checked for allergens, then age, then collections. **9 of 20 collections** have 8–12 recipes (First Tastes, Iron-Rich First Foods, Batch & Freeze for Babies, Meal Prep for Toddlers, Protein Packs, Lunchbox & Daycare, Picky Eater Favorites, Family Dinners, Halloween). **11 are short.** The review also found 10 adult recipes with no age and no child steps (8 of them mention pregnancy), 2 wrong allergen lists, 1 wrong gluten-free claim and 1 internal note visible in a published recipe. These are listed under "Fix in the catalog".
+**In short:** each of the 70 recipes was read in full (ingredients, steps, tips, storage) and checked for allergens, then age, then collections. **9 of 20 collections** have 8–12 recipes (First Tastes, Iron-Rich First Foods, Batch & Freeze for Babies, Meal Prep for Toddlers, Protein Packs, Lunchbox & Daycare, Picky Eater Favorites, Family Dinners, Halloween). **11 are short.** The review also found 10 adult recipes with no age and no child steps (8 of them mention pregnancy), 2 wrong allergen lists, 1 wrong gluten-free claim and 1 internal reviewer note shown as a recipe step. On 2026-10-05 the allergen lists, the gluten-free tag and the note were fixed in the catalog, and the 7 adult recipes in the live collections were swapped for children's recipes. What is still open is under "Fix in the catalog".
 
 Example: *Overnight Oats with Chia and Berries* (#34) has no catalog age. Its tip says it helps "when nausea makes hot food unappealing", it is topped with sliced almonds (a choking risk under 4), and it is sweetened with honey or maple. It is judged "from 4 years as written" and placed in no collection until it is rewritten for children. After that it fits Toddler Breakfasts and Big-Kid Breakfasts.
 
@@ -16,23 +16,27 @@ Example: *Overnight Oats with Chia and Berries* (#34) has no catalog age. Its ti
 
 ## Fix in the catalog
 
-| Recipe | Problem | Fix |
-|---|---|---|
-| #15 Baked Fish Tacos with Slaw | Allergen list says wheat, but the recipe uses corn tortillas | Remove wheat, or change to flour tortillas |
-| #16 Tofu and Vegetable Stir-Fry | Allergen list misses wheat: regular soy sauce contains wheat | Add wheat, or specify wheat-free tamari |
-| #58 Apple Sunflower Snack Rounds | Tagged gluten-free, but the oat cereal is not named gluten-free | Say "certified gluten-free oat cereal", or drop the tag |
-| #11 Mild Vegetable Curry with Rice | Step 9 is an internal reviewer note ("Manually inspect the blocked image...") and shows in the recipe | Delete step 9 |
-| #28 Baked Sweet Potato with Black Beans and Avocado | One of 10 adult recipes (#28–37): no age, no child steps; 8 of them mention pregnancy | Rewrite #28–37 for children, or retire them from the kids catalog |
-| #69 Soft-Baked Blueberry & Oat Bars | Rejected by the review gate over its 6-month minimum age; published as a free recipe | Expert decision on minimum age and shape |
-| #70 Salmon & Pea Fish Cakes | Smashing the peas for 9-month-olds is only a tip | Make it a step |
+| Recipe | Problem | Fix | Status |
+|---|---|---|---|
+| #15 Baked Fish Tacos with Slaw | Allergen list said wheat, but the recipe uses corn tortillas | Allergens fish only; tortilla ingredient says to check the label for wheat | Done 2026-10-05 |
+| #16 Tofu and Vegetable Stir-Fry | Allergen list missed wheat: regular soy sauce contains wheat | Wheat added | Done 2026-10-05 |
+| #58 Apple Sunflower Snack Rounds | Tagged gluten-free, but the oat cereal is not named gluten-free | Gluten-free tag removed | Done 2026-10-05 |
+| #11 Mild Vegetable Curry with Rice | Step 9 was an internal reviewer note ("Manually inspect the blocked image...") | Step 9 deleted | Done 2026-10-05 |
+| #28 Baked Sweet Potato with Black Beans and Avocado | One of 10 adult recipes (#28–37): no age, no child steps; 8 of them mention pregnancy | Rewrite #28–37 for children, or retire them from the kids catalog. Out of live collections since 2026-10-05 | Open |
+| #69 Soft-Baked Blueberry & Oat Bars | Rejected by the review gate over its 6-month minimum age; published as a free recipe | Expert decision on minimum age and shape | Open |
+| #70 Salmon & Pea Fish Cakes | Smashing the peas for 9-month-olds is only a tip | Make it a step | Open |
+
+The four fixes were one guarded database change: each recipe moved to content version 3 with a new review record, so the review gate still passes. Backup: `~/MyCuratedHavenBackups/2026-10-05-before-recipe-tag-fixes`; SQL: `recipe-review/apply-tag-review-fixes.sql` (private, outside this repository).
 
 Smaller gaps: 22 recipes qualify for gluten-free, vegan or vegetarian but the catalog does not tag them, so the free-from tags here add them. Puff pastry (#38) and the broths (#6, #12, #13, #30) need a label check.
 
-## Live collections: conflicts
+## Live collections: changes on 2026-10-05
 
-- **Protein Packs (1–2 years)** holds 4 adult recipes that, as written, suit older children: #29 Chicken Stir-Fry (from 2 y), #33 Mediterranean Chicken Salad (from 3 y), #35 Quinoa Burrito Bowl (from 2 y), #36 Salmon Bowl (from 2 y). #37 Egg Muffins is also from the pregnancy set. Either add toddler steps or swap in #55 Soft Tofu Veggie Stir Fry, which is written for 1–3 years.
-- **Meal Prep for Toddlers** holds #30 Folate-Rich Lentil Soup and #32 Lentil Curry, both from the pregnancy set (salt to taste, "sensitive to spices during pregnancy").
-- **Halloween:** no conflicts.
+The live collections held 7 adult recipes. They were swapped for reviewed children's recipes in `src/config/collections.ts`; each book still has 10 recipes.
+
+- **Protein Packs (1–2 years):** out #29 Chicken Stir-Fry, #33 Mediterranean Chicken Salad, #35 Quinoa Burrito Bowl, #36 Salmon Bowl, #37 Egg Muffins. In #40 Onigiri Rice Triangles, #54 Soft Chicken Veggie Rice Bowl, #18 Bean and Veggie Burrito Bowl, #55 Soft Tofu Veggie Stir Fry, #56 Turkey Veggie Mini Meatballs.
+- **Meal Prep for Toddlers:** out #30 Folate-Rich Lentil Soup and #32 Lentil Curry. In #11 Mild Vegetable Curry with Rice and #50 Cheesy Veggie Quinoa Toddler Bites; both freeze, so "every one of them freezes" still holds.
+- **Halloween:** unchanged.
 
 ## Collections
 
@@ -119,29 +123,29 @@ Smaller gaps: 22 recipes qualify for gluten-free, vegan or vegetarian but the ca
 
 ### Meal Prep for Toddlers · 10 recipes
 
+- #11 Mild Vegetable Curry with Rice (6 m–10 y): Added 2026-10-05: freezes 2 months
 - #12 One-Pot Chicken and Vegetable Rice (6 m–10 y): Live member; one pot, double batch tip
 - #13 Slow Cooker Beef and Vegetable Stew (6 m–10 y): Live member; slow cooker batch
 - #20 Veggie-Packed Lasagna (1–10 y): Live member; assemble ahead
 - #22 Cheesy Broccoli & Quinoa Bites (9 m–5 y): Live member; freezes 2 months
 - #24 Mini Turkey & Apple Meatloaf Muffins (9 m–3 y): Live member; freezes 2 months
-- #30 Folate-Rich Lentil and Spinach Soup (1–10 y): Live member (see flag)
-- #32 Lentil and Vegetable Curry with Coconut Milk (1–10 y): Live member (see flag)
 - #47 Mini Bean & Cheese Burritos (1–10 y): Live member; freezes 1 month
+- #50 Cheesy Veggie Quinoa Toddler Bites (1–3 y): Added 2026-10-05: freezes 2 months
 - #57 Veggie Lentil Pancakes (1–3 y): Live member; freezes 2 months
 - #59 Cheesy Veggie Mini Muffins (1–4 y): Live member
 
 ### Protein Packs · 10 recipes
 
+- #18 Bean and Veggie Burrito Bowl (9 m–10 y): Added 2026-10-05: black beans, mashed for babies
 - #23 Mild Curried Red Lentil Cakes (10 m–4 y): Live member
 - #26 Sesame Tofu & Veggie Cubes (6 m–3 y): Live member
-- #29 Chicken and Vegetable Stir-Fry with Brown Rice (2–10 y): Live member (see flag)
-- #33 Mediterranean Chicken and Chickpea Salad (3–10 y): Live member (see flag)
-- #35 Quinoa and Black Bean Burrito Bowl (2–10 y): Live member (see flag)
-- #36 Salmon and Sweet Potato Bowl with Avocado (2–10 y): Live member (see flag)
-- #37 Spinach and Feta Egg Muffins (1–10 y): Live member (see flag)
 - #39 Mini Baked Chicken Nuggets (1–10 y): Live member
+- #40 Onigiri Rice Triangles (1–10 y): Added 2026-10-05: tuna or salmon, written for 12 m+
 - #44 Turkey & Hummus Pinwheels (1–10 y): Live member
 - #53 Salmon Potato Veggie Mash (1–4 y): Live member
+- #54 Soft Chicken Veggie Rice Bowl (1–3 y): Added 2026-10-05: chicken, written for 1-3 years
+- #55 Soft Tofu Veggie Stir Fry with Rice (1–3 y): Added 2026-10-05: tofu, written for 1-3 years
+- #56 Turkey Veggie Mini Meatballs with Pasta (18 m–4 y): Added 2026-10-05: turkey meatballs cut small
 
 ### Everyday Treats · 7 recipes
 
@@ -334,8 +338,8 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 6 m–10 y (catalog, checked). Puréed or mashed for babies, whole peas only for older children: fine.
 - **Tags:** 6-8m, 9-12m, 1-2y, 2-3y, 3-5y · dinner, lunch · veg-packed · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
-- **Collections:** Freezer Dinners, Family Dinners
-- PUBLISHED TEXT BUG: step 9 is an internal note to reviewers ('Manually inspect the blocked image...'). Remove it.
+- **Collections:** Freezer Dinners, Family Dinners, Meal Prep for Toddlers
+- Fixed 2026-10-05: the internal reviewer note (step 9) was deleted.
 - Coconut milk: not a tree nut under current FDA guidance, but some parents avoid it; say 'contains coconut'.
 - Curry powder: check label for wheat fillers to keep gluten-free.
 
@@ -368,19 +372,19 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 
 ### #15 Baked Fish Tacos with Slaw
 
-- **Allergens:** fish: white fish. Catalog list: fish, wheat.
+- **Allergens:** fish: white fish. Catalog list: fish.
 - **Age:** 1–10 y (catalog, checked). Fish flaked, tortillas cut small, slaw softened: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · dinner · protein · whole-family · egg-free, dairy-free, nut-free · finger-food
 - **Collections:** Family Dinners
-- ALLERGEN MISMATCH: catalog lists wheat, but the recipe uses corn tortillas. Either the list is wrong or flour tortillas were meant. Not tagged gluten-free until fixed.
+- Fixed 2026-10-05: allergen list is now fish only, and the tortilla ingredient says to check the label for wheat.
 
 ### #16 Tofu and Vegetable Stir-Fry
 
-- **Allergens:** soy: firm tofu, soy sauce; sesame: sesame oil; wheat: soy sauce. Catalog list: soy, sesame.
+- **Allergens:** soy: firm tofu, soy sauce; sesame: sesame oil; wheat: soy sauce. Catalog list: wheat, soy, sesame.
 - **Age:** 8 m–10 y (catalog, checked). Tofu and vegetables mashed for infants, no firm cubes: fine from 8 m.
 - **Tags:** 6-8m, 9-12m, 1-2y, 2-3y, 3-5y · dinner · protein, veg-packed · whole-family, freezes · egg-free, dairy-free, nut-free, vegetarian, vegan · bowl
 - **Collections:** Family Dinners
-- ALLERGEN MISMATCH: soy sauce normally contains wheat; catalog lists only soy and sesame. Add wheat, or specify tamari.
+- Fixed 2026-10-05: wheat added to the allergen list.
 - Left out of Freezer Dinners: frozen tofu stir-fry goes spongy; storage only allows 1 month.
 
 ### #17 Vegetable Pasta Primavera
@@ -396,7 +400,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 9 m–10 y (catalog, checked). Beans and corn flattened, all mashed for babies: fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · dinner, lunch · protein, iron, fiber, veg-packed · whole-family, make-ahead · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
-- **Collections:** Iron-Rich First Foods, Family Dinners
+- **Collections:** Iron-Rich First Foods, Family Dinners, Protein Packs
 - Left out of Freezer Dinners: only the rice and beans freeze; avocado and tomato are fresh.
 
 ### #19 Mediterranean Baked Chicken with Quinoa
@@ -487,20 +491,21 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** soy: tamari; sesame: sesame oil. Catalog list: soy, sesame.
 - **Age:** 2–10 y (judged: the catalog has no age). NO AGE IN CATALOG. As written: crisp-tender broccoli, snap peas, raw-ish pepper strips, no child steps. Firm and fibrous for under-2s. From 24 m as written; from 12 m only with a step to cook vegetables soft and cut chicken small.
 - **Tags:** 2-3y, 3-5y · dinner · protein, veg-packed · whole-family · egg-free, dairy-free, nut-free, gluten-free · bowl
-- **Collections:** Protein Packs · *after rewrite: Family Dinners*
+- **Collections:** none · *after rewrite: Family Dinners*
 - WRITTEN FOR PREGNANCY, NOT CHILDREN (same no-age set as #31-37): rewrite with child steps before adding to any new collection.
-- LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written it suits 2 years and up. Add a toddler step (soft vegetables, small chicken) or move it.
 - Gluten-free relies on the wheat-free tamari it names; catalog diet tags miss gluten-free.
+- Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written).
 
 ### #30 Folate-Rich Lentil and Spinach Soup
 
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 1–10 y (judged: the catalog has no age). NO AGE IN CATALOG. Soft soup, but salt to taste and regular broth. From 12 m as written; from 9 m if blended with no-salt broth and no added salt.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch, dinner · iron, protein, fiber, veg-packed, sick-days · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
-- **Collections:** Meal Prep for Toddlers · *after rewrite: Freezer Dinners, Family Dinners*
+- **Collections:** none · *after rewrite: Freezer Dinners, Family Dinners*
 - WRITTEN FOR PREGNANCY, NOT CHILDREN; title says folate-rich (same no-age set as #31-37): rewrite with child steps before adding to any new collection.
 - Broth: use low-sodium and check its label for gluten.
 - Title says 'folate-rich': a nutrition claim the review flagged on other titles.
+- Removed from the live Meal Prep on 2026-10-05 (adult recipe).
 
 ### #31 Greek Yogurt Parfait with Berries and Almonds
 
@@ -516,18 +521,19 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 1–10 y (judged: the catalog has no age). NO AGE IN CATALOG. Soft curry, but salt and 2 tbsp curry powder. From 12 m with the child's portion taken before salt.
 - **Tags:** 1-2y, 2-3y, 3-5y · dinner · iron, protein, fiber, veg-packed · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
-- **Collections:** Meal Prep for Toddlers · *after rewrite: Freezer Dinners, Family Dinners*
-- WRITTEN FOR PREGNANCY, NOT CHILDREN: tip says 'if sensitive to spices during pregnancy'. It is live in Meal Prep.
+- **Collections:** none · *after rewrite: Freezer Dinners, Family Dinners*
+- WRITTEN FOR PREGNANCY, NOT CHILDREN: tip says 'if sensitive to spices during pregnancy'.
 - Coconut milk: say 'contains coconut'.
+- Removed from the live Meal Prep on 2026-10-05 (adult recipe).
 
 ### #33 Mediterranean Chicken and Chickpea Salad
 
 - **Allergens:** milk: feta. Catalog list: milk.
 - **Age:** 3–10 y (judged: the catalog has no age). NO AGE IN CATALOG. As written: whole chickpeas, halved (not quartered) cherry tomatoes, halved olives, raw onion, salad leaves, salt. Choking risks under 3. From 36 m as written.
 - **Tags:** 3-5y · lunch · protein · make-ahead, no-cook · egg-free, nut-free, gluten-free · bowl
-- **Collections:** Protein Packs · *after rewrite: Lunchbox & Daycare*
+- **Collections:** none · *after rewrite: Lunchbox & Daycare*
 - WRITTEN FOR PREGNANCY, NOT CHILDREN: tip mentions pregnancy fatigue.
-- LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 3 years and up.
+- Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written).
 
 ### #34 Overnight Oats with Chia and Berries
 
@@ -544,26 +550,27 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 2–10 y (judged: the catalog has no age). NO AGE IN CATALOG. Whole beans and corn, halved cherry tomatoes, raw onion, salt. From 24 m as written; from 12 m with beans mashed, tomatoes quartered, no salt.
 - **Tags:** 2-3y, 3-5y · lunch, dinner · protein, iron, fiber, veg-packed · make-ahead, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
-- **Collections:** Protein Packs · *after rewrite: Lunchbox & Daycare, Family Dinners*
+- **Collections:** none · *after rewrite: Lunchbox & Daycare, Family Dinners*
 - Same no-age adult set as #28-37 (no pregnancy words in this one, but no child steps).
-- LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 2 years and up.
+- Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written).
 
 ### #36 Salmon and Sweet Potato Bowl with Avocado
 
 - **Allergens:** fish: salmon. Catalog list: fish.
 - **Age:** 2–10 y (judged: the catalog has no age). NO AGE IN CATALOG. Salted sweet potato and salmon, raw massaged kale, no child steps or bone check. From 24 m as written; from 12 m with salmon flaked and checked for bones, kale chopped fine, no salt.
 - **Tags:** 2-3y, 3-5y · lunch, dinner · protein · make-ahead, whole-family · egg-free, dairy-free, nut-free, gluten-free · bowl
-- **Collections:** Protein Packs · *after rewrite: Family Dinners*
+- **Collections:** none · *after rewrite: Family Dinners*
 - Same adult set as #28-37 (mercury tip suggests the pregnancy set).
-- LIVE COLLECTION CONFLICT: in Protein Packs (1-2 years) but as written suits 2 years and up.
+- Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written).
 
 ### #37 Spinach and Feta Egg Muffins
 
 - **Allergens:** eggs: eggs; milk: feta, milk. Catalog list: eggs, milk.
 - **Age:** 1–10 y (judged: the catalog has no age). NO AGE IN CATALOG. Soft baked egg, tomatoes quartered, little salt: fine from 12 m cut into strips.
 - **Tags:** 1-2y, 2-3y, 3-5y · breakfast, snack · protein, veg-packed · freezes, make-ahead, on-the-go · nut-free, gluten-free, vegetarian · finger-food
-- **Collections:** Protein Packs · *after rewrite: Toddler Breakfasts, Big-Kid Breakfasts*
+- **Collections:** none · *after rewrite: Toddler Breakfasts, Big-Kid Breakfasts*
 - WRITTEN FOR PREGNANCY: tip says 'when morning sickness makes hot foods unappealing'. Light rewrite only: replace that tip and add a cutting step for 12 m.
+- Removed from the live Protein Packs on 2026-10-05 (adult recipe; suits older children as written).
 
 ### #38 Baked Samosa Puffs
 
@@ -586,7 +593,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** eggs: mayonnaise; fish: tuna or salmon. Catalog list: eggs, fish.
 - **Age:** 1–10 y (catalog, checked). Loose soft rice, no salt for the child, nori only if soft: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch · protein · on-the-go · dairy-free, nut-free, gluten-free · finger-food · back-to-school
-- **Collections:** Lunchbox & Daycare
+- **Collections:** Lunchbox & Daycare, Protein Packs
 - Same-day only: storage says use the same day.
 
 ### #41 Rainbow Pesto Pasta Salad
@@ -666,7 +673,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** milk: cheddar; eggs: egg; wheat: breadcrumbs. Catalog list: milk, eggs, wheat.
 - **Age:** 1–3 y (catalog, checked). Soft, cut or crumbled: fine from 12 m.
 - **Tags:** 1-2y, 2-3y · lunch, snack · veg-packed, picky-friendly · freezes, make-ahead, on-the-go · nut-free, vegetarian · bites
-- **Collections:** On-the-Go Snacks, Picky Eater Favorites
+- **Collections:** On-the-Go Snacks, Picky Eater Favorites, Meal Prep for Toddlers
 
 ### #51 Creamy Hummus Yogurt Veggie Dippers
 
@@ -697,7 +704,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 1–3 y (catalog, checked). Shredded under 1/2 inch, vegetables soft: fine from 12 m.
 - **Tags:** 1-2y, 2-3y · lunch, dinner · protein, veg-packed · freezes, make-ahead, one-pot · egg-free, dairy-free, nut-free, gluten-free · bowl
-- **Collections:** Freezer Dinners
+- **Collections:** Freezer Dinners, Protein Packs
 - Catalog diet tags miss gluten-free. Broth: check label.
 
 ### #55 Soft Tofu Veggie Stir Fry with Rice
@@ -705,15 +712,14 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Allergens:** soy: tofu, tamari. Catalog list: soy.
 - **Age:** 1–3 y (catalog, checked). Soft strips or crumbles, pieces under 1/2 inch: fine from 12 m.
 - **Tags:** 1-2y, 2-3y · lunch, dinner · protein, veg-packed · — · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
-- **Collections:** none
-- Not placed: Protein Packs is live with fixed members. This recipe suits 1-2 years better than #29 (Chicken Stir-Fry), which is in Protein Packs but suits 2+ as written. Consider swapping.
+- **Collections:** Protein Packs
 
 ### #56 Turkey Veggie Mini Meatballs with Pasta
 
 - **Allergens:** milk: Parmesan; eggs: egg; wheat: breadcrumbs, pasta. Catalog list: milk, eggs, wheat.
 - **Age:** 18 m–4 y (catalog, checked). Meatballs quartered to under 1/2 inch: fine from 18 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch, dinner · protein, veg-packed, picky-friendly · make-ahead, whole-family, freezes · nut-free · bowl
-- **Collections:** Family Dinners, Picky Eater Favorites
+- **Collections:** Family Dinners, Picky Eater Favorites, Protein Packs
 - 'Freezes' comes from the tip (freeze baked meatballs); the storage note does not say it.
 - Left out of Thanksgiving Table: turkey meatballs are not a Thanksgiving dish.
 
@@ -731,7 +737,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 18 m–4 y (catalog, checked). Steamed apple, thin spread, 1-inch pieces: fine from 18 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · snack · no goal · under-15-min · egg-free, dairy-free, nut-free, vegetarian, vegan · finger-food
 - **Collections:** Halloween
-- GLUTEN-FREE CLAIM WRONG: catalog says gluten-free, but the oat cereal is not named gluten-free. Specify certified gluten-free oats or drop the tag.
+- Fixed 2026-10-05: the gluten-free tag was removed.
 - Left out of On-the-Go Snacks: keeps only 4 hours in the fridge.
 
 ### #59 Cheesy Veggie Mini Muffins

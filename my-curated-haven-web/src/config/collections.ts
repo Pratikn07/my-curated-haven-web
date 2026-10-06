@@ -9,7 +9,10 @@ import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/typ
  * slug, its page shows the placeholder price and "Opening soon".
  *
  * Recipe facts (title, minutes, allergens, freezer note, photo) are a snapshot
- * of the catalog taken on 2026-10-04 from ../recipe-review. Membership moves into
+ * of the catalog taken on 2026-10-04 from ../recipe-review. On 2026-10-05 seven
+ * adult recipes (written for pregnancy, no child steps) were swapped for reviewed
+ * children's recipes: docs/implementation/recipe-collections/RECIPE-TAGS.md.
+ * Membership moves into
  * collection_releases / collection_recipes when RC-02 is decided. The recipes
  * are drafts in the catalog, so they carry no link until they are published.
  */
@@ -33,24 +36,24 @@ const CATALOG: Record<string, Fact> = {
   "slow-cooker-beef-and-vegetable-stew": { title: "Slow Cooker Beef and Vegetable Stew", minutes: 480, image: "95ea00e4-b591-4bf9-a888-7d58e9443538-v2.png", allergens: [], freezes: "2 months" },
   "veggie-packed-lasagna": { title: "Veggie-Packed Lasagna", minutes: 75, image: "c1fd76c2-ba4f-4845-bfb8-4cd3f133a39f-v2.png", allergens: ["wheat", "milk", "egg"], freezes: "2 months" },
   "mini-turkey-and-apple-meatloaf-muffins": { title: "Mini Turkey & Apple Meatloaf Muffins", minutes: 45, image: "ffe850af-331e-41e0-90ed-403ab3cd6f5c-v2.png", allergens: ["egg", "wheat"], freezes: "2 months" },
-  "lentil-and-vegetable-curry-with-coconut-milk": { title: "Lentil and Vegetable Curry with Coconut Milk", minutes: 60, image: "b4f8599e-a6c9-4961-8cfe-d34f0394323a-v2.png", allergens: [], freezes: "3 months" },
+  "mild-vegetable-curry-with-rice": { title: "Mild Vegetable Curry with Rice", minutes: 40, image: "97bf9e64-ca84-4855-b0d5-90336e1939fb-v3.png", allergens: [], freezes: "2 months" },
   "one-pot-chicken-and-vegetable-rice": { title: "One-Pot Chicken and Vegetable Rice", minutes: 40, image: "5771fc64-2543-4023-8a2c-915343898ee4-v2.png", allergens: [], freezes: "2 months" },
   "cheesy-broccoli-and-quinoa-bites": { title: "Cheesy Broccoli & Quinoa Bites", minutes: 45, image: "4cbf26da-f8c0-4644-b2ea-f227c0c08f9b-v2.png", allergens: ["egg", "milk"], freezes: "2 months" },
-  "folate-rich-lentil-and-spinach-soup": { title: "Folate-Rich Lentil and Spinach Soup", minutes: 45, image: "fb0f0b6a-39a4-482f-9a8f-04fea182d0c3-v2.png", allergens: [], freezes: "3 months" },
+  "cheesy-veggie-quinoa-toddler-bites": { title: "Cheesy Veggie Quinoa Toddler Bites", minutes: 60, image: "2bbb6f71-cee5-4b70-8db3-655da31ecf88-v2.png", allergens: ["milk", "egg", "wheat"], freezes: "2 months" },
   "mini-bean-and-cheese-burritos": { title: "Mini Bean & Cheese Burritos", minutes: 10, image: "d4e758fb-1ea5-4b0c-b230-d2948fe63c1e-v2.png", allergens: ["wheat", "milk"], freezes: "1 month" },
   "veggie-lentil-pancakes": { title: "Veggie Lentil Pancakes", minutes: 60, image: "0b1f8518-adf5-4209-b1bd-f77ae9d354f6-v2.png", allergens: [], freezes: "2 months" },
   "cheesy-veggie-mini-muffins": { title: "Cheesy Veggie Mini Muffins", minutes: 40, image: "558d4bb7-4811-443f-aedc-1ff390e336ba-v2.png", allergens: ["milk", "egg", "wheat"], freezes: "2 months" },
   // Protein Packs
   "mini-baked-chicken-nuggets": { title: "Mini Baked Chicken Nuggets", minutes: 40, image: "04ecc68a-752c-4b65-a003-af419cda610b-v2.png", allergens: ["egg", "wheat"], freezes: "2 months", protein: "Chicken" },
-  "salmon-and-sweet-potato-bowl-with-avocado": { title: "Salmon and Sweet Potato Bowl with Avocado", minutes: 45, image: "122c687b-9fb5-4f62-8835-4795b5b706ba-v2.png", allergens: ["fish"], freezes: null, protein: "Salmon" },
-  "spinach-and-feta-egg-muffins": { title: "Spinach and Feta Egg Muffins", minutes: 45, image: "86063a05-b9e3-4eb9-ac87-11e09fc6bec2-v2.png", allergens: ["egg", "milk"], freezes: "2 months", protein: "Egg" },
+  "onigiri-rice-triangles": { title: "Onigiri Rice Triangles", minutes: 45, image: "7c7a9197-9384-40bd-b623-8d7a49812faa-v3.png", allergens: ["egg", "fish"], freezes: null, protein: "Tuna or salmon" },
+  "soft-chicken-veggie-rice-bowl": { title: "Soft Chicken Veggie Rice Bowl", minutes: 40, image: "1af3ef26-5ca1-4678-8a31-bac8666d1b01-v2.png", allergens: [], freezes: "2 months", protein: "Chicken" },
   "mild-curried-red-lentil-cakes": { title: "Mild Curried Red Lentil Cakes", minutes: 45, image: "a3cd52f0-7652-4fe1-a543-7d4072d92e50-v2.png", allergens: [], freezes: "2 months", protein: "Red lentils" },
   "sesame-tofu-and-veggie-cubes": { title: "Sesame Tofu & Veggie Cubes", minutes: 30, image: "268cee74-16e6-491a-8d80-760aeb0be0e7-v2.png", allergens: ["soy", "sesame"], freezes: null, protein: "Tofu" },
   "turkey-and-hummus-pinwheels": { title: "Turkey & Hummus Pinwheels", minutes: 15, image: "e7ac0613-5e18-44ce-bdbf-02f4ac591de0-v2.png", allergens: ["wheat", "sesame"], freezes: null, protein: "Turkey" },
-  "quinoa-and-black-bean-burrito-bowl": { title: "Quinoa and Black Bean Burrito Bowl", minutes: 40, image: "f225556b-1177-4cc1-8302-331bfe26d7ca-v2.png", allergens: [], freezes: null, protein: "Black beans" },
+  "bean-and-veggie-burrito-bowl": { title: "Bean and Veggie Burrito Bowl", minutes: 55, image: "af5f3ff1-bbf1-43f4-a367-4c234656404f-v2.png", allergens: [], freezes: null, protein: "Black beans" },
   "salmon-potato-veggie-mash": { title: "Salmon Potato Veggie Mash", minutes: 40, image: "ab9d4c8d-f997-4664-9416-35d2f8a763bc-v2.png", allergens: ["milk", "fish"], freezes: null, protein: "Salmon" },
-  "chicken-and-vegetable-stir-fry-with-brown-rice": { title: "Chicken and Vegetable Stir-Fry with Brown Rice", minutes: 25, image: "660c9100-427d-4583-ae1c-8eae4232c72d-v2.png", allergens: ["soy", "sesame"], freezes: null, protein: "Chicken" },
-  "mediterranean-chicken-and-chickpea-salad": { title: "Mediterranean Chicken and Chickpea Salad", minutes: 20, image: "a588b956-254e-4df2-bae7-b83dcc81b069-v2.png", allergens: ["milk"], freezes: null, protein: "Chicken and chickpeas" },
+  "soft-tofu-veggie-stir-fry-with-rice": { title: "Soft Tofu Veggie Stir Fry with Rice", minutes: 25, image: "f803dcc2-ce11-4838-b6af-8fe4476fcc18-v2.png", allergens: ["soy"], freezes: null, protein: "Tofu" },
+  "turkey-veggie-mini-meatballs-with-pasta": { title: "Turkey Veggie Mini Meatballs with Pasta", minutes: 45, image: "2938abd9-3dab-41b5-a8cb-cc15c9fc9ec5-v2.png", allergens: ["milk", "egg", "wheat"], freezes: null, protein: "Turkey" },
 };
 
 function recipes(slugs: readonly string[]): CollectionRecipe[] {
@@ -91,7 +94,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     title: "Meal Prep",
     tagline: "Cook once on Sunday. Eat well on Wednesday.",
     story:
-      "Ten recipes that keep: a slow-cooker stew, a lasagna, a lentil soup, and muffins and burritos that go from freezer to plate on a tired evening. Every one of them freezes.",
+      "Ten recipes that keep: a slow-cooker stew, a lasagna, a vegetable curry, and muffins, bites and burritos that go from freezer to plate on a tired evening. Every one of them freezes.",
     forWhen: "For the evenings when the only plan is the one you made at the weekend.",
     cloth: "forest",
     cover: { src: "/images/collections/cover-meal-prep-1040.webp", width: 1040, height: 1400, alt: "A forest-green cloth cookbook with gold-foil stacked food containers on its cover" },
@@ -100,10 +103,10 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     recipes: recipes([
       "slow-cooker-beef-and-vegetable-stew",
       "veggie-packed-lasagna",
-      "folate-rich-lentil-and-spinach-soup",
+      "mild-vegetable-curry-with-rice",
       "mini-turkey-and-apple-meatloaf-muffins",
       "one-pot-chicken-and-vegetable-rice",
-      "lentil-and-vegetable-curry-with-coconut-milk",
+      "cheesy-veggie-quinoa-toddler-bites",
       "cheesy-broccoli-and-quinoa-bites",
       "mini-bean-and-cheese-burritos",
       "veggie-lentil-pancakes",
@@ -116,7 +119,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     title: "Protein Packs",
     tagline: "Meals built around one protein, in shapes little hands can manage.",
     story:
-      "Chicken, salmon, egg, red lentils, tofu, turkey, beans and chickpeas. Each recipe is built around one of them and comes as a bite, a cake, a bowl or a pinwheel.",
+      "Chicken, salmon, tuna, red lentils, tofu, turkey and black beans. Each recipe is built around one of them and comes as a bite, a cake, a bowl or a pinwheel.",
     forWhen: "For the plate that keeps coming back with only the pasta eaten.",
     cloth: "plum",
     cover: { src: "/images/collections/cover-protein-packs-1040.webp", width: 1040, height: 1414, alt: "A plum cloth cookbook with a gold-foil egg cup, lentils and beans on its cover" },
@@ -124,15 +127,15 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     placeholderPrice: "$12.99",
     recipes: recipes([
       "mini-baked-chicken-nuggets",
-      "salmon-and-sweet-potato-bowl-with-avocado",
-      "spinach-and-feta-egg-muffins",
+      "onigiri-rice-triangles",
+      "soft-chicken-veggie-rice-bowl",
       "mild-curried-red-lentil-cakes",
       "sesame-tofu-and-veggie-cubes",
       "turkey-and-hummus-pinwheels",
-      "quinoa-and-black-bean-burrito-bowl",
+      "bean-and-veggie-burrito-bowl",
       "salmon-potato-veggie-mash",
-      "chicken-and-vegetable-stir-fry-with-brown-rice",
-      "mediterranean-chicken-and-chickpea-salad",
+      "soft-tofu-veggie-stir-fry-with-rice",
+      "turkey-veggie-mini-meatballs-with-pasta",
     ]),
   },
 ];
