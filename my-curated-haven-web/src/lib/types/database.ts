@@ -1428,10 +1428,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_console_context: { Args: never; Returns: Json }
+      admin_staff_assign: {
+        Args: {
+          p_operation_id: string
+          p_reason: string
+          p_roles: string[]
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      admin_staff_list: { Args: never; Returns: Json }
+      admin_staff_lookup: { Args: { p_email: string }; Returns: Json }
+      admin_staff_revoke: {
+        Args: { p_operation_id: string; p_reason: string; p_user_id: string }
+        Returns: Json
+      }
       increment_shop_click: {
         Args: { product_id_input: string }
         Returns: undefined
       }
+      is_console_recipe_reader: { Args: never; Returns: boolean }
       is_recipe_admin: { Args: never; Returns: boolean }
       search_shop_products: {
         Args: { query_text: string; result_limit?: number }
