@@ -70,7 +70,7 @@ export async function generateMetadata({
       url: canonicalUrl,
       type: "article",
       images: catalog.previewImagePath
-        ? [{ url: catalog.previewImagePath, alt: catalog.title }]
+        ? [{ url: catalog.previewImagePath, alt: catalog.imageAlt ?? catalog.title }]
         : [],
     },
   };
@@ -269,13 +269,16 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
         <div className="recipe-print-figure relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface-muted">
           <Image
             src={catalog.previewImagePath}
-            alt={catalog.title}
+            alt={catalog.imageAlt ?? catalog.title}
             fill
             sizes="(min-width: 1024px) 896px, 100vw"
             priority
             className="recipe-print-image object-cover"
           />
         </div>
+      ) : null}
+      {catalog.imageDescription ? (
+        <p className="mb-8 text-sm text-text-muted">{catalog.imageDescription}</p>
       ) : null}
 
       {/* Main Recipe Content Anchor */}

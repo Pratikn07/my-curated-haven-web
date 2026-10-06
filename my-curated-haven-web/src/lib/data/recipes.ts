@@ -7,6 +7,8 @@ export interface RecipeCatalogItem {
   title: string;
   publicSummary: string;
   previewImagePath: string;
+  imageAlt: string | null;
+  imageDescription: string | null;
   totalMinutes: number | null;
   mealLabels: string[];
   dietLabels: string[];
@@ -61,6 +63,8 @@ function mapCatalogRow(row: {
   title: string;
   public_summary: string;
   preview_image_path: string;
+  preview_image_alt: string | null;
+  preview_image_description: string | null;
   total_minutes: number | null;
   meal_labels: string[];
   diet_labels: string[];
@@ -72,6 +76,8 @@ function mapCatalogRow(row: {
     title: row.title,
     publicSummary: row.public_summary,
     previewImagePath: row.preview_image_path,
+    imageAlt: row.preview_image_alt,
+    imageDescription: row.preview_image_description,
     totalMinutes: row.total_minutes,
     mealLabels: row.meal_labels,
     dietLabels: row.diet_labels,
@@ -90,7 +96,7 @@ export async function getPublishedCatalog(
   const { data, error } = await client
     .from("recipe_catalog")
     .select(
-      "id, slug, title, public_summary, preview_image_path, total_minutes, meal_labels, diet_labels, published_at"
+      "id, slug, title, public_summary, preview_image_path, preview_image_alt, preview_image_description, total_minutes, meal_labels, diet_labels, published_at"
     )
     .order("title");
 
@@ -114,7 +120,7 @@ export async function getRecipeBySlug(
   const { data: catalogData, error: catalogError } = await client
     .from("recipe_catalog")
     .select(
-      "id, slug, title, public_summary, preview_image_path, total_minutes, meal_labels, diet_labels, published_at"
+      "id, slug, title, public_summary, preview_image_path, preview_image_alt, preview_image_description, total_minutes, meal_labels, diet_labels, published_at"
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -201,7 +207,7 @@ export async function getFreeRecipeSlots(
       slot,
       assigned_at,
       recipe_catalog:recipe_id (
-        id, slug, title, public_summary, preview_image_path, total_minutes, meal_labels, diet_labels, published_at
+        id, slug, title, public_summary, preview_image_path, preview_image_alt, preview_image_description, total_minutes, meal_labels, diet_labels, published_at
       )
     `)
     .order("slot");

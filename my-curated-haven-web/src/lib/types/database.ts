@@ -609,6 +609,10 @@ export type Database = {
           diet_labels: string[]
           id: string
           meal_labels: string[]
+          preview_image_alt: string | null
+          preview_image_description: string | null
+          preview_image_object_id: string | null
+          preview_image_object_version: string | null
           preview_image_path: string
           public_summary: string
           publication_state: string
@@ -623,6 +627,10 @@ export type Database = {
           diet_labels?: string[]
           id?: string
           meal_labels?: string[]
+          preview_image_alt?: string | null
+          preview_image_description?: string | null
+          preview_image_object_id?: string | null
+          preview_image_object_version?: string | null
           preview_image_path: string
           public_summary: string
           publication_state?: string
@@ -637,6 +645,10 @@ export type Database = {
           diet_labels?: string[]
           id?: string
           meal_labels?: string[]
+          preview_image_alt?: string | null
+          preview_image_description?: string | null
+          preview_image_object_id?: string | null
+          preview_image_object_version?: string | null
           preview_image_path?: string
           public_summary?: string
           publication_state?: string
