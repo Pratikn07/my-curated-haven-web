@@ -109,6 +109,6 @@ Every recipe gets tags from these groups. The website's filters are built from t
 
 - Cover art: 6 new covers made on 2026-10-06 (First Tastes, Iron-Rich First Foods, Batch & Freeze for Babies, Family Dinners, Lunchbox & Daycare, Picky Eater Favorites).
 - Real prices and the refresh promise per collection (plan task RC-01 to RC-05 in the [implementation plan](IMPLEMENTATION-PLAN.md)).
-- Covers for the other 11 collections (First Finger Foods and Freezer Dinners first). Until then the site draws them as plain cloth books.
+- The other 11 covers were made by the owner on 2026-10-06 from the same prompt style; all 20 collections now have cover art.
 
 **Website (2026-10-06):** `/collections` is the bookcase: "Cooking for" an age, filter chips, a featured seasonal book, shelves, and series pages at `/collections/series/<key>`. Collections with 8–12 recipes open to their own page with a placeholder price and "Opening soon"; the rest stand on the shelf as "coming soon". The first showroom stays at `/collections/test` (Halloween, Meal Prep, Protein Packs). Data: `src/config/collections.ts` and `src/config/recipe-snapshot.ts`.

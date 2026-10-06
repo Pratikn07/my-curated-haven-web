@@ -2451,8 +2451,8 @@ a.bk-book:focus-visible .bk-book-cover > .cl-book {
 }
 
 .bk-book[data-soon] .bk-book-cover > .cl-book {
-  filter: grayscale(0.55);
-  opacity: 0.6;
+  filter: grayscale(0.35);
+  opacity: 0.78;
 }
 
 .bk-book[data-soon] .bk-book-title {
@@ -2672,9 +2672,9 @@ a.bk-volume-link:focus-visible {
   border-radius: 0.4rem;
 }
 
+/* A series page is a showcase: volumes still being written stay in colour, labelled "Coming soon". */
 .bk-volume[data-soon] .bk-volume-cover > .cl-book {
-  filter: saturate(0.7);
-  opacity: 0.85;
+  opacity: 0.94;
 }
 
 .bk-volume-label {
