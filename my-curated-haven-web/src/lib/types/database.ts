@@ -1441,12 +1441,22 @@ export type Database = {
     }
     Functions: {
       admin_console_context: { Args: never; Returns: Json }
+      admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }
+      admin_draft_save: { Args: { p_command: Json }; Returns: Json }
+      admin_draft_start: {
+        Args: { p_operation_id: string; p_recipe_id: string }
+        Returns: Json
+      }
       admin_recipe_detail: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_history: {
         Args: { p_cursor?: string; p_limit?: number; p_recipe_id: string }
         Returns: Json
       }
       admin_recipe_list: { Args: { p_query: Json }; Returns: Json }
+      admin_recipe_revision: {
+        Args: { p_recipe_id: string; p_revision_id: string }
+        Returns: Json
+      }
       admin_recipe_usage: { Args: { p_recipe_id: string }; Returns: Json }
       admin_staff_assign: {
         Args: {

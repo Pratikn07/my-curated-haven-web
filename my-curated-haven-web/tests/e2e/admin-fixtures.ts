@@ -97,7 +97,11 @@ async function withPg<T>(fn: (pg: Client) => Promise<T>): Promise<T> {
   }
 }
 
-export async function createAdminFixture(label: string, roles: string[]): Promise<AdminFixture> {
+export async function createAdminFixture(
+  label: string,
+  roles: string[],
+  minStage: "inspection" | "editing" | "publication" = "inspection"
+): Promise<AdminFixture> {
   validatePhase10Targets();
   const url = supabaseUrl();
   const urlHost = new URL(url).hostname;
@@ -105,16 +109,57 @@ export async function createAdminFixture(label: string, roles: string[]): Promis
     throw new Error("Admin fixtures refuse non-loopback Supabase targets.");
   }
   const admin = createClient(url, serviceKey(), { auth: { persistSession: false } });
-  const safeLabel = label.toLowerCase().replace(/[^a-z0-9-]/g, "-").slice(0, 24);
-  const rand = crypto.randomBytes(4).toString("hex");
-  const email = `synthetic-${safeLabel}-${rand}@synthetic.test`;
+  const safeLabel = label.toLowerCase().replace(/[^a-z0-9-]/g, "-").slice(0, 12);
+  const rand = crypto.randomBytes(2).toString("hex");
+  const email = `syn-${safeLabel}-${rand}@synthetic.test`;
   const password = `Synth-${crypto.randomBytes(9).toString("hex")}!1A`;
 
-  const created = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const created = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name: "Synthetic" },
+  });
   if (created.error || !created.data.user) {
     throw new Error(`Admin fixture user creation failed: ${created.error?.message ?? "unknown"}`);
   }
   const userId = created.data.user.id;
+  const recipeId = crypto.randomUUID();
+
+  async function cleanupPartial(): Promise<void> {
+    try {
+      await withPg(async (pg) => {
+        await pg.query("ALTER TABLE private.recipe_revisions DISABLE TRIGGER recipe_revisions_immutable");
+        try {
+          await pg.query("DELETE FROM private.recipe_revisions WHERE recipe_id=$1", [recipeId]);
+        } finally {
+          await pg.query("ALTER TABLE private.recipe_revisions ENABLE TRIGGER recipe_revisions_immutable");
+        }
+        await pg.query("DELETE FROM private.recipe_drafts WHERE recipe_id=$1 AND workflow_schema=1", [
+          recipeId,
+        ]);
+        await pg.query("DELETE FROM public.recipe_catalog WHERE id=$1", [recipeId]);
+        await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
+        try {
+          await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
+        } finally {
+          await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
+        }
+      });
+    } catch {
+      // Best effort: the orphan message below names the remedy.
+    }
+    await admin.auth.admin.deleteUser(userId).catch(() => {});
+  }
+
+  try {
+    return await buildFixture();
+  } catch (error) {
+    await cleanupPartial();
+    throw error;
+  }
+
+  async function buildFixture(): Promise<AdminFixture> {
 
   // Capture real SSR session cookies through the app's own cookie adapter.
   let captured: { name: string; value: string }[] = [];
@@ -143,7 +188,17 @@ export async function createAdminFixture(label: string, roles: string[]): Promis
   const aal2Cookies = [...captured];
 
   await withPg(async (pg) => {
-    await pg.query("UPDATE private.admin_console_settings SET stage='inspection' WHERE singleton");
+    await pg.query(
+      `UPDATE private.admin_console_settings SET stage = (
+         SELECT (ARRAY['disabled','inspection','editing','publication'])[rank] FROM (
+           SELECT greatest(
+             (SELECT array_position(ARRAY['disabled','inspection','editing','publication'], stage)
+              FROM private.admin_console_settings WHERE singleton),
+             array_position(ARRAY['disabled','inspection','editing','publication'], $1::text)) AS rank
+         ) s
+       ) WHERE singleton`,
+      [minStage]
+    );
     try {
       await pg.query(
         "INSERT INTO private.admin_memberships(user_id,role,granted_by,reason) SELECT $1,r,$1,$2 FROM unnest($3::text[]) r",
@@ -157,7 +212,6 @@ export async function createAdminFixture(label: string, roles: string[]): Promis
     }
   });
 
-  const recipeId = crypto.randomUUID();
   const recipeSlug = `synthetic-${safeLabel}-${rand}`;
   const recipeTitle = `Synthetic ${label} ${rand}`;
   await withPg(async (pg) => {
@@ -214,6 +268,15 @@ export async function createAdminFixture(label: string, roles: string[]): Promis
       if (disposed) return;
       disposed = true;
       await withPg(async (pg) => {
+        await pg.query("ALTER TABLE private.recipe_revisions DISABLE TRIGGER recipe_revisions_immutable");
+        try {
+          await pg.query("DELETE FROM private.recipe_revisions WHERE recipe_id=$1", [recipeId]);
+        } finally {
+          await pg.query("ALTER TABLE private.recipe_revisions ENABLE TRIGGER recipe_revisions_immutable");
+        }
+        await pg.query("DELETE FROM private.recipe_drafts WHERE recipe_id=$1 AND workflow_schema=1", [
+          recipeId,
+        ]);
         await pg.query("DELETE FROM public.recipe_catalog WHERE id=$1", [recipeId]);
         await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
         try {
@@ -225,4 +288,5 @@ export async function createAdminFixture(label: string, roles: string[]): Promis
       await admin.auth.admin.deleteUser(userId).catch(() => {});
     },
   };
+  }
 }

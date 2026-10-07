@@ -22,17 +22,17 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CWD: my-curated-haven-web
   EVIDENCE: DB 12 (26: literal %/_/unicode/UUID, 25+2 pagination, views, usage) PASS; admin units 9/9; browser library→detail→back with query+focus passes on chromium-desktop --workers=1
 
-- [ ] R4: Private draft edits preserve active public content and rights
+- [x] R4: Private draft edits preserve active public content and rights
   CHECK: npm run test:admin:gate -- revisions
   EXPECT: ADMIN_GATE_REVISIONS_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: DB 13 (37: racing starts share one head, null-body save, control-key/target rejection, stale/out-of-band conflict with zero content change, identical replay, no-change preserves approval, BLOCKED without reopen, revoked replay denied) PASS; public catalog/body byte-identical after private ops (conflict/no-change add no rows); editor UI in Task 8
 
-- [ ] R5: Concurrent edits and retries produce one valid transition
+- [x] R5: Concurrent edits and retries produce one valid transition
   CHECK: npm run test:admin:gate -- concurrency
   EXPECT: ADMIN_GATE_CONCURRENCY_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: two-connection lock-barrier races on the owned stack (chromium-desktop --workers=1): simultaneous starts serialize to one head (loser provably blocked, then shares the head); simultaneous saves admit one v2 winner and one 40001/ADM_CONFLICT loser with final working_version=2 and 2 revisions
 
 - [ ] R6: Human decisions bind exactly to current submitted snapshot and issues
   CHECK: npm run test:admin:gate -- review

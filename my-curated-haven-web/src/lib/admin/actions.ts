@@ -1,6 +1,17 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  loadAdminRevision,
+  rebaseAdminDraft,
+  saveAdminDraft,
+  startAdminDraft,
+} from "@/lib/admin/recipes";
+import type { Base, DraftCommand } from "@/lib/admin/contracts";
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
 
 export async function lookupStaff(email: string) {
   const supabase = await createClient();
@@ -38,4 +49,32 @@ export async function revokeStaff(input: { userId: string; reason: string; opera
   });
   if (error) return { ok: false as const, code: "UNAVAILABLE" as const, reference: "staff-revoke" };
   return { ok: true as const, value: data };
+}
+
+export async function startDraftAction(recipeId: string, operationId: string) {
+  if (!isUuid(recipeId) || !isUuid(operationId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "draft-start" };
+  }
+  return startAdminDraft(recipeId, operationId);
+}
+
+export async function saveDraftAction(input: DraftCommand) {
+  if (!isUuid(input.recipeId) || !isUuid(input.operationId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "draft-save" };
+  }
+  return saveAdminDraft(input);
+}
+
+export async function rebaseDraftAction(input: DraftCommand & { newBase: Base }) {
+  if (!isUuid(input.recipeId) || !isUuid(input.operationId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "draft-rebase" };
+  }
+  return rebaseAdminDraft(input);
+}
+
+export async function loadRevisionAction(recipeId: string, revisionId: string) {
+  if (!isUuid(recipeId) || !isUuid(revisionId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "draft-revision" };
+  }
+  return loadAdminRevision(recipeId, revisionId);
 }
