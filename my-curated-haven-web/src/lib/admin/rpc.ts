@@ -23,6 +23,7 @@ export function classifyAdminError(error: { code?: string; message?: string } | 
   if (match && KNOWN_CODES[match[0]]) return KNOWN_CODES[match[0]];
   if (error.code === "42501") return "DENIED";
   if (error.code === "PGRST301" || error.code === "401") return "AUTH_REQUIRED";
+  if (error.code === "55P03") return "UNAVAILABLE";
   return "UNAVAILABLE";
 }
 

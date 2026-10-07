@@ -40,17 +40,17 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CWD: my-curated-haven-web
   EVIDENCE: DB 15 (32: invalid submits, stale/conflict/double decisions, role separation, no-change, invalidation, resubmission, legacy isolation) PASS; browser editor→reviewer→approve with issue resolution + viewer observation on desktop and mobile, reopen acknowledgement; decisions carry real actor + exact digest
 
-- [ ] R7: Publication is atomic and refresh retry never republishes
+- [x] R7: Publication is atomic and refresh retry never republishes
   CHECK: npm run test:admin:gate -- publication
   EXPECT: ADMIN_GATE_PUBLICATION_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: DB 16 (49: exact publish with archive/version/legacy/head, identical replay, stale/conflict, changed-content block, missing/vanished-asset block with active intact, injected-fault full rollback, campaign/sealed/live/pending/historical blocks, test-only publishes, ordinary + emergency withdraw with audit); browser confirmation flow in Task 13
 
-- [ ] R8: Commercial, sealed and campaign boundaries prevent unsafe corrections
+- [x] R8: Commercial, sealed and campaign boundaries prevent unsafe corrections
   CHECK: npm run test:admin:gate -- impact
   EXPECT: ADMIN_GATE_IMPACT_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: partial — image-availability evidence implemented (pass/unknown/fail in readiness, unknown/unavailable never a pass, publication recheck deferred to Task 12); sealed/commercial gates land in Increment C
+  EVIDENCE: frozen impact token (stable facts only) echoed and rechecked under SHARE NOWAIT locks; sealed/live/pending/historical/campaign exposure blocks ordinary publish; owner-only emergency withdraw with full refs; missing campaign snapshot blocks; busy locks map to UNAVAILABLE retry
 
 - [x] R9: Direct entry and SPA navigation suppress optional admin telemetry
   CHECK: npm run test:admin:gate -- privacy

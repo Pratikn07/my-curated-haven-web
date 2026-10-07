@@ -12,13 +12,24 @@ import {
   verifyAdminAsset,
 } from "@/lib/admin/assets";
 import {
+  loadAdminImpact,
   loadReviewState,
+  publishAdminRevision,
   recordAdminIssue,
   reviewAdminRevision,
   submitAdminRevision,
+  withdrawAdminRecipe,
 } from "@/lib/admin/recipes";
 import { loadAdminRecipe } from "@/lib/admin/context";
-import type { Base, DraftCommand, Operation, Revision, ReviewCommand } from "@/lib/admin/contracts";
+import type {
+  Base,
+  DraftCommand,
+  Operation,
+  PublishCommand,
+  Revision,
+  ReviewCommand,
+  WithdrawCommand,
+} from "@/lib/admin/contracts";
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -152,4 +163,25 @@ export async function loadReviewStateAction(revisionId: string) {
     return { ok: false as const, code: "INVALID" as const, reference: "review-state" };
   }
   return loadReviewState(revisionId);
+}
+
+export async function loadImpactAction(recipeId: string) {
+  if (!isUuid(recipeId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "impact" };
+  }
+  return loadAdminImpact(recipeId);
+}
+
+export async function publishRevisionAction(input: PublishCommand) {
+  if (!isUuid(input.recipeId) || !isUuid(input.operationId) || !isUuid(input.revisionId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "revision-publish" };
+  }
+  return publishAdminRevision(input);
+}
+
+export async function withdrawRecipeAction(input: WithdrawCommand) {
+  if (!isUuid(input.recipeId) || !isUuid(input.operationId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "recipe-withdraw" };
+  }
+  return withdrawAdminRecipe(input);
 }

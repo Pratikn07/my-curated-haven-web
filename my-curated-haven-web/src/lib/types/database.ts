@@ -1453,14 +1453,17 @@ export type Database = {
         Args: { p_cursor?: string; p_limit?: number; p_recipe_id: string }
         Returns: Json
       }
+      admin_recipe_impact: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_list: { Args: { p_query: Json }; Returns: Json }
       admin_recipe_revision: {
         Args: { p_recipe_id: string; p_revision_id: string }
         Returns: Json
       }
       admin_recipe_usage: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_recipe_withdraw: { Args: { p_command: Json }; Returns: Json }
       admin_review_state: { Args: { p_revision_id: string }; Returns: Json }
       admin_revision_issue: { Args: { p_command: Json }; Returns: Json }
+      admin_revision_publish: { Args: { p_command: Json }; Returns: Json }
       admin_revision_review: { Args: { p_command: Json }; Returns: Json }
       admin_revision_submit: { Args: { p_command: Json }; Returns: Json }
       admin_staff_assign: {

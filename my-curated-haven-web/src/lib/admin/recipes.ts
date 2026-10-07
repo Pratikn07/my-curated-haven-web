@@ -5,9 +5,12 @@ import type {
   LibraryQuery,
   MutationReceipt,
   Operation,
+  PublishCommand,
   Result,
   Revision,
   ReviewCommand,
+  Usage,
+  WithdrawCommand,
 } from "./contracts";
 import { adminRpc } from "./rpc";
 import { createClient } from "../supabase/server";
@@ -226,5 +229,73 @@ export async function loadReviewState(revisionId: string): Promise<Result<Review
       if (!isRecord(data) || !Array.isArray(data["issues"])) throw new Error("bad review state");
       return data as unknown as ReviewState;
     }
+  );
+}
+
+export async function loadAdminImpact(
+  recipeId: string
+): Promise<Result<{ usage: Usage; base: Base; impactToken: string; checkedAt: string }>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () => supabase.rpc("admin_recipe_impact", { p_recipe_id: recipeId as never }),
+    (data) => {
+      if (!isRecord(data) || typeof data["impactToken"] !== "string") {
+        throw new Error("bad impact");
+      }
+      return data as unknown as {
+        usage: Usage;
+        base: Base;
+        impactToken: string;
+        checkedAt: string;
+      };
+    }
+  );
+}
+
+export async function publishAdminRevision(
+  input: PublishCommand
+): Promise<Result<MutationReceipt>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () =>
+      supabase.rpc("admin_revision_publish", {
+        p_command: {
+          operation_id: input.operationId,
+          recipe_id: input.recipeId,
+          reason: input.reason,
+          revision_id: input.revisionId,
+          expected_version: input.expectedVersion,
+          expected_digest: input.expectedDigest,
+          base: {
+            content_version: input.base.contentVersion,
+            active_hash: input.base.activeHash,
+          },
+          impact_token: input.impactToken,
+        } as never,
+      }),
+    decodeReceipt
+  );
+}
+
+export async function withdrawAdminRecipe(
+  input: WithdrawCommand
+): Promise<Result<MutationReceipt>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () =>
+      supabase.rpc("admin_recipe_withdraw", {
+        p_command: {
+          operation_id: input.operationId,
+          recipe_id: input.recipeId,
+          reason: input.reason,
+          base: {
+            content_version: input.base.contentVersion,
+            active_hash: input.base.activeHash,
+          },
+          emergency: input.emergency,
+          acknowledge_promise_impact: input.acknowledgePromiseImpact,
+        } as never,
+      }),
+    decodeReceipt
   );
 }
