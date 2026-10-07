@@ -12,6 +12,7 @@ import {
   verifyAdminAsset,
 } from "@/lib/admin/assets";
 import {
+  loadReviewState,
   recordAdminIssue,
   reviewAdminRevision,
   submitAdminRevision,
@@ -144,4 +145,11 @@ export async function reviewRevisionAction(input: ReviewCommand) {
     return { ok: false as const, code: "INVALID" as const, reference: "revision-review" };
   }
   return reviewAdminRevision(input);
+}
+
+export async function loadReviewStateAction(revisionId: string) {
+  if (!isUuid(revisionId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "review-state" };
+  }
+  return loadReviewState(revisionId);
 }

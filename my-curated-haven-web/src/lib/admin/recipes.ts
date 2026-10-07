@@ -187,3 +187,44 @@ export async function reviewAdminRevision(
     decodeReceipt
   );
 }
+
+export interface ReviewIssue {
+  id: string;
+  code: string;
+  field: string | null;
+  severity: "blocker" | "suggestion";
+  origin: string;
+  explanation: string;
+  createdBy: string;
+  createdAt: string;
+  resolved: boolean;
+}
+
+export interface ReviewState {
+  submission: {
+    id: string;
+    digest: string;
+    version: number;
+    submittedBy: string;
+    submittedAt: string;
+  } | null;
+  decisions: {
+    decision: string;
+    reviewer: string;
+    reason: string;
+    decidedAt: string;
+    submissionId: string;
+  }[];
+  issues: ReviewIssue[];
+}
+
+export async function loadReviewState(revisionId: string): Promise<Result<ReviewState>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () => supabase.rpc("admin_review_state", { p_revision_id: revisionId as never }),
+    (data) => {
+      if (!isRecord(data) || !Array.isArray(data["issues"])) throw new Error("bad review state");
+      return data as unknown as ReviewState;
+    }
+  );
+}

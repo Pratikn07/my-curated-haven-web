@@ -1459,6 +1459,7 @@ export type Database = {
         Returns: Json
       }
       admin_recipe_usage: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_review_state: { Args: { p_revision_id: string }; Returns: Json }
       admin_revision_issue: { Args: { p_command: Json }; Returns: Json }
       admin_revision_review: { Args: { p_command: Json }; Returns: Json }
       admin_revision_submit: { Args: { p_command: Json }; Returns: Json }

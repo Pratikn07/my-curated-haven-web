@@ -34,11 +34,11 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CWD: my-curated-haven-web
   EVIDENCE: two-connection lock-barrier races on the owned stack (chromium-desktop --workers=1): simultaneous starts serialize to one head (loser provably blocked, then shares the head); simultaneous saves admit one v2 winner and one 40001/ADM_CONFLICT loser with final working_version=2 and 2 revisions
 
-- [ ] R6: Human decisions bind exactly to current submitted snapshot and issues
+- [x] R6: Human decisions bind exactly to current submitted snapshot and issues
   CHECK: npm run test:admin:gate -- review
   EXPECT: ADMIN_GATE_REVIEW_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: DB 15 (32: invalid submits, stale/conflict/double decisions, role separation, no-change, invalidation, resubmission, legacy isolation) PASS; browser editor→reviewer→approve with issue resolution + viewer observation on desktop and mobile, reopen acknowledgement; decisions carry real actor + exact digest
 
 - [ ] R7: Publication is atomic and refresh retry never republishes
   CHECK: npm run test:admin:gate -- publication

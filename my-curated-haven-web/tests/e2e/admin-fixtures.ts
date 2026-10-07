@@ -87,6 +87,79 @@ export function readTelemetry(requests: string[]): unknown[] {
   });
 }
 
+const REVIEW_TRIGGERS: [string, string][] = [
+  ["private.recipe_review_submissions", "review_submission_immutable"],
+  ["private.recipe_review_decisions", "review_decision_immutable"],
+  ["private.recipe_revision_issues", "revision_issue_immutable"],
+  ["private.recipe_issue_resolutions", "issue_resolution_immutable"],
+];
+
+async function deleteReviewData(
+  pg: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
+  recipeFilter: string,
+  recipeParam: unknown[]
+): Promise<void> {
+  for (const [table, trigger] of REVIEW_TRIGGERS) {
+    await pg.query(`ALTER TABLE ${table} DISABLE TRIGGER ${trigger}`);
+  }
+  try {
+    await pg.query(
+      `DELETE FROM private.recipe_issue_resolutions WHERE issue_id IN
+       (SELECT i.id FROM private.recipe_revision_issues i
+        JOIN private.recipe_revisions r ON r.id = i.revision_id
+        JOIN public.recipe_catalog c ON c.id = r.recipe_id WHERE ${recipeFilter})`,
+      recipeParam
+    );
+    await pg.query(
+      `DELETE FROM private.recipe_review_decisions WHERE revision_id IN
+       (SELECT r.id FROM private.recipe_revisions r
+        JOIN public.recipe_catalog c ON c.id = r.recipe_id WHERE ${recipeFilter})`,
+      recipeParam
+    );
+    await pg.query(
+      `DELETE FROM private.recipe_revision_issues WHERE revision_id IN
+       (SELECT r.id FROM private.recipe_revisions r
+        JOIN public.recipe_catalog c ON c.id = r.recipe_id WHERE ${recipeFilter})`,
+      recipeParam
+    );
+    await pg.query(
+      `DELETE FROM private.recipe_review_submissions WHERE revision_id IN
+       (SELECT r.id FROM private.recipe_revisions r
+        JOIN public.recipe_catalog c ON c.id = r.recipe_id WHERE ${recipeFilter})`,
+      recipeParam
+    );
+  } finally {
+    for (const [table, trigger] of REVIEW_TRIGGERS) {
+      await pg.query(`ALTER TABLE ${table} ENABLE TRIGGER ${trigger}`);
+    }
+  }
+}
+
+async function deleteRevisionData(
+  pg: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
+  recipeFilter: string,
+  recipeParam: unknown[]
+): Promise<void> {
+  await deleteReviewData(pg, recipeFilter, recipeParam);
+  await pg.query("ALTER TABLE private.recipe_revisions DISABLE TRIGGER recipe_revisions_immutable");
+  try {
+    await pg.query(
+      `DELETE FROM private.recipe_revisions WHERE recipe_id IN
+       (SELECT c.id FROM public.recipe_catalog c WHERE ${recipeFilter})`,
+      recipeParam
+    );
+  } finally {
+    await pg.query("ALTER TABLE private.recipe_revisions ENABLE TRIGGER recipe_revisions_immutable");
+  }
+  await pg.query(
+    `DELETE FROM private.recipe_drafts WHERE recipe_id IN
+     (SELECT c.id FROM public.recipe_catalog c WHERE ${recipeFilter})`,
+    recipeParam
+  );
+  await pg.query(`DELETE FROM public.recipe_catalog c WHERE ${recipeFilter}`, recipeParam);
+}
+
+
 async function withPg<T>(fn: (pg: Client) => Promise<T>): Promise<T> {
   const pg = new Client({ connectionString: databaseUrl() });
   await pg.connect();
@@ -129,16 +202,7 @@ export async function createAdminFixture(
   async function cleanupPartial(): Promise<void> {
     try {
       await withPg(async (pg) => {
-        await pg.query("ALTER TABLE private.recipe_revisions DISABLE TRIGGER recipe_revisions_immutable");
-        try {
-          await pg.query("DELETE FROM private.recipe_revisions WHERE recipe_id=$1", [recipeId]);
-        } finally {
-          await pg.query("ALTER TABLE private.recipe_revisions ENABLE TRIGGER recipe_revisions_immutable");
-        }
-        await pg.query("DELETE FROM private.recipe_drafts WHERE recipe_id=$1 AND workflow_schema=1", [
-          recipeId,
-        ]);
-        await pg.query("DELETE FROM public.recipe_catalog WHERE id=$1", [recipeId]);
+        await deleteRevisionData(pg, "c.id = $1", [recipeId]);
         await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
         try {
           await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
@@ -150,6 +214,54 @@ export async function createAdminFixture(
       // Best effort: the orphan message below names the remedy.
     }
     await admin.auth.admin.deleteUser(userId).catch(() => {});
+  }
+
+  async function purgeSyntheticOwners(): Promise<void> {
+    // Self-healing for interrupted runs (timeouts/kills skip dispose).
+    // Safe only because specs run serially on one worker against the owned
+    // stack; every purged identity is synthetic.test, never the caller.
+    await withPg(async (pg) => {
+      await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
+      try {
+        await pg.query(
+          `DELETE FROM private.admin_memberships
+           WHERE user_id <> $1 AND (reason LIKE 'Synthetic%' OR reason = 'poc bootstrap')`,
+          [userId]
+        );
+      } finally {
+        await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
+      }
+      await deleteRevisionData(pg, "c.slug LIKE 'syn-%'", []);
+    });
+    const listed = await admin.auth.admin.listUsers();
+    for (const u of listed.data?.users ?? []) {
+      if (u.id !== userId && u.email?.endsWith("@synthetic.test")) {
+        await admin.auth.admin.deleteUser(u.id).catch(() => {});
+      }
+    }
+  }
+
+  async function insertMembership(): Promise<void> {
+    try {
+      await withPg(async (pg) => {
+        await pg.query(
+          "INSERT INTO private.admin_memberships(user_id,role,granted_by,reason) SELECT $1,r,$1,$2 FROM unnest($3::text[]) r",
+          [userId, `Synthetic ${label}`, roles]
+        );
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("admin_one_active_owner")) {
+        await purgeSyntheticOwners();
+        await withPg(async (pg) => {
+          await pg.query(
+            "INSERT INTO private.admin_memberships(user_id,role,granted_by,reason) SELECT $1,r,$1,$2 FROM unnest($3::text[]) r",
+            [userId, `Synthetic ${label}`, roles]
+          );
+        });
+        return;
+      }
+      throw error;
+    }
   }
 
   try {
@@ -200,10 +312,7 @@ export async function createAdminFixture(
       [minStage]
     );
     try {
-      await pg.query(
-        "INSERT INTO private.admin_memberships(user_id,role,granted_by,reason) SELECT $1,r,$1,$2 FROM unnest($3::text[]) r",
-        [userId, `Synthetic ${label}`, roles]
-      );
+      await insertMembership();
     } catch (error) {
       if (error instanceof Error && error.message.includes("admin_one_active_owner")) {
         throw new Error("Admin specs need --workers=1: a second active owner cannot exist.");
@@ -268,16 +377,7 @@ export async function createAdminFixture(
       if (disposed) return;
       disposed = true;
       await withPg(async (pg) => {
-        await pg.query("ALTER TABLE private.recipe_revisions DISABLE TRIGGER recipe_revisions_immutable");
-        try {
-          await pg.query("DELETE FROM private.recipe_revisions WHERE recipe_id=$1", [recipeId]);
-        } finally {
-          await pg.query("ALTER TABLE private.recipe_revisions ENABLE TRIGGER recipe_revisions_immutable");
-        }
-        await pg.query("DELETE FROM private.recipe_drafts WHERE recipe_id=$1 AND workflow_schema=1", [
-          recipeId,
-        ]);
-        await pg.query("DELETE FROM public.recipe_catalog WHERE id=$1", [recipeId]);
+        await deleteRevisionData(pg, "c.id = $1", [recipeId]);
         await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
         try {
           await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
