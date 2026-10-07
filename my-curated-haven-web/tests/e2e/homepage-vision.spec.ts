@@ -284,20 +284,6 @@ test("[haven-house] metadata and social image use the My Curated Haven brand", a
   expect(image.headers()["content-type"]).toContain("image/png");
 });
 
-test("[haven-house] The house link closes the mobile menu and focuses the house", async ({ page }, testInfo) => {
-  test.skip(isDesktop(testInfo.project.name), "mobile navigation behavior is covered by mobile projects");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/about");
-  const menu = page.getByRole("button", { name: "Open menu" });
-  const menuId = await menu.getAttribute("aria-controls");
-  await menu.click();
-  await page.locator(`[id="${menuId}"]`).getByRole("link", { name: "The house" }).click();
-  await expect(page).toHaveURL(/\/#house$/);
-  await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator("#house")).toBeFocused();
-  await expect(page.locator("#house")).toBeInViewport();
-});
-
 test("[haven-house] a phone sees the headline, the tap hint and the open Kitchen on the first screen", async ({ page }, testInfo) => {
   test.skip(isDesktop(testInfo.project.name), "first-screen check runs on phone projects");
   // An iPhone screen minus Instagram's in-app browser bars.

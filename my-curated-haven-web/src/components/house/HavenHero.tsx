@@ -10,7 +10,13 @@ import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
  * then the house with the way to recipes under it. Composed for phones first: at Instagram's in-app
  * size the open Kitchen's tag sits on the first screen.
  */
-export default function HavenHero({ kitchenRecipes }: { kitchenRecipes: KitchenRecipeLink[] }) {
+export default function HavenHero({
+  kitchenRecipes,
+  showCollections,
+}: {
+  kitchenRecipes: KitchenRecipeLink[];
+  showCollections: boolean;
+}) {
   return (
     <section id="house" tabIndex={-1} aria-labelledby="home-title" className="scroll-mt-20 outline-none">
       <Container className="grid gap-4 pt-4 pb-12 sm:gap-6 sm:pt-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12 lg:py-16">
@@ -33,6 +39,7 @@ export default function HavenHero({ kitchenRecipes }: { kitchenRecipes: KitchenR
         <HouseExplorer
           scene={<HouseScene />}
           kitchenRecipes={kitchenRecipes}
+          showCollections={showCollections}
           after={
             <TrackedHomepageLink
               href="/recipes"

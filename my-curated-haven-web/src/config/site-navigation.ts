@@ -12,15 +12,14 @@ export const COLLECTIONS_HREF = "/collections";
 
 export const headerLinks: NavLink[] = [
   { href: "/", label: "Home" },
-  { href: "/recipes", label: "Free Recipes" },
+  { href: "/recipes", label: "Recipes" },
   { href: COLLECTIONS_HREF, label: "Collections" },
-  { href: "/#house", label: "The house" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
 ];
 
 export const footerLinks: NavLink[] = [
-  { href: "/recipes", label: "Free Recipes" },
+  { href: "/recipes", label: "Recipes" },
   { href: COLLECTIONS_HREF, label: "Collections" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
