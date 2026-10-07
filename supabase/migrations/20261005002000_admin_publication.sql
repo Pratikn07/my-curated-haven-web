@@ -228,7 +228,7 @@ BEGIN
   SELECT c.id,
     jsonb_build_object('title', c.title, 'publicSummary', c.public_summary,
       'totalMinutes', c.total_minutes, 'mealLabels', c.meal_labels, 'dietLabels', c.diet_labels),
-    to_jsonb(b.*), 
+    to_jsonb(b.*),
     jsonb_build_object('path', c.preview_image_path, 'alt', c.preview_image_alt,
       'description', c.preview_image_description),
     c.publication_state, b.content_version, op_id
