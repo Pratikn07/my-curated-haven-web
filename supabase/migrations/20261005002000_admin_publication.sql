@@ -60,6 +60,7 @@ BEGIN
   IF p_recipe_id IS NULL OR NOT EXISTS (SELECT 1 FROM public.recipe_catalog WHERE id = p_recipe_id) THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'ADM_INVALID';
   END IF;
+  PERFORM set_config('lock_timeout', '5000', true);
   LOCK TABLE public.free_recipe_slots, public.collection_recipes, public.collection_releases,
     private.release_manifests, private.commercial_offers,
     private.purchase_orders, private.provider_payments,
@@ -121,6 +122,7 @@ BEGIN
     OR length(trim(coalesce(reason, ''))) NOT BETWEEN 1 AND 1000 THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'ADM_INVALID';
   END IF;
+  PERFORM set_config('lock_timeout', '5000', true);
   LOCK TABLE public.free_recipe_slots, public.collection_recipes, public.collection_releases,
     private.release_manifests, private.commercial_offers,
     private.purchase_orders, private.provider_payments,
@@ -319,6 +321,7 @@ BEGIN
     OR length(trim(coalesce(reason, ''))) NOT BETWEEN 1 AND 1000 THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'ADM_INVALID';
   END IF;
+  PERFORM set_config('lock_timeout', '5000', true);
   LOCK TABLE public.free_recipe_slots, public.collection_recipes, public.collection_releases,
     private.release_manifests, private.commercial_offers,
     private.purchase_orders, private.provider_payments,

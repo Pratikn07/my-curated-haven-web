@@ -73,6 +73,6 @@ export type ReviewCommand = Operation & { revisionId: string; expectedVersion: n
   resolvedIssueIds: string[] };
 export type PublishCommand = Operation & { revisionId: string; expectedVersion: number;
   expectedDigest: string; base: Base; impactToken: string };
-export type WithdrawCommand = Operation & { base: Base; impactToken: string;
+export type WithdrawCommand = Operation & { base: Base;
   emergency: boolean; acknowledgePromiseImpact: boolean };
 export type RefreshReceipt = { operationId: string; state: "complete" | "pending" };

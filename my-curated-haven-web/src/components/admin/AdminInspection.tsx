@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AdminContext, RecipeDetail } from "@/lib/admin/contracts";
 import AdminRecipePreview from "./AdminRecipePreview";
 import AdminRecipeReview from "./AdminRecipeReview";
+import AdminRecipePublication from "./AdminRecipePublication";
 
 export default function AdminInspection({
   detail,
@@ -17,6 +18,7 @@ export default function AdminInspection({
       <Link href={returnTo}>Back to recipes</Link>
       <AdminRecipePreview snapshot={detail.active} label="Active recipe" />
       <AdminRecipeReview detail={detail} context={context} />
+      <AdminRecipePublication detail={detail} context={context} />
       <section aria-label="Readiness">
         <h2>Readiness</h2>
         <p>{detail.readiness.review}</p>

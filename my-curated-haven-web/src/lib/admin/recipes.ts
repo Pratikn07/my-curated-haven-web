@@ -71,7 +71,8 @@ export async function startAdminDraft(
         p_recipe_id: recipeId as never,
         p_operation_id: operationId as never,
       }),
-    decodeRevision
+    decodeRevision,
+    true
   );
 }
 
@@ -79,7 +80,8 @@ export async function saveAdminDraft(input: DraftCommand): Promise<Result<Mutati
   const supabase = await createClient();
   return adminRpc(
     () => supabase.rpc("admin_draft_save", { p_command: toDbCommand(input) as never }),
-    decodeReceipt
+    decodeReceipt,
+    true
   );
 }
 
@@ -96,7 +98,8 @@ export async function rebaseAdminDraft(
   };
   return adminRpc(
     () => supabase.rpc("admin_draft_rebase", { p_command: command as never }),
-    decodeReceipt
+    decodeReceipt,
+    true
   );
 }
 
@@ -111,7 +114,8 @@ export async function loadAdminRevision(
         p_recipe_id: recipeId as never,
         p_revision_id: revisionId as never,
       }),
-    decodeRevision
+    decodeRevision,
+    true
   );
 }
 
@@ -131,7 +135,8 @@ export async function submitAdminRevision(
           expected_digest: input.expectedDigest,
         } as never,
       }),
-    decodeRevision
+    decodeRevision,
+    true
   );
 }
 
@@ -187,7 +192,8 @@ export async function reviewAdminRevision(
           resolved_issue_ids: input.resolvedIssueIds,
         } as never,
       }),
-    decodeReceipt
+    decodeReceipt,
+    true
   );
 }
 
@@ -248,7 +254,8 @@ export async function loadAdminImpact(
         impactToken: string;
         checkedAt: string;
       };
-    }
+    },
+    true
   );
 }
 
@@ -273,7 +280,8 @@ export async function publishAdminRevision(
           impact_token: input.impactToken,
         } as never,
       }),
-    decodeReceipt
+    decodeReceipt,
+    true
   );
 }
 
@@ -296,6 +304,7 @@ export async function withdrawAdminRecipe(
           acknowledge_promise_impact: input.acknowledgePromiseImpact,
         } as never,
       }),
-    decodeReceipt
+    decodeReceipt,
+    true
   );
 }

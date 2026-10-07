@@ -142,14 +142,21 @@ async function deleteRevisionData(
 ): Promise<void> {
   await deleteReviewData(pg, recipeFilter, recipeParam);
   await pg.query("ALTER TABLE private.recipe_revisions DISABLE TRIGGER recipe_revisions_immutable");
+  await pg.query("ALTER TABLE private.recipe_active_archives DISABLE TRIGGER recipe_active_archives_immutable");
   try {
     await pg.query(
       `DELETE FROM private.recipe_revisions WHERE recipe_id IN
        (SELECT c.id FROM public.recipe_catalog c WHERE ${recipeFilter})`,
       recipeParam
     );
+    await pg.query(
+      `DELETE FROM private.recipe_active_archives WHERE recipe_id IN
+       (SELECT c.id FROM public.recipe_catalog c WHERE ${recipeFilter})`,
+      recipeParam
+    );
   } finally {
     await pg.query("ALTER TABLE private.recipe_revisions ENABLE TRIGGER recipe_revisions_immutable");
+    await pg.query("ALTER TABLE private.recipe_active_archives ENABLE TRIGGER recipe_active_archives_immutable");
   }
   await pg.query(
     `DELETE FROM private.recipe_drafts WHERE recipe_id IN
@@ -160,14 +167,29 @@ async function deleteRevisionData(
 }
 
 
-async function withPg<T>(fn: (pg: Client) => Promise<T>): Promise<T> {
-  const pg = new Client({ connectionString: databaseUrl() });
-  await pg.connect();
-  try {
-    return await fn(pg);
-  } finally {
-    await pg.end();
+async function withPg<T>(fn: (pg: Client) => Promise<T>, retryDeadlock = false): Promise<T> {
+  const run = async (): Promise<T> => {
+    const pg = new Client({ connectionString: databaseUrl() });
+    await pg.connect();
+    try {
+      await pg.query("SET SESSION lock_timeout = '15s'");
+      return await fn(pg);
+    } finally {
+      await pg.end();
+    }
+  };
+  if (!retryDeadlock) return run();
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      lastError = error;
+      if (!(error instanceof Error && (error as { code?: string }).code === "40P01")) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+    }
   }
+  throw lastError;
 }
 
 export async function createAdminFixture(
@@ -201,15 +223,19 @@ export async function createAdminFixture(
 
   async function cleanupPartial(): Promise<void> {
     try {
-      await withPg(async (pg) => {
-        await deleteRevisionData(pg, "c.id = $1", [recipeId]);
-        await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
-        try {
-          await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
-        } finally {
-          await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
-        }
-      });
+      await withPg(
+        async (pg) => {
+          await deleteRevisionData(pg, "c.id = $1", [recipeId]);
+          await pg.query("DELETE FROM private.admin_operations WHERE actor_id=$1", [userId]);
+          await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
+          try {
+            await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
+          } finally {
+            await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
+          }
+        },
+        true
+      );
     } catch {
       // Best effort: the orphan message below names the remedy.
     }
@@ -220,19 +246,25 @@ export async function createAdminFixture(
     // Self-healing for interrupted runs (timeouts/kills skip dispose).
     // Safe only because specs run serially on one worker against the owned
     // stack; every purged identity is synthetic.test, never the caller.
-    await withPg(async (pg) => {
-      await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
-      try {
-        await pg.query(
-          `DELETE FROM private.admin_memberships
-           WHERE user_id <> $1 AND (reason LIKE 'Synthetic%' OR reason = 'poc bootstrap')`,
-          [userId]
-        );
-      } finally {
-        await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
-      }
-      await deleteRevisionData(pg, "c.slug LIKE 'syn-%'", []);
-    });
+    await withPg(
+      async (pg) => {
+        await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
+        try {
+          await pg.query(
+            `DELETE FROM private.admin_memberships
+             WHERE user_id <> $1 AND (reason LIKE 'Synthetic%' OR reason = 'poc bootstrap'
+               OR NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = user_id)
+               OR EXISTS (SELECT 1 FROM auth.users u
+                          WHERE u.id = user_id AND u.email LIKE '%@synthetic.test'))`,
+            [userId]
+          );
+        } finally {
+          await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
+        }
+        await deleteRevisionData(pg, "c.slug LIKE 'synthetic-%'", []);
+      },
+      true
+    );
     const listed = await admin.auth.admin.listUsers();
     for (const u of listed.data?.users ?? []) {
       if (u.id !== userId && u.email?.endsWith("@synthetic.test")) {
@@ -376,15 +408,19 @@ export async function createAdminFixture(
     async dispose() {
       if (disposed) return;
       disposed = true;
-      await withPg(async (pg) => {
-        await deleteRevisionData(pg, "c.id = $1", [recipeId]);
-        await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
-        try {
-          await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
-        } finally {
-          await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
-        }
-      });
+      await withPg(
+        async (pg) => {
+          await deleteRevisionData(pg, "c.id = $1", [recipeId]);
+          await pg.query("DELETE FROM private.admin_operations WHERE actor_id=$1", [userId]);
+          await pg.query("ALTER TABLE private.admin_memberships DISABLE TRIGGER admin_owner_protected");
+          try {
+            await pg.query("DELETE FROM private.admin_memberships WHERE user_id=$1", [userId]);
+          } finally {
+            await pg.query("ALTER TABLE private.admin_memberships ENABLE TRIGGER admin_owner_protected");
+          }
+        },
+        true
+      );
       await admin.auth.admin.deleteUser(userId).catch(() => {});
     },
   };

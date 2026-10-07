@@ -30,20 +30,34 @@ export function classifyAdminError(error: { code?: string; message?: string } | 
 export async function adminRpc<T>(
   call: () => PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>,
   decode: (data: unknown) => T,
+  retryOnLock = false
 ): Promise<Result<T>> {
-  let response: { data: unknown; error: { code?: string; message?: string } | null };
-  try {
-    response = await call();
-  } catch {
-    return { ok: false, code: "UNAVAILABLE", reference: reference() };
-  }
-  if (response.error) {
-    return { ok: false, code: classifyAdminError(response.error), reference: reference() };
-  }
-  try {
-    const value = decode(response.data);
-    return { ok: true, value };
-  } catch {
-    return { ok: false, code: "UNAVAILABLE", reference: reference() };
+  let attempts = 0;
+  for (;;) {
+    attempts += 1;
+    let response: { data: unknown; error: { code?: string; message?: string } | null };
+    try {
+      response = await call();
+    } catch {
+      return { ok: false, code: "UNAVAILABLE", reference: reference() };
+    }
+    if (response.error) {
+      const code = classifyAdminError(response.error);
+      if (
+        retryOnLock &&
+        attempts < 3 &&
+        (response.error.code === "55P03" || response.error.code === "40P01")
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 300 * attempts));
+        continue;
+      }
+      return { ok: false, code, reference: reference() };
+    }
+    try {
+      const value = decode(response.data);
+      return { ok: true, value };
+    } catch {
+      return { ok: false, code: "UNAVAILABLE", reference: reference() };
+    }
   }
 }

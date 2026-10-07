@@ -2,24 +2,23 @@
 
 import { createClient } from "@/lib/supabase/server";
 import {
-  loadAdminRevision,
-  rebaseAdminDraft,
-  saveAdminDraft,
-  startAdminDraft,
-} from "@/lib/admin/recipes";
-import {
   listAdminAssets,
   verifyAdminAsset,
 } from "@/lib/admin/assets";
 import {
   loadAdminImpact,
+  loadAdminRevision,
   loadReviewState,
   publishAdminRevision,
+  rebaseAdminDraft,
   recordAdminIssue,
   reviewAdminRevision,
+  saveAdminDraft,
+  startAdminDraft,
   submitAdminRevision,
   withdrawAdminRecipe,
 } from "@/lib/admin/recipes";
+import { refreshAdminRecipe, retryAdminRefresh } from "@/lib/admin/refresh";
 import { loadAdminRecipe } from "@/lib/admin/context";
 import type {
   Base,
@@ -184,4 +183,62 @@ export async function withdrawRecipeAction(input: WithdrawCommand) {
     return { ok: false as const, code: "INVALID" as const, reference: "recipe-withdraw" };
   }
   return withdrawAdminRecipe(input);
+}
+
+export async function refreshRecipeAction(
+  receipt: Parameters<typeof refreshAdminRecipe>[0],
+  options?: { slug?: string; campaignSlugs?: string[] }
+) {
+  return refreshAdminRecipe(receipt, options);
+}
+
+export async function retryRefreshAction(operationId: string, recipeId: string) {
+  if (!isUuid(operationId) || !isUuid(recipeId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "refresh-retry" };
+  }
+  return retryAdminRefresh(operationId, recipeId);
+}
+
+export async function recordFailureAction(input: {
+  action: string;
+  target: string | null;
+  operationId: string;
+  code: string;
+}) {
+  if (!isUuid(input.operationId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "failure-audit" };
+  }
+  if (!/^[a-z.]{1,80}$/.test(input.action) || !/^[A-Z_]{1,40}$/.test(input.code)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "failure-audit" };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !isUuid(user.id)) {
+    return { ok: false as const, code: "AUTH_REQUIRED" as const, reference: "failure-audit" };
+  }
+  if (input.target !== null && !isUuid(input.target)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "failure-audit" };
+  }
+  try {
+    const { Client } = await import("pg");
+    const pg = new Client({ connectionString: process.env.COMMERCE_DATABASE_URL });
+    await pg.connect();
+    try {
+      await pg.query("SELECT private.admin_record_failure($1,$2,$3,$4,$5,$6)", [
+        user.id,
+        input.action,
+        input.target,
+        input.operationId,
+        input.code,
+        "admin-console",
+      ]);
+    } finally {
+      await pg.end();
+    }
+  } catch {
+    return { ok: false as const, code: "UNAVAILABLE" as const, reference: "failure-audit" };
+  }
+  return { ok: true as const, value: { recorded: true } };
 }
