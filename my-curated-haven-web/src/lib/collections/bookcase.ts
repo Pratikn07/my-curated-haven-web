@@ -73,7 +73,12 @@ export interface BookcaseEntry {
   price: string;
   recipeCount: number;
   matches: FilterKey[];
+  /** The first recipes, shown on the inside page when the book opens. */
+  contents: string[];
 }
+
+/** Lines on the inside page of an opening book. */
+export const CONTENTS_LINES = 6;
 
 export function toBookcaseEntry(collection: ShowroomCollection, price: string): BookcaseEntry {
   return {
@@ -89,6 +94,7 @@ export function toBookcaseEntry(collection: ShowroomCollection, price: string): 
     price,
     recipeCount: collection.recipes.length,
     matches: collectionMatches(collection.recipes),
+    contents: collection.availability === "open" ? collection.recipes.slice(0, CONTENTS_LINES).map((recipe) => recipe.title) : [],
   };
 }
 

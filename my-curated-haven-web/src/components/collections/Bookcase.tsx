@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { BookCover } from "@/components/collections/Book";
+import { isOpeningBook, openBook, shouldOpenBook } from "@/components/collections/motion/openBook";
 import {
   FILTERS,
   STAGE_OPTIONS,
@@ -211,7 +213,36 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
   );
 }
 
+/**
+ * Tapping an open book lifts it, opens the cover to its contents and hands over
+ * to the collection page (motion/openBook.ts). Touching it starts loading the page.
+ */
+function useOpenBook(entry: BookcaseEntry) {
+  const router = useRouter();
+  const href = `/collections/${entry.slug}`;
+  return {
+    onPointerDown: () => router.prefetch(href),
+    onClick: (event: ReactMouseEvent<HTMLAnchorElement>) => {
+      if (isOpeningBook()) {
+        event.preventDefault();
+        return;
+      }
+      if (!shouldOpenBook(event.nativeEvent)) return;
+      event.preventDefault();
+      openBook({
+        link: event.currentTarget,
+        title: entry.title,
+        contents: entry.contents,
+        total: entry.recipeCount,
+        cloth: entry.cloth,
+        navigate: () => router.push(href),
+      });
+    },
+  };
+}
+
 function BookTile({ entry }: { entry: BookcaseEntry }) {
+  const opener = useOpenBook(entry);
   const book = { title: entry.title, cover: entry.cover, cloth: entry.cloth };
   if (!entry.open) {
     return (
@@ -229,7 +260,7 @@ function BookTile({ entry }: { entry: BookcaseEntry }) {
     );
   }
   return (
-    <Link className="bk-book" href={`/collections/${entry.slug}`}>
+    <Link className="bk-book" href={`/collections/${entry.slug}`} {...opener}>
       <span className="bk-book-cover">
         <BookCover book={book} sizes="(min-width: 768px) 10rem, 34vw" tilt />
       </span>
@@ -242,9 +273,10 @@ function BookTile({ entry }: { entry: BookcaseEntry }) {
 }
 
 function Featured({ entry }: { entry: BookcaseEntry }) {
+  const opener = useOpenBook(entry);
   return (
     <section className="bk-featured" data-cloth={entry.cloth} aria-labelledby="bk-featured-title">
-      <Link className="bk-featured-link" href={`/collections/${entry.slug}`}>
+      <Link className="bk-featured-link" href={`/collections/${entry.slug}`} {...opener}>
         <span className="bk-featured-cover">
           <BookCover book={{ title: entry.title, cover: entry.cover, cloth: entry.cloth }} sizes="(min-width: 768px) 12rem, 38vw" priority />
         </span>

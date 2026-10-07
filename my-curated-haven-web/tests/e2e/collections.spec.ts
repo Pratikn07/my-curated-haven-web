@@ -203,3 +203,34 @@ test("every book stands level on its shelf, whatever the length of its title", a
     expect(new Set(tops).size, (await row.getAttribute("aria-labelledby")) ?? "shelf").toBe(1);
   }
 });
+
+test("tapping a book opens it to its contents and lands on its page", async ({ page }) => {
+  await page.goto("/collections", LOAD);
+  // The bookcase answers once hydrated; choosing an age proves it.
+  const ages = page.getByRole("group", { name: "Cooking for" });
+  await expect(async () => {
+    await ages.getByRole("button", { name: "6–12 m" }).click();
+    await expect(ages.getByRole("button", { name: "6–12 m" })).toHaveAttribute("aria-pressed", "true", { timeout: 1000 });
+  }).toPass();
+
+  await page.getByRole("region", { name: "Everyday meals" }).getByRole("link", { name: /First Tastes/ }).click();
+  const overlay = page.locator(".bk-open");
+  await expect(overlay).toBeAttached();
+  await expect(overlay.locator(".bk-open-list li").first()).toHaveText("Silky Carrot Apple Starter Purée");
+  await expect(page).toHaveURL(/\/collections\/first-tastes$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("First Tastes");
+  await expect(overlay).toHaveCount(0, { timeout: 10_000 });
+});
+
+test("with reduced motion a book link goes straight to its page", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections", LOAD);
+  const ages = page.getByRole("group", { name: "Cooking for" });
+  await expect(async () => {
+    await ages.getByRole("button", { name: "6–12 m" }).click();
+    await expect(ages.getByRole("button", { name: "6–12 m" })).toHaveAttribute("aria-pressed", "true", { timeout: 1000 });
+  }).toPass();
+  await page.getByRole("region", { name: "Everyday meals" }).getByRole("link", { name: /First Tastes/ }).click();
+  await expect(page).toHaveURL(/\/collections\/first-tastes$/);
+  await expect(page.locator(".bk-open")).toHaveCount(0);
+});
