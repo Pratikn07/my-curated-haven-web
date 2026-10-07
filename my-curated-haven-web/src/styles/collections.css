@@ -2826,3 +2826,132 @@ a.bk-volume-link:focus-visible {
     transition: none;
   }
 }
+
+/* ---------- Opening a book (motion/openBook.ts) ----------
+ * A fixed layer over the page: paper scrim, then the book at the middle of the
+ * screen with its spine on the centre line. The cover swings open on that spine
+ * to a contents page. Sizes come from the book's width (--bk-open-w).
+ */
+
+.cl.bk-open {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  perspective: 1800px;
+  pointer-events: none;
+}
+
+.bk-open-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--cl-paper);
+}
+
+.bk-open-book {
+  position: absolute;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.bk-open-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--bk-open-w) * 0.03);
+  padding: calc(var(--bk-open-w) * 0.1) calc(var(--bk-open-w) * 0.09);
+  border-radius: 0 2.2% 2.2% 0 / 0 1.6% 1.6% 0;
+  background: var(--cl-card);
+  color: var(--cl-ink);
+  box-shadow: 0 1px 1px rgb(20 10 4 / 0.2), 0 18px 30px -16px rgb(20 10 4 / 0.45);
+  overflow: hidden;
+}
+
+.bk-open-eyebrow {
+  color: var(--cl-ink-soft);
+  font-size: calc(var(--bk-open-w) * 0.042);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.bk-open-title {
+  font-family: var(--font-display);
+  font-size: calc(var(--bk-open-w) * 0.1);
+  line-height: 1.02;
+}
+
+.bk-open-list {
+  display: grid;
+  gap: calc(var(--bk-open-w) * 0.022);
+  margin-top: calc(var(--bk-open-w) * 0.02);
+  font-size: calc(var(--bk-open-w) * 0.05);
+  line-height: 1.25;
+  counter-reset: bk-open;
+}
+
+/* One line per recipe, cut with an ellipsis, so the list always fits the page. */
+.bk-open-list li {
+  overflow: hidden;
+  padding-bottom: calc(var(--bk-open-w) * 0.018);
+  border-bottom: 1px dotted var(--cl-line);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  counter-increment: bk-open;
+}
+
+.bk-open-list li::before {
+  content: counter(bk-open);
+  display: inline-block;
+  width: 1.4em;
+  color: var(--cl-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.bk-open-more {
+  color: var(--cl-ink-soft);
+  font-size: calc(var(--bk-open-w) * 0.045);
+  font-style: italic;
+}
+
+/* The shadow the cover casts on the page as it lifts away. */
+.bk-open-fold {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(20 10 4 / 0.55), rgb(20 10 4 / 0.12) 35%, transparent 70%);
+  pointer-events: none;
+}
+
+.bk-open-cover {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.bk-open-front,
+.bk-open-inside {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.bk-open .bk-open-front {
+  width: 100%;
+}
+
+/* Inside of the cover: the cloth turned in over marbled endpaper. */
+.bk-open-inside {
+  transform: rotateY(180deg);
+  border-radius: 2.2% 0 0 2.2% / 1.6% 0 0 1.6%;
+  background:
+    linear-gradient(90deg, transparent 0 88%, rgb(0 0 0 / 0.25) 100%),
+    radial-gradient(120% 80% at 30% 20%, var(--cloth-lift, #66452f) 0%, transparent 60%),
+    var(--cloth-deep, #2b1b11);
+  box-shadow: inset 0 0 0 calc(var(--bk-open-w) * 0.05) var(--cloth, #4e3322);
+}
