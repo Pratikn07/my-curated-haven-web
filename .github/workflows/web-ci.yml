@@ -105,22 +105,29 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Build
+        run: npm run build
+
+      - name: Browser tests
+        # The privacy spec needs its own instrumented build below; the rest of
+        # the suite assumes the default build (no remote SDK).
+        run: |
+          list="$(npx playwright test --list $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts'))"
+          printf '%s\n' "$list"
+          printf '%s\n' "$list" | grep -Eq 'Total: [1-9][0-9]* tests'
+          npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
+
+      - name: Rebuild with instrumented analytics for the privacy spec
         env:
-          # Instrumented build for the privacy spec: the loopback sink below
-          # only receives SDK traffic when these test-only values are baked
-          # in (see ops/ADMIN-CONSOLE.md). Never point them at production.
+          # Test-only values baked in for the loopback sink intercepted by
+          # Playwright (see ops/ADMIN-CONSOLE.md). Never point them at production.
           NEXT_PUBLIC_ANALYTICS_ENABLED: "true"
           NEXT_PUBLIC_APP_ENV: staging
           NEXT_PUBLIC_POSTHOG_KEY: test-key-staging
           NEXT_PUBLIC_POSTHOG_HOST: http://127.0.0.1:54349/sink
         run: npm run build
 
-      - name: Browser tests
-        run: |
-          list="$(npx playwright test --list)"
-          printf '%s\n' "$list"
-          printf '%s\n' "$list" | grep -Eq 'Total: [1-9][0-9]* tests'
-          npm run test:e2e
+      - name: Privacy browser tests (instrumented build)
+        run: npm run test:e2e -- tests/e2e/admin-privacy.spec.ts
 
       - name: Assemble Phase 10 scenario evidence
         if: always()

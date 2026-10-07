@@ -48,6 +48,11 @@ Admin browser specs run against the owned stack with real Auth users (never the 
 - The privacy spec needs an instrumented build: `NEXT_PUBLIC_ANALYTICS_ENABLED=true NEXT_PUBLIC_APP_ENV=staging
   NEXT_PUBLIC_POSTHOG_KEY=test-key-staging NEXT_PUBLIC_POSTHOG_HOST=http://127.0.0.1:54349/sink` (loopback sink
   intercepted by Playwright; nothing listens there).
+- Two build profiles are required for a fully green desktop suite: the analytics, public-site deferred-text and
+  stories analytics specs assume the default build (no remote SDK), while only the privacy positive control needs
+  the instrumented build. The admin specs pass on either profile.
+- OTP specs read mailpit at `http://127.0.0.1:54324`. When several local stacks run side by side, this stack's
+  inbucket may land on another host port; relay it (e.g. a localhost TCP forward 54324→actual) for those specs.
 - Fixture users, memberships and synthetic recipes are removed on dispose; the append-only audit log is intentionally
   retained, so the pgTAP audit assertion is baseline-relative.
 
