@@ -4,8 +4,10 @@ import type {
   DraftCommand,
   LibraryQuery,
   MutationReceipt,
+  Operation,
   Result,
   Revision,
+  ReviewCommand,
 } from "./contracts";
 import { adminRpc } from "./rpc";
 import { createClient } from "../supabase/server";
@@ -107,5 +109,81 @@ export async function loadAdminRevision(
         p_revision_id: revisionId as never,
       }),
     decodeRevision
+  );
+}
+
+export async function submitAdminRevision(
+  input: Operation & { revisionId: string; expectedVersion: number; expectedDigest: string }
+): Promise<Result<Revision>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () =>
+      supabase.rpc("admin_revision_submit", {
+        p_command: {
+          operation_id: input.operationId,
+          recipe_id: input.recipeId,
+          reason: input.reason,
+          revision_id: input.revisionId,
+          expected_version: input.expectedVersion,
+          expected_digest: input.expectedDigest,
+        } as never,
+      }),
+    decodeRevision
+  );
+}
+
+export async function recordAdminIssue(
+  input: Operation & {
+    revisionId: string;
+    expectedDigest: string;
+    code: string;
+    field: string | null;
+    severity: "blocker" | "suggestion";
+    explanation: string;
+  }
+): Promise<Result<{ issueId: string }>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () =>
+      supabase.rpc("admin_revision_issue", {
+        p_command: {
+          operation_id: input.operationId,
+          recipe_id: input.recipeId,
+          reason: input.reason,
+          revision_id: input.revisionId,
+          expected_digest: input.expectedDigest,
+          code: input.code,
+          field: input.field,
+          severity: input.severity,
+          explanation: input.explanation,
+        } as never,
+      }),
+    (data) => {
+      if (!isRecord(data) || typeof data["issueId"] !== "string") throw new Error("bad issue");
+      return { issueId: data["issueId"] as string };
+    }
+  );
+}
+
+export async function reviewAdminRevision(
+  input: ReviewCommand
+): Promise<Result<MutationReceipt>> {
+  const supabase = await createClient();
+  return adminRpc(
+    () =>
+      supabase.rpc("admin_revision_review", {
+        p_command: {
+          operation_id: input.operationId,
+          recipe_id: input.recipeId,
+          reason: input.reason,
+          revision_id: input.revisionId,
+          expected_version: input.expectedVersion,
+          expected_digest: input.expectedDigest,
+          submission_id: input.submissionId,
+          decision: input.decision,
+          resolved_issue_ids: input.resolvedIssueIds,
+        } as never,
+      }),
+    decodeReceipt
   );
 }
