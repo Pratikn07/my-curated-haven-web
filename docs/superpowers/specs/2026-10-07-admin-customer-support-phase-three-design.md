@@ -1,0 +1,366 @@
+# Admin customer purchases and access support: Phase 3 design
+
+- Date: 2026-10-07, America/Los_Angeles.
+- Status: first written design for owner review. Recommendations specific to Phase 3 are proposals, not recorded owner approvals.
+- Deliverable: functional and architectural design. Visual UI design, the implementation task plan, deployment and live support actions are separate work.
+- Source baseline: remote `main` verified at `9bfdfc94390e5d3348a7b895d901ea81e13aac90`. Commerce source inspected in the collections showroom worktree at `f08e034ddda3a69c203828050d4aded38da0fd1e`, the corresponding navigation change before its squash merge.
+- Admin planning baseline: `codex/admin-recipe-workspace-design` at `7176813`, containing the Phase 2 design and implementation plan, with existing uncommitted Phase 1 publication work preserved. Phase 2 is planned, not implemented by these documents.
+- Verification boundary: current repository and primary provider documentation reviewed; production database contents, deployed payment behaviour, live sales and provider configuration were not verified for this design.
+
+## 1. Purpose and success
+
+Phase 3 gives the owner a reliable way to answer: **“This customer says they paid but cannot access their collection. What happened, and how do I resolve it?”** It extends the admin console with customer lookup, purchase inspection, access explanations, provider checks and narrowly controlled recovery. The first operator is the owner; additional named support admins must be possible without giving every recipe editor access to customer information.
+
+The central journey is:
+
+**Find the account or order → understand the original purchase → explain current access → diagnose the mismatch → preview a permitted repair → human approval → apply and verify.**
+
+Success means the operator can distinguish an unpaid checkout from a missing fulfilment, a refunded purchase from a projection error, and an account mismatch from a genuine access failure. A customer should not be told to purchase again simply because a webhook or projection is late. Equally, a repair must not recreate access that was legitimately removed.
+
+This phase is a support workspace, not a general sales dashboard, customer relationship platform or replacement for Stripe Dashboard. Interface styling and detailed screen layouts remain for later UI/UX work. The workflows, information hierarchy, decisions and failure states are defined here so the later interface has a clear contract.
+
+## 2. Decision register
+
+| Status | Decision | Design consequence |
+| --- | --- | --- |
+| Established across the admin work | Owner first; future admins supported | Named memberships, explicit permissions and current authority checks. |
+| Agreed in Phase 2 | Preserve what buyers purchased, and give them future additions | Support explains access through original sources and the approved collection succession policy. It never manufactures another purchase for an addition. |
+| Agreed in Phase 2 | Human approval of exact publication changes; agents can execute specifically approved proposals through protected database commands | Carry the same exact-proposal approval and human/executor distinction into new manual support repairs. This extension is proposed for Phase 3 review. |
+| Proposed Phase 3 scope | Start with lookup, explanation and diagnosis, then enable repair | Three independently gated delivery increments. |
+| Proposed Phase 3 default | Initiate refunds in Stripe Dashboard initially | Admin displays verified refund state and access effects; no in-panel money movement. The owner has not yet answered the refund-initiation choice. |
+| Proposed Phase 3 default | Repairs restore documented rights, not discretionary rights | No arbitrary unlock, goodwill grant, ownership transfer or account merge in the first release. |
+| Proposed Phase 3 default | Owner approves repairs initially | Future operators may prepare and execute owner-approved repairs; delegation of approval requires an explicit capability grant. |
+| Existing commerce policy awaiting confirmation | Refund, dispute and access-duration rules | Resolve applicable C05–C09 decisions and record policy versions before enabling live state-changing reconciliation. This design does not invent a refund promise or lifetime-access term. |
+
+The owner can review this first draft without another questionnaire. The proposed defaults above are the concrete choices to accept or change. Approval of the document must not be represented as approval of any individual customer's repair or refund.
+
+## 3. Existing systems and gaps
+
+| Area | Source-confirmed position | Phase 3 responsibility |
+| --- | --- | --- |
+| Orders and financial history | Private offers, order snapshots, provider payments, refunds, disputes, event inbox and outbox tables exist. Orders have support references and separate attempt states. | Read original bindings and historical terms; do not infer them from current prices or collection titles. |
+| Access lineage | `private.access_sources` supports `stripe_purchase`, `native_legacy`, `support_grant` and `promotional`; `public.access_entitlements` is a projection. | Explain each source and recompute through shared policy. The existence of a source type does not authorise new support grants. |
+| Customer refresh | `reconcileAndFulfillSession` is scoped to an authenticated customer's own order. It skips provider retrieval after a local successful payment is found. | Build a fresh, complete support reconciliation contract; wrapping this function is insufficient for current refunds/disputes. |
+| Payment writer | `private.record_payment_and_grant_access`, as replaced by the remediation migration, checks snapshot account/mode/amount/currency and rejects a payment already bound to another order. It then makes the purchase source eligible. | Preserve those guards and harden shared eligibility evaluation so replaying a success cannot bypass adverse adjustments, expiry, closure or holds. Verify the final integrated source before choosing migration details. |
+| Refund writer | `private.record_refund_and_recompute_access` aggregates successful refunds; at the full captured amount it disables the matching purchase source and reprojects access. | Validate complete payment/order/account/mode bindings, support later lifecycle changes and preserve unrelated sources. Do not assume every policy transition is already handled. |
+| Provider events | The reviewed handler processes paid checkout completion and refund creation/update, plus refunds embedded in `charge.refunded`. | Verify delivery configuration and fill required lifecycle coverage. No dispute lifecycle or delayed-payment success/failure handler was found in the reviewed fulfilment module. A table is not proof of complete ingestion. |
+| Customer APIs | Status and refresh routes restrict records to the current customer. | Keep those boundaries. Admin cross-customer inspection needs a separate authorised interface and minimal support DTOs. |
+| Admin authority | Phase 1 defines owner/viewer/editor/reviewer/publisher and recipe permissions, MFA and current DB membership checks. | Add an opt-in support capability set. A recipe viewer is not automatically a customer-data viewer. |
+| Collections | Phase 2 specifies immutable purchase history plus approved successor access and correction handling. | Integrate its finished resolver and checkout changes. Do not rebuild a separate support-only interpretation of collection ownership. |
+| Account closure | An existing manual runbook covers closure and retention, with older launch assumptions. | Preserve historical ownership and route recovery/closure to its separately approved process. The old assertion that checkout is not live is not current production evidence. |
+
+Current source anchors are listed in section 20. These findings describe inspected code, not a claim that migrations or services are deployed. Before implementation, reconcile completed Phase 1, current main and the final Phase 2 integration; do not build Phase 3 against this planning branch as if all prerequisites already exist.
+
+## 4. Scope and architecture choice
+
+Three approaches were considered:
+
+| Approach | Advantages | Limits and risks |
+| --- | --- | --- |
+| Inspection-only dashboard | Smallest initial surface; customer/order facts are easier to find. | The owner still uses separate tools and SQL for recovery; inconsistent fixes remain possible. Useful as increment 3A. |
+| Order-centred support workspace with controlled reconciliation — recommended | Connects evidence, diagnosis and repair around the same purchase; supports gradual permissions and rollout. | Requires shared state evaluation, approval receipts and concurrency work before repair can be enabled. |
+| Full commerce administration | Refunds, grants, transfers, prices, promotions and reporting in one place. | Introduces several independent money and identity workflows before the core support path is proven. Defer to later phases. |
+
+The recommended architecture uses the existing admin application, commerce ledger and Phase 2 access resolver. Add private support records and narrow server/database contracts. Keep financial truth in the provider and local ledger, effective access in the shared resolver, and human support decisions in the audit trail. Avoid a parallel “admin access” boolean or a second purchase database.
+
+Initial scope includes exact lookup; a small actionable exception queue; account/order details; original versus current collection context; access lineage; provider inspection; case notes; approved evidence-based repairs; refund/dispute visibility; and auditable results.
+
+Deferred work includes refund initiation/cancellation, charges, checkout creation on behalf of customers, discounts, price editing, subscriptions, bulk edits/exports, arbitrary support grants, source revocation overrides, account transfers/merges/deletion, password or MFA resets, customer impersonation, automated dispute responses, file attachments and customer messaging. None is needed to resolve a documented payment/access inconsistency. Later inclusion needs its own policy and authority contract.
+
+## 5. Lookup and customer context
+
+### 5.1 Supported entry points
+
+Support starts from an exact order support reference, exact normalised account email or exact internal account ID. A provider payment/session ID is an advanced exact lookup for operators with provider-inspection permission; match it within the selected provider account and mode. A support reference locates a record but is not proof that a person contacting support owns it.
+
+Use the identity system's established email normalisation. Do not apply provider-specific guesses such as removing dots or plus suffixes. Do not use billing email, a forwarded receipt or a recreated email account to transfer purchase ownership.
+
+Results distinguish `found`, `not_found`, `unconfirmed`, `ambiguous` and `unavailable`. Ambiguous results require selecting and verifying a specific account; never choose the first row. An order with a closed account can be inspected under the financial-record permission without inventing a current customer account. An identity lookup outage must not become “no purchase found.”
+
+### 5.2 Information available
+
+Customer context contains the minimum useful identity, confirmation/account-availability state, order references, collection access summaries and support case history. It excludes child profiles, chats, preferences, passwords, MFA secrets, card details and unrelated native-app activity. Exact email is restricted support information and should not appear in URLs, analytics or default logs.
+
+Orders are paginated. Show test/live mode prominently and separate the default live workspace from test fixtures. Preserve a route from order to its recorded owner principal even if the Auth link has been removed. Do not search retained orders by guessed historic email when the retention policy no longer permits that link.
+
+An initial attention queue is limited to supported operational signals: recorded binding review, failed/pending reconciliation, verified paid-but-unfulfilled mismatch, unresolved support cases and known refund/dispute follow-up. Include a reason and observation time for each item. Do not label all open checkouts as failed, scan the whole provider account on every page load, or treat missing telemetry as a financial anomaly.
+
+## 6. Purchase and access explanation
+
+### 6.1 Keep independent states visible
+
+| Axis | What the operator needs to know |
+| --- | --- |
+| Checkout attempt | Creating, creation unknown, open, processing, review or closed; whether a hosted attempt remains unresolved. “Closed” does not mean “unpaid.” |
+| Payment | Captured/not captured/processing/unknown, amount and currency, provider binding and last verified time. |
+| Refund | Each refund's status and amount; total successful refunds compared with captured amount. Pending is not completed reimbursement. |
+| Dispute | Inquiry versus formal dispute, provider status/deadline when available, and separately the applied access policy. |
+| Source eligibility | Whether this order currently supplies access, applicable term and exact exclusion reason. |
+| Effective collection access | Access from all qualifying sources, approved successor additions, and any content availability restriction. |
+| Account availability | Whether the recorded owner can currently authenticate and use product access. |
+
+Do not collapse these into a single green “paid” badge. For example, a paid order can be fully refunded while a separate native grant still gives collection access. The repair preview must explain the difference between changing this order's source and changing the customer's final access.
+
+### 6.2 Original purchase versus current collection
+
+Display the order's frozen release, manifest/checksum, amount/currency and policy versions. Show original captured totals separately from current price and successful refunds; use integer minor units and currency-aware formatting. Validate the supported subtotal/tax/discount/quantity composition against the frozen order contract. Do not total different currencies together. Preserve original financial occurrence times separately from verification times; a support check is not a new purchase date. Preserve “historical field unavailable” for incomplete legacy records instead of backfilling today's terms as historical truth.
+
+For Phase 2 collections, explain the original member set, approved later additions and current approved recipe corrections. Corrections do not become new purchases; additions do not become independent grants. Effective successor access is inherited only through qualifying original sources under the versioned policy. Unreconciled legacy grants remain explicitly unresolved and must not be silently broadened.
+
+Example: an order purchased release A with five recipes; the approved successor has three additions. A qualifying source supplies access to the original five and the three additions. A full refund makes that order stop supplying all eight. If another valid source remains, its independently permitted access continues. A withdrawn recipe remains in purchase history with an availability explanation; support cannot bypass a safety/content hold.
+
+### 6.3 Provenance and freshness
+
+Every diagnosis identifies local ledger observation time, last provider verification, resolver/policy version and affected publication version. A timeline distinguishes provider facts, human decisions, system attempts and completed local writes. Show an unavailable or incomplete provider check explicitly; never present a cached observation as a fresh verification.
+
+The support view uses the same access evaluator as customer library/detail/recipe/print/download authorisation. It may explain more private reasons, but it must not grant more rights or read as the customer. A local preview of expected access is not proof of a successful signed-in customer session.
+
+## 7. Diagnosis and permitted resolutions
+
+| Situation | Diagnosis | Initial resolution |
+| --- | --- | --- |
+| Verified payment, no local payment/source | Fulfilment gap after exact binding checks | Preview recording the verified payment and restoring only its documented source. |
+| Eligible source exists, projection missing/stale | Access projection mismatch | Preview recomputation from all valid sources; preserve source history. |
+| Payment open, unpaid or still processing | No verified completed purchase yet | Explain/wait/recheck the same attempt. No grant and no replacement checkout from this workspace. |
+| Provider or identity check unavailable | Evidence incomplete | Keep current recorded state; report unknown and retry safely. |
+| Captured amount, currency, account, mode or order binding mismatch | Financial/identity conflict | Block automatic repair; owner review against original records. |
+| Payment succeeded, then refund/dispute changed | Later adjustment affects this source | Import verified facts and apply the approved policy; do not replay a success to force access. |
+| Checkout email differs from signed-in account | Receipt identity differs from order ownership | Explain the recorded purchase account; use the established recovery process. No email-only reassignment. |
+| Account closed, recreated or disabled | Ownership/account availability conflict | Financial inspection only; separate account recovery/retention process. |
+| Collection addition missing | Resolver/publication/projection mismatch | Use Phase 2 successor policy; repair only a proven projection problem. Fix publication defects in Phase 2. |
+| Recipe withdrawn or protected asset unavailable | Content/delivery issue | Link to the responsible content/operations workflow; access repair cannot override it. |
+| Two verified payments for the same collection | Possible duplicate purchase | Preserve both records and assess through Stripe support workflow; no automatic refund or deletion. |
+
+Diagnostics distinguish facts, inferred explanations and recommended next actions. An agent-generated narrative cannot independently authorise a state transition. Known conflicts remain visible even when another valid source masks the customer's immediate access problem.
+
+## 8. Provider inspection and repair workflow
+
+### 8.1 Inspect current provider state
+
+**Check provider status** retrieves the order-bound session/payment/charge and relevant refunds/disputes using server-held configuration for the exact provider account and test/live mode. Verify the credential/account binding rather than trusting a locally stored account label. Fetch complete paginated adjustment records where necessary; absent data in a partial response is not proof that an adjustment does not exist.
+
+This diagnostic operation may store an immutable private observation and audit record. It does not alter eligibility, charge/refund money or send messages. Store normalised facts, provider object identities, verification time, completeness and provenance rather than unrestricted payloads. Missing configuration and unsupported provider states produce explicit blockers. Mock sessions are confined to isolated fixtures and cannot support live repair.
+
+### 8.2 Prepare an exact proposal
+
+Prepare a repair only from a complete supported observation and current local state. The proposal includes target account/order/source, observed provider bindings, original financial terms, policy and collection versions, expected row versions, before/after eligibility, before/after effective access, side effects, reason, affected scope, blockers and a canonical digest.
+
+The first release supports two commands:
+
+1. **Reconcile verified order facts and eligibility:** persist verified financial facts, create/update only the original purchase source when justified, and recompute effective access under approved policy. The result can restore or remove this source's access; the preview must say which.
+2. **Rebuild access projection:** preserve financial/source facts and recompute a demonstrably inconsistent derived projection through the shared resolver. It cannot turn an ineligible source into an eligible one.
+
+Do not offer raw field editing, “mark paid,” “force unlock,” “ignore dispute,” direct entitlement mutation or a new discretionary grant. Existing administrative holds remain separate facts and cannot be cleared by these commands. Unknown legacy policy/binding or an unresolved identity conflict blocks execution.
+
+### 8.3 Approve, apply and verify
+
+The owner reviews a concrete proposal and selects **Approve and apply repair**. Other staff initially prepare proposals for owner approval. Approval binds the exact digest, target and consequences; it is not a reusable permission to repair the account later. A proposed default is a five-minute maximum proposal/approval lifetime, with fresh provider retrieval during execution regardless of age. Changed facts require a new preview and approval.
+
+After approval, retrieve current provider facts outside any SQL transaction, then compare them with the approved proposal. Compare material financial/access facts; a later verification timestamp alone does not invalidate unchanged evidence. Recheck current membership, permission, MFA, account state, policy, collection dependencies and row versions before committing. A webhook or another operator may have already completed the intended repair: return a verified no-change result if the approved effect is already satisfied; reject materially changed consequences.
+
+Apply facts, source eligibility, projection, case linkage, audit and any permitted side-effect records in one transaction. Return a durable receipt and reread the account's effective access through the production resolver. If commit succeeded but the client lost the response, retrieve that receipt by operation ID. Do not run a different repair merely because the first response was lost.
+
+Afterwards show **applied**, **already satisfied**, **blocked/stale**, **pending verification**, **failed without commit** or **outcome unknown** accurately. Database success plus a failed follow-up read is “applied; verification pending,” not a rolled-back failure. Support resolution requires a recorded post-check or an explicit remaining customer/account action.
+
+## 9. Refund and dispute boundaries
+
+### 9.1 Refund initiation recommendation
+
+Keep refund initiation/cancellation in Stripe Dashboard for the first release. This is a proposed default awaiting owner review. Stripe supports Dashboard or API refunds and multiple partial refunds within the original charge total; it also exposes pending, failed and canceled lifecycle outcomes. The support workspace must display the actual state rather than treat a submitted request as completed reimbursement. [Stripe refund documentation](https://docs.stripe.com/refunds)
+
+An authorised operator may follow a server-constructed, validated Stripe Dashboard link for the bound payment in the correct mode/account. Do not expose checkout URLs or arbitrary provider URLs from customer input. Stripe permissions remain independent of local admin permissions. Record the local support decision/reference separately; the link itself neither initiates nor approves a refund.
+
+The panel can inspect and reconcile verified refund facts without initiating money movement. No customer message is sent by these controls. Existing transactional notification delivery remains separately governed and must not be duplicated by a support repair.
+
+### 9.2 Proposed eligibility rules for review
+
+Use the order's approved versioned policy. The following proposed baseline aligns with existing commerce planning; it is not a new published customer promise:
+
+| Verified financial condition | Proposed source effect |
+| --- | --- |
+| Paid; no disqualifying adjustment; term/account valid | Purchase source eligible. |
+| Refund requested, pending or requires action | No revocation solely because a request exists. Show follow-up state. |
+| Successful partial refund below captured total | Source remains eligible unless the approved historical policy says otherwise. |
+| Successful cumulative full refund | Only the qualifying purchase source becomes ineligible; recompute other sources and successor access. |
+| Refund later failed/canceled/returned | Re-evaluate current complete facts and all other exclusions; never reactivate blindly. |
+| Inquiry/early warning | Surface for review; no automatic source revocation solely from classification. |
+| Formal open dispute | Block support restoration pending the approved dispute policy. If that policy authorises a temporary source hold, apply only to the affected source. |
+| Dispute won/favourably resolved | Re-evaluate payment, refunds, term, account and holds; winning alone does not force restoration. |
+| Dispute lost | Proposed ineligibility of that source under approved policy; do not revoke unrelated rights. |
+| Missing policy or unknown provider classification | Explain uncertainty and block new repair. Do not silently invent a new access rule. |
+
+Stripe distinguishes inquiries from formal disputes; provider status should be preserved alongside the local policy interpretation. [Stripe dispute lifecycle](https://docs.stripe.com/disputes/how-disputes-work)
+
+Until the owner confirms the applicable policy, recording a financial observation is permitted under diagnosis but changing access because of that observation is blocked. Do not retroactively apply a newly chosen policy to old orders without a separately approved migration. Unknown policy blocks new repair rather than automatically removing otherwise recorded access.
+
+### 9.3 Lifecycle correctness
+
+Reconciliation must handle refund updates/failures/cancellations, dispute lifecycle changes and the asynchronous payment methods actually enabled. Verify the account's event subscriptions and supported API version during implementation. Include complete pagination, precise object bindings and periodic/on-demand recovery for missed deliveries. Do not infer this coverage from an event table.
+
+Webhook delivery can be duplicated and arrive out of order. Use event identities for inbox deduplication and canonical provider retrieval plus fenced state transitions; do not use event timestamps as a total ordering or erase a known adverse adjustment because an older success arrives. [Stripe webhook delivery guidance](https://docs.stripe.com/webhooks)
+
+Existing checkout/webhook fulfilment continues under its approved automated commerce policy. New manual support repairs require exact human approval. This design does not introduce an operator approval click for every normal customer purchase. Both paths must share the same eligibility evaluator so ordinary processing cannot undo a support repair or adverse adjustment.
+
+## 10. Support cases and history
+
+Use lightweight private support cases rather than building a ticketing platform. A case records a primary account or order, reason category, optional concise note, creator, status, relevant order references and operation receipts. Proposed states are **open**, **investigating**, **waiting on customer**, **waiting on provider** and **resolved**. Reopening preserves earlier resolution history. Resolving a case does not change financial or access state.
+
+Suggested categories are missing access, unresolved payment, account mismatch, refund follow-up, dispute follow-up, duplicate purchase and content availability. These are operational labels, not automatic policy decisions. Staff can add bounded internal notes with their own identity/time; corrections append an amendment rather than silently rewriting the audit history. Cases and notes are not visible to customers.
+
+Avoid attachments, pasted card/bank data, full private transcripts and unrestricted provider payloads. Store a minimal external correspondence reference when necessary. Notes must have explicit retention/redaction rules before production, including how a redaction preserves the fact and actor of the change while removing personal text. Financial/audit retention must not imply indefinite retention of free-form notes.
+
+The timeline includes case activity, provider observations, approvals, execution attempts, successful commits, no-change receipts and post-check results. Read-only sensitive lookup and detail access are auditable without logging the searched email or response body. Case status never hides an unresolved money/access discrepancy.
+
+## 11. Roles, permissions and privacy
+
+Extend the existing console membership model with explicit support capabilities. Proposed permission names are design contracts, not functions already implemented:
+
+| Capability | Owner | Future support viewer | Future support operator |
+| --- | --- | --- | --- |
+| `support.read` — minimal customer/order/access/case/history reads | Yes | Yes, explicitly granted | Yes, explicitly granted |
+| `support.case.write` — create cases and append notes | Yes | No | Yes |
+| `support.provider.inspect` — provider identifiers and fresh diagnosis | Yes | No by default | Yes |
+| `support.repair.prepare` — exact proposal creation | Yes | No | Yes |
+| `support.repair.approve` — human approval of permitted effects | Yes | No | No initially |
+| `support.repair.execute` — apply a currently approved proposal | Yes | No | Yes, only within that approval |
+| Refund initiation, account transfer or discretionary grant | Separate external/future workflow | No | No |
+
+Do not infer any support capability from `recipe.read`, `recipe.edit` or publication permissions. Owners receive the approved support set through an explicit migration/bootstrap decision; other existing members receive none by default. Do not seed real account identities in migrations. Introducing additional staff approval later requires the owner to grant the specific capability, not a code change that broadens all recipe roles.
+
+For browser operations, derive the actor from verified authentication and `auth.uid()`, require `aal2`, and check active current DB membership, support stage and exact permission on every read and write. Recheck both executor and authorising human at commit. Do not trust editable profile metadata, posted actor UUIDs or stale role claims. Receipt access is also permission-checked after revocation.
+
+Return minimal typed DTOs, not raw joined rows. Private tables stay outside public exposure; security-definer wrappers need fixed search paths, narrow EXECUTE grants and parameter validation. A browser never receives a service-role credential. Existing server commerce credentials must not become a general client-accessible cross-customer API.
+
+Use private/no-store responses, actor-scoped server caches where unavoidable, and no shared customer-detail caching. Support routes, search fields, notes, approvals and provider links are excluded from optional analytics, replay and session recordings. Logs retain safe support references, operation/correlation IDs, bounded reason codes and outcomes; redact emails, provider response bodies, tokens, billing details and library error objects. Rate-limit searches and checks, cap page sizes and never disclose total customer lists without an explicit product need.
+
+Protect browser mutations against cross-site requests and validate same-origin intent. Lost MFA/current authority hides details and invalidates pending actions. Permission errors, empty results and outages need distinguishable operator explanations without leaking information to unauthorised callers.
+
+## 12. Data and command model
+
+Reuse orders, payments, refunds, disputes, sources, manifests and access projections as authoritative domain records. Add only the support-specific records required by the workflows:
+
+| Logical record | Minimum responsibility |
+| --- | --- |
+| Support case and case events | Account/order linkage, category, bounded notes, state and append-only activity. |
+| Provider observation | Order/account/mode binding, normalised current facts, completeness, verification time, provenance and evidence digest. |
+| Repair proposal | Exact supported command, before/after effects, row/policy/publication versions, evidence references, digest, expiry and blockers. |
+| Human approval | Authorising identity, target proposal/digest, reason, expiry and approval channel. |
+| Support operation/receipt | Idempotency key, request digest, executor/attestor, fencing token, current outcome, committed audit/projection references and post-check result. |
+
+Physical names, indexes and whether existing audit tables can be safely reused belong in the implementation plan after integrated-schema review. Private support records are not a substitute for immutable financial records. Approval evidence cannot be edited by ordinary note writers.
+
+Expose narrow commands for exact lookup, detail/history, case activity, provider inspection, prepare repair, approve repair, execute approved repair and receipt retrieval. Use opaque IDs in application routes and POST bodies for sensitive searches, not emails in query strings. Schema-check every input; client-supplied customer IDs are lookup targets, never proof of authority or ownership.
+
+A successful read includes `checkedAt`, source completeness and policy/resolver identity. Mutations include an operation UUID and canonical request digest. Reusing a UUID for the same authorised command returns its receipt; reusing it for a different command is rejected. Receipts show actual committed effects and their scope, not merely the requested action.
+
+Do not treat `closed` as an error or make support automatically create another checkout attempt. Any future resolution of `creation_unknown` must use the original provider idempotency/binding evidence; unsupported cases remain blocked for the established commerce recovery workflow.
+
+## 13. Transactions, races and side effects
+
+The database and Stripe do not share an atomic transaction. Use an operation lease with a monotonically increasing fencing token around the network verification and a short database transaction for the local commit. Never hold SQL row locks while calling the provider. If the lease or expected version changed during the call, discard the observation and re-evaluate.
+
+At local commit, coordinate order locks, affected source locks and the shared user/collection projection lock in the same deterministic order as checkout, webhooks, refund processing and Phase 2 publication. Source changes from different orders must compose correctly. Preserve existing aggregate access while recomputing; a refund on A cannot revoke B or an independent native grant.
+
+Check immutable binding at every boundary: provider account, mode, session/payment/charge, original order owner/release and captured amount/currency. A unique-provider-object conflict bound to another order is a hard conflict, not a successful upsert. Refunds/disputes must belong to the verified payment and order. Phase 2 publication/correction changes invalidate a proposal only where they change its evaluated consequences; the shared resolver supplies the relevant dependency token.
+
+Financial facts, eligibility, projections and the mandatory audit receipt commit together. Failure of the audit/projection rolls back the state change. Store failed attempts separately without claiming a domain commit. Use bounded lock/serialization retries only while the approved command and evidence remain valid. Outcome-unknown retries first recover the operation state.
+
+Support diagnostics and projection-only repairs send no customer communications. Missing-payment fulfilment may have a previously unsent transactional notification: preview its exact eligible effect and use the approved outbox/deduplication contract. Existing outbox records do not prove that a delivery worker is active; verify the actual delivery integration before enabling any such side effect. Never resend a receipt as a side effect of repeated reconciliation. Pending/failed refunds cannot enqueue a misleading “refund confirmed” notification; event identity alone is insufficient to define message eligibility across changing statuses.
+
+Private access decisions must reflect committed state without depending on a public-page refresh. A later failed UI refresh must not undo financial history or grant fallback access. Any caches used by customer authorisation must be invalidated or versioned so revocation and restoration are effective within the explicitly tested delivery contract.
+
+## 14. Agent and direct-database parity
+
+An authorised agent can inspect, prepare a repair and present the concrete before/after effects. It must ask the owner to approve that exact proposal before execution. A “yes” or “yeah” answering the exact proposal is sufficient conversational authorisation; a general instruction to investigate an account is not approval to change access.
+
+The database path uses protected procedures with the same policy, version, expiry, digest, concurrency and receipt checks as the browser. It does not directly `UPDATE access_entitlements`, manufacture an order, alter captured amounts or accept a posted “approved_by” identity as proof of human approval.
+
+As in Phase 2, the database cannot independently authenticate a human chat statement. A registered restricted operator may attest the human's exact authorisation, with a minimal evidence reference, only through a separately controlled operator identity. Store the human authoriser, executing process and attesting operator separately; verify the human's current authority at execution. The attestation is an explicit trust boundary, not cryptographic proof of the conversation.
+
+Provider observations must originate from the trusted server reconciliation adapter or an equivalently registered verifier. A generic SQL caller cannot submit self-invented “Stripe says paid” facts. A database-only operator may execute an already verified, approved proposal; fresh provider inspection still uses the trusted adapter. No fake Auth context, browser service key or unrestricted superuser write is presented as the normal approval-enforced workflow.
+
+Retries preserve the original operation receipt. A changed target, evidence, policy, expiry or effect requires a refreshed proposal and another human approval. Agents never approve their own human-authorisation record. Implementation/runbooks must document actual restricted calls and role grants before claiming parity is complete.
+
+## 15. Error and degraded-state contract
+
+| Failure | Required behaviour |
+| --- | --- |
+| Identity/provider/database read unavailable | Display uncertainty; keep current recorded access; no repair from incomplete evidence. |
+| Provider timeout/rate limit | Bound retries; retain diagnostic operation state; no money movement or duplicate job storm. |
+| Stale proposal, changed provider facts or new refund | Show changed consequences and require a new approval. |
+| Authority revoked/MFA expired | Deny details or mutation as appropriate; no reuse of old approval/receipt to bypass authority. |
+| Invalid ownership or financial binding | Block with safe reason/reference; route for owner investigation. |
+| Projection failure during transaction | Roll back facts/source/projection/audit together; preserve a distinct failed-attempt record. |
+| Commit succeeded, response/post-check lost | Recover receipt, report committed effects and pending verification; do not apply twice. |
+| Unsupported legacy/dispute policy | Preserve evidence, block repair and identify the required policy/reconciliation decision. |
+| Content safety hold or closed account | Explain the separate blocker; no support override. |
+
+Errors exposed to the operator contain actionable safe codes and a correlation reference. Logs contain redacted diagnostic detail. A successful repair result must never be inferred from a queued operation, a provider HTTP success alone or a green admin page.
+
+## 16. Delivery increments and rollout
+
+| Increment | Capability | Gate before enabling |
+| --- | --- | --- |
+| 3A — Inspect and explain | Explicit support authority; exact lookup; order/customer detail; source lineage; original/current collection explanation; cases and restricted attention queue. | Completed Phase 1/2 integration, private-data boundary checks and owner walkthrough. Provider facts remain labelled with actual freshness. |
+| 3B — Diagnose and prepare | Trusted provider inspection; supported lifecycle coverage; normalised observations; precise repair proposals and blocked cases. No manual repair execution. | Complete provider binding/event/unknown-state tests and approved policy mappings. Verify production configuration read-only before calling diagnosis live-ready. |
+| 3C — Approve and repair | Human approval; fenced shared reconciliation; projection repair; durable receipts; operator parity and recovery rehearsal. | All acceptance gates below, owner approval of the reviewed implementation, isolated test-mode rehearsal and explicit release authorisation. |
+
+Support inspection/diagnosis/repair have independent server-enforced gates; they are not tied implicitly to recipe publication stage. Owner-only enablement comes first. Expansion to named support staff follows permission and revocation rehearsal. No bulk repair capability in the first release.
+
+Use synthetic/isolated database fixtures and Stripe test mode for repair/refund/dispute scenarios. Do not charge/refund a real customer or create live access changes to test this design. Production verification starts with narrow authorised read-only evidence; any live mutation follows its own exact approved operation.
+
+Rollback disables new repair/diagnostic commands while preserving inspection when safe, audit records and ordinary commerce processing. Do not remove prior financial/audit history or blindly restore entitlement rows from a backup. Correct a bad committed repair through a new verified, approved compensating operation. Add forward migrations; do not rewrite applied Phase 1/2 migration history.
+
+## 17. Acceptance gates
+
+| Gate | Required evidence before Phase 3 completion |
+| --- | --- |
+| A1 — Scope and integration | Current main, finished admin and Phase 2 contracts integrated; agreed versus proposed policies recorded; no accidental refund/transfer/grant API. |
+| A2 — Authority and privacy | Anonymous, ordinary customer and recipe-only staff cannot inspect support data; MFA/current membership enforced on reads, commands and receipts; analytics/cache/log leak checks pass. |
+| A3 — Exact identity | Found/not-found/unconfirmed/ambiguous/unavailable and closed/recreated accounts handled; billing email/receipt/reference alone cannot transfer ownership. |
+| A4 — Historical truth | Original terms/manifest retained through price/title/publication changes; incomplete legacy fields remain unknown; test/live and currencies cannot be mixed. |
+| A5 — Access explanation | Shared evaluator agrees with customer reading/library/print/asset decisions; original rights, additions, corrections and content holds are explained accurately. |
+| A6 — Financial binding | Wrong account/mode/payment/order/amount/currency and provider identity conflicts block repair, including malicious posted evidence. |
+| A7 — Verified missing fulfilment | Paid-but-unfulfilled test case repairs only the original qualifying source and projection; unpaid/processing/unknown states cannot unlock. |
+| A8 — Projection repair | Rebuilding a projection preserves valid sources and cannot override expiry, closure, manual/content holds or refund/dispute exclusions. |
+| A9 — Refund/dispute lifecycle | Successful cumulative full refund, partial/pending/failed/canceled/returned refund, inquiry, open/won/lost dispute and missing policy cases produce reviewed effects. |
+| A10 — Multiple sources | Refund/expiry of A preserves B/native/promotional rights; successor access disappears only where its qualifying source ceases; disjoint validity intervals do not bridge a gap. |
+| A11 — Approval integrity | Exact digest/target/effect/expiry checked; changed evidence or dependency and revoked human/executor invalidate execution; owner and delegated staff flows behave as specified. |
+| A12 — Concurrency and replay | Duplicate/out-of-order webhooks, support-versus-refund, two operators, lost responses, expired leases and publication races converge without resurrection, duplicate purchases or duplicate messages. |
+| A13 — Atomicity and recovery | Faults in facts/source/projection/audit writes leave no partial commit; receipt recovery distinguishes unknown from failed; compensating repair is rehearsed. |
+| A14 — Agent parity | Registered verifier and restricted operator path enforce the same evidence/approval contracts; human/executor/attestor separated; forged provider facts/approver rejected. |
+| A15 — Workflow and rollout | Owner can complete lookup→explanation→diagnosis→approved repair in test mode; case history/post-check accurate; stage disable/revocation rehearsal and operations runbook completed. |
+
+Runtime verification should combine focused database permission/invariant tests, reconciliation/policy tests with provider fixtures, route/browser authority checks and a bounded owner walkthrough. Add meaningful race/fault tests where they prove a gate, rather than duplicating every implementation detail. No runtime test or deployment success is claimed by writing this document.
+
+## 18. Operational readiness and measurement
+
+Measure actionable support outcomes with private operational aggregates: unresolved verified fulfilment mismatches, age of pending reconciliation, blocked reason counts, successful/no-change/failed repair counts and post-check completion. These are not revenue reports or optional behavioural analytics. Do not claim fewer support tickets without a real baseline and consistent case capture.
+
+The runbook must name who monitors cases/provider adjustments, who can approve a repair, how authority is revoked, how to inspect an unknown result, how to recover a lost receipt, and how to escalate policy/identity/content issues. Include exact safe provider/database checks, test/live targeting and redacted examples. Do not copy the old account-closure runbook's launch assumptions into new operational truth.
+
+Data retention requires explicit configuration before production: case-note retention/redaction, observation payload minimisation, approval evidence access, immutable financial/audit retention and account-closure handling. This design does not prescribe a legal retention duration. Resolve that operational policy without collecting unnecessary personal data in the meantime.
+
+## 19. Review and next artifact
+
+The review choices are concrete: adopt the order-centred workspace; keep refunds in Stripe initially; limit repairs to documented rights; use owner approval first; and confirm the applicable refund/dispute/access policies before live repair. Any changes should update this decision register and affected acceptance gates together.
+
+After written-design review, create a separate Phase 3 implementation plan with exact integrated modules/migrations, task ordering, policy approvals, evidence for A1–A15, release gates, rollback and owner rehearsal. Preserve the previously selected Native execution method: implement each task in the primary agent, then obtain the independent final review at the authorised execution stage. This document does not start that implementation.
+
+## 20. Source anchors and related plans
+
+Paths below are repository-relative so the specification remains portable between worktrees. They identify inspected sources or existing planning contracts, not runtime proof:
+
+- [Phase 1 design](2026-10-04-admin-recipe-workspace-design.md) and [Phase 1 implementation plan](../plans/2026-10-04-admin-recipe-workspace.md).
+- [Phase 2 collections design](2026-10-06-admin-collections-phase-two-design.md) and [Phase 2 implementation plan](../plans/2026-10-07-admin-collections-phase-two.md).
+- `supabase/migrations/20260923200000_phase8_commerce_schema.sql`: offers, order snapshots, payment/refund/dispute/source tables and original writer/projection procedures.
+- `supabase/migrations/20260924174355_phase8_remediation_guards.sql`: replacement payment writer with snapshot and cross-order payment-binding guards.
+- `my-curated-haven-web/src/lib/payments/repository.ts`: scoped commerce reads, orders and financial writer adapters.
+- `my-curated-haven-web/src/lib/payments/fulfilment.ts`: current customer refresh, webhook completion and refund handling.
+- `my-curated-haven-web/src/lib/payments/guardrails.ts`: snapshot/payment validation.
+- `my-curated-haven-web/src/app/api/orders/[orderId]/status/route.ts` and `refresh/route.ts`: existing customer-owned order endpoints.
+- `my-curated-haven-web/src/app/api/stripe/webhook/route.ts`: signed provider event intake.
+- `my-curated-haven-web/src/lib/admin/contracts.ts` and admin access migrations: current recipe authority and typed result boundary in the admin worktree.
+- [Commerce states and data](../../implementation/phase-8/PAYMENT-DATA-AND-STATES.md), [refunds and support policy](../../implementation/phase-8/REFUNDS-AND-SUPPORT.md), and [recipe access/security](../../implementation/phase-8/RECIPE-ACCESS-AND-SECURITY.md).
+- `ops/ACCOUNT-CLOSURE.md` and `ops/ADMIN-CONSOLE.md`: separate account closure and admin operating boundaries; verify and update stale assumptions during implementation.
+- [Stripe refunds](https://docs.stripe.com/refunds), [Stripe webhooks](https://docs.stripe.com/webhooks), and [Stripe dispute lifecycle](https://docs.stripe.com/disputes/how-disputes-work): primary provider documentation checked for this design. Local access effects remain owner-approved project policy.
