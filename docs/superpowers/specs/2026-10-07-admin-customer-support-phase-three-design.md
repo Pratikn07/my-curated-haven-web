@@ -1,7 +1,7 @@
 # Admin customer purchases and access support: Phase 3 design
 
 - Date: 2026-10-07, America/Los_Angeles.
-- Status: first written design for owner review. Recommendations specific to Phase 3 are proposals, not recorded owner approvals.
+- Status: revised for the owner's 2026-10-07 decision to include secure refund initiation in Phase 3's first complete release. Detailed safeguards and remaining policy choices are for review; feature approval is not approval of an individual refund.
 - Deliverable: functional and architectural design. Visual UI design, the implementation task plan, deployment and live support actions are separate work.
 - Source baseline: remote `main` verified at `9bfdfc94390e5d3348a7b895d901ea81e13aac90`. Commerce source inspected in the collections showroom worktree at `f08e034ddda3a69c203828050d4aded38da0fd1e`, the corresponding navigation change before its squash merge.
 - Admin planning baseline: `codex/admin-recipe-workspace-design` at `7176813`, containing the Phase 2 design and implementation plan, with existing uncommitted Phase 1 publication work preserved. Phase 2 is planned, not implemented by these documents.
@@ -11,9 +11,11 @@
 
 Phase 3 gives the owner a reliable way to answer: **“This customer says they paid but cannot access their collection. What happened, and how do I resolve it?”** It extends the admin console with customer lookup, purchase inspection, access explanations, provider checks and narrowly controlled recovery. The first operator is the owner; additional named support admins must be possible without giving every recipe editor access to customer information.
 
-The central journey is:
+The central support journey is:
 
 **Find the account or order → understand the original purchase → explain current access → diagnose the mismatch → preview a permitted repair → human approval → apply and verify.**
+
+The refund journey is **Open the original order → prepare a full or partial refund → preview the exact amount and access consequences → owner approves and submits → track provider status and reconcile access.** These are separate commands: repairing access never implicitly refunds money.
 
 Success means the operator can distinguish an unpaid checkout from a missing fulfilment, a refunded purchase from a projection error, and an account mismatch from a genuine access failure. A customer should not be told to purchase again simply because a webhook or projection is late. Equally, a repair must not recreate access that was legitimately removed.
 
@@ -27,7 +29,8 @@ This phase is a support workspace, not a general sales dashboard, customer relat
 | Agreed in Phase 2 | Preserve what buyers purchased, and give them future additions | Support explains access through original sources and the approved collection succession policy. It never manufactures another purchase for an addition. |
 | Agreed in Phase 2 | Human approval of exact publication changes; agents can execute specifically approved proposals through protected database commands | Carry the same exact-proposal approval and human/executor distinction into new manual support repairs. This extension is proposed for Phase 3 review. |
 | Proposed Phase 3 scope | Start with lookup, explanation and diagnosis, then enable repair | Three independently gated delivery increments. |
-| Proposed Phase 3 default | Initiate refunds in Stripe Dashboard initially | Admin displays verified refund state and access effects; no in-panel money movement. The owner has not yet answered the refund-initiation choice. |
+| Agreed on 2026-10-07 | Include secure refund initiation inside admin in Phase 3's first complete release | Add separately gated, owner-approved full/partial refunds with durable intents, bounded idempotency and recovery. No automatic refund or unrestricted money API. |
+| Proposed refund safeguards | Owner-only browser submission initially; original payment and exact approved amount | Separate refund capabilities, current membership/MFA, trusted server credentials and immutable approval/receipt. Refund cancellation and agent money submission remain deferred. |
 | Proposed Phase 3 default | Repairs restore documented rights, not discretionary rights | No arbitrary unlock, goodwill grant, ownership transfer or account merge in the first release. |
 | Proposed Phase 3 default | Owner approves repairs initially | Future operators may prepare and execute owner-approved repairs; delegation of approval requires an explicit capability grant. |
 | Existing commerce policy awaiting confirmation | Refund, dispute and access-duration rules | Resolve applicable C05–C09 decisions and record policy versions before enabling live state-changing reconciliation. This design does not invent a refund promise or lifetime-access term. |
@@ -63,9 +66,9 @@ Three approaches were considered:
 
 The recommended architecture uses the existing admin application, commerce ledger and Phase 2 access resolver. Add private support records and narrow server/database contracts. Keep financial truth in the provider and local ledger, effective access in the shared resolver, and human support decisions in the audit trail. Avoid a parallel “admin access” boolean or a second purchase database.
 
-Initial scope includes exact lookup; a small actionable exception queue; account/order details; original versus current collection context; access lineage; provider inspection; case notes; approved evidence-based repairs; refund/dispute visibility; and auditable results.
+Initial scope includes exact lookup; a small actionable exception queue; account/order details; original versus current collection context; access lineage; provider inspection; case notes; approved evidence-based repairs; refund/dispute visibility; owner-approved full/partial refund initiation; and auditable results.
 
-Deferred work includes refund initiation/cancellation, charges, checkout creation on behalf of customers, discounts, price editing, subscriptions, bulk edits/exports, arbitrary support grants, source revocation overrides, account transfers/merges/deletion, password or MFA resets, customer impersonation, automated dispute responses, file attachments and customer messaging. None is needed to resolve a documented payment/access inconsistency. Later inclusion needs its own policy and authority contract.
+Deferred work includes refund cancellation, bulk/automatic refunds, charges, checkout creation on behalf of customers, discounts, price editing, subscriptions, bulk edits/exports, arbitrary support grants, source revocation overrides, account transfers/merges/deletion, password or MFA resets, customer impersonation, automated dispute responses, file attachments and customer messaging. Connect transfer reversals/application-fee refunds and the `fraudulent` refund reason also require separate design. Later inclusion needs its own policy and authority contract.
 
 ## 5. Lookup and customer context
 
@@ -129,7 +132,7 @@ The support view uses the same access evaluator as customer library/detail/recip
 | Account closed, recreated or disabled | Ownership/account availability conflict | Financial inspection only; separate account recovery/retention process. |
 | Collection addition missing | Resolver/publication/projection mismatch | Use Phase 2 successor policy; repair only a proven projection problem. Fix publication defects in Phase 2. |
 | Recipe withdrawn or protected asset unavailable | Content/delivery issue | Link to the responsible content/operations workflow; access repair cannot override it. |
-| Two verified payments for the same collection | Possible duplicate purchase | Preserve both records and assess through Stripe support workflow; no automatic refund or deletion. |
+| Two verified payments for the same collection | Possible duplicate purchase | Preserve both records; owner may prepare an exact refund of the selected payment under policy. No automatic refund or deletion. |
 
 Diagnostics distinguish facts, inferred explanations and recommended next actions. An agent-generated narrative cannot independently authorise a state transition. Known conflicts remain visible even when another valid source masks the customer's immediate access problem.
 
@@ -164,13 +167,27 @@ Afterwards show **applied**, **already satisfied**, **blocked/stale**, **pending
 
 ## 9. Refund and dispute boundaries
 
-### 9.1 Refund initiation recommendation
+### 9.1 Secure refund initiation — included in the first release
 
-Keep refund initiation/cancellation in Stripe Dashboard for the first release. This is a proposed default awaiting owner review. Stripe supports Dashboard or API refunds and multiple partial refunds within the original charge total; it also exposes pending, failed and canceled lifecycle outcomes. The support workspace must display the actual state rather than treat a submitted request as completed reimbursement. [Stripe refund documentation](https://docs.stripe.com/refunds)
+The owner chose in-panel refunds if they can be implemented securely. Stripe provides a server-side API for full/partial refunds, expressed as positive integer minor units within the original charge's remaining amount. Refunds return to the original payment method; a submitted request can still be pending or fail. [Stripe create refund API](https://docs.stripe.com/api/refunds/create), [Stripe refund lifecycle](https://docs.stripe.com/refunds)
 
-An authorised operator may follow a server-constructed, validated Stripe Dashboard link for the bound payment in the correct mode/account. Do not expose checkout URLs or arbitrary provider URLs from customer input. Stripe permissions remain independent of local admin permissions. Record the local support decision/reference separately; the link itself neither initiates nor approves a refund.
+The recommended first-release authority is owner-only preparation, approval and submission through the authenticated admin browser. Use separate `support.refund.prepare`, `support.refund.approve` and `support.refund.execute` capabilities. A support operator's repair authority does not include refund authority. The server requires current owner membership and the relevant capability, MFA `aal2`, same-origin intent and the dedicated refund submission gate. Delegating refund authority needs a later explicit decision and named grants.
 
-The panel can inspect and reconcile verified refund facts without initiating money movement. No customer message is sent by these controls. Existing transactional notification delivery remains separately governed and must not be duplicated by a support repair.
+**Prepare and preview.** Select full remaining amount or enter a partial amount, plus an internal reason and supported provider reason (`requested_by_customer` or `duplicate`). Full remaining becomes a fixed amount at preview; it never expands automatically before submission. Bind the original order, owner principal, provider account/mode, captured charge/payment, amount/currency, policy versions and expected access effects into the proposal digest. Display original capture, successful/pending refunds, locally reserved amounts, proposed refund, remaining balance and effects on original/additional collection access. Reject zero, negative, fractional, unsafe integer, wrong-currency and excessive amounts server-side.
+
+**Verify before submission.** Require a complete fresh provider check and approved refund/access policy at preparation and dispatch. Reserve capacity against successful refunds, pending/requires-action refunds and unresolved local submissions; deduplicate a local intent already represented by a provider refund. Block a new submission while another refund on the same payment is in flight or outcome-unknown. Block uncaptured/fully refunded payments, active formal disputes, unknown bindings/policies or unsupported Connect fee/transfer flows. Stripe's own remaining-amount constraint remains the final protection against a concurrent Dashboard refund. Changed financial facts or access consequences require another preview and approval.
+
+**Approve and submit.** A single clearly labelled “Approve and submit refund” action may record approval and begin submission, but internally it must first persist the exact human approval and durable intent. Approval expires within five minutes. Store the requesting human, exact digest and reason separately from the server executor. The trusted server uses a restricted Stripe key with only the required refund write/read permissions; no key reaches the browser, agent SQL session or source control. Verify that the actual account supports the needed restricted permissions before enabling the feature. [Stripe restricted API keys](https://docs.stripe.com/keys)
+
+**Recover safely.** Commit an operation UUID, canonical provider request, payment reservation and stable provider idempotency key before the external call. Use short DB transactions; never hold locks over Stripe requests. Same-operation retries reuse the exact key and body. A timeout, lost response or ambiguous provider error is `outcome_unknown`, not proof that no refund occurred. Stripe can retain the first result including a server error, and keys can be pruned after at least 24 hours; project retry policy therefore stops all resubmission at 23 hours from first dispatch and permits reconciliation only afterwards. [Stripe idempotent requests](https://docs.stripe.com/api/idempotent_requests)
+
+Resolve unknown outcomes through a known refund ID or a complete payment-scoped provider lookup with the recorded operation correlation and exact binding/amount/currency. Correlation metadata is not approval evidence. Ambiguous absence is not permission to create a fresh operation/key. A dispatched unknown request remains reserved and blocks another refund until conclusively resolved. Bounded same-key transport recovery does not approve a new refund: any resend still requires current owner authority, an enabled submission gate and unexpired five-minute approval. After either deadline, use reads only. Recording/reconciling an already dispatched result continues through trusted recovery. Do not evade these rules with automatic SDK retries.
+
+**Report the actual result.** Distinguish not dispatched, outcome unknown, submitted/pending, requires action, succeeded, failed and canceled, separately from local ledger reconciliation. Persist a provider refund fact even if a local lease expires or audit/projection writes fail after Stripe accepts it. Report “submitted; local reconciliation pending” and recover; external money movement cannot be rolled back by SQL. Keep approval, attempt, provider ID and final receipt auditable. Revocation or disabling submission blocks new dispatches but must not erase or prevent recording an already sent operation.
+
+Access changes come from verified lifecycle facts and the shared versioned policy, never from clicking submit. Pending refunds retain recorded access; under the proposed baseline, a successful partial refund retains the source and a cumulative full refund removes only that purchase source and its dependent successor rights. Other valid sources continue to compose. Provider transactional notifications may occur according to Stripe settings; preview this possibility, verify configuration and avoid duplicate application messages. No support messaging endpoint is added.
+
+Stripe Dashboard remains available through server-constructed, validated links for unsupported/escalated cases, with independently managed Stripe permissions. Cancellation, bulk refunds and the `fraudulent` reason remain outside this release; Stripe's fraudulent reason also changes blocklists, so it must not be offered as an incidental note choice. [Stripe refund reason behavior](https://docs.stripe.com/api/refunds/create)
 
 ### 9.2 Proposed eligibility rules for review
 
@@ -223,11 +240,14 @@ Extend the existing console membership model with explicit support capabilities.
 | `support.repair.prepare` — exact proposal creation | Yes | No | Yes |
 | `support.repair.approve` — human approval of permitted effects | Yes | No | No initially |
 | `support.repair.execute` — apply a currently approved proposal | Yes | No | Yes, only within that approval |
-| Refund initiation, account transfer or discretionary grant | Separate external/future workflow | No | No |
+| `support.refund.prepare` — fixed amount and effects preview | Yes, explicit grant | No | No initially |
+| `support.refund.approve` — exact human refund authorisation | Yes, explicit grant | No | No initially |
+| `support.refund.execute` — trusted browser-triggered submission | Yes, explicit grant | No | No initially |
+| Account transfer or discretionary grant | Separate future workflow | No | No |
 
 Do not infer any support capability from `recipe.read`, `recipe.edit` or publication permissions. Owners receive the approved support set through an explicit migration/bootstrap decision; other existing members receive none by default. Do not seed real account identities in migrations. Introducing additional staff approval later requires the owner to grant the specific capability, not a code change that broadens all recipe roles.
 
-For browser operations, derive the actor from verified authentication and `auth.uid()`, require `aal2`, and check active current DB membership, support stage and exact permission on every read and write. Recheck both executor and authorising human at commit. Do not trust editable profile metadata, posted actor UUIDs or stale role claims. Receipt access is also permission-checked after revocation.
+For browser operations, derive the actor from verified authentication and `auth.uid()`, require `aal2`, and check active current DB membership, support stage and exact permission on every read and write. Recheck both executor and authorising human at a local repair commit and immediately before a new refund dispatch. Trusted recording/recovery of an already dispatched financial result continues even if that human is later revoked; new dispatch and receipt access remain denied. Do not trust editable profile metadata, posted actor UUIDs or stale role claims. Receipt access is also permission-checked after revocation.
 
 Return minimal typed DTOs, not raw joined rows. Private tables stay outside public exposure; security-definer wrappers need fixed search paths, narrow EXECUTE grants and parameter validation. A browser never receives a service-role credential. Existing server commerce credentials must not become a general client-accessible cross-customer API.
 
@@ -246,10 +266,12 @@ Reuse orders, payments, refunds, disputes, sources, manifests and access project
 | Repair proposal | Exact supported command, before/after effects, row/policy/publication versions, evidence references, digest, expiry and blockers. |
 | Human approval | Authorising identity, target proposal/digest, reason, expiry and approval channel. |
 | Support operation/receipt | Idempotency key, request digest, executor/attestor, fencing token, current outcome, committed audit/projection references and post-check result. |
+| Refund proposal/approval | Fixed integer amount/currency, original payment binding, provider/internal reasons, complete evidence, available balance, expected access effects, digest and exact human approval/expiry. |
+| Refund intent/attempt/receipt | Durable request and stable provider key, first-dispatch/retry deadline, reserved capacity, dispatch fence, append-only attempts/results, provider refund ID/status and local reconciliation state. Unique operation plus payment-scoped unresolved-intent protection. |
 
 Physical names, indexes and whether existing audit tables can be safely reused belong in the implementation plan after integrated-schema review. Private support records are not a substitute for immutable financial records. Approval evidence cannot be edited by ordinary note writers.
 
-Expose narrow commands for exact lookup, detail/history, case activity, provider inspection, prepare repair, approve repair, execute approved repair and receipt retrieval. Use opaque IDs in application routes and POST bodies for sensitive searches, not emails in query strings. Schema-check every input; client-supplied customer IDs are lookup targets, never proof of authority or ownership.
+Expose narrow commands for exact lookup, detail/history, case activity, provider inspection, prepare repair, approve repair, execute approved repair, prepare/approve/submit refund and receipt retrieval. Refund commands have distinct schemas and receipts; a repair command cannot request money movement. Use opaque IDs in application routes and POST bodies for sensitive searches, not emails in query strings. Schema-check every input; client-supplied customer IDs are lookup targets, never proof of authority or ownership.
 
 A successful read includes `checkedAt`, source completeness and policy/resolver identity. Mutations include an operation UUID and canonical request digest. Reusing a UUID for the same authorised command returns its receipt; reusing it for a different command is rejected. Receipts show actual committed effects and their scope, not merely the requested action.
 
@@ -257,13 +279,15 @@ Do not treat `closed` as an error or make support automatically create another c
 
 ## 13. Transactions, races and side effects
 
-The database and Stripe do not share an atomic transaction. Use an operation lease with a monotonically increasing fencing token around the network verification and a short database transaction for the local commit. Never hold SQL row locks while calling the provider. If the lease or expected version changed during the call, discard the observation and re-evaluate.
+The database and Stripe do not share an atomic transaction. Use an operation lease with a monotonically increasing fencing token around network verification and a short database transaction for the local commit. Never hold SQL row locks while calling the provider. If the lease or expected version changed during a read-only verification, reject that observation for execution and re-evaluate. A money-writing response is different: retain and reconcile its provider fact even if its lease is stale; fencing prevents stale state overwrite, not loss of a real refund.
 
 At local commit, coordinate order locks, affected source locks and the shared user/collection projection lock in the same deterministic order as checkout, webhooks, refund processing and Phase 2 publication. Source changes from different orders must compose correctly. Preserve existing aggregate access while recomputing; a refund on A cannot revoke B or an independent native grant.
 
 Check immutable binding at every boundary: provider account, mode, session/payment/charge, original order owner/release and captured amount/currency. A unique-provider-object conflict bound to another order is a hard conflict, not a successful upsert. Refunds/disputes must belong to the verified payment and order. Phase 2 publication/correction changes invalidate a proposal only where they change its evaluated consequences; the shared resolver supplies the relevant dependency token.
 
-Financial facts, eligibility, projections and the mandatory audit receipt commit together. Failure of the audit/projection rolls back the state change. Store failed attempts separately without claiming a domain commit. Use bounded lock/serialization retries only while the approved command and evidence remain valid. Outcome-unknown retries first recover the operation state.
+Local financial facts, eligibility, projections and the mandatory audit receipt commit together. Failure of the audit/projection rolls back that local state change. Store failed attempts separately without claiming a domain commit. Use bounded lock/serialization retries only while the approved command and evidence remain valid. Outcome-unknown retries first recover the operation state.
+
+Refund submission first records a durable intent under a payment-scoped lock, then dispatches outside the transaction, then records/reconciles the provider result. A DB rollback cannot undo a provider refund. Concurrency protection combines local unresolved-intent reservation, the stable provider key and Stripe's amount validation; it does not claim permanent exactly-once execution across systems. Trusted recovery must work while new submissions are disabled and must preserve every known external result through local write faults.
 
 Support diagnostics and projection-only repairs send no customer communications. Missing-payment fulfilment may have a previously unsent transactional notification: preview its exact eligible effect and use the approved outbox/deduplication contract. Existing outbox records do not prove that a delivery worker is active; verify the actual delivery integration before enabling any such side effect. Never resend a receipt as a side effect of repeated reconciliation. Pending/failed refunds cannot enqueue a misleading “refund confirmed” notification; event identity alone is insufficient to define message eligibility across changing statuses.
 
@@ -281,12 +305,16 @@ Provider observations must originate from the trusted server reconciliation adap
 
 Retries preserve the original operation receipt. A changed target, evidence, policy, expiry or effect requires a refreshed proposal and another human approval. Agents never approve their own human-authorisation record. Implementation/runbooks must document actual restricted calls and role grants before claiming parity is complete.
 
+For the first refund release, agents may inspect within their existing read authority and suggest an unapproved draft amount/reason. Creating the protected refund proposal, owner approval and actual money submission use the authenticated admin browser; no refund capability is granted to a DB agent. Existing repair attestation or direct-database execution does not grant refund dispatch. No SQL function accepts an arbitrary provider refund request or a posted human identity as permission to move money. Extending refund submission to an agent is a separate future authority design.
+
 ## 15. Error and degraded-state contract
 
 | Failure | Required behaviour |
 | --- | --- |
 | Identity/provider/database read unavailable | Display uncertainty; keep current recorded access; no repair from incomplete evidence. |
-| Provider timeout/rate limit | Bound retries; retain diagnostic operation state; no money movement or duplicate job storm. |
+| Diagnostic provider timeout/rate limit | Bound read retries; retain diagnostic operation state; no money movement or duplicate job storm. |
+| Refund timeout/ambiguous provider error | Keep exact intent/key and reserved capacity; show outcome unknown; recover before any new refund. Never imply failed/no money movement. |
+| Provider refund accepted, local recording fails | Preserve submission evidence, report reconciliation pending and recover trusted provider facts; SQL rollback cannot cancel the refund. |
 | Stale proposal, changed provider facts or new refund | Show changed consequences and require a new approval. |
 | Authority revoked/MFA expired | Deny details or mutation as appropriate; no reuse of old approval/receipt to bypass authority. |
 | Invalid ownership or financial binding | Block with safe reason/reference; route for owner investigation. |
@@ -303,19 +331,19 @@ Errors exposed to the operator contain actionable safe codes and a correlation r
 | --- | --- | --- |
 | 3A — Inspect and explain | Explicit support authority; exact lookup; order/customer detail; source lineage; original/current collection explanation; cases and restricted attention queue. | Completed Phase 1/2 integration, private-data boundary checks and owner walkthrough. Provider facts remain labelled with actual freshness. |
 | 3B — Diagnose and prepare | Trusted provider inspection; supported lifecycle coverage; normalised observations; precise repair proposals and blocked cases. No manual repair execution. | Complete provider binding/event/unknown-state tests and approved policy mappings. Verify production configuration read-only before calling diagnosis live-ready. |
-| 3C — Approve and repair | Human approval; fenced shared reconciliation; projection repair; durable receipts; operator parity and recovery rehearsal. | All acceptance gates below, owner approval of the reviewed implementation, isolated test-mode rehearsal and explicit release authorisation. |
+| 3C — Approve, repair and refund | Human approval; fenced shared reconciliation; projection repair; owner-only full/partial refund submission; durable receipts; repair operator parity and recovery rehearsal. | All A1–A19 gates, owner approval of the reviewed implementation, isolated test-mode refund rehearsal and explicit release authorisation. |
 
-Support inspection/diagnosis/repair have independent server-enforced gates; they are not tied implicitly to recipe publication stage. Owner-only enablement comes first. Expansion to named support staff follows permission and revocation rehearsal. No bulk repair capability in the first release.
+Support inspection/diagnosis/repair have independent server-enforced gates; they are not tied implicitly to recipe publication stage. Refund dispatch additionally requires `refund_submission_enabled`, default false; enabling repair never enables money movement. In-flight result recovery remains available when dispatch is disabled. Owner-only enablement comes first. Expansion to named support staff follows permission and revocation rehearsal. No bulk repair capability in the first release. Increments 3A/3B may be internal milestones; the first complete Phase 3 release includes the agreed refund workflow.
 
 Use synthetic/isolated database fixtures and Stripe test mode for repair/refund/dispute scenarios. Do not charge/refund a real customer or create live access changes to test this design. Production verification starts with narrow authorised read-only evidence; any live mutation follows its own exact approved operation.
 
-Rollback disables new repair/diagnostic commands while preserving inspection when safe, audit records and ordinary commerce processing. Do not remove prior financial/audit history or blindly restore entitlement rows from a backup. Correct a bad committed repair through a new verified, approved compensating operation. Add forward migrations; do not rewrite applied Phase 1/2 migration history.
+Rollback disables new refund submissions and repair/diagnostic commands while preserving in-flight financial recovery, inspection when safe, audit records and ordinary commerce processing. Do not remove prior financial/audit history or blindly restore entitlement rows from a backup. Correct a bad committed access repair through a new verified, approved compensating operation. A refund cannot be undone by restoring the database or automatically charging the customer. Add forward migrations; do not rewrite applied Phase 1/2 migration history.
 
 ## 17. Acceptance gates
 
 | Gate | Required evidence before Phase 3 completion |
 | --- | --- |
-| A1 — Scope and integration | Current main, finished admin and Phase 2 contracts integrated; agreed versus proposed policies recorded; no accidental refund/transfer/grant API. |
+| A1 — Scope and integration | Current main, finished admin and Phase 2 contracts integrated; secure refund scope agreed, remaining policies recorded; only the intended protected refund endpoint, no charge/transfer/grant API. |
 | A2 — Authority and privacy | Anonymous, ordinary customer and recipe-only staff cannot inspect support data; MFA/current membership enforced on reads, commands and receipts; analytics/cache/log leak checks pass. |
 | A3 — Exact identity | Found/not-found/unconfirmed/ambiguous/unavailable and closed/recreated accounts handled; billing email/receipt/reference alone cannot transfer ownership. |
 | A4 — Historical truth | Original terms/manifest retained through price/title/publication changes; incomplete legacy fields remain unknown; test/live and currencies cannot be mixed. |
@@ -330,6 +358,10 @@ Rollback disables new repair/diagnostic commands while preserving inspection whe
 | A13 — Atomicity and recovery | Faults in facts/source/projection/audit writes leave no partial commit; receipt recovery distinguishes unknown from failed; compensating repair is rehearsed. |
 | A14 — Agent parity | Registered verifier and restricted operator path enforce the same evidence/approval contracts; human/executor/attestor separated; forged provider facts/approver rejected. |
 | A15 — Workflow and rollout | Owner can complete lookup→explanation→diagnosis→approved repair in test mode; case history/post-check accurate; stage disable/revocation rehearsal and operations runbook completed. |
+| A16 — Refund authority and exact amount | Owner/current grant/MFA/origin/gate enforced; staff/agent/forged approvals denied; fixed full/partial amounts and original binding validated; unknown policy/dispute/unsupported flow blocks dispatch. |
+| A17 — Refund concurrency and replay | Double clicks, two tabs, Dashboard races, pending reservations and same-UUID/different-body produce no duplicate refund; same key/body only within the bounded dispatch contract. |
+| A18 — Refund uncertainty and durable recovery | Timeout/500/lost response, crash around dispatch, local commit failure and stale lease preserve intent/results; approval expiry or the 23-hour hard cutoff forbids resubmission; revoked actor/disabled gate does not stop recording an already dispatched result. |
+| A19 — Refund outcome and release | Stripe test-mode full/partial creation plus provider-fixture pending/requires-action/failed/canceled coverage and access composition verified; submitted is not succeeded; restricted key/config, notifications, retention, kill switch and owner walkthrough evidenced. |
 
 Runtime verification should combine focused database permission/invariant tests, reconciliation/policy tests with provider fixtures, route/browser authority checks and a bounded owner walkthrough. Add meaningful race/fault tests where they prove a gate, rather than duplicating every implementation detail. No runtime test or deployment success is claimed by writing this document.
 
@@ -337,15 +369,15 @@ Runtime verification should combine focused database permission/invariant tests,
 
 Measure actionable support outcomes with private operational aggregates: unresolved verified fulfilment mismatches, age of pending reconciliation, blocked reason counts, successful/no-change/failed repair counts and post-check completion. These are not revenue reports or optional behavioural analytics. Do not claim fewer support tickets without a real baseline and consistent case capture.
 
-The runbook must name who monitors cases/provider adjustments, who can approve a repair, how authority is revoked, how to inspect an unknown result, how to recover a lost receipt, and how to escalate policy/identity/content issues. Include exact safe provider/database checks, test/live targeting and redacted examples. Do not copy the old account-closure runbook's launch assumptions into new operational truth.
+The runbook must name who monitors cases/provider adjustments, who can approve a repair/refund, how authority is revoked, how to inspect an unknown result, how to recover a lost receipt, and how to escalate policy/identity/content issues. Include refund dispatch/retry deadlines, unresolved-intent alerts, the dedicated kill switch and trusted recovery after revocation. Include exact safe provider/database checks, test/live targeting and redacted examples. Do not copy the old account-closure runbook's launch assumptions into new operational truth.
 
 Data retention requires explicit configuration before production: case-note retention/redaction, observation payload minimisation, approval evidence access, immutable financial/audit retention and account-closure handling. This design does not prescribe a legal retention duration. Resolve that operational policy without collecting unnecessary personal data in the meantime.
 
 ## 19. Review and next artifact
 
-The review choices are concrete: adopt the order-centred workspace; keep refunds in Stripe initially; limit repairs to documented rights; use owner approval first; and confirm the applicable refund/dispute/access policies before live repair. Any changes should update this decision register and affected acceptance gates together.
+The owner has chosen secure refund initiation inside admin for the first complete Phase 3 release. Review the proposed owner-only browser authority, exact full/partial approval, durable dispatch/recovery safeguards and the remaining refund/dispute/access policies before implementation. Repairs remain limited to documented rights. Any changes update this decision register and affected gates together.
 
-After written-design review, create a separate Phase 3 implementation plan with exact integrated modules/migrations, task ordering, policy approvals, evidence for A1–A15, release gates, rollback and owner rehearsal. Preserve the previously selected Native execution method: implement each task in the primary agent, then obtain the independent final review at the authorised execution stage. This document does not start that implementation.
+The companion [Phase 3 implementation plan](../plans/2026-10-07-admin-customer-support-phase-three.md) must cover exact integrated modules/migrations, task ordering, policy approvals, evidence for A1–A19, release gates, rollback and owner rehearsal. Preserve the previously selected Native execution method: implement each task in the primary agent, then obtain the independent final review at the authorised execution stage. This document revision does not start that implementation or approve a real customer refund.
 
 ## 20. Source anchors and related plans
 
@@ -364,3 +396,4 @@ Paths below are repository-relative so the specification remains portable betwee
 - [Commerce states and data](../../implementation/phase-8/PAYMENT-DATA-AND-STATES.md), [refunds and support policy](../../implementation/phase-8/REFUNDS-AND-SUPPORT.md), and [recipe access/security](../../implementation/phase-8/RECIPE-ACCESS-AND-SECURITY.md).
 - `ops/ACCOUNT-CLOSURE.md` and `ops/ADMIN-CONSOLE.md`: separate account closure and admin operating boundaries; verify and update stale assumptions during implementation.
 - [Stripe refunds](https://docs.stripe.com/refunds), [Stripe webhooks](https://docs.stripe.com/webhooks), and [Stripe dispute lifecycle](https://docs.stripe.com/disputes/how-disputes-work): primary provider documentation checked for this design. Local access effects remain owner-approved project policy.
+- [Stripe create refund API](https://docs.stripe.com/api/refunds/create), [idempotent requests](https://docs.stripe.com/api/idempotent_requests), and [restricted API keys](https://docs.stripe.com/keys): checked for the refund-scope revision. Approval, the 23-hour retry cutoff, local reservations and owner-only submission are project safeguards.
