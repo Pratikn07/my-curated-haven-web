@@ -11,6 +11,7 @@ import {
   type HouseRoomStatus,
 } from "@/config/house-rooms";
 import { HOMEPAGE_CONTENT_VERSION } from "@/config/homepage-content";
+import { COLLECTIONS_HREF } from "@/config/site-navigation";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { applyHouseLight } from "@/lib/house-light";
 import HouseDepth from "@/components/house/HouseDepth";
@@ -111,10 +112,12 @@ function LibraryBookLink({ onLeaveRoom }: { onLeaveRoom: (after: () => void) => 
 function RoomCardBody({
   room,
   kitchenRecipes,
+  showCollections,
   onLeaveRoom,
 }: {
   room: HouseRoom;
   kitchenRecipes: KitchenRecipeLink[];
+  showCollections: boolean;
   onLeaveRoom: (after: () => void) => void;
 }) {
   if (room.id === "kitchen") {
@@ -138,12 +141,22 @@ function RoomCardBody({
           </ul>
         ) : null}
         <div className="flex items-end justify-between gap-4">
-          <Link
-            href="/recipes"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
-          >
-            Browse recipes
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/recipes"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+            >
+              Browse recipes
+            </Link>
+            {showCollections ? (
+              <Link
+                href={COLLECTIONS_HREF}
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-border-control bg-surface px-5 py-3 font-semibold hover:bg-surface-muted"
+              >
+                Browse collections
+              </Link>
+            ) : null}
+          </div>
           <div className="kitchen-pot" aria-hidden="true">
             <Steam />
             <div className="kitchen-pot-image" />
@@ -160,10 +173,13 @@ function RoomCardBody({
 export default function HouseExplorer({
   scene,
   kitchenRecipes,
+  showCollections,
   after,
 }: {
   scene: ReactNode;
   kitchenRecipes: KitchenRecipeLink[];
+  /** Whether this environment shows any collection (same rule as the header link). */
+  showCollections: boolean;
   /** Shown under the house and its room names, such as the way to all recipes. */
   after?: ReactNode;
 }) {
@@ -476,7 +492,7 @@ export default function HouseExplorer({
                   </h3>
                 </div>
                 <p className="max-w-[60ch] text-text-muted">{room.summary}</p>
-                <RoomCardBody room={room} kitchenRecipes={kitchenRecipes} onLeaveRoom={closeRoom} />
+                <RoomCardBody room={room} kitchenRecipes={kitchenRecipes} showCollections={showCollections} onLeaveRoom={closeRoom} />
               </article>
             ))}
             {active ? (

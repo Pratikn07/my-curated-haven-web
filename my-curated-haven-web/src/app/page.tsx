@@ -7,6 +7,7 @@ import HomeRecipes from "@/components/home/HomeRecipes";
 import LibraryPreview from "@/components/home/LibraryPreview";
 import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import { SITE_ORIGIN } from "@/config/site-navigation";
+import { hasShowroomCollections } from "@/lib/collections/visibility";
 import { loadHomepageRecipes } from "@/lib/data/load-homepage-recipes";
 
 const pageTitle = "My Curated Haven | A calm corner for parents of little ones";
@@ -44,7 +45,7 @@ export default async function Home() {
 
   return (
     <>
-      <HavenHero kitchenRecipes={kitchenRecipes} />
+      <HavenHero kitchenRecipes={kitchenRecipes} showCollections={hasShowroomCollections()} />
       <HomeRecipes data={recipes} />
       <CollectionSummary state={HOMEPAGE_RECIPE_STATE} />
       <LibraryPreview />

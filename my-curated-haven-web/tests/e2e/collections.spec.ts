@@ -35,7 +35,7 @@ test("the showroom shows each collection as a chapter with its price and a way i
   await expect(page.getByRole("link", { name: /Try a free recipe/ }).first()).toHaveAttribute("href", "/recipes");
 });
 
-test("the header offers Collections and Free Recipes", async ({ page }) => {
+test("the header offers Collections and Recipes", async ({ page }) => {
   await page.goto("/", LOAD);
   const header = page.locator("header").first();
   const menu = header.getByRole("button", { name: "Open menu" });
@@ -47,7 +47,7 @@ test("the header offers Collections and Free Recipes", async ({ page }) => {
     }).toPass();
   }
   await expect(header.getByRole("link", { name: "Collections" }).first()).toHaveAttribute("href", "/collections");
-  await expect(header.getByRole("link", { name: "Free Recipes" }).first()).toHaveAttribute("href", "/recipes");
+  await expect(header.getByRole("link", { name: "Recipes", exact: true }).first()).toHaveAttribute("href", "/recipes");
 });
 
 test("a collection page lists every recipe with its allergens and is honest about buying", async ({ page }) => {
