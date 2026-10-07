@@ -7,6 +7,7 @@ import {
   saveAdminDraft,
   startAdminDraft,
 } from "@/lib/admin/recipes";
+import { loadAdminRecipe } from "@/lib/admin/context";
 import type { Base, DraftCommand } from "@/lib/admin/contracts";
 
 function isUuid(value: string): boolean {
@@ -77,4 +78,13 @@ export async function loadRevisionAction(recipeId: string, revisionId: string) {
     return { ok: false as const, code: "INVALID" as const, reference: "draft-revision" };
   }
   return loadAdminRevision(recipeId, revisionId);
+}
+
+export async function refreshDraftAction(recipeId: string) {
+  if (!isUuid(recipeId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "draft-refresh" };
+  }
+  const detail = await loadAdminRecipe(recipeId);
+  if (!detail.ok) return detail;
+  return detail;
 }

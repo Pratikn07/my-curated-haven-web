@@ -52,3 +52,36 @@ export function diffSnapshots(before: RecipeSnapshot, after: RecipeSnapshot): Sn
   }
   return out;
 }
+
+function getPath(root: unknown, path: string): unknown {
+  let current = root;
+  for (const part of path.split(".")) {
+    if (!isRecord(current) && !Array.isArray(current)) return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function setPath(root: unknown, path: string, value: unknown): unknown {
+  const parts = path.split(".");
+  const key = parts.pop() as string;
+  const container =
+    parts.length === 0 ? root : getPath(root, parts.join("."));
+  const clone = Array.isArray(container) ? [...container] : { ...(container as Record<string, unknown>) };
+  (clone as Record<string, unknown>)[key] = value;
+  if (parts.length === 0) return clone;
+  return setPath(root, parts.join("."), clone);
+}
+
+export function mergePaths(
+  stored: RecipeSnapshot,
+  candidate: RecipeSnapshot,
+  choices: Record<string, "stored" | "candidate">
+): RecipeSnapshot {
+  let merged = JSON.parse(JSON.stringify(stored)) as RecipeSnapshot;
+  for (const [field, choice] of Object.entries(choices)) {
+    if (choice !== "candidate") continue;
+    merged = setPath(merged, field, getPath(candidate, field)) as RecipeSnapshot;
+  }
+  return merged;
+}

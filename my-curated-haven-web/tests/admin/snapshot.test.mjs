@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { diffSnapshots, patchSnapshot } from "../../src/lib/admin/snapshot.ts";
+import { diffSnapshots, mergePaths, patchSnapshot } from "../../src/lib/admin/snapshot.ts";
 
 const SNAPSHOT = {
   recipeId: "91000000-0000-0000-0000-000000000001",
@@ -36,4 +36,13 @@ test("diff reports only changed leaves", () => {
   const diff = diffSnapshots(SNAPSHOT, changed);
   assert.deepEqual(diff, [{ field: "catalog.title", before: "Before", after: "After" }]);
   assert.deepEqual(diffSnapshots(SNAPSHOT, SNAPSHOT), []);
+});
+
+test("merge applies per-field choices without touching the rest", () => {
+  const candidate = patchSnapshot(SNAPSHOT, { catalog: { ...SNAPSHOT.catalog, title: "After" } });
+  const merged = mergePaths(SNAPSHOT, candidate, { "catalog.title": "candidate" });
+  assert.equal(merged.catalog.title, "After");
+  assert.deepEqual(merged.body, SNAPSHOT.body);
+  const kept = mergePaths(SNAPSHOT, candidate, { "catalog.title": "stored" });
+  assert.equal(kept.catalog.title, "Before");
 });
