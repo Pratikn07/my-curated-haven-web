@@ -105,6 +105,14 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Build
+        env:
+          # Instrumented build for the privacy spec: the loopback sink below
+          # only receives SDK traffic when these test-only values are baked
+          # in (see ops/ADMIN-CONSOLE.md). Never point them at production.
+          NEXT_PUBLIC_ANALYTICS_ENABLED: "true"
+          NEXT_PUBLIC_APP_ENV: staging
+          NEXT_PUBLIC_POSTHOG_KEY: test-key-staging
+          NEXT_PUBLIC_POSTHOG_HOST: http://127.0.0.1:54349/sink
         run: npm run build
 
       - name: Browser tests
@@ -182,8 +190,15 @@ jobs:
       - name: Verify clean migration replay
         run: supabase db reset
 
-      - name: Run database access matrix tests (pgTAP)
-        run: supabase test db
+      - name: Run database access matrix tests (pgTAP, excluding admin workspace)
+        # Admin workspace tests inline their fixture via scripts/test-admin-db.mjs
+        # because raw `supabase test db` cannot resolve their \ir include.
+        run: supabase test db $(ls supabase/tests/database/*.test.sql | grep -Ev '/[^/]*admin[^/]*\.test\.sql$')
+
+      - name: Run admin workspace database tests (pgTAP)
+        env:
+          ADMIN_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: node my-curated-haven-web/scripts/test-admin-db.mjs
 
       - name: Verify generated TypeScript types drift
         run: |

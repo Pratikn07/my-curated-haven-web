@@ -62,25 +62,25 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- workflow
   EXPECT: ADMIN_GATE_WORKFLOW_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: unmet; no keyboard/narrow-layout workflow spec built in Phase 1. Remaining action: owner reviews final synthetic screens (ADMIN-CONSOLE.md release package) and a workflow spec is added before close.
 
-- [ ] R11: Existing customer recipe and campaign access remains correct
+- [x] R11: Existing customer recipe and campaign access remains correct
   CHECK: npm run test:admin:gate -- regression
   EXPECT: ADMIN_GATE_REGRESSION_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: legacy pgTAP 01-09 (123) PASS + admin pgTAP 10-16 (219) PASS on clean `supabase db reset`; browser on chromium-desktop --workers=1: saved-recipe-access + data-access 15 passed/1 skipped, recipes + allergen-display + stories 26 passed with 2 pre-existing stories failures (scroll-position 177, analytics predicate 281 — fail on fresh reset, branch touches no stories/campaigns/analytics files), public-site + saved-recipes 24 passed/1 skipped/4 conditional did-not-run. Anonymous reads return only promised free-slot recipes; entitled/non-entitled, legacy inspection, staff-no-purchase, save/print/canonical and campaign counts stable.
 
-- [ ] R12: Required local checks and synthetic migration rehearsal pass
+- [x] R12: Required local checks and synthetic migration rehearsal pass
   CHECK: npm run test:admin:gate -- release
   EXPECT: ADMIN_GATE_RELEASE_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: local subgate met — `supabase db reset` clean replay of all 10 admin migrations; legacy pgTAP 123 PASS; admin pgTAP 219 PASS; generated-types diff clean; lint + typecheck clean; units 16/13/23/18 PASS; instrumented production build clean; admin browser set green (access 4, editing 3, inspection 1, concurrency 2, publication 1, review 2, privacy 3); web-ci.yml finalised (instrumented analytics build env for the privacy positive control; pgTAP split into legacy-excluding-admin plus the fixture-bundling admin runner whose default now covers 10-16). Committed/deployed/external subgates unmet: release requires separate authorisation; see ops/ADMIN-CONSOLE.md release package.
 
 - [ ] OWNER: Owner reviews final screens and confirms workflow fit
-  EVIDENCE: pending; final screens not yet implemented
+  EVIDENCE: unmet; remaining action: owner walks the inspection/edit/review/publication screens on synthetic data and confirms fit (closes R10).
 
 - [ ] REVIEW: Independent whole-branch review has no unresolved critical or important findings
-  EVIDENCE: pending
+  EVIDENCE: unmet; remaining action: independent review of branch `codex/admin-recipe-workspace-design` requested with this package.
 
 - [ ] DEPLOY: After separately authorized release, deployed SHA, flags, owner bootstrap and authenticated journey verified
-  EVIDENCE: pending; deployment not authorized in implementation scope
+  EVIDENCE: unmet; deployment not authorized in implementation scope.
