@@ -60,7 +60,7 @@ export type RecipeDetail = { active: RecipeSnapshot; publication: PublicationSta
 export type StaffMatch = { userId: string; email: string };
 export type StaffRow = StaffMatch & { roles: AdminRole[]; active: boolean;
   grantedBy: string; grantedAt: string; revokedBy: string | null; revokedAt: string | null };
-export type Asset = { objectId: string; objectVersion: string; path: string; bucket: "recipe-images";
+export type Asset = { objectId: string | null; objectVersion: string | null; path: string; bucket: "recipe-previews";
   available: boolean; provenance: "recorded_approval" | "requires_review" };
 export type Operation = { operationId: string; recipeId: string; reason: string };
 export type DraftCommand = Operation & { expectedVersion: number; expectedDigest: string;

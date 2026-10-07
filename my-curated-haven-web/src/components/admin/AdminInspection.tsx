@@ -14,7 +14,7 @@ export default function AdminInspection({
   return (
     <div>
       <Link href={returnTo}>Back to recipes</Link>
-      <AdminRecipePreview snapshot={detail.active} label="Recipe preview" />
+      <AdminRecipePreview snapshot={detail.active} label="Active recipe" />
       <section aria-label="Readiness">
         <h2>Readiness</h2>
         <p>{detail.readiness.review}</p>

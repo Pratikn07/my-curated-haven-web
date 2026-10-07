@@ -1447,6 +1447,7 @@ export type Database = {
         Args: { p_operation_id: string; p_recipe_id: string }
         Returns: Json
       }
+      admin_recipe_assets: { Args: never; Returns: Json }
       admin_recipe_detail: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_history: {
         Args: { p_cursor?: string; p_limit?: number; p_recipe_id: string }

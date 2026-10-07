@@ -7,8 +7,9 @@ import {
   saveAdminDraft,
   startAdminDraft,
 } from "@/lib/admin/recipes";
+import { listAdminAssets, verifyAdminAsset } from "@/lib/admin/assets";
 import { loadAdminRecipe } from "@/lib/admin/context";
-import type { Base, DraftCommand } from "@/lib/admin/contracts";
+import type { Base, DraftCommand, Revision } from "@/lib/admin/contracts";
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -87,4 +88,15 @@ export async function refreshDraftAction(recipeId: string) {
   const detail = await loadAdminRecipe(recipeId);
   if (!detail.ok) return detail;
   return detail;
+}
+
+export async function listAssetsAction() {
+  return listAdminAssets();
+}
+
+export async function verifyAssetAction(revision: Revision) {
+  if (!isUuid(revision.id) || !isUuid(revision.recipeId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "asset-verify" };
+  }
+  return verifyAdminAsset(revision);
 }

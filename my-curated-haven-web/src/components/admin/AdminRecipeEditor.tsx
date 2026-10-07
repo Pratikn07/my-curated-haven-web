@@ -4,8 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Base, RecipeSnapshot, Revision } from "@/lib/admin/contracts";
 import { diffSnapshots } from "@/lib/admin/snapshot";
-import { rebaseDraftAction, refreshDraftAction, saveDraftAction } from "@/lib/admin/actions";
+import {
+  rebaseDraftAction,
+  refreshDraftAction,
+  saveDraftAction,
+  verifyAssetAction,
+} from "@/lib/admin/actions";
 import AdminRecipeCompare from "./AdminRecipeCompare";
+import AdminRecipeAssets, { useAdminAssets } from "./AdminRecipeAssets";
 
 type Ingredient = { item: string; amount?: string; unit?: string; [key: string]: unknown };
 type Step = { step: number; text: string; [key: string]: unknown };
@@ -54,6 +60,10 @@ export default function AdminRecipeEditor({
   const [candidate, setCandidate] = useState<RecipeSnapshot>(() =>
     JSON.parse(JSON.stringify(initial.snapshot))
   );
+  const [revision, setRevision] = useState<Revision>(initial);
+  const assets = useAdminAssets();
+  const [checking, setChecking] = useState(false);
+  const [checkStatus, setCheckStatus] = useState<string | null>(null);
   const [expectedVersion, setExpectedVersion] = useState(initial.version);
   const [expectedDigest, setExpectedDigest] = useState(initial.digest);
   const [currentBase, setCurrentBase] = useState(base);
@@ -112,6 +122,7 @@ export default function AdminRecipeEditor({
     setPending(false);
     if (result.ok) {
       const receipt = result.value as {
+        revisionId: string | null;
         version: number;
         digest: string;
         noChange: boolean;
@@ -119,6 +130,15 @@ export default function AdminRecipeEditor({
       };
       setExpectedVersion(receipt.version);
       setExpectedDigest(receipt.digest);
+      if (receipt.revisionId) {
+        setRevision((prev) => ({
+          ...prev,
+          id: receipt.revisionId as string,
+          version: receipt.version,
+          digest: receipt.digest,
+          snapshot: JSON.parse(JSON.stringify(candidate)),
+        }));
+      }
       setOperationId(crypto.randomUUID());
       setNeedsRebase(false);
       setStatus(
@@ -163,9 +183,23 @@ export default function AdminRecipeEditor({
     });
     setPending(false);
     if (result.ok) {
-      const receipt = result.value as { version: number; digest: string; committedAt: string };
+      const receipt = result.value as {
+        revisionId: string | null;
+        version: number;
+        digest: string;
+        committedAt: string;
+      };
       setExpectedVersion(receipt.version);
       setExpectedDigest(receipt.digest);
+      if (receipt.revisionId) {
+        setRevision((prev) => ({
+          ...prev,
+          id: receipt.revisionId as string,
+          version: receipt.version,
+          digest: receipt.digest,
+          snapshot: JSON.parse(JSON.stringify(candidate)),
+        }));
+      }
       setCurrentBase({
         contentVersion: fresh.value.contentVersion,
         activeHash: fresh.value.activeHash,
@@ -176,6 +210,29 @@ export default function AdminRecipeEditor({
     } else {
       setOperationId(newOp);
       setStatus(`Rebase failed (${result.code}). Adjust and retry.`);
+    }
+  }
+
+  async function checkAvailability() {
+    if (JSON.stringify(candidate) !== JSON.stringify(revision.snapshot)) {
+      setCheckStatus("Save your changes first, then check availability.");
+      return;
+    }
+    setChecking(true);
+    const result = await verifyAssetAction(revision);
+    setChecking(false);
+    if (result.ok) {
+      setCandidate((prev) => ({
+        ...prev,
+        image: { ...prev.image, objectId: result.value.objectId },
+      }));
+      setCheckStatus(
+        result.value.available
+          ? `Available, checked at ${result.value.checkedAt}.`
+          : "Object unavailable in storage."
+      );
+    } else {
+      setCheckStatus(`Availability check failed (${result.code}).`);
     }
   }
 
@@ -438,6 +495,15 @@ export default function AdminRecipeEditor({
           </li>
         ))}
       </ol>
+
+      <AdminRecipeAssets
+        value={candidate.image}
+        assets={assets}
+        onChange={(image) => setCandidate((prev) => ({ ...prev, image }))}
+        onCheck={checkAvailability}
+        checking={checking}
+        checkStatus={checkStatus}
+      />
 
       <label htmlFor="field-imageAlt">Image alt text</label>
       <input

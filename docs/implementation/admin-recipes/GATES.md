@@ -26,7 +26,7 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- revisions
   EXPECT: ADMIN_GATE_REVISIONS_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: DB 13 (37: racing starts share one head, null-body save, control-key/target rejection, stale/out-of-band conflict with zero content change, identical replay, no-change preserves approval, BLOCKED without reopen, revoked replay denied) PASS; public catalog/body byte-identical after private ops (conflict/no-change add no rows); editor UI in Task 8
+  EVIDENCE: DB 13 (37) + 14 (11) PASS; browser save/reload keeps working revision with byte-identical active catalog/body/alt (image metadata too); editor validation, read-only identity, compare/merge, rebase, real-object image select + availability check covered in Task 8/9 suites
 
 - [x] R5: Concurrent edits and retries produce one valid transition
   CHECK: npm run test:admin:gate -- concurrency
@@ -50,7 +50,7 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- impact
   EXPECT: ADMIN_GATE_IMPACT_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: pending
+  EVIDENCE: partial — image-availability evidence implemented (pass/unknown/fail in readiness, unknown/unavailable never a pass, publication recheck deferred to Task 12); sealed/commercial gates land in Increment C
 
 - [x] R9: Direct entry and SPA navigation suppress optional admin telemetry
   CHECK: npm run test:admin:gate -- privacy
