@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import SignOutButton from "@/components/account/SignOutButton";
+import SecurityMfa from "@/components/account/SecurityMfa";
 import { Bookmark, ShoppingBag, Mail, HelpCircle, AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -111,6 +112,19 @@ export default async function AccountPage() {
               <span>Contact support &rarr;</span>
             </div>
           </Link>
+        </section>
+
+        {/* Security */}
+        <section aria-label="Security" className="rounded-[var(--radius-card)] border border-border bg-surface p-5 sm:p-8">
+          <h2 className="text-base font-bold text-foreground">
+            Two-step verification
+          </h2>
+          <p className="mt-1 text-sm text-text-muted">
+            Add an authenticator app to protect your account. Admin access requires this second step.
+          </p>
+          <div className="mt-4">
+            <SecurityMfa />
+          </div>
         </section>
 
         {/* Account Closure Guidance */}
