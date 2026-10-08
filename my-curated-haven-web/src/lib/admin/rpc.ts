@@ -39,6 +39,13 @@ export async function adminRpc<T>(
     try {
       response = await call();
     } catch {
+      // Transport failure (dropped connection, truncated upstream stream):
+      // nothing reached the database, so replaying the same operation id is
+      // safe for every ledger-protected caller. Without the flag, fail fast.
+      if (retryOnLock && attempts < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 300 * attempts));
+        continue;
+      }
       return { ok: false, code: "UNAVAILABLE", reference: reference() };
     }
     if (response.error) {

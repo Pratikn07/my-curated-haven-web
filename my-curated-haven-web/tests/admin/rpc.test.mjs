@@ -29,3 +29,33 @@ test("transport throw is unavailable", async () => {
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.code, "UNAVAILABLE");
 });
+
+test("transport throw retries then succeeds with the flag", async () => {
+  let calls = 0;
+  const result = await adminRpc(
+    async () => {
+      calls += 1;
+      if (calls < 3) throw new Error("truncated stream");
+      return { data: { ok: true }, error: null };
+    },
+    (x) => x,
+    true
+  );
+  assert.equal(result.ok, true);
+  assert.equal(calls, 3);
+});
+
+test("persistent transport failure gives up as unavailable", async () => {
+  let calls = 0;
+  const result = await adminRpc(
+    async () => {
+      calls += 1;
+      throw new Error("network down");
+    },
+    (x) => x,
+    true
+  );
+  assert.equal(result.ok, false);
+  if (!result.ok) assert.equal(result.code, "UNAVAILABLE");
+  assert.equal(calls, 3);
+});
