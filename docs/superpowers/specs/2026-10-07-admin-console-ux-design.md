@@ -1,7 +1,7 @@
 # Admin console UI/UX design for Phases 1–4
 
 - Date: 2026-10-07, America/Los_Angeles.
-- Status: written design for owner review. The owner accepted the visual direction in conversation; this document records the detailed interaction contract for review before a UI implementation plan.
+- Status: owner approved proceeding from this written design to UI implementation planning on 2026-10-07. The earlier visual direction and this interaction contract remain the design basis; each UI plan has its own review handoff before code execution.
 - Scope: the protected My Curated Haven admin console. This is a UI/UX layer over the four existing domain designs, not new authority to edit customer access, move money, publish content, or deploy.
 - Evidence boundary: repository source and the four written phase designs were inspected. The interactive concept uses illustrative records and figures. It is neither a live-data view nor evidence that Phases 2–4 are implemented or deployed.
 
@@ -170,4 +170,4 @@ This design is a visual and interaction crosswalk for the four [Phase 1](../plan
 
 The current branch contains functional Phase 1 admin routes and components, including a minimal shell, recipe library, editor, review, publication, and Team. Its existing preview/usage presentation does not yet match this visual design. Phases 2–4 are planned workflows; their presence in this document and the illustrative concept does not mean their screens or backend contracts are implemented or active.
 
-After owner review of this written spec, write a UI-specific implementation plan against the then-current integrated checkout. The plan should start with the Phase 1 shell, library, recipe detail, editor, dedicated Preview & changes, Team, accessible mobile states, and browser verification. It should add the later domain screens only after their protected reads and commands are integrated. Before any production activation, verify current migrations, membership/MFA, stage flags, fresh source data, and the owner journey under the corresponding phase release gates.
+The UI implementation work is split into independently reviewable [Phase 1 recipe and shell](../plans/2026-10-07-admin-console-phase-one-ui.md), [Phase 2 Collections and Publishing Home](../plans/2026-10-07-admin-console-phase-two-ui.md), [Phase 3 Support and Home](../plans/2026-10-07-admin-console-phase-three-ui.md), and [Phase 4 Campaigns and reports](../plans/2026-10-07-admin-console-phase-four-ui.md) plans. Each plan starts from the then-current integrated checkout and adds domain screens only after their protected reads and commands are active. Before any production activation, verify current migrations, membership/MFA, stage flags, fresh source data, and the owner journey under the corresponding phase release gates.
