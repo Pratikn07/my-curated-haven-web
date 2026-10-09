@@ -1630,11 +1630,20 @@ export type Database = {
         Args: { p_cursor: string; p_user_id: string }
         Returns: Json
       }
+      admin_support_diagnose_begin: {
+        Args: { p_operation_id: string; p_order_id: string }
+        Returns: Json
+      }
       admin_support_history: {
         Args: { p_cursor: string; p_order_id: string }
         Returns: Json
       }
+      admin_support_latest_observation: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
       admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
+      admin_support_observation: { Args: { p_id: string }; Returns: Json }
       admin_support_order: { Args: { p_order_id: string }; Returns: Json }
       admin_support_queue: {
         Args: { p_cursor: string; p_mode: string }

@@ -23,6 +23,20 @@ UPDATE private.support_workspace_settings SET note_retention_days = <days>, upda
 
 The owner can redact a note's text (`admin_support_redact_note`); the text is cleared and the reason, time and owner are recorded. Every support read is audited by who read, what kind of read, what was found and the outcome, never by what was searched for.
 
+## Provider checks (diagnosis)
+
+With the support stage at `diagnosis` or later, staff who may inspect provider details (owner, Support) see a "Stripe check" section on each order and can ask Stripe about it. A check only reads Stripe and records the answer as an immutable observation; it changes no payment, access or order. Each person may run 5 checks a minute.
+
+The server reads Stripe and records the answer through its own database login, set in `SUPPORT_VERIFIER_DATABASE_URL`. Without it, checks report "unavailable" and nothing falls back to another connection. A deployed site refuses a local address. Database-owner steps, once per environment:
+
+1. Create the login as a member of the verifier group (the group can only claim checks and record answers):
+   `CREATE ROLE mch_support_verifier LOGIN PASSWORD '<generated>' IN ROLE mch_commerce_verifier;`
+2. Register it, naming the owner's user id: `SELECT private.commerce_verifier_register('mch_support_verifier', 'Vercel support verifier', '<owner user id>');`
+3. Set `SUPPORT_VERIFIER_DATABASE_URL` in Vercel to a pooler URL for that login, then redeploy.
+4. To stop checks at once: `SELECT private.commerce_verifier_revoke('mch_support_verifier');` Checks then fail as unavailable and record nothing.
+
+Never set `SUPPORT_PROVIDER_FIXTURE` on a deployment; it is ignored there anyway.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.
@@ -32,3 +46,5 @@ Run Phase 3 database work against the owned local project `mch-admin-support-tes
 - Replay migrations: `supabase db reset --local --workdir .superpowers/sdd/2026-10-09-admin-support/local`
 - Suites (from `my-curated-haven-web/`): `node scripts/test-admin-db.mjs --workdir .superpowers/sdd/2026-10-09-admin-support/local [suite.test.sql ...]`; `--all` runs every database suite.
 - Read local keys with `supabase status --workdir … -o env` into a file or the shell; never print or commit them.
+- Provider checks in browser tests read the local payment records instead of Stripe: set `SUPPORT_VERIFIER_DATABASE_URL` to the owned stack's database and `SUPPORT_PROVIDER_FIXTURE=local-ledger`. The fixture reader runs only without `VERCEL_ENV` and only for test-mode orders. Specs that need a verifier register the local login and remove it afterwards.
+- Run support browser specs with `--workers=1`. They switch the single support stage; two browsers running at once can restore each other's stage and leave it changed (database suite 70 then fails "support starts switched off").

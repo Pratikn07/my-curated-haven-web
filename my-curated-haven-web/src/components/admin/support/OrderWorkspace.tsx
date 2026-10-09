@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Result } from "@/lib/admin/contracts";
-import type { OrderCasesPage, OrderSupportDto, SupportRead } from "@/lib/admin/support/contracts";
+import type { OrderCasesPage, OrderSupportDto, ProviderObservation, SupportRead } from "@/lib/admin/support/contracts";
 import AdminRecordFrame from "@/components/admin/AdminRecordFrame";
 import { formatUtc } from "@/lib/admin/collections/labels";
 import { ACCESS_LABELS, ACCOUNT_LABELS, ATTEMPT_LABELS, PAYMENT_LABELS, formatMoney } from "@/lib/admin/support/labels";
 import AccessExplanation from "./AccessExplanation";
+import ProviderDiagnosis from "./ProviderDiagnosis";
 import SupportCases from "./SupportCases";
 import SupportTimeline from "./SupportTimeline";
 
@@ -12,8 +13,10 @@ import SupportTimeline from "./SupportTimeline";
  * One order as support sees it. The seven states are separate on purpose: a paid order can still lack access, and
  * an unavailable fact is shown as unavailable, never as "none" or "no".
  */
-export default function OrderWorkspace({ read, cases, canWriteCases }: {
+export default function OrderWorkspace({ read, cases, canWriteCases, diagnosis = null }: {
   read: SupportRead<OrderSupportDto>; cases: Result<OrderCasesPage>; canWriteCases: boolean;
+  /** Present only for staff who may inspect provider details while diagnosis is switched on. */
+  diagnosis?: Result<SupportRead<ProviderObservation | null>> | null;
 }) {
   const order = read.value;
   const refunds = order.refunds.length === 0 ? "None recorded"
@@ -63,6 +66,7 @@ export default function OrderWorkspace({ read, cases, canWriteCases }: {
           <div><dt>Recipe list</dt><dd>{historical.manifestHash ? `Recorded (${historical.manifestHash.slice(0, 8)})` : "Unknown"}</dd></div>
         </dl>
       </section>
+      {diagnosis ? <ProviderDiagnosis orderId={order.orderId} latest={diagnosis} canCheck /> : null}
       <AccessExplanation access={order.access} />
       <SupportCases orderId={order.orderId} cases={cases} canWrite={canWriteCases} />
       {/* Keyed by the newest event, so a refresh after a case change shows the new activity. */}

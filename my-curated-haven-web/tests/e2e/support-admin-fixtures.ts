@@ -32,6 +32,8 @@ export interface SupportFixture {
   /** Delete the customer's account, as a closed account would leave it; orders keep their principal. */
   closeCustomer(): Promise<void>;
   setNoteRetention(days: number | null): Promise<void>;
+  /** Revoke the local verifier registration (only when the fixture registered one). */
+  revokeVerifier(): Promise<void>;
   query(sql: string, args?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
   dispose(): Promise<void>;
 }
@@ -62,7 +64,12 @@ export async function setSupportStage(stage: SupportStage): Promise<SupportStage
   });
 }
 
-export async function createSupportFixture(role: SupportRole, stage: SupportStage = "inspection"): Promise<SupportFixture> {
+/**
+ * `verifier` registers this test database login as the provider verifier, so the app's verifier connection (the same
+ * loopback login) may claim checks; the registration is removed on dispose.
+ */
+export async function createSupportFixture(role: SupportRole, stage: SupportStage = "inspection",
+  options: { verifier?: boolean } = {}): Promise<SupportFixture> {
   const rand = crypto.randomBytes(3).toString("hex").toUpperCase();
   const staff = await createAdminFixture(`support-${role}`.slice(0, 12), ROLES[role]);
   const customer = await createAdminFixture("support-cust", []);
@@ -85,8 +92,12 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     await withPg(async (pg) => {
       await pg.query("UPDATE private.support_workspace_settings SET stage=$1, note_retention_days=$2 WHERE singleton",
         [originalStage, originalRetention]);
-      // Orders that a support case refers to stay (case history cannot be deleted); everything else is removed.
-      const referenced = (await pg.query("SELECT 1 FROM private.support_cases WHERE order_id = ANY($1)", [[orderId, legacyOrderId]])).rowCount;
+      if (options.verifier) {
+        await pg.query("DELETE FROM private.commerce_verifier_principals WHERE principal = current_user AND registered_by = $1", [staff.userId]);
+      }
+      // Orders that a support case or provider check refers to stay (that history cannot be deleted); the rest is removed.
+      const referenced = (await pg.query(`SELECT 1 FROM private.support_cases WHERE order_id = ANY($1)
+        UNION ALL SELECT 1 FROM private.commerce_verification_jobs WHERE order_id = ANY($1)`, [[orderId, legacyOrderId]])).rowCount;
       if (!referenced) {
         await pg.query("DELETE FROM private.payment_refunds WHERE order_id = ANY($1)", [[orderId, legacyOrderId]]);
         await pg.query("DELETE FROM private.provider_payments WHERE order_id = ANY($1)", [[orderId, legacyOrderId]]);
@@ -136,6 +147,11 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
       await pg.query("INSERT INTO public.access_entitlements(user_id,release_id,state) VALUES($1,$2,'active')", [customer.userId, releaseId]);
       await pg.query(`INSERT INTO private.collection_access_policies(release_id,source_kind,policy,approved_by,approval_reason)
         VALUES($1,'stripe_purchase','additions-v1',$2,'Synthetic support fixture')`, [releaseId, staff.userId]);
+      if (options.verifier) {
+        await pg.query(`INSERT INTO private.commerce_verifier_principals(principal,label,registered_by)
+          VALUES(current_user,'Local test verifier',$1)
+          ON CONFLICT (principal) DO UPDATE SET label=EXCLUDED.label, registered_by=EXCLUDED.registered_by, revoked_at=NULL`, [staff.userId]);
+      }
     });
   } catch (error) {
     await dispose();
@@ -157,6 +173,9 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     },
     setNoteRetention: async (days) => {
       await withPg((pg) => pg.query("UPDATE private.support_workspace_settings SET note_retention_days=$1 WHERE singleton", [days]));
+    },
+    revokeVerifier: async () => {
+      await withPg((pg) => pg.query("UPDATE private.commerce_verifier_principals SET revoked_at=now() WHERE principal=current_user"));
     },
     query: (sql, args = []) => withPg((pg) => pg.query(sql, args)),
     dispose,

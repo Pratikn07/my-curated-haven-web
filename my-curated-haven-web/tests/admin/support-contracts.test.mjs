@@ -1,8 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { decodeOperation, decodeProposal } from "../../src/lib/admin/support/decode.ts";
+import {
+  decodeDiagnosisJob, decodeLatestObservationRead, decodeObservationRead, decodeOperation, decodeProposal,
+} from "../../src/lib/admin/support/decode.ts";
 import { parseLookup } from "../../src/lib/admin/support/query.ts";
-import { OPERATION, USER, proposal, receipt } from "../fixtures/support.mjs";
+import { OPERATION, USER, paidFacts, proposal, receipt } from "../fixtures/support.mjs";
 
 test("malformed success is rejected rather than decoded as empty", () => {
   assert.throws(() => decodeProposal({ id: "x", effects: [] }));
@@ -52,4 +54,24 @@ test("lookup refuses partial, smuggled or unsupported input", () => {
     { kind: "name", value: "Buyer" },
     "buyer@synthetic.test",
   ]) assert.throws(() => parseLookup(input), undefined, JSON.stringify(input));
+});
+
+const observationRead = (over = {}) => ({ value: { id: OPERATION, orderId: USER, jobId: OPERATION, fence: 3, facts: paidFacts(),
+  complete: true, blockers: [], verifiedAt: "2026-10-09T10:00:00.123456+00:00", apiVersion: "local-ledger",
+  materialDigest: "a".repeat(64), ...over }, checkedAt: "2026-10-09T10:00:01Z", complete: true, resolverVersion: null });
+
+test("a recorded provider check decodes exactly, and an incomplete one keeps its blockers", () => {
+  assert.deepEqual(decodeObservationRead(observationRead()), observationRead());
+  const incomplete = observationRead({ complete: false, blockers: ["refunds_incomplete"] });
+  assert.deepEqual(decodeObservationRead(incomplete).value.blockers, ["refunds_incomplete"]);
+  assert.equal(decodeLatestObservationRead({ ...observationRead(), value: null }).value, null);
+  assert.deepEqual(decodeDiagnosisJob({ jobId: OPERATION }), { jobId: OPERATION });
+});
+
+test("a provider check with an extra fact, a bad blocker or a fractional amount is refused", () => {
+  assert.throws(() => decodeObservationRead(observationRead({ facts: { ...paidFacts(), capturedMinor: 15.5 } })));
+  assert.throws(() => decodeObservationRead(observationRead({ facts: { ...paidFacts(), customerEmail: "a@b.test" } })));
+  assert.throws(() => decodeObservationRead(observationRead({ blockers: ["Refunds Incomplete"] })));
+  assert.throws(() => decodeObservationRead(observationRead({ materialDigest: "abc" })));
+  assert.throws(() => decodeDiagnosisJob({ jobId: OPERATION, extra: true }));
 });

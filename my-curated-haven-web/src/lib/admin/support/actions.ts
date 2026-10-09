@@ -1,7 +1,8 @@
 "use server";
 
 import type { Result } from "../contracts";
-import type { CaseCommand, LookupResult, SupportCase, SupportHistoryPage, SupportRead } from "./contracts";
+import type { CaseCommand, LookupResult, ProviderObservation, SupportCase, SupportHistoryPage, SupportRead } from "./contracts";
+import { diagnoseSupportOrder } from "./diagnosis";
 import { InvalidLookup, parseLookup } from "./query";
 import { commandSupportCase, loadSupportHistory, lookupSupport } from "./repository";
 
@@ -43,4 +44,10 @@ export async function supportCaseAction(input: CaseCommand): Promise<Result<Supp
 export async function supportHistoryAction(orderId: string, cursor: string): Promise<Result<SupportHistoryPage>> {
   if (!UUID.test(orderId) || !CURSOR.test(cursor)) return invalid("support-history");
   return loadSupportHistory(orderId, cursor);
+}
+
+/** Ask Stripe about one order and record what it says. Repeating the same operation joins the same check. */
+export async function diagnoseOrderAction(orderId: string, operationId: string): Promise<Result<SupportRead<ProviderObservation>>> {
+  if (!UUID.test(orderId) || !UUID.test(operationId)) return invalid("support-diagnosis");
+  return diagnoseSupportOrder(orderId, operationId);
 }

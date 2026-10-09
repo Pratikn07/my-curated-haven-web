@@ -1,4 +1,6 @@
-import type { Binding, RepairEffect } from "../../payments/reconciliation/contracts";
+import type {
+  Binding, DisputeFact, FinancialFacts, ProviderObservation, RefundFact, RepairEffect,
+} from "../../payments/reconciliation/contracts";
 import type {
   AccessExplanation, CustomerSupportDto, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
@@ -266,6 +268,59 @@ const customerDto = object<CustomerSupportDto>({
   nextCursor: nullable(text(200)),
 });
 
+// Provider facts as the verifier recorded them. Provider ids may be empty when Stripe omitted them; the observation's
+// blockers already say so, and the record is still shown as recorded.
+const providerId: Decoder<string> = (v, p) => (typeof v === "string" && v.length <= 255 ? v : bad(p));
+const BLOCKER = /^[a-z][a-z0-9_]{1,63}$/;
+
+const refundFact = object<RefundFact>({
+  id: providerId,
+  paymentIntentId: providerId,
+  chargeId: providerId,
+  amountMinor: minor,
+  currency: pattern(CURRENCY),
+  status: text(64) as Decoder<RefundFact["status"]>,
+  occurredAt: timestamp,
+});
+
+const disputeFact = object<DisputeFact>({
+  id: providerId,
+  paymentIntentId: providerId,
+  chargeId: providerId,
+  amountMinor: minor,
+  currency: pattern(CURRENCY),
+  status: text(64),
+  classification: oneOf("inquiry", "formal", "unknown"),
+  deadline: nullable(timestamp),
+});
+
+const financialFacts = object<FinancialFacts>({
+  accountId: pattern(ACCOUNT),
+  mode: oneOf("test", "live"),
+  sessionId: nullable(text(300)),
+  paymentIntentId: nullable(providerId),
+  chargeId: nullable(providerId),
+  capturedMinor: nullable(minor),
+  currency: nullable(pattern(CURRENCY)),
+  paymentState: oneOf("unpaid", "processing", "paid", "failed", "unknown"),
+  paidAt: nullable(timestamp),
+  refunds: array(refundFact, 2000),
+  disputes: array(disputeFact, 2000),
+});
+
+const observation = object<ProviderObservation>({
+  id: uuid,
+  orderId: uuid,
+  jobId: uuid,
+  fence: count,
+  facts: financialFacts,
+  complete: bool,
+  blockers: array(pattern(BLOCKER), 50),
+  verifiedAt: timestamp,
+  apiVersion: text(40),
+  materialDigest: digest,
+});
+
 export function decodeLookupRead(input: unknown): SupportRead<LookupResult> {
   return read(lookupResult)(input, "lookup");
 }
@@ -310,4 +365,17 @@ export function decodeRedaction(input: unknown): { eventId: string; redactedAt: 
 
 export function decodeOrderCases(input: unknown): OrderCasesPage {
   return orderCasesPage(input, "cases");
+}
+
+export function decodeDiagnosisJob(input: unknown): { jobId: string } {
+  return object<{ jobId: string }>({ jobId: uuid })(input, "diagnosis");
+}
+
+export function decodeObservationRead(input: unknown): SupportRead<ProviderObservation> {
+  return read(observation)(input, "observation");
+}
+
+/** The order's latest observation; null when no check was ever recorded. */
+export function decodeLatestObservationRead(input: unknown): SupportRead<ProviderObservation | null> {
+  return read(nullable(observation))(input, "observation");
 }

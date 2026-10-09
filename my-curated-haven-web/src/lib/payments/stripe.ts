@@ -3,11 +3,14 @@ import { getStripeConfig } from "./config";
 
 let stripeInstance: Stripe | null = null;
 
+/** The Stripe API version every server read and write uses; provider observations record it. */
+export const STRIPE_API_VERSION = "2025-02-24.acacia" as const;
+
 export function getStripeClient(): Stripe {
   if (!stripeInstance) {
     const config = getStripeConfig();
     stripeInstance = new Stripe(config.secretKey, {
-      apiVersion: "2025-02-24.acacia" as const,
+      apiVersion: STRIPE_API_VERSION,
       appInfo: {
         name: "My Curated Haven Web",
         version: "0.1.0",

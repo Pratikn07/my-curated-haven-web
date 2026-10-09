@@ -40,6 +40,26 @@ export const QUEUE_REASONS: Record<string, string> = {
   CASE_WAITING_ON_PROVIDER: "Case waiting on Stripe",
 };
 
+/** Why a provider check is incomplete, in plain words. An unlisted code is shown as-is. */
+export const BLOCKER_LABELS: Record<string, string> = {
+  checkout_unavailable: "Stripe could not be reached",
+  provider_unavailable: "Stripe is not set up on this server",
+  session_missing: "The order has no checkout session",
+  session_order_mismatch: "The checkout session belongs to another order",
+  account_mismatch: "The Stripe account differs from the order's",
+  mode_mismatch: "Test or live mode differs from the order's",
+  session_mismatch: "The checkout session differs from the order's",
+  payment_incomplete: "Payment details are incomplete",
+  refunds_incomplete: "Not every refund could be read",
+  disputes_incomplete: "Not every dispute could be read",
+  refund_conflict: "Stripe returned conflicting refund records",
+  dispute_conflict: "Stripe returned conflicting dispute records",
+  adjustment_binding_mismatch: "A refund or dispute belongs to another payment",
+  currency_mismatch: "A refund or dispute is in another currency",
+  refund_status_unknown: "A refund has an unrecognised status",
+  dispute_status_unknown: "A dispute has an unrecognised status",
+};
+
 export function formatMoney(minor: number | null, currency: string | null): string {
   if (minor === null || currency === null) return "Unknown";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() }).format(minor / 100);
