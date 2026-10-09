@@ -82,3 +82,24 @@ test("public-to-admin navigation into collections sends nothing once admin pages
     await fixture.dispose();
   }
 });
+
+test("Home and the collection publish page send nothing once admin pages load", async ({ page }) => {
+  const fixture = await createCollectionsFixture();
+  try {
+    await fixture.setCollectionStage("publication");
+    const hits = await watchSink(page);
+    await fixture.login(page, "owner", "aal2");
+    await page.goto("/");
+    await page.waitForTimeout(1500);
+    const publicHits = hits.length;
+    expect(publicHits).toBeGreaterThan(0);
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { level: 1, name: "Home" })).toBeVisible();
+    await page.goto(`/admin/collections/${fixture.collectionId}/publish`);
+    await expect(page.getByRole("heading", { level: 1, name: "Review collection effect" })).toBeVisible();
+    await page.waitForTimeout(1000);
+    expect(hits.slice(publicHits)).toEqual([]);
+  } finally {
+    await fixture.dispose();
+  }
+});

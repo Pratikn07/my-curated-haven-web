@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import crypto from "node:crypto";
-import { createCollectionsFixture, type CollectionsFixture } from "./collections-admin-fixtures";
+import { createCollectionsFixture, type CollectionsFixture, type DraftHead } from "./collections-admin-fixtures";
 
 test.describe.configure({ mode: "serial" });
 
@@ -18,57 +18,14 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => { await f?.dispose(); });
 
-type Head = { revision_id: string; version: number; digest: string; snapshot: Record<string, unknown>;
-  base_publication_id: string | null; base_digest: string; submission_id: string | null };
+const head = () => f.head();
+const prepareDraft = (patch: Record<string, unknown>) => f.prepareDraft(patch);
+const impactToken = (revisionId: string) => f.impactToken(revisionId);
+const publishWithoutRefresh = (note: string) => f.publishWithoutRefresh(note);
 
-async function head(): Promise<Head | undefined> {
-  return (await f.query(`SELECT h.revision_id, h.version, h.submission_id, r.digest, r.snapshot, r.base_publication_id, r.base_digest
-    FROM private.collection_draft_heads h JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=$1`,
-  [f.collectionId])).rows[0] as Head | undefined;
-}
-
-/** A member reference to a recipe's current reviewed version, confirmed as fitting. */
-async function member(recipeId: string) {
-  const { rows } = await f.query(`SELECT c.slug, b.content_version, private.admin_active_hash(c.id) hash
-    FROM public.recipe_catalog c JOIN public.recipe_bodies b ON b.recipe_id=c.id WHERE c.id=$1`, [recipeId]);
-  return { recipeId, recipeSlug: rows[0].slug, contentVersion: rows[0].content_version, reviewDigest: rows[0].hash,
-    tagsDigest: "b".repeat(64), placementNote: "", fit: "accepted" };
-}
-
-/** A fully checkable private draft with `patch` applied, saved as the owner. */
-async function prepareDraft(patch: Record<string, unknown>): Promise<Head> {
-  let current = await head();
-  if (!current) {
-    await f.rpcAs("owner", "admin_collection_draft_start", { collection_id: f.collectionId, operation_id: crypto.randomUUID(),
-      reason: "Publication test" });
-    current = (await head())!;
-  }
-  const members = [await member(f.recipeIds[0]), await member(f.extraRecipes.reviewed.id)];
-  await f.rpcAs("owner", "admin_collection_draft_save", { collection_id: f.collectionId, operation_id: crypto.randomUUID(),
-    reason: "Publication test", expected_version: current.version, expected_digest: current.digest,
-    base: { publication_id: current.base_publication_id, digest: current.base_digest },
-    snapshot: { ...current.snapshot, members, ...patch }, reopen_reviewed: true });
-  return (await head())!;
-}
-
-async function impactToken(revisionId: string): Promise<string> {
-  return (await f.query("SELECT private.collection_evaluate($1,$2)#>>'{value,token}' t", [f.collectionId, revisionId])).rows[0].t as string;
-}
-
-function exact(draft: Head, token: string) {
+function exact(draft: DraftHead, token: string) {
   return { collection_id: f.collectionId, revision_id: draft.revision_id, expected_version: draft.version,
     expected_digest: draft.digest, impact_token: token };
-}
-
-/** Publish the open draft directly through the RPC, as a server that crashed before its refresh would leave it. */
-async function publishWithoutRefresh(note: string): Promise<Record<string, unknown>> {
-  const draft = await prepareDraft({ tagline: note });
-  const undecided = (await f.query("SELECT private.collection_unmapped_access($1) u", [f.collectionId])).rows[0].u as
-    { releaseId: string; sourceKind: string }[];
-  return f.rpcAs("owner", "admin_collection_publish", { ...exact(draft, await impactToken(draft.revision_id)),
-    operation_id: crypto.randomUUID(), reason: note, base: { publication_id: draft.base_publication_id, digest: draft.base_digest },
-    approve_now: true, access_decisions: undecided.map((u) => ({ release_id: u.releaseId, source_kind: u.sourceKind,
-      policy: "additions-v1" })) });
 }
 
 async function publications(): Promise<number> {

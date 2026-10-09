@@ -70,7 +70,17 @@
 .admin-console__nav {
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
+}
+
+.admin-console__nav-group {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
+}
+
+.admin-console__nav-group .admin-console__rail-label {
+  margin: 0;
 }
 
 .admin-console__nav-link {
@@ -795,6 +805,13 @@
   .admin-console__nav {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .admin-console__nav-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .admin-console__main {
@@ -1269,4 +1286,62 @@
 .admin-collection-receipts button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* Publishing Home. */
+.admin-home > .admin-record__header {
+  margin-bottom: var(--space-4);
+}
+
+.admin-home__lane + .admin-home__lane {
+  margin-top: var(--space-6);
+}
+
+.admin-home__counts,
+.admin-home__meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.admin-home__rows {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-home__rows li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.admin-home__rows li > div {
+  flex: 1 1 14rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-home__rows p {
+  margin: 0 0 var(--space-1);
+}
+
+.admin-home__title {
+  font-weight: 700;
+}
+
+.admin-home__rows a,
+.admin-home__lane > p a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
 }

@@ -29,8 +29,18 @@ export interface CollectionsFixture {
   rpcAs(role: Exclude<CollectionRole, "customer">, fn: string, command: Record<string, unknown>): Promise<Record<string, unknown>>;
   /** Record a campaign snapshot so evidence is known; restored on dispose. */
   recordCampaigns(): Promise<void>;
+  /** The open draft head, if any. */
+  head(): Promise<DraftHead | undefined>;
+  /** Save a fully checkable draft (current recipe references, fit confirmed) with `patch`, as the owner. */
+  prepareDraft(patch: Record<string, unknown>): Promise<DraftHead>;
+  impactToken(revisionId: string): Promise<string>;
+  /** Prepare and publish a draft through the RPC only, as a server that stopped before its refresh would leave it. */
+  publishWithoutRefresh(note: string): Promise<Record<string, unknown>>;
   dispose(): Promise<void>;
 }
+
+export type DraftHead = { revision_id: string; version: number; digest: string; snapshot: Record<string, unknown>;
+  base_publication_id: string | null; base_digest: string; submission_id: string | null };
 
 const IMMUTABLE: [string, string][] = [
   ["private.collection_issue_resolutions", "collection_issue_resolutions_immutable"],
@@ -209,6 +219,60 @@ export async function createCollectionsFixture(options: {
     throw error;
   }
 
+  async function rpcAs(role: Exclude<CollectionRole, "customer">, fn: string, command: Record<string, unknown>) {
+    if (!/^admin_collection_[a-z_]+$/.test(fn)) throw new Error(`Not a collection RPC: ${fn}`);
+    if (!people[role]) people[role] = await createAdminFixture(`coll-${role}`, [role]);
+    const userId = people[role]!.userId;
+    return withPg(async (pg) => {
+      await pg.query("BEGIN");
+      try {
+        await pg.query("SELECT set_config('request.jwt.claim.sub',$1,true), set_config('request.jwt.claims',$2,true)",
+          [userId, JSON.stringify({ sub: userId, aal: "aal2", role: "authenticated" })]);
+        await pg.query("SET LOCAL ROLE authenticated");
+        const { rows } = await pg.query(`SELECT public.${fn}($1::jsonb) AS result`, [command]);
+        await pg.query("COMMIT");
+        return rows[0].result as Record<string, unknown>;
+      } catch (error) {
+        await pg.query("ROLLBACK");
+        throw error;
+      }
+    });
+  }
+
+  async function head(): Promise<DraftHead | undefined> {
+    return (await withPg((pg) => pg.query(`SELECT h.revision_id, h.version, h.submission_id, r.digest, r.snapshot,
+      r.base_publication_id, r.base_digest FROM private.collection_draft_heads h
+      JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=$1`, [collectionId]))).rows[0] as DraftHead | undefined;
+  }
+
+  /** A member reference to a recipe's current reviewed version, confirmed as fitting. */
+  async function member(recipeId: string) {
+    const { rows } = await withPg((pg) => pg.query(`SELECT c.slug, b.content_version, private.admin_active_hash(c.id) hash
+      FROM public.recipe_catalog c JOIN public.recipe_bodies b ON b.recipe_id=c.id WHERE c.id=$1`, [recipeId]));
+    return { recipeId, recipeSlug: rows[0].slug, contentVersion: rows[0].content_version, reviewDigest: rows[0].hash,
+      tagsDigest: "b".repeat(64), placementNote: "", fit: "accepted" };
+  }
+
+  async function prepareDraft(patch: Record<string, unknown>): Promise<DraftHead> {
+    let current = await head();
+    if (!current) {
+      await rpcAs("owner", "admin_collection_draft_start", { collection_id: collectionId, operation_id: crypto.randomUUID(),
+        reason: "Synthetic draft" });
+      current = (await head())!;
+    }
+    const members = [await member(owner.recipeId), await member(extraRecipes.reviewed.id)];
+    await rpcAs("owner", "admin_collection_draft_save", { collection_id: collectionId, operation_id: crypto.randomUUID(),
+      reason: "Synthetic draft", expected_version: current.version, expected_digest: current.digest,
+      base: { publication_id: current.base_publication_id, digest: current.base_digest },
+      snapshot: { ...current.snapshot, members, ...patch }, reopen_reviewed: true });
+    return (await head())!;
+  }
+
+  async function impactToken(revisionId: string): Promise<string> {
+    return (await withPg((pg) => pg.query("SELECT private.collection_evaluate($1,$2)#>>'{value,token}' t",
+      [collectionId, revisionId]))).rows[0].t as string;
+  }
+
   return {
     collectionId, slug, title,
     recipeIds: [owner.recipeId],
@@ -225,31 +289,26 @@ export async function createCollectionsFixture(options: {
     async setCollectionStage(stage) {
       await setCollectionStage(stage);
     },
-    async rpcAs(role, fn, command) {
-      if (!/^admin_collection_[a-z_]+$/.test(fn)) throw new Error(`Not a collection RPC: ${fn}`);
-      if (!people[role]) people[role] = await createAdminFixture(`coll-${role}`, [role]);
-      const userId = people[role]!.userId;
-      return withPg(async (pg) => {
-        await pg.query("BEGIN");
-        try {
-          await pg.query("SELECT set_config('request.jwt.claim.sub',$1,true), set_config('request.jwt.claims',$2,true)",
-            [userId, JSON.stringify({ sub: userId, aal: "aal2", role: "authenticated" })]);
-          await pg.query("SET LOCAL ROLE authenticated");
-          const { rows } = await pg.query(`SELECT public.${fn}($1::jsonb) AS result`, [command]);
-          await pg.query("COMMIT");
-          return rows[0].result as Record<string, unknown>;
-        } catch (error) {
-          await pg.query("ROLLBACK");
-          throw error;
-        }
-      });
-    },
+    rpcAs,
     async recordCampaigns() {
       await withPg(async (pg) => {
         await pg.query(`INSERT INTO private.admin_campaign_snapshots(deployment_revision,configuration,configuration_hash)
           VALUES('synthetic-collections-review','{"campaigns":[]}','synthetic') ON CONFLICT (deployment_revision) DO NOTHING`);
         await pg.query("UPDATE private.admin_console_settings SET campaign_revision='synthetic-collections-review' WHERE singleton");
       });
+    },
+    head,
+    prepareDraft,
+    impactToken,
+    async publishWithoutRefresh(note) {
+      const draft = await prepareDraft({ tagline: note });
+      const undecided = (await withPg((pg) => pg.query("SELECT private.collection_unmapped_access($1) u", [collectionId])))
+        .rows[0].u as { releaseId: string; sourceKind: string }[];
+      return rpcAs("owner", "admin_collection_publish", { collection_id: collectionId, operation_id: crypto.randomUUID(),
+        reason: note, revision_id: draft.revision_id, expected_version: draft.version, expected_digest: draft.digest,
+        impact_token: await impactToken(draft.revision_id),
+        base: { publication_id: draft.base_publication_id, digest: draft.base_digest }, approve_now: true,
+        access_decisions: undecided.map((u) => ({ release_id: u.releaseId, source_kind: u.sourceKind, policy: "additions-v1" })) });
     },
     dispose,
   };

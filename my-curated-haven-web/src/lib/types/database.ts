@@ -1568,6 +1568,8 @@ export type Database = {
       admin_collection_review: { Args: { p_command: Json }; Returns: Json }
       admin_collection_submit: { Args: { p_command: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }
+      admin_home_continue_work: { Args: { p_limit: number }; Returns: Json }
+      admin_home_publishing_results: { Args: { p_limit: number }; Returns: Json }
       admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }
       admin_draft_save: { Args: { p_command: Json }; Returns: Json }
       admin_draft_start: {
