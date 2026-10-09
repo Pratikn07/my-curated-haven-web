@@ -40,9 +40,11 @@ export type IssueCollectionCommand = CollectionCommand & { revisionId: string; e
   expectedDigest: string; code: string; field: string | null; severity: "blocker" | "suggestion"; explanation: string };
 export type ReviewCollectionCommand = SubmitCollectionCommand & { submissionId: string;
   decision: "approve" | "changes_requested" | "reject"; resolvedIssueIds: string[] };
+export type AccessDecision = { releaseId: string; sourceKind: string; policy: "additions-v1" | "original-only" };
+export type UndecidedAccess = { releaseId: string; version: number; sourceKind: string; buyers: number };
 export type PublishCollectionCommand = CollectionCommand & { revisionId: string;
   expectedVersion: number; expectedDigest: string; base: CollectionBase;
-  impactToken: string; approveNow: boolean };
+  impactToken: string; approveNow: boolean; accessDecisions: AccessDecision[] };
 export type CollectionStatusFilter = "published" | "unpublished" | "listed" | "unlisted" | "retired";
 export type CollectionQuery = { q: string; shelf: string[]; stage: string[];
   status: CollectionStatusFilter[]; draft: boolean | null; attention: boolean; page: number; pageSize: 25 };

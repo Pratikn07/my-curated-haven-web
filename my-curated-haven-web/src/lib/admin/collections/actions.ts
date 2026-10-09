@@ -1,12 +1,12 @@
 "use server";
 
 import type {
-  CollectionCommand, CollectionSnapshot, DraftControl, IssueCollectionCommand, ReviewCollectionCommand, SaveCollectionCommand,
-  SubmitCollectionCommand,
+  CollectionCommand, CollectionSnapshot, DraftControl, IssueCollectionCommand, PublishCollectionCommand, ReviewCollectionCommand,
+  SaveCollectionCommand, SubmitCollectionCommand,
 } from "./contracts";
 import {
   controlCollectionDraft, createCollection, listCollectionRecipes, loadCollectionDetail, loadCollectionHistory,
-  raiseCollectionIssue, reviewCollection, saveCollectionDraft, startCollectionDraft, submitCollection,
+  publishCollection, raiseCollectionIssue, reviewCollection, saveCollectionDraft, startCollectionDraft, submitCollection,
 } from "./repository";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -95,4 +95,16 @@ export async function reviewCollectionAction(input: ReviewCollectionCommand) {
     if (!ready.ok) return ready;
   }
   return reviewCollection(input);
+}
+
+export async function publishCollectionAction(input: PublishCollectionCommand) {
+  if (!validExact(input) || typeof input.impactToken !== "string" || typeof input.approveNow !== "boolean"
+    || !input.base || !(input.base.publicationId === null || UUID.test(input.base.publicationId))
+    || !Array.isArray(input.accessDecisions) || !input.accessDecisions.every((d) => UUID.test(d.releaseId)
+      && typeof d.sourceKind === "string" && (d.policy === "additions-v1" || d.policy === "original-only"))) {
+    return invalid("collection-publish");
+  }
+  const ready = await readyForApproval(input.collectionId, input.revisionId);
+  if (!ready.ok) return ready;
+  return publishCollection(input);
 }

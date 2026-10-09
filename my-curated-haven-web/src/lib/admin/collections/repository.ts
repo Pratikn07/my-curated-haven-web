@@ -4,13 +4,14 @@ import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
   CatalogPage, CollectionCommand, CollectionDetail, CollectionHistoryPage, CollectionLibrary, CollectionQuery, CollectionSnapshot,
-  DraftControl, DraftResult, IssueCollectionCommand, ReviewCollectionCommand, SaveCollectionCommand, SubmitCollectionCommand,
+  CollectionReceipt, DraftControl, DraftResult, IssueCollectionCommand, PublishCollectionCommand, ReviewCollectionCommand,
+  SaveCollectionCommand, SubmitCollectionCommand, UndecidedAccess,
 } from "./contracts";
 import {
   decodeCatalogPage, decodeCollectionDetail, decodeCollectionHistory, decodeCollectionLibrary, decodeDraftResult,
-  decodeImpactResult,
+  decodeImpactResult, decodeReceipt, decodeUndecidedAccess,
 } from "./decode";
-import { controlWire, createWire, issueWire, reviewWire, saveWire, startWire, submitWire } from "./wire";
+import { controlWire, createWire, issueWire, publishWire, reviewWire, saveWire, startWire, submitWire } from "./wire";
 import { collectionReadiness } from "./readiness";
 import covers from "@/config/collection-covers.json";
 import type { CollectionImpact, CoverAsset } from "./contracts";
@@ -96,4 +97,16 @@ export async function raiseCollectionIssue(input: IssueCollectionCommand): Promi
 export async function reviewCollection(input: ReviewCollectionCommand): Promise<Result<DraftResult>> {
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_collection_review", { p_command: reviewWire(input) }), strict(decodeDraftResult), true);
+}
+
+export async function publishCollection(input: PublishCollectionCommand): Promise<Result<CollectionReceipt>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_publish", { p_command: publishWire(input) }), strict(decodeReceipt), true);
+}
+
+/** Buyer groups (origin release and access source) whose additions decision must be made at publication. */
+export async function loadUndecidedAccess(collectionId: string): Promise<Result<UndecidedAccess[]>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_access_decisions", { p_collection_id: collectionId }),
+    strict(decodeUndecidedAccess), true);
 }

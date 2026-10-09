@@ -1,6 +1,6 @@
 import type {
-  CollectionCommand, CollectionSnapshot, DraftControl, IssueCollectionCommand, ReviewCollectionCommand, SaveCollectionCommand,
-  SubmitCollectionCommand,
+  CollectionCommand, CollectionSnapshot, DraftControl, IssueCollectionCommand, PublishCollectionCommand, ReviewCollectionCommand,
+  SaveCollectionCommand, SubmitCollectionCommand,
 } from "./contracts";
 
 /**
@@ -46,4 +46,10 @@ export function issueWire(input: IssueCollectionCommand) {
 export function reviewWire(input: ReviewCollectionCommand) {
   return { ...submitWire(input), submission_id: input.submissionId, decision: input.decision,
     resolved_issue_ids: input.resolvedIssueIds };
+}
+
+export function publishWire(input: PublishCollectionCommand) {
+  return { ...submitWire(input), base: { publication_id: input.base.publicationId, digest: input.base.digest },
+    approve_now: input.approveNow,
+    access_decisions: input.accessDecisions.map((d) => ({ release_id: d.releaseId, source_kind: d.sourceKind, policy: d.policy })) };
 }

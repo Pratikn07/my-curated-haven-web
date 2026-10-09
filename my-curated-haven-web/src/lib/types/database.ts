@@ -1530,6 +1530,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_collection_access_decisions: {
+        Args: { p_collection_id: string }
+        Returns: Json
+      }
       admin_collection_catalog: { Args: { p_query: Json }; Returns: Json }
       admin_collection_create: { Args: { p_command: Json }; Returns: Json }
       admin_collection_detail: {
@@ -1552,6 +1556,7 @@ export type Database = {
       }
       admin_collection_issue: { Args: { p_command: Json }; Returns: Json }
       admin_collection_library: { Args: { p_query: Json }; Returns: Json }
+      admin_collection_publish: { Args: { p_command: Json }; Returns: Json }
       admin_collection_review: { Args: { p_command: Json }; Returns: Json }
       admin_collection_submit: { Args: { p_command: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }

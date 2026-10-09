@@ -9,6 +9,7 @@ import type {
   CollectionImpact,
   CollectionLibrary,
   CollectionReadiness,
+  CollectionReceipt,
   CollectionRevision,
   CollectionRow,
   CollectionSnapshot,
@@ -16,6 +17,7 @@ import type {
   Member,
   RecipeSummary,
   ReviewDecision,
+  UndecidedAccess,
   ReviewIssue,
 } from "./contracts";
 
@@ -209,6 +211,20 @@ export function decodeImpactResult(data: unknown): Result<Result<CollectionImpac
 
 export function decodeCatalogPage(data: unknown): Result<CatalogPage> {
   return run(catalogPage, data);
+}
+
+const receipt = object<CollectionReceipt>({
+  operationId: uuid, collectionId: uuid, revisionId: uuid, publicationId: nullable(uuid), releaseId: nullable(uuid),
+  version: positive, digest, noChange: boolean, committedAt: timestamp, refreshState: oneOf(["complete", "pending"]),
+});
+const undecided = object<UndecidedAccess>({ releaseId: uuid, version: positive, sourceKind: string, buyers: count });
+
+export function decodeReceipt(data: unknown): Result<CollectionReceipt> {
+  return run(receipt, data);
+}
+
+export function decodeUndecidedAccess(data: unknown): Result<UndecidedAccess[]> {
+  return run(array(undecided), data);
 }
 
 export function decodeDraftResult(data: unknown): Result<DraftResult> {

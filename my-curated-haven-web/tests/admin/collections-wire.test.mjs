@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { controlWire, createWire, reviewWire, saveWire, startWire } from "../../src/lib/admin/collections/wire.ts";
+import { controlWire, createWire, publishWire, reviewWire, saveWire, startWire } from "../../src/lib/admin/collections/wire.ts";
 import { decodeDraftResult } from "../../src/lib/admin/collections/decode.ts";
 
 const ID = "93000000-0000-0000-0000-000000000001";
@@ -36,4 +36,13 @@ test("review commands name the exact revision, submission and evidence token", (
     collection_id: ID, operation_id: OP, reason: "Looks right", revision_id: ID, expected_version: 3,
     expected_digest: "d".repeat(64), impact_token: "t", submission_id: OP, decision: "approve", resolved_issue_ids: [OP],
   });
+});
+
+test("publish commands carry the base, the one-step flag and explicit buyer decisions", () => {
+  const wire = publishWire({ collectionId: ID, operationId: OP, reason: "Publish", revisionId: ID, expectedVersion: 2,
+    expectedDigest: "d".repeat(64), impactToken: "t", base: { publicationId: null, digest: "e".repeat(64) }, approveNow: true,
+    accessDecisions: [{ releaseId: OP, sourceKind: "native_legacy", policy: "additions-v1" }] });
+  assert.deepEqual(wire.base, { publication_id: null, digest: "e".repeat(64) });
+  assert.equal(wire.approve_now, true);
+  assert.deepEqual(wire.access_decisions, [{ release_id: OP, source_kind: "native_legacy", policy: "additions-v1" }]);
 });

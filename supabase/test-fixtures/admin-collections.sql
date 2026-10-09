@@ -152,3 +152,24 @@ $$;
 -- Task 11: what the collection page would send as its checkout expectation right now.
 CREATE FUNCTION pg_temp.collection_checkout_expectation(p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001')
 RETURNS jsonb LANGUAGE sql AS $$ SELECT private.collection_sellable(p_collection) - 'offer' - 'memberIds' $$;
+
+-- Task 12: make a collection's head fully ready (campaigns recorded, current references, fit confirmed).
+CREATE FUNCTION pg_temp.collection_make_ready(p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001',
+  p_patch jsonb DEFAULT '{}') RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+ INSERT INTO private.admin_campaign_snapshots(deployment_revision,configuration,configuration_hash)
+ VALUES('synthetic-deploy','{"campaigns":[]}','h') ON CONFLICT (deployment_revision) DO NOTHING;
+ UPDATE private.admin_console_settings SET campaign_revision='synthetic-deploy';
+ PERFORM pg_temp.collection_cmd(1,'admin_collection_draft_save',pg_temp.collection_save_command(p_collection,
+   jsonb_build_object('members',pg_temp.collection_current_members(p_collection,'accepted')) || p_patch)
+   || '{"reopen_reviewed":true}'::jsonb);
+END $$;
+
+-- A publish command for the current head with fresh evidence.
+CREATE FUNCTION pg_temp.collection_publish_command(p_approve_now boolean DEFAULT true,
+  p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001', p_decisions jsonb DEFAULT '[]') RETURNS jsonb LANGUAGE sql AS $$
+ SELECT pg_temp.collection_submit_command(p_collection) || jsonb_build_object('reason','Synthetic publish',
+  'base',jsonb_build_object('publication_id',r.base_publication_id,'digest',r.base_digest),
+  'approve_now',p_approve_now,'access_decisions',p_decisions)
+ FROM private.collection_draft_heads h JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=p_collection
+$$;
