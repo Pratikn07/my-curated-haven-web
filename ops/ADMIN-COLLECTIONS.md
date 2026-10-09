@@ -4,7 +4,7 @@ Phase 2 adds private collection drafts, human review and publication to the admi
 
 Publication stays disabled until every coupled gate in `docs/implementation/admin-collections/GATES.md` passes: buyer access (A5–A7), checkout reservation (A8), atomic publication (A11), public reader cutover and the owner walkthrough (A12). Enabling it with the old release-only reader or slug-only checkout is unsafe.
 
-Sections below are filled in by the tasks that own them: catalog import (Task 4), source cutover (Task 13), publication and refresh recovery (Task 14), operator SQL (Task 16) and the gated release steps (Task 18).
+Sections below are filled in by the tasks that own them: catalog import (Task 4), source cutover (Task 13), publication and refresh recovery (Task 14), recipe corrections and tags (Task 15), operator SQL (Task 16) and the gated release steps (Task 18).
 
 ## Catalog import (Task 4)
 
@@ -46,6 +46,18 @@ FROM private.collection_refresh_jobs WHERE state <> 'complete' ORDER BY created_
 ```
 
 A job with 10 attempts is no longer claimed; check the cause (`error_ref`) first, then reset `attempts` deliberately before retrying from the workspace. History offers "Copy into new draft" for earlier publications; the copy keeps every recipe buyers own today and goes through review again.
+
+## Recipe corrections and tags (Task 15)
+
+A recipe people have bought (sealed release, live offer on sale, pending live checkout or live payment) can only change through a correction. On the recipe's publish page the owner or a publisher sees "Correction to a purchased recipe", the collections it reaches and any private collection draft that will need a new review, ticks the acknowledgement and uses "Publish correction". The database (`admin_recipe_correct`) requires the same recipe identity, an exactly approved revision, the current impact token and a fresh image check; campaign promises still block. It archives the previous complete snapshot with reason, authoriser, executor and affected releases. It never changes collection membership, releases, offers, prices or orders. Emergency withdrawal stays owner-only; a withdrawn recipe comes back through a reviewed correction.
+
+Reviewed tags live in `private.recipe_tag_versions`, one row per recipe content version, with the vocabulary in `private.recipe_tag_categories` and `private.recipe_tag_values` (seeded by migration from `recipe-tags.json`). Until a recipe's tags are imported its snapshot has no tags and nothing changes. After import, tags are edited in the recipe editor from the vocabulary only, reviewed with the rest of the snapshot, and each publication or correction records its version's tags.
+
+Tag import, run from `my-curated-haven-web/` against the named database:
+
+1. Dry run (default): `node scripts/admin-recipe-tags-import.mjs --db-url-env <ENV_NAME> --out tags-report.json`. The report lists each recipe as `import`, `unchanged`, `different` (already has reviewed tags; change it through review), `missing_recipe`, `missing_body` or `invalid`, and names open recipe drafts and collection drafts that include it.
+2. The owner reviews the report. Importing changes each imported recipe's active hash: open recipe drafts must rebase and collection drafts must update their recipe references before review. Run the tag import before the collection import where possible.
+3. Apply: `node scripts/admin-recipe-tags-import.mjs --db-url-env <ENV_NAME> --apply-private --report tags-report.json --authoriser <owner-uuid> --reason "<why>"`. It refuses a report that no longer matches the source and database, records tags only for current versions without tags, with import provenance, and writes one audit entry per recipe.
 
 ## Local verification stack
 

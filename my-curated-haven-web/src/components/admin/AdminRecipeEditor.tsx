@@ -4,6 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import type { Base, RecipeSnapshot, Revision } from "@/lib/admin/contracts";
 import { diffSnapshots } from "@/lib/admin/snapshot";
+import { tagLabel, type TagCategory } from "@/lib/admin/recipe-tags";
 import {
   rebaseDraftAction,
   refreshDraftAction,
@@ -46,6 +47,44 @@ function withBody(prev: RecipeSnapshot, patch: Record<string, unknown>): RecipeS
   return { ...prev, body: { ...prev.body, ...patch } as RecipeSnapshot["body"] };
 }
 
+type Tags = NonNullable<RecipeSnapshot["tags"]>;
+
+/** Reviewed global tags, chosen from the existing vocabulary only. Absent until the recipe's tags are imported. */
+function TagFields({ tags, vocabulary, onChange }: {
+  tags: RecipeSnapshot["tags"];
+  vocabulary: TagCategory[] | null;
+  onChange: (tags: Tags) => void;
+}) {
+  if (tags === undefined) return <p>Tags have not been imported for this recipe yet.</p>;
+  if (!vocabulary) return <p role="status">The tag vocabulary is unavailable, so tags cannot be changed right now.</p>;
+  return <fieldset className="admin-editor__tags">
+    <legend>Tags</legend>
+    <p>Tags belong to the recipe: a change applies in every collection that includes it.</p>
+    {vocabulary.map((category) => {
+      const value = tags[category.category];
+      if (!category.multiple) {
+        return <label key={category.category}>{tagLabel(category.category)}
+          <select value={typeof value === "string" ? value : ""}
+            onChange={(e) => onChange({ ...tags, [category.category]: e.target.value || null })}>
+            <option value="">None</option>
+            {category.values.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </label>;
+      }
+      const list = Array.isArray(value) ? value : [];
+      return <fieldset key={category.category} className="admin-editor__tag-group">
+        <legend>{tagLabel(category.category)}</legend>
+        {category.values.map((option) => <label key={option}>
+          <input type="checkbox" checked={list.includes(option)}
+            onChange={(e) => onChange({ ...tags, [category.category]: e.target.checked
+              ? [...list, option] : list.filter((item) => item !== option) })} />
+          {option}
+        </label>)}
+      </fieldset>;
+    })}
+  </fieldset>;
+}
+
 function asJson(value: unknown): import("@/lib/types/database").Json {
   return value as import("@/lib/types/database").Json;
 }
@@ -55,11 +94,13 @@ export default function AdminRecipeEditor({
   active,
   base,
   returnTo,
+  vocabulary,
 }: {
   initial: Revision;
   active: RecipeSnapshot;
   base: Base;
   returnTo: string;
+  vocabulary: TagCategory[] | null;
 }) {
   const [candidate, setCandidate] = useState<RecipeSnapshot>(() =>
     JSON.parse(JSON.stringify(initial.snapshot))
@@ -330,6 +371,9 @@ export default function AdminRecipeEditor({
           })
         }
       />
+
+      <TagFields tags={candidate.tags} vocabulary={vocabulary}
+        onChange={(tags) => setCandidate((prev) => ({ ...prev, tags }))} />
 
       {candidate.body ? (
         <>

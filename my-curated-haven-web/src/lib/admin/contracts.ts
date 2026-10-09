@@ -30,7 +30,9 @@ export type RecipeSnapshot = { recipeId: string; slug: string;
     allergenReviewState: "unknown" | "reviewed_listed" | "reviewed_no_allergens";
     allergens: string[] | null; storageNotes: string | null };
   image: { path: string; alt: string | null; description: string | null;
-    objectId: string | null; objectVersion: string | null } };
+    objectId: string | null; objectVersion: string | null };
+  /** Reviewed global tags; absent until the recipe's tags are imported (Phase 2). */
+  tags?: Record<string, string[] | string | null> };
 export type Base = { contentVersion: number | null; activeHash: string };
 export type Revision = { id: string; draftId: string; recipeId: string; version: number;
   digest: string; base: Base; state: "draft" | "submitted" | "approved" | "changes_requested"

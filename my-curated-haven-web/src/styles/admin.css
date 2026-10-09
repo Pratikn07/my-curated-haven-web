@@ -1345,3 +1345,43 @@
   font-weight: 700;
   text-decoration: underline;
 }
+
+/* Reviewed recipe tags in the editor. */
+.admin-editor__tags {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  min-width: 0;
+}
+
+.admin-editor__tags > label {
+  display: grid;
+  gap: var(--space-1);
+  font-weight: 700;
+}
+
+.admin-editor__tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.admin-editor__tag-group > legend {
+  width: 100%;
+  margin-bottom: var(--space-1);
+  font-weight: 700;
+}
+
+.admin-editor__tag-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.75rem;
+}

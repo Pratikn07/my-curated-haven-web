@@ -109,3 +109,35 @@ test("the correction notice fits a 320px screen", async ({ page }) => {
   await expect(page.getByRole("region", { name: "Correction to a purchased recipe" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
+
+test("imported tags are edited from the vocabulary and the preview shows every collection they reach", async ({ page }) => {
+  // Close the approved draft left by the campaign case (Phase 1 has no discard), then import tags for the recipe.
+  await f.query(`UPDATE private.recipe_drafts SET lifecycle='superseded' WHERE recipe_id=$1 AND workflow_schema=1
+    AND lifecycle IN ('draft','submitted','approved','changes_requested','rejected')`, [recipeId]);
+  const tags = { stage: ["6-8m"], meal: ["breakfast"], goal: [], practical: ["freezes"], free_from: ["nut-free"],
+    occasion: [], texture: "puree" };
+  const imported = await f.query(`SELECT private.recipe_tags_import(jsonb_build_object('authoriser',$1::uuid,
+    'operationId',gen_random_uuid(),'reason','Synthetic tag import','recipes',jsonb_build_array(jsonb_build_object(
+    'slug',$2::text,'tags',$3::jsonb,'sourceDigest',repeat('d',64))))) r`, [f.ownerId, slug, JSON.stringify(tags)]);
+  expect((imported.rows[0].r as { imported: string[] }).imported).toEqual([slug]);
+
+  await f.login(page, "owner", "aal2");
+  await page.goto(`/admin/recipes/${recipeId}/edit`);
+  await expect(page.getByRole("status", { name: "" }).filter({ hasText: "Editor ready" })).toBeVisible();
+  const editorTags = page.getByRole("group", { name: "Tags" });
+  await expect(editorTags.getByRole("group", { name: "Meal" }).getByLabel("breakfast")).toBeChecked();
+  await editorTags.getByLabel("Texture").selectOption("mash");
+  await page.getByLabel("Reason").fill("Correct the texture tag");
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Saved at" })).toBeVisible();
+  const saved = await f.query(`SELECT r.snapshot#>>'{tags,texture}' texture FROM private.recipe_drafts d
+    JOIN private.recipe_revisions r ON r.id=d.current_revision_id WHERE d.recipe_id=$1 AND d.workflow_schema=1
+      AND d.lifecycle='draft'`, [recipeId]);
+  expect(saved.rows[0].texture).toBe("mash");
+
+  await page.goto(`/admin/recipes/${recipeId}/preview`);
+  const summary = page.getByRole("region", { name: "Change summary" });
+  await expect(summary.getByRole("list", { name: "Changed fields" })).toContainText("Tags · Texture");
+  await expect(summary.getByRole("note")).toContainText(
+    `Tags belong to the recipe, so this change applies in every collection that includes it: ${f.title}.`);
+});
