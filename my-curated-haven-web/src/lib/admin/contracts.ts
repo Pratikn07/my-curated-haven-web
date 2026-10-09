@@ -5,7 +5,8 @@ export type Permission = "recipe.read" | "recipe.edit" | "recipe.review"
   | "collection.read" | "collection.edit" | "collection.review" | "collection.publish";
 export type ConsoleStage = "disabled" | "inspection" | "editing" | "publication";
 export type AdminCode = "AUTH_REQUIRED" | "MFA_REQUIRED" | "DENIED" | "DISABLED"
-  | "INVALID" | "NOT_FOUND" | "CONFLICT" | "UNAVAILABLE" | "BLOCKED";
+  | "INVALID" | "NOT_FOUND" | "CONFLICT" | "UNAVAILABLE" | "BLOCKED"
+  | "STALE" | "RATE_LIMITED" | "OUTCOME_UNKNOWN";
 export type Result<T> = { ok: true; value: T }
   | { ok: false; code: AdminCode; reference: string; fields?: Record<string, string> };
 export type Operator = { id: string; email: string; roles: AdminRole[]; permissions: Permission[] };
