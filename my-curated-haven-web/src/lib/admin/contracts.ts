@@ -1,7 +1,8 @@
 import type { Json } from "@/lib/types/database";
 export type AdminRole = "owner" | "viewer" | "editor" | "reviewer" | "publisher";
 export type Permission = "recipe.read" | "recipe.edit" | "recipe.review"
-  | "recipe.publish" | "recipe.withdraw" | "recipe.emergency_withdraw" | "team.manage";
+  | "recipe.publish" | "recipe.withdraw" | "recipe.emergency_withdraw" | "team.manage"
+  | "collection.read" | "collection.edit" | "collection.review" | "collection.publish";
 export type ConsoleStage = "disabled" | "inspection" | "editing" | "publication";
 export type AdminCode = "AUTH_REQUIRED" | "MFA_REQUIRED" | "DENIED" | "DISABLED"
   | "INVALID" | "NOT_FOUND" | "CONFLICT" | "UNAVAILABLE" | "BLOCKED";

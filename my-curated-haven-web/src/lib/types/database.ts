@@ -202,6 +202,96 @@ export type Database = {
           },
         ]
       }
+      collection_publication_projection: {
+        Row: {
+          availability: string
+          cloth: string
+          collection_id: string
+          cover: Json | null
+          for_when: string
+          listing_state: string
+          members: Json
+          publication_id: string
+          published_at: string
+          published_count: number
+          refresh: string
+          release_id: string | null
+          series_key: string | null
+          series_volume: number | null
+          shelf: string
+          slug: string
+          sort_order: number
+          stage_max: number | null
+          stage_min: number | null
+          story: string
+          tagline: string
+          title: string
+        }
+        Insert: {
+          availability: string
+          cloth: string
+          collection_id: string
+          cover?: Json | null
+          for_when: string
+          listing_state: string
+          members?: Json
+          publication_id: string
+          published_at: string
+          published_count: number
+          refresh: string
+          release_id?: string | null
+          series_key?: string | null
+          series_volume?: number | null
+          shelf: string
+          slug: string
+          sort_order: number
+          stage_max?: number | null
+          stage_min?: number | null
+          story: string
+          tagline: string
+          title: string
+        }
+        Update: {
+          availability?: string
+          cloth?: string
+          collection_id?: string
+          cover?: Json | null
+          for_when?: string
+          listing_state?: string
+          members?: Json
+          publication_id?: string
+          published_at?: string
+          published_count?: number
+          refresh?: string
+          release_id?: string | null
+          series_key?: string | null
+          series_volume?: number | null
+          shelf?: string
+          slug?: string
+          sort_order?: number
+          stage_max?: number | null
+          stage_min?: number | null
+          story?: string
+          tagline?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_publication_projection_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: true
+            referencedRelation: "recipe_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_publication_projection_release_id_fkey"
+            columns: ["release_id"]
+            isOneToOne: false
+            referencedRelation: "collection_releases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_recipes: {
         Row: {
           position: number
@@ -1440,6 +1530,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_collection_catalog: { Args: { p_query: Json }; Returns: Json }
+      admin_collection_detail: {
+        Args: { p_collection_id: string }
+        Returns: Json
+      }
+      admin_collection_history: {
+        Args: { p_collection_id: string; p_cursor?: string }
+        Returns: Json
+      }
+      admin_collection_library: { Args: { p_query: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }
       admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }
       admin_draft_save: { Args: { p_command: Json }; Returns: Json }
