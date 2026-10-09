@@ -15,6 +15,97 @@ ALTER TABLE private.recipe_active_archives
  ADD COLUMN executor_id text,
  ADD COLUMN affected_releases jsonb;
 
+-- Phase 1's recipe usage, without the signed-in check, so the restricted operator channel (Task 16) can
+-- compute the same evidence. The browser read keeps its check and returns the same value.
+CREATE FUNCTION private.recipe_usage(p_recipe_id uuid) RETURNS jsonb
+LANGUAGE plpgsql STABLE SET search_path = '' AS $$
+DECLARE
+  slots int[];
+  rels jsonb;
+  recipe_slug text;
+  camp_rev text;
+  camp_cfg jsonb;
+  camps jsonb := '[]'::jsonb;
+  source_rev text;
+  campaign jsonb;
+  campaign_slugs jsonb;
+  valid_campaigns boolean := false;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM public.recipe_catalog WHERE id = p_recipe_id) THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'ADM_INVALID';
+  END IF;
+  SELECT slug INTO recipe_slug FROM public.recipe_catalog WHERE id = p_recipe_id;
+  SELECT coalesce(array_agg(s.slot ORDER BY s.slot), '{}') INTO slots
+    FROM public.free_recipe_slots s WHERE s.recipe_id = p_recipe_id;
+  SELECT coalesce(jsonb_agg(jsonb_build_object(
+    'id', rel.id, 'collectionId', rel.collection_id, 'title', col.title,
+    'version', rel.version, 'state', rel.state,
+    'sealed', rel.state IN ('sealed', 'retired'),
+    'liveOffer', EXISTS (SELECT 1 FROM private.commercial_offers o
+      WHERE o.release_id = rel.id AND o.provider_mode = 'live' AND o.sale_enabled),
+    'pendingLiveAttempt', EXISTS (SELECT 1 FROM private.purchase_orders po
+      JOIN private.commercial_offers o ON o.id = po.offer_id
+      WHERE po.release_id = rel.id AND o.provider_mode = 'live'
+        AND po.attempt_state IN ('creating', 'creation_unknown', 'open', 'processing', 'review')),
+    'historicalLivePayment', EXISTS (SELECT 1 FROM private.provider_payments pay
+      JOIN private.purchase_orders po ON po.id = pay.order_id
+      JOIN private.commercial_offers o ON o.id = po.offer_id
+      WHERE po.release_id = rel.id AND o.provider_mode = 'live' AND pay.captured_amount > 0),
+    'testActivity', EXISTS (SELECT 1 FROM private.purchase_orders po
+      JOIN private.commercial_offers o ON o.id = po.offer_id
+      WHERE po.release_id = rel.id AND o.provider_mode = 'test'))
+    ORDER BY col.title, rel.version), '[]'::jsonb)
+    INTO rels
+    FROM public.collection_recipes cr
+    JOIN public.collection_releases rel ON rel.id = cr.release_id
+    JOIN public.recipe_collections col ON col.id = rel.collection_id
+    WHERE cr.recipe_id = p_recipe_id;
+  SELECT s.campaign_revision, a.configuration INTO camp_rev, camp_cfg
+  FROM private.admin_console_settings s
+  LEFT JOIN private.admin_campaign_snapshots a
+    ON a.deployment_revision = s.campaign_revision
+  WHERE s.singleton;
+  IF camp_rev IS NOT NULL AND jsonb_typeof(camp_cfg) = 'object' THEN
+    IF jsonb_typeof(camp_cfg->'campaigns') = 'array' THEN
+      valid_campaigns := true;
+      FOR campaign IN SELECT value FROM jsonb_array_elements(camp_cfg->'campaigns') LOOP
+        campaign_slugs := private.admin_campaign_recipe_slugs(campaign);
+        IF campaign_slugs IS NULL THEN
+          valid_campaigns := false;
+          EXIT;
+        END IF;
+        IF coalesce(campaign->>'status', 'published') = 'published'
+          AND campaign_slugs ? recipe_slug THEN
+          camps := camps || jsonb_build_array(jsonb_build_object(
+            'slug', campaign->>'slug', 'status', 'published',
+            'recipeSlugs', campaign_slugs,
+            'promisedCount', jsonb_array_length(campaign_slugs),
+            'deploymentRevision', camp_rev));
+        END IF;
+      END LOOP;
+      IF valid_campaigns THEN
+        source_rev := camp_rev;
+      ELSE
+        camps := '[]'::jsonb;
+      END IF;
+    END IF;
+  END IF;
+  RETURN jsonb_build_object(
+    'checkedAt', now(),
+    'sourceRevision', source_rev,
+    'freeSlots', to_jsonb(slots),
+    'releases', rels,
+    'campaigns', camps
+  );
+END $$;
+
+CREATE OR REPLACE FUNCTION public.admin_recipe_usage(p_recipe_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+BEGIN
+  PERFORM private.admin_assert('recipe.read', 'inspection');
+  RETURN private.recipe_usage(p_recipe_id);
+END $$;
+
 -- Collections that use a recipe: any release, the current publication or an open draft. UUID order is
 -- the shared lock order.
 CREATE FUNCTION private.recipe_collection_ids(p_recipe_id uuid) RETURNS uuid[]
@@ -59,6 +150,7 @@ LANGUAGE plpgsql SET search_path='' AS $$
 DECLARE
  actor uuid := (p_context->>'human_authoriser')::uuid;
  executor text := p_context->>'executor_id';
+ operator_run boolean := coalesce(p_context->>'executor_type','human') = 'operator';
  cmd_recipe uuid; op_id uuid; rev_id uuid; reason text;
  head private.recipe_drafts; current jsonb; candidate jsonb; receipt jsonb; pub text; pub_before text;
  usage jsonb; base jsonb; token text; snap_cfg jsonb; camp_rev text; asset_check jsonb;
@@ -90,12 +182,14 @@ BEGIN
  IF NOT FOUND OR pub_before NOT IN ('published','withdrawn') THEN
   RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
  END IF;
- -- A replay of a committed operation returns its receipt before anything else is compared.
- receipt := private.admin_begin_operation(actor, op_id, 'recipe.correct', cmd_recipe,
-  jsonb_build_object('recipe_id',cmd_recipe,'reason',reason,'revision_id',rev_id,
+ -- A replay of a committed operation returns its receipt before anything else is compared. Browser runs use
+ -- Phase 1's ledger (keyed by the signed-in human); operator runs use the executor-keyed collection ledger.
+ receipt := jsonb_build_object('recipe_id',cmd_recipe,'reason',reason,'revision_id',rev_id,
    'expected_version',p_command->'expected_version','expected_digest',p_command->>'expected_digest',
    'base',p_command->'base','impact_token',p_command->>'impact_token','correction_kind','same_recipe',
-   'acknowledge_global_impact',true,'executor_id',executor));
+   'acknowledge_global_impact',true,'executor_id',executor);
+ receipt := CASE WHEN operator_run THEN private.collection_begin_operation(executor, op_id, 'recipe.correct', NULL, receipt)
+   ELSE private.admin_begin_operation(actor, op_id, 'recipe.correct', cmd_recipe, receipt) END;
  IF receipt IS NOT NULL THEN RETURN receipt; END IF;
  SELECT * INTO head FROM private.recipe_drafts
   WHERE recipe_id=cmd_recipe AND workflow_schema=1
@@ -151,7 +245,7 @@ BEGIN
  END IF;
 
  -- The same impact evidence and token as ordinary publication.
- usage := public.admin_recipe_usage(cmd_recipe);
+ usage := private.recipe_usage(cmd_recipe);
  IF usage->>'sourceRevision' IS NULL THEN RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_BLOCKED'; END IF;
  SELECT jsonb_build_object('contentVersion',b.content_version,'activeHash',private.admin_active_hash(cmd_recipe)), b.content_version
   INTO base, old_version
@@ -210,7 +304,9 @@ BEGIN
  VALUES (actor, 'recipe.correct', cmd_recipe, rev_id, current->>'digest', old_version::text, new_version::text, op_id, reason, 'success');
  receipt := jsonb_build_object('operationId',op_id,'recipeId',cmd_recipe,'revisionId',rev_id,'version',head.working_version,
   'digest',current->>'digest','noChange',false,'committedAt',now(),'publication',pub);
- PERFORM private.admin_finish_operation(actor, op_id, receipt);
+ IF operator_run THEN PERFORM private.collection_finish_operation(executor, op_id, receipt);
+ ELSE PERFORM private.admin_finish_operation(actor, op_id, receipt);
+ END IF;
  RETURN receipt;
 END $$;
 
@@ -262,6 +358,7 @@ BEGIN
   RETURN receipts;
 END $$;
 
-REVOKE ALL ON FUNCTION private.recipe_collection_ids(uuid), private.recipe_correct_core(jsonb,jsonb) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION private.recipe_usage(uuid), private.recipe_collection_ids(uuid), private.recipe_correct_core(jsonb,jsonb)
+ FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_recipe_correct(jsonb), public.admin_recipe_correction_impact(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_recipe_correct(jsonb), public.admin_recipe_correction_impact(uuid) TO authenticated;

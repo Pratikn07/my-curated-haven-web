@@ -59,6 +59,32 @@ Tag import, run from `my-curated-haven-web/` against the named database:
 2. The owner reviews the report. Importing changes each imported recipe's active hash: open recipe drafts must rebase and collection drafts must update their recipe references before review. Run the tag import before the collection import where possible.
 3. Apply: `node scripts/admin-recipe-tags-import.mjs --db-url-env <ENV_NAME> --apply-private --report tags-report.json --authoriser <owner-uuid> --reason "<why>"`. It refuses a report that no longer matches the source and database, records tags only for current versions without tags, with import provenance, and writes one audit entry per recipe.
 
+## Operator channel (Task 16)
+
+An agent can prepare and publish a collection update, or a recipe correction, through its own database login instead of the browser. It never uses a service-role key and never sets browser identity claims. The database checks three things: the login is a registered operator, the named human holds the authority now, and the proposal is exactly the current one. It does not check that the human really said yes. That is why every attestation records the evidence reference, an optional excerpt (at most 500 characters), the time the question was asked and the operator who recorded it. Browser MFA rules are unchanged.
+
+Registration is a reviewed manual step by the database owner; no migration ever registers a real login:
+
+```sql
+CREATE ROLE agent_login LOGIN PASSWORD '<generated, stored in the operator secret store>';
+GRANT mch_collection_operator TO agent_login;
+SELECT private.collection_operator_register('agent_login', 'Agent label', '<owner user uuid>');
+-- To stop it:
+SELECT private.collection_operator_revoke('agent_login');
+```
+
+`mch_collection_operator` has no login, no table access and execute rights on six procedures only: `collection_operator_prepare`, `collection_operator_preview`, `recipe_operator_preview`, `collection_operator_attest`, `collection_operator_publish` and `recipe_operator_correct`. The operator is the database session user; `SET ROLE` does not change it, so an unregistered or revoked login is refused even inside the group.
+
+Call sequence with `scripts/admin-collections-operator.mjs` (the connection string names the operator login):
+
+1. Optional preparation for a named editor: `private.collection_operator_prepare('{"action":"start"|"save","human_id":…,…}')` uses the same draft cores and validation as the editor. History records the human as `saved_by` and `operator:<login>` as executor.
+2. `preview --collection <id> --out proposal.json` (or `preview-recipe --recipe <id>`). It prints readiness, buyer groups without an additions decision and the exact question to ask: "Approve and publish this update to <collection>?"
+3. The agent asks the human exactly that question and records where they answered.
+4. `attest --proposal proposal.json --human <uuid> --evidence-ref <ref> --proposed-at <time asked> --reason <why> [--evidence-excerpt …] [--approve-now] [--decision release:source:policy …]`. The human must currently hold `collection.publish` (and `collection.review` with `--approve-now`) or `recipe.publish`, and every undecided buyer group needs a decision. Returns the authorisation id, valid for 30 minutes and only for the operator that recorded it.
+5. `publish --authorisation <id>` or `correct --authorisation <id>`. The human's authority, the stages and the exact candidate, base and evidence are checked again, then the shared publication or correction core runs. The attestation is consumed with the receipt; repeating the same `--operation` returns that receipt, and a different operation is a conflict.
+
+History keeps the three identities apart: the human authoriser, the operator executor (`operator:<login>`) and the attestation id on the review decision. The operator cannot refresh the public pages; the receipt shows "Refresh pending" until someone with publish access uses Retry refresh in the workspace or the pages revalidate on their hourly schedule.
+
 ## Local verification stack
 
 Run Phase 2 database work against the owned local project `mch-admin-collections-test`, never the default stack (54321/54322) or the Phase 1 stack (54340–54349).
