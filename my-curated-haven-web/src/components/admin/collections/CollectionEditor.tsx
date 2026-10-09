@@ -142,6 +142,8 @@ export default function CollectionEditor({ detail, covers, returnTo }: {
       <h1>Edit private draft: {revision.snapshot.title || detail.identity.title}</h1>
       <p>{workingLabel(revision.state)} · revision {revision.version} · nothing here is public until it is published.</p>
       <p role="status" aria-label="Save status" aria-live="polite" className="admin-editor__status">{status}</p>
+      {!dirty && !pending ? <Link href={`/admin/collections/${detail.collectionId}/preview?returnTo=${encodeURIComponent(returnTo)}`}
+        className="admin-editor__preview-link">Preview &amp; changes</Link> : null}
 
       {conflict ? (
         <section aria-labelledby="collection-conflict" className="admin-collection__section admin-collection__conflict">
@@ -215,6 +217,7 @@ export default function CollectionEditor({ detail, covers, returnTo }: {
       </fieldset>
 
       <CollectionContents members={candidate.members} onChange={(members) => patch({ members })} titles={titles}
+        staleSlugs={detail.readiness.checks.filter((c) => c.code === "RECIPE_CURRENT" && c.state === "fail").map((c) => c.scope)}
         onTitle={(id, title) => setTitles((prev) => new Map(prev).set(id, title))} protectedIds={protectedIds}
         protectionKnown={detail.impact.ok} publishedIds={publishedIds} disabled={!hydrated || pending} />
 

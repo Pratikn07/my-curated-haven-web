@@ -30,7 +30,10 @@ export default function CollectionDraftActions({ collectionId, hasDraft, hasPubl
     setMessage(`Could not prepare a draft (${result.code}, reference ${result.reference}). Try again.`);
   }
 
-  if (hasDraft) return <Link href={editHref}>Edit private draft</Link>;
+  if (hasDraft) return <div className="admin-workspace-action">
+    <Link href={editHref}>Edit private draft</Link>
+    <Link href={`/admin/collections/${collectionId}/preview?returnTo=${encodeURIComponent(returnTo)}`}>Preview &amp; changes</Link>
+  </div>;
   if (!hasPublication) return <p>This collection has nothing published to start from.</p>;
   return <div className="admin-workspace-action">
     <p>Prepare a private draft from what is live. Nothing changes for visitors or buyers until it is published.</p>

@@ -1103,3 +1103,60 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+.admin-collection-preview > .admin-record__header {
+  margin-bottom: var(--space-4);
+}
+
+.admin-collection__preview-nav,
+.admin-workspace-action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.admin-collection__preview-nav a,
+.admin-workspace-action a {
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.admin-collection__changes {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-collection__changes dt {
+  font-weight: 700;
+}
+
+.admin-collection__changes dd {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-collection__before {
+  color: var(--text-muted);
+}
+
+.admin-collection__private-banner,
+.admin-collection__stale {
+  padding: var(--space-3);
+  border: 1px solid var(--action);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.admin-collection__stale p {
+  margin: 0 0 var(--space-2);
+}
+
+.admin-collection__preview-page .cl {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}

@@ -8,8 +8,12 @@ import type {
 } from "./contracts";
 import {
   decodeCatalogPage, decodeCollectionDetail, decodeCollectionHistory, decodeCollectionLibrary, decodeDraftResult,
+  decodeImpactResult,
 } from "./decode";
 import { controlWire, createWire, saveWire, startWire } from "./wire";
+import { collectionReadiness } from "./readiness";
+import covers from "@/config/collection-covers.json";
+import type { CollectionImpact, CoverAsset } from "./contracts";
 
 /** Turns a strict decoder Result into adminRpc's throw-on-invalid decoder, so bad shapes become UNAVAILABLE. */
 function strict<T>(decode: (data: unknown) => Result<T>): (data: unknown) => T {
@@ -26,10 +30,23 @@ export async function loadCollectionLibrary(query: CollectionQuery): Promise<Res
     strict(decodeCollectionLibrary), true);
 }
 
+export const COLLECTION_COVERS = covers as CoverAsset[];
+
+/** Detail with readiness recomputed here so the cover check uses this deployment's cover manifest. */
 export async function loadCollectionDetail(id: string): Promise<Result<CollectionDetail>> {
   const supabase = await createClient();
-  return adminRpc(() => supabase.rpc("admin_collection_detail", { p_collection_id: id }),
+  const detail = await adminRpc(() => supabase.rpc("admin_collection_detail", { p_collection_id: id }),
     strict(decodeCollectionDetail), true);
+  if (!detail.ok || !detail.value.working) return detail;
+  return { ok: true, value: { ...detail.value,
+    readiness: collectionReadiness(detail.value.working, detail.value.impact, COLLECTION_COVERS) } };
+}
+
+export async function loadCollectionImpact(collectionId: string, revisionId: string): Promise<Result<CollectionImpact>> {
+  const supabase = await createClient();
+  const outer = await adminRpc(() => supabase.rpc("admin_collection_impact", { p_collection_id: collectionId,
+    p_revision_id: revisionId }), strict(decodeImpactResult), true);
+  return outer.ok ? outer.value : outer;
 }
 
 export async function loadCollectionHistory(id: string, cursor: string | null): Promise<Result<CollectionHistoryPage>> {

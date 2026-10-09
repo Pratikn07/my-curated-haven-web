@@ -60,7 +60,7 @@ const detail = () => ({
     protectedRecipeIds: [], eligibleBuyerCount: 0, pendingLiveCount: 0, offerIds: [],
     affectedCampaignSlugs: [], checks: [] } },
   recipes: [{ recipeId: "93000000-0000-0000-0000-000000000101", slug: "pear-puree", title: "Pear purée",
-    publication: "published" }],
+    publication: "published", totalMinutes: 10, imagePath: "recipe-previews/pear.webp", allergens: [], storageNotes: null }],
   history: [{ id: "e1", action: "collection.save", at: AT, reason: "Draft", humanAuthoriser: USER,
     authoriserEmail: "owner@synthetic.test", executor: USER, executorType: "human", beforeRef: null, afterRef: REV,
     operationId: "op-1" }],

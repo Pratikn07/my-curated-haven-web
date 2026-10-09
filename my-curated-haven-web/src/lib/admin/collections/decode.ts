@@ -130,7 +130,8 @@ const event = object<CollectionEvent>({
   afterRef: nullable(string), operationId: string,
 });
 
-const recipeSummary = object<RecipeSummary>({ recipeId: uuid, slug: string, title: string, publication: string });
+const recipeSummary = object<RecipeSummary>({ recipeId: uuid, slug: string, title: string, publication: string,
+  totalMinutes: nullable(count), imagePath: string, allergens: array(string), storageNotes: nullable(string) });
 
 const detail = object<CollectionDetail>({
   collectionId: uuid, identity: object({ slug: string, title: string }), sourceMode: oneOf(["legacy", "database"]),
@@ -181,6 +182,10 @@ const catalogRecipe = object<CatalogRecipe>({
 const catalogPage = object<CatalogPage>({
   rows: array(catalogRecipe), filteredTotal: count, page: positive, pageSize: literal(25 as const), checkedAt: timestamp,
 });
+
+export function decodeImpactResult(data: unknown): Result<Result<CollectionImpact>> {
+  return run(impact, data);
+}
 
 export function decodeCatalogPage(data: unknown): Result<CatalogPage> {
   return run(catalogPage, data);

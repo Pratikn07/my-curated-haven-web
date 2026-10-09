@@ -1546,6 +1546,10 @@ export type Database = {
         Args: { p_collection_id: string; p_cursor?: string }
         Returns: Json
       }
+      admin_collection_impact: {
+        Args: { p_collection_id: string; p_revision_id: string }
+        Returns: Json
+      }
       admin_collection_library: { Args: { p_query: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }
       admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }

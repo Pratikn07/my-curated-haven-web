@@ -111,3 +111,25 @@ BEGIN
  RESET ROLE;
  RETURN result;
 END $$;
+
+-- Task 8+: the current draft revision of a collection, and its impact as synthetic staff p_user.
+CREATE FUNCTION pg_temp.collection_candidate_id(p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001') RETURNS uuid
+LANGUAGE sql AS $$ SELECT revision_id FROM private.collection_draft_heads WHERE collection_id=p_collection $$;
+
+CREATE FUNCTION pg_temp.collection_impact_as(p_user int, p_collection uuid, p_revision uuid) RETURNS jsonb LANGUAGE plpgsql AS $$
+DECLARE result jsonb;
+BEGIN
+ PERFORM pg_temp.admin_claims(('92000000-0000-0000-0000-'||lpad(p_user::text,12,'0'))::uuid,'aal2');
+ SET LOCAL ROLE authenticated;
+ result := public.admin_collection_impact(p_collection, p_revision);
+ RESET ROLE;
+ RETURN result;
+END $$;
+
+-- Members of the collection's head, with references refreshed to each recipe's current version and fit p_fit.
+CREATE FUNCTION pg_temp.collection_current_members(p_collection uuid, p_fit text DEFAULT 'accepted') RETURNS jsonb LANGUAGE sql AS $$
+ SELECT coalesce(jsonb_agg(m || jsonb_build_object('contentVersion',b.content_version,
+   'reviewDigest',private.admin_active_hash(c.id),'fit',p_fit) ORDER BY o),'[]'::jsonb)
+ FROM jsonb_array_elements(pg_temp.collection_head_snapshot(p_collection)->'members') WITH ORDINALITY x(m,o)
+ JOIN public.recipe_catalog c ON c.id=(m->>'recipeId')::uuid JOIN public.recipe_bodies b ON b.recipe_id=c.id
+$$;

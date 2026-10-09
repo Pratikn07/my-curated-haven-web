@@ -13,7 +13,8 @@ function move<T>(list: T[], from: number, to: number): T[] {
 }
 
 export default function CollectionContents({ members, onChange, titles, onTitle, protectedIds, protectionKnown,
-  publishedIds, disabled }: {
+  publishedIds, disabled, staleSlugs = [] }: {
+  staleSlugs?: string[];
   members: Member[];
   onChange: (members: Member[]) => void;
   titles: Map<string, string>;
@@ -52,6 +53,24 @@ export default function CollectionContents({ members, onChange, titles, onTitle,
       reviewDigest: recipe.activeHash, tagsDigest: recipe.tagsDigest, placementNote: "", fit: "unverified" }]);
   }
 
+  /** Point stale members at each recipe's current version (the recipe changed after it was added). */
+  async function refreshReferences() {
+    setSearchStatus("Updating recipe references");
+    let next = members;
+    for (const slug of staleSlugs) {
+      const result = await listCollectionRecipesAction(slug, 1);
+      const current = result.ok ? result.value.rows.find((r) => r.slug === slug) : undefined;
+      if (!current || current.contentVersion === null || current.activeHash === null) {
+        setSearchStatus(`Could not read the current version of ${slug}. Try again.`);
+        return;
+      }
+      next = next.map((m) => m.recipeSlug === slug ? { ...m, contentVersion: current.contentVersion as number,
+        reviewDigest: current.activeHash as string, tagsDigest: current.tagsDigest } : m);
+    }
+    onChange(next);
+    setSearchStatus("Recipe references updated. Save the draft to keep them.");
+  }
+
   function update(index: number, patch: Partial<Member>) {
     onChange(members.map((m, i) => (i === index ? { ...m, ...patch } : m)));
   }
@@ -60,6 +79,10 @@ export default function CollectionContents({ members, onChange, titles, onTitle,
     <section aria-labelledby="collection-contents-editor" className="admin-collection__section">
       <h2 id="collection-contents-editor">Recipes in this draft</h2>
       <p>{members.length} {members.length === 1 ? "recipe" : "recipes"}. Order here is the order on the collection page. There is no minimum or maximum.</p>
+      {staleSlugs.length > 0 ? <div className="admin-collection__stale" role="note">
+        <p>{staleSlugs.length} {staleSlugs.length === 1 ? "recipe has" : "recipes have"} changed since being added to this draft.</p>
+        <button type="button" onClick={refreshReferences} disabled={disabled}>Use current recipe versions</button>
+      </div> : null}
       {!protectionKnown ? <p role="note">Buyer information could not be checked, so every published recipe is kept in place.</p> : null}
       {members.length === 0 ? <p>No recipes yet. Search below to add existing recipes.</p> : (
         <ol className="admin-collection__members admin-collection__members--edit" aria-label="Draft recipes">
