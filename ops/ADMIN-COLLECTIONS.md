@@ -4,7 +4,7 @@ Phase 2 adds private collection drafts, human review and publication to the admi
 
 Publication stays disabled until every coupled gate in `docs/implementation/admin-collections/GATES.md` passes: buyer access (A5–A7), checkout reservation (A8), atomic publication (A11), public reader cutover and the owner walkthrough (A12). Enabling it with the old release-only reader or slug-only checkout is unsafe.
 
-Sections below are filled in by the tasks that own them: catalog import (Task 4), source cutover (Task 13), publication and refresh recovery (Task 14), recipe corrections and tags (Task 15), operator SQL (Task 16) and the gated release steps (Task 18).
+Sections below: catalog import (Task 4), source cutover (Task 13), publication and refresh recovery (Task 14), recipe corrections and tags (Task 15), operator channel (Task 16), release and recovery (Task 18) and the local verification stack.
 
 ## Catalog import (Task 4)
 
@@ -24,15 +24,17 @@ Apply never writes `collection_publication_projection`, switches source mode, cr
 The collection pages, bookcase, series, showroom chapters, sitemap and the recipes-page shelf read collections through `src/lib/collections/publication.ts`. The server setting `COLLECTIONS_SOURCE_BACKEND` chooses the backend:
 
 - `legacy` (default when unset): every collection comes from `src/config/collections.ts`, exactly as before. No collection database read.
-- `registry`: each collection follows `private.collection_sources.source_mode`. `legacy` collections are served whole from config; `database` collections only from `public.collection_publication_projection` plus current recipe facts. Display hints that are not part of a publication (showroom chapter flag, placeholder price) still come from config. Unlisted collections leave the shelf but keep their page by link; retired ones leave the storefront, and buyers keep them in their library.
+- `registry`: each collection follows `private.collection_sources.source_mode`. `legacy` collections are served whole from config; `database` collections only from `public.collection_publication_projection` plus current recipe facts. Display hints that are not part of a publication (showroom chapter flag, placeholder price) still come from config. Unlisted collections leave the shelf but keep their page by link; retired ones leave the storefront, and buyers keep them in their library. A retired or coming-soon database collection has no page (404) and `private.collection_sellable` refuses it at checkout, even if an offer is still switched on.
 
 Registry mode never falls back to config when the database read fails; the read throws so a cached page keeps serving its last committed version. Once any collection has a database publication in production, registry-compatible builds are the rollback floor: switching back to `legacy` would show stale configured content for that collection. A commerce lookup failure on a collection page reads "Purchase unavailable right now", never "Opening soon" or a guessed price.
+
+`COMMERCE_DATABASE_URL` is not set in production today (`ops/PRODUCTION-CONFIG.md`). Without it, a deployment has no commerce data: collection pages show the configured placeholder price as before, and a recipe publication refreshes every collection page. Registry reads, collection publication refresh jobs and checkout reservations all need it, so it must be set before `registry` mode and before the collection stage reaches `publication`.
 
 Cutover order: deploy with `registry` while every collection is still `legacy` (pages unchanged), confirm parity, then publish collections one at a time through the admin (each first publication switches that collection to `database` in the same transaction).
 
 ## Publication and refresh recovery (Task 14)
 
-Publishing happens on `/admin/collections/<id>/publish` ("Review collection effect"). The page shows the exact revision and digest, the recipe and page changes, buyers today, any buyer group without an additions decision (Give additions or Original only, recorded with the reason), sales and checkout effect, and who is recorded. An owner (publish and review permission) uses "Approve and publish", which records the approval of that exact revision in the same transaction. A publisher without review permission can only use "Publish approved revision" after a reviewer approved it. A stale page returns `ADM_CONFLICT` and publishes nothing.
+Publishing happens on `/admin/collections/<id>/publish` ("Review collection effect"). The page shows the exact revision and digest, the recipe and page changes, buyers today, any buyer group without an additions decision (Give additions or Original only, recorded with the reason), sales and checkout effect, and who is recorded. An owner (publish and review permission) uses "Approve and publish", which records the approval of that exact revision in the same transaction. A publisher without review permission can only use "Publish approved revision" after a reviewer approved it, and cannot decide buyer groups: while any group is undecided the page says who must decide and the database answers `ADM_BLOCKED`. An owner opening an approved revision with undecided groups decides them and publishes under review authority; the reviewer's approval is kept. A publication that changes nothing records no buyer decision. A stale page returns `ADM_CONFLICT` and publishes nothing; repeating a request that already committed returns its receipt.
 
 Each non-imported publication writes a row in `private.collection_refresh_jobs` in its own transaction, with the page paths taken from the publication (`/collections`, the collection page, both series pages, `/collections/test`, `/recipes`, `/sitemap.xml` and the two admin pages). Straight after the commit the server action claims that job (`private.collection_refresh_claim`, 2-minute lease, at most 10 attempts), calls `revalidatePath` for each stored path and finishes it (`private.collection_refresh_finish`). The worker procedures are not granted to `anon` or `authenticated`; only the server's database pool can call them.
 
@@ -84,6 +86,38 @@ Call sequence with `scripts/admin-collections-operator.mjs` (the connection stri
 5. `publish --authorisation <id>` or `correct --authorisation <id>`. The human's authority, the stages and the exact candidate, base and evidence are checked again, then the shared publication or correction core runs. The attestation is consumed with the receipt; repeating the same `--operation` returns that receipt, and a different operation is a conflict.
 
 History keeps the three identities apart: the human authoriser, the operator executor (`operator:<login>`) and the attestation id on the review decision. The operator cannot refresh the public pages; the receipt shows "Refresh pending" until someone with publish access uses Retry refresh in the workspace or the pages revalidate on their hourly schedule.
+
+## Release and recovery (Task 18)
+
+Nothing here authorises a production migration, deploy or stage change; each step needs the owner's explicit go-ahead. Phase 1's own owner walkthrough, independent review and authenticated release checks (`docs/implementation/admin-recipes/GATES.md`) are prerequisites.
+
+Before any production step:
+
+- Migrations apply in filename order through `20261008001300_collection_review_fixes.sql`. `20261008000310_admin_conflict_not_retryable.sql` also fixes a live Phase 1 problem (PostgREST retrying `40001` conflicts in a loop) and can ship on its own first.
+- Take a point-in-time backup and confirm a restore works in a non-production project. Never restore production over live payments: recover forward.
+- Confirm `src/lib/types/database.ts` equals `supabase gen types typescript` for the target.
+- The collection stage starts `disabled` and `COLLECTIONS_SOURCE_BACKEND` defaults to `legacy`: deploying changes nothing a visitor or buyer sees.
+
+Release sequence, one confirmed step at a time:
+
+1. Deploy schema and code with the collection stage `disabled` and `COLLECTIONS_SOURCE_BACKEND=legacy`. Check the public collection pages, a buyer's library and checkout as before.
+2. Recipe tag import: dry run, owner review of the report, then apply (Task 15 section).
+3. Collection catalog import: dry run, owner review (blockers, `MEMBERSHIP_MISMATCH`, `ACCESS_POLICY_UNKNOWN`, `ORDER_SNAPSHOT_INCOMPLETE`), then private apply (Task 4 section).
+4. Owner decisions before any offer moves: reconcile legacy orders without provider context, and decide which existing buyer groups get `additions-v1` or `original-only` (recorded at the first publication of each collection, or beforehand).
+5. Set the collection stage to `inspection`; the owner checks every collection against the live site. Then `editing` for the owner only; no new staff permissions in the same step.
+6. Set `COMMERCE_DATABASE_URL` for production (a remote, non-loopback database URL), then deploy with `COLLECTIONS_SOURCE_BACKEND=registry` while every collection is still `legacy`; confirm the public pages are unchanged (registry-compatible builds are the rollback floor from the first database publication onward).
+7. Rehearse publication, buyer access and checkout in a non-production project with test-mode offers.
+8. Set the stage to `publication` for the owner. Publish one collection at a time through the publish page. After each one, check the public page, an existing buyer's library and recipe, a checkout reservation, and that the receipt shows the refresh as updated (or use Retry refresh).
+9. Record the deployed SHA and the fresh authenticated owner, customer, recipe body, file and checkout evidence in `GATES.md`.
+10. Register an operator login only if the owner asks for the operator channel (Task 16 section).
+
+Recovery:
+
+- Stop changes by lowering the collection stage: `editing` stops publication, `inspection` stops editing, `disabled` hides the workspace. Committed publications, releases, orders and buyer additions stay as they are.
+- Keep registry-compatible reads once any collection has a database publication; switching back to `legacy` would show stale configured content for that collection.
+- Retry specific refresh jobs from the workspace (or let the hourly revalidation run).
+- Fix content with a reviewed forward change: a new collection draft, or a recipe correction.
+- Never delete release or order history, restore the database over live payments, re-enable an old offer to hide a problem, or switch a collection's source back by hand.
 
 ## Local verification stack
 

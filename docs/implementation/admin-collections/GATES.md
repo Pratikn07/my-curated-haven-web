@@ -130,6 +130,42 @@ Ruling: the registry-build CI step runs on chromium-desktop only. Its purpose is
 
 Ruling: CI's failure diagnostics artifact is unchanged: Playwright report and traces on failure only, kept 7 days, as Phase 1 set it up. Admin traces can contain request payloads; narrowing that artifact belongs with the Phase 1 CI owner. Cost if wrong: failure traces stay visible to repository readers for 7 days.
 
+Progress (Task 18, 2026-10-09): independent final review and fixes.
+
+The review found no problems in authority, grants, RLS, the `PT409` conflict code, lock order, idempotency or buyer read parity. It raised these, all fixed here except where a ruling says otherwise:
+
+- **High, delivered additions unprotected.** A recipe that earlier buyers receive as an addition could be removed by a later draft, because only releases with their own buyers, orders or live offers counted as committed. Migration `20261008001300_collection_review_fixes.sql`: the delivered release is committed when buyers of an earlier release receive it through an `additions-v1` policy.
+- **High, "Purchase unavailable" in production.** Production has no `COMMERCE_DATABASE_URL` (`ops/PRODUCTION-CONFIG.md`), so the branch's stricter offer read turned every collection page into "Purchase unavailable right now". `commerceDatabaseConfigured()` (`src/lib/payments/database-config.ts`) now tells "not configured yet" apart from an outage: without the URL, collection pages show the configured placeholder price as before (R8-05). An outage with the URL set still shows "Purchase unavailable".
+- **Medium, recipe refresh always pending without the pool.** The recipe publish refresh looked up collection paths through the commerce pool. Without it, every collection page now refreshes (`revalidatePath("/collections", "layout")`), and the refresh completes.
+- **Medium, buyer-group decisions not bound to review.** A publisher without review permission could decide `additions-v1` for existing buyers, and decisions were written even when the publication changed nothing. Now only the one-step approval (which needs review permission) records decisions; a separated publisher facing an undecided group gets `ADM_BLOCKED`, and a no-change publication records none. The publish page disables the choice for that publisher and says who must decide; an owner on an already approved revision decides under review authority and the reviewer's approval is kept.
+- **Medium, retired or coming-soon database collections viewable and sellable.** In registry mode their pages could be rebuilt from a stray offer. `isWithheldCollection` returns 404 for them, and `private.collection_sellable` refuses a database collection whose publication is retired or not open.
+- **Medium-low, offers stranded.** When the active publication had no release (an empty coming-soon page), the next publication neither sealed the last published release nor moved its offers. The base is now the latest published release in that case.
+- **Low, a retry after commit returned CONFLICT.** The publish action now asks the database on a readiness conflict, which replays the committed receipt for the same operation and payload and refuses anything else.
+- **Low, displayed price could differ from the charged offer.** The page now shows the price, currency and terms version of the offer `collection_sellable` would charge, and the fallback read orders offers.
+- **Low, `/recipes` failed with the registry.** Its three example books are optional; a registry outage now leaves them out. The sitemap still throws on purpose (see ruling).
+- **Low, `refreshRecipeAction` had no authority check.** It now runs the retry's checks: aal2 staff, an operation of this recipe, and paths from the database.
+- **Low, CI registry steps skipped after a browser failure.** Both registry steps now run with `if: ${{ !cancelled() }}`. The backend suite-count check now expects 13 collection admin suites.
+- **Found while testing:** the owner's one-step approval on a revision a reviewer had already approved always failed with an ambiguous column reference (`decision`). It was latent because the page sent that case as a plain publish; the new decision path uses it. Fixed in the same migration.
+
+Ruling: the sitemap does not catch a registry failure. It is prerendered and regenerated on publication, so a failed regeneration keeps the last good sitemap; catching would replace it with one missing the collections until the next publication. Cost if wrong: a build in registry mode fails while the database is unreachable.
+
+Ruling (review 7b): refresh jobs stay keyed by operation id. Operation ids are random UUIDs, publications are unique per job, and a retry checks the job belongs to the collection. Cost if wrong: one publication's refresh would wait for the hourly revalidation.
+
+Ruling (review 7c): an owner's one-step approval of an already approved revision reuses the reviewer's decision instead of adding a second one. The owner holds review authority, evidence freshness is rechecked in the same transaction, and the receipt links the reviewer's decision. Cost if wrong: history shows the reviewer's approval, not the owner's, for that publication.
+
+Ruling (review 7e): refresh jobs keep their 10-attempt cap. After it, Retry refresh is refused and the pages update on their hourly revalidation. Cost if wrong: a receipt shows "Refresh pending" until a deploy or the next publication of that collection.
+
+Known follow-up for the owner walkthrough: on a revision identical to what is live, the publish page still asks for undecided buyer groups, though a no-change publication records no decision.
+
+Evidence:
+- SQL suite `28_admin_collections_review_fixes.test.sql` 15/15. It covers: a separated publisher blocked from deciding with nothing recorded, then the owner decides on the reviewer's approval with one decision; a delivered addition protected and a later draft refused for removing it; a no-change publication recording no decision; an empty coming-soon publication followed by recipes sealing the last release and moving its offer; an open collection sellable, then refused once coming soon and once retired. Its first run hit the ambiguous-column error above.
+- All database suites on a clean replay of the owned stack: 769/769 (32 files). Generated types unchanged.
+- Scale scenario passes (no per-row loops, no membership scans; protected members at most 6.3 ms).
+- Unit: admin 83/83, collections 54/54. Lint and typecheck pass.
+- Browser, chromium-desktop, default build: publication, corrections, recipe publication, payment guardrails, checkout, access and Home specs 42/42, including the new publisher-versus-owner buyer-group case and the `commerceDatabaseConfigured` check.
+- Browser, registry build: storefront and collections specs 22/22, including the new retired-collection 404 case.
+- Browser, full chromium-desktop suite on the default build (every spec except privacy): 255 passed, 7 skipped (registry-only and single-project specs), 0 failed.
+
 Ruling: The plan's `20261007` migration timestamps precede the applied Phase 1 audit migrations through `20261007233000`. Allocate every Phase 2 migration after that timestamp in dependency order; update all references and verification commands before implementation. Cost if wrong: migration replay or production upgrade could execute in the wrong order.
 
 - [ ] A1: Existing collection experience is reconciled against source mappings; inspection and public browser paths preserve intended behavior.
