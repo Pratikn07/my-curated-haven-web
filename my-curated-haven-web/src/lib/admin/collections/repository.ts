@@ -3,10 +3,12 @@ import type { Result } from "../contracts";
 import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
-  CollectionCommand, CollectionDetail, CollectionHistoryPage, CollectionLibrary, CollectionQuery, CollectionSnapshot,
+  CatalogPage, CollectionCommand, CollectionDetail, CollectionHistoryPage, CollectionLibrary, CollectionQuery, CollectionSnapshot,
   DraftControl, DraftResult, SaveCollectionCommand,
 } from "./contracts";
-import { decodeCollectionDetail, decodeCollectionHistory, decodeCollectionLibrary, decodeDraftResult } from "./decode";
+import {
+  decodeCatalogPage, decodeCollectionDetail, decodeCollectionHistory, decodeCollectionLibrary, decodeDraftResult,
+} from "./decode";
 import { controlWire, createWire, saveWire, startWire } from "./wire";
 
 /** Turns a strict decoder Result into adminRpc's throw-on-invalid decoder, so bad shapes become UNAVAILABLE. */
@@ -34,6 +36,12 @@ export async function loadCollectionHistory(id: string, cursor: string | null): 
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_collection_history", { p_collection_id: id, p_cursor: cursor ?? undefined }),
     strict(decodeCollectionHistory), true);
+}
+
+export async function listCollectionRecipes(query: { q: string; page: number }): Promise<Result<CatalogPage>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_catalog", { p_query: { q: query.q.slice(0, 200), page: query.page } }),
+    strict(decodeCatalogPage), true);
 }
 
 // Writes retry only on lock timeouts and dropped transport: every command carries an operation id,

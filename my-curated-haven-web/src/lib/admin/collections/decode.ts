@@ -1,5 +1,7 @@
 import type { AdminCode, Check, Result } from "../contracts";
 import type {
+  CatalogPage,
+  CatalogRecipe,
   CollectionDetail,
   CollectionEvent,
   CollectionHistoryPage,
@@ -169,6 +171,20 @@ export function decodeCollectionDetail(data: unknown): Result<CollectionDetail> 
 
 const draftResult = object<DraftResult>({ operationId: uuid, noChange: boolean, revision: nullable(revision),
   committedAt: timestamp });
+
+const catalogRecipe = object<CatalogRecipe>({
+  recipeId: uuid, slug: string, title: string, publication: string, contentVersion: nullable(positive),
+  activeHash: nullable(digest), reviewed: boolean, allergens: array(string), tagsDigest: digest,
+  totalMinutes: nullable(count), mealLabels: array(string), dietLabels: array(string),
+});
+
+const catalogPage = object<CatalogPage>({
+  rows: array(catalogRecipe), filteredTotal: count, page: positive, pageSize: literal(25 as const), checkedAt: timestamp,
+});
+
+export function decodeCatalogPage(data: unknown): Result<CatalogPage> {
+  return run(catalogPage, data);
+}
 
 export function decodeDraftResult(data: unknown): Result<DraftResult> {
   return run(draftResult, data);

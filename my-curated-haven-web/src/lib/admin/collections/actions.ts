@@ -2,7 +2,8 @@
 
 import type { CollectionCommand, CollectionSnapshot, DraftControl, SaveCollectionCommand } from "./contracts";
 import {
-  controlCollectionDraft, createCollection, loadCollectionHistory, saveCollectionDraft, startCollectionDraft,
+  controlCollectionDraft, createCollection, listCollectionRecipes, loadCollectionDetail, loadCollectionHistory,
+  saveCollectionDraft, startCollectionDraft,
 } from "./repository";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -44,4 +45,14 @@ export async function controlCollectionDraftAction(input: DraftControl) {
   if (!validCommand(input) || !["rebase", "copy_publication", "discard"].includes(input.action)
     || (input.referenceId !== null && !UUID.test(input.referenceId))) return invalid("collection-control");
   return controlCollectionDraft(input);
+}
+
+export async function listCollectionRecipesAction(q: string, page: number) {
+  if (typeof q !== "string" || !Number.isInteger(page) || page < 1 || page > 1000) return invalid("collection-catalog");
+  return listCollectionRecipes({ q, page });
+}
+
+export async function loadCollectionDetailAction(collectionId: string) {
+  if (!UUID.test(collectionId)) return invalid("collection-detail");
+  return loadCollectionDetail(collectionId);
 }

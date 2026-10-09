@@ -26,10 +26,11 @@ function draftText(row: CollectionRow): string {
   return row.draftCount === null ? label : `${label} · ${row.draftCount} ${row.draftCount === 1 ? "recipe" : "recipes"}`;
 }
 
-export default function CollectionLibrary({ library, query, selectedId }: {
+export default function CollectionLibrary({ library, query, selectedId, canCreate = false }: {
   library: Library;
   query: CollectionQuery;
   selectedId: string | null;
+  canCreate?: boolean;
 }) {
   const { rows } = library;
   const returnTo = listHref(query);
@@ -43,6 +44,7 @@ export default function CollectionLibrary({ library, query, selectedId }: {
           <p className="admin-record__eyebrow">Publishing</p>
           <h1>Collections</h1>
           <p>See what each collection shows today, whether a private draft is waiting, and whether it is for sale. These are separate facts.</p>
+          {canCreate ? <Link href="/admin/collections/new" className="admin-library__new">New collection</Link> : null}
         </header>
         <form className="admin-library__filters" method="get" action="/admin/collections">
           <label>Search collections<input name="q" type="search" defaultValue={query.q} maxLength={200} /></label>

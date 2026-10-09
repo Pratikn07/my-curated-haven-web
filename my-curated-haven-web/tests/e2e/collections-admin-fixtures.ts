@@ -17,6 +17,8 @@ export interface CollectionsFixture {
   title: string;
   recipeIds: string[];
   recipeTitles: string[];
+  /** Recipes not yet in the collection: one editorially reviewed, one not. */
+  extraRecipes: { reviewed: { id: string; title: string }; unreviewed: { id: string; title: string } };
   ownerId: string;
   customerId: string;
   publishCommand: Record<string, unknown> | null;
@@ -91,6 +93,10 @@ export async function setCollectionStage(stage: CollectionStage): Promise<Collec
   return withPg(async (pg) => {
     const previous = (await pg.query("SELECT stage FROM private.collection_workspace_settings WHERE singleton")).rows[0].stage;
     await pg.query("UPDATE private.collection_workspace_settings SET stage=$1", [stage]);
+    // Collection actions also need the console stage; raise it if needed, never lower it.
+    await pg.query(`UPDATE private.admin_console_settings SET stage=$1 WHERE singleton AND
+      array_position(ARRAY['disabled','inspection','editing','publication'], stage) <
+      array_position(ARRAY['disabled','inspection','editing','publication'], $1::text)`, [stage]);
     return previous as CollectionStage;
   });
 }
@@ -113,12 +119,20 @@ export async function createCollectionsFixture(options: {
   const slug = `synthetic-collection-${rand}`;
   const title = `Synthetic collection ${rand}`;
   const recipeTitle = (await owner.active()).catalog.title;
+  const extraRecipes = {
+    reviewed: { id: crypto.randomUUID(), title: `Synthetic extra ${rand}` },
+    unreviewed: { id: crypto.randomUUID(), title: `Synthetic unreviewed ${rand}` },
+  };
   let disposed = false;
 
   async function dispose(): Promise<void> {
     if (disposed) return;
     disposed = true;
-    await withPg((pg) => deleteCollections(pg, slug));
+    await withPg(async (pg) => {
+      await deleteCollections(pg, slug);
+      await deleteCollections(pg, "synthetic-new-%");
+      await pg.query("DELETE FROM public.recipe_catalog WHERE slug LIKE $1", [`synthetic-colrecipe-${rand}-%`]);
+    });
     await setCollectionStage(originalStage);
     for (const person of Object.values(people)) await person?.dispose();
   }
@@ -127,6 +141,13 @@ export async function createCollectionsFixture(options: {
     customer = await createAdminFixture(`coll-customer`, []);
     people.customer = customer;
     await withPg(async (pg) => {
+      for (const [kind, recipe] of Object.entries(extraRecipes)) {
+        await pg.query(`INSERT INTO public.recipe_catalog(id,slug,title,public_summary,preview_image_path,total_minutes)
+          VALUES($1,$2,$3,'Synthetic fixture','recipe-previews/fixture.webp',20)`, [recipe.id, `synthetic-colrecipe-${rand}-${kind}`, recipe.title]);
+        await pg.query(`INSERT INTO public.recipe_bodies(recipe_id,ingredients,instructions,yield,allergen_review_state)
+          VALUES($1,'[{"item":"Synthetic"}]','[{"step":1,"text":"Synthetic"}]','1 serving',$2)`,
+          [recipe.id, kind === "reviewed" ? "reviewed_no_allergens" : "unknown"]);
+      }
       await pg.query("INSERT INTO public.recipe_collections(id,slug,title,public_summary,listing_state) VALUES($1,$2,$3,'Synthetic','unlisted')",
         [collectionId, slug, title]);
       await pg.query("INSERT INTO public.collection_releases(id,collection_id,version,state) VALUES($1,$2,1,'published')", [releaseId, collectionId]);
@@ -160,6 +181,7 @@ export async function createCollectionsFixture(options: {
     collectionId, slug, title,
     recipeIds: [owner.recipeId],
     recipeTitles: [recipeTitle],
+    extraRecipes,
     ownerId: owner.userId,
     customerId: customer.userId,
     publishCommand: null,

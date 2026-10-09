@@ -964,3 +964,142 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.admin-library__new {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+  color: var(--action);
+  font-weight: 700;
+}
+
+.admin-collection-editor legend {
+  font-weight: 700;
+}
+
+.admin-collection__members--edit {
+  padding-left: 0;
+  list-style: none;
+}
+
+.admin-collection__members--edit > li {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+.admin-collection__member-head,
+.admin-collection__member-controls,
+.admin-collection__save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-collection__member-controls {
+  margin: var(--space-2) 0;
+}
+
+.admin-collection__member-title {
+  font-weight: 700;
+}
+
+.admin-collection__member-fields {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.admin-collection__search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.admin-collection__results {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.admin-collection__results > li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-collection__conflict {
+  border-color: var(--action);
+}
+
+@media (max-width: 48rem) {
+  .admin-collection__member-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Controls inside labels (not direct fieldset children) must also shrink to the column. */
+.admin-collection-editor label,
+.admin-collection__member-fields label,
+.admin-collection__search label {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.admin-collection-editor select,
+.admin-collection-editor textarea,
+.admin-collection-editor input:not([type="checkbox"]) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.admin-collection-editor input[readonly] {
+  background: var(--surface-muted);
+}
+
+.admin-collection-editor .admin-library__check {
+  display: flex;
+}
+
+.admin-collection__search label {
+  flex: 1 1 12rem;
+}
+
+/* Buttons outside the editor fieldsets (recipe list, search, conflict) match the editor's buttons. */
+.admin-collection-editor .admin-collection__section button,
+.admin-workspace-action button {
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-collection-editor .admin-collection__section button:disabled,
+.admin-workspace-action button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  decodeCatalogPage,
   decodeCollectionDetail,
   decodeCollectionLibrary,
 } from "../../src/lib/admin/collections/decode.ts";
@@ -127,4 +128,11 @@ test("library rows keep published and draft counts and commerce state independen
   }
   assert.equal(decodeCollectionLibrary({ rows: [{ ...row, publishedCount: 1.5 }], filteredTotal: 1,
     page: 1, pageSize: 25, checkedAt: AT }).ok, false);
+});
+
+test("catalog rows carry review state and allergens; a recipe without a body has no version", () => {
+  const row = { recipeId: ID, slug: "pear", title: "Pear", publication: "draft", contentVersion: null, activeHash: null,
+    reviewed: false, allergens: [], tagsDigest: DIGEST, totalMinutes: null, mealLabels: [], dietLabels: [] };
+  assert.equal(decodeCatalogPage({ rows: [row], filteredTotal: 1, page: 1, pageSize: 25, checkedAt: AT }).ok, true);
+  assert.equal(decodeCatalogPage({ rows: [{ ...row, reviewed: "yes" }], filteredTotal: 1, page: 1, pageSize: 25, checkedAt: AT }).ok, false);
 });

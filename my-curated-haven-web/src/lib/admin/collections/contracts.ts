@@ -66,3 +66,8 @@ export type SnapshotChange = { field: string; before: unknown; after: unknown };
 export type DraftControl = CollectionCommand & { action: "rebase" | "copy_publication" | "discard";
   expectedDigest: string; referenceId: string | null };
 export type DraftResult = { operationId: string; noChange: boolean; revision: CollectionRevision | null; committedAt: string };
+export type CatalogRecipe = { recipeId: string; slug: string; title: string; publication: string;
+  contentVersion: number | null; activeHash: string | null; reviewed: boolean; allergens: string[];
+  tagsDigest: string; totalMinutes: number | null; mealLabels: string[]; dietLabels: string[] };
+export type CatalogPage = { rows: CatalogRecipe[]; filteredTotal: number; page: number; pageSize: 25; checkedAt: string };
+export type CoverAsset = NonNullable<CollectionSnapshot["cover"]>;

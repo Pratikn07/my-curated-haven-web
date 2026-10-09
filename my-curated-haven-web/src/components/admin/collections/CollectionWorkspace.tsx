@@ -7,15 +7,17 @@ import {
 } from "@/lib/admin/collections/labels";
 import AdminRecordFrame from "../AdminRecordFrame";
 import CollectionHistory from "./CollectionHistory";
+import CollectionDraftActions from "./CollectionDraftActions";
 
-function nextAction(context: AdminContext): string {
+function NextAction({ context, detail, returnTo }: { context: AdminContext; detail: CollectionDetail; returnTo: string }) {
   if (context.collectionStage === "inspection") {
-    return "Collections are in inspection stage. You can review what is live; private drafts are not switched on yet.";
+    return <p>Collections are in inspection stage. You can review what is live; private drafts are not switched on yet.</p>;
   }
   if (!context.operator.permissions.includes("collection.edit")) {
-    return "You can inspect this collection. Preparing changes needs collection edit permission.";
+    return <p>You can inspect this collection. Preparing changes needs collection edit permission.</p>;
   }
-  return "Private collection drafts are not available in this release yet.";
+  return <CollectionDraftActions collectionId={detail.collectionId} hasDraft={detail.working !== null}
+    hasPublication={detail.published !== null} returnTo={returnTo} />;
 }
 
 function MemberList({ members, titles, protectedIds, addedIds, label }: {
@@ -97,7 +99,7 @@ export default function CollectionWorkspace({ detail, context, returnTo }: {
       liveState={publicationLabel(detail.published?.publicationId ?? null, publishedMembers.length)}
       workingState={detail.working ? `${workingLabel(detail.working.state)} · revision ${detail.working.version}` : workingLabel(null)}
       checkedAt={formatUtc(detail.checkedAt)}
-      actions={<p>{nextAction(context)}</p>}
+      actions={<NextAction context={context} detail={detail} returnTo={returnTo} />}
     >
       <Link href={returnTo}>Back to collections</Link>
       {snapshot ? <Overview snapshot={snapshot} detail={detail} /> : <p role="status">This collection has no published page or private draft yet.</p>}
