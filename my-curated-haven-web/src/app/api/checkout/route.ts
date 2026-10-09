@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { createCheckoutSession } from "@/lib/payments/checkout";
 import { acceptCampaignInput } from "@/lib/analytics/campaigns";
+import type { CheckoutExpectation } from "@/lib/payments/types";
 
-const CHECKOUT_FIELDS = new Set(["collectionSlug", "analyticsConsent", "attribution"]);
+const CHECKOUT_FIELDS = new Set(["collectionSlug", "analyticsConsent", "attribution", "expected"]);
 const ATTRIBUTION_FIELDS = new Set([
   "utm_source",
   "utm_medium",
@@ -43,6 +44,19 @@ export async function POST(request: Request) {
       );
     }
 
+    // What the page showed for sale. Missing or malformed means the page must refresh before buying.
+    let expected: CheckoutExpectation | null = null;
+    if (record.expected !== undefined && record.expected !== null) {
+      const raw = record.expected as Record<string, unknown>;
+      const keys = ["publicationId", "releaseId", "offerId", "manifestHash", "sourceDigest"];
+      if (typeof raw !== "object" || Array.isArray(raw) || Object.keys(raw).some((k) => !keys.includes(k))
+        || !(raw.publicationId === null || typeof raw.publicationId === "string")
+        || ["releaseId", "offerId", "manifestHash", "sourceDigest"].some((k) => typeof raw[k] !== "string")) {
+        return NextResponse.json({ error: "Invalid checkout expectation." }, { status: 400 });
+      }
+      expected = raw as unknown as CheckoutExpectation;
+    }
+
     let attribution: ReturnType<typeof acceptCampaignInput> = null;
     if (record.attribution !== undefined) {
       if (
@@ -72,6 +86,7 @@ export async function POST(request: Request) {
     const requestOrigin = new URL(request.url).origin;
     const result = await createCheckoutSession({
       collectionSlug,
+      expected,
       user: {
         id: user.id,
         email: user.email,
@@ -87,6 +102,16 @@ export async function POST(request: Request) {
           code: "already_owned",
           message: "You already have active access to this collection.",
           collectionSlug: result.collectionSlug,
+        },
+        { status: 409 }
+      );
+    }
+
+    if (result.status === "stale") {
+      return NextResponse.json(
+        {
+          code: "refresh_required",
+          message: "This collection changed since the page loaded. Refresh to see what is on sale now.",
         },
         { status: 409 }
       );

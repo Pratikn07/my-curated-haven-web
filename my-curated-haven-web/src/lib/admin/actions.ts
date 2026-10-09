@@ -18,7 +18,8 @@ import {
   submitAdminRevision,
   withdrawAdminRecipe,
 } from "@/lib/admin/recipes";
-import { refreshAdminRecipe, retryAdminRefresh } from "@/lib/admin/refresh";
+import { publishRecipeCorrection } from "@/lib/admin/recipe-corrections";
+import { refreshCommittedRecipe, retryAdminRefresh } from "@/lib/admin/refresh";
 import { loadAdminHistory, loadAdminRecipe, loadAdminRecipeOperations } from "@/lib/admin/context";
 import { adminRpc } from "@/lib/admin/rpc";
 import type {
@@ -26,6 +27,8 @@ import type {
   DraftCommand,
   Operation,
   PublishCommand,
+  RecipeCorrectionCommand,
+  RefreshReceipt,
   ReviewCommand,
   StaffRow,
   WithdrawCommand,
@@ -206,6 +209,14 @@ export async function publishRevisionAction(input: PublishCommand) {
   return publishAdminRevision(input);
 }
 
+export async function publishRecipeCorrectionAction(input: RecipeCorrectionCommand) {
+  if (!isUuid(input.recipeId) || !isUuid(input.operationId) || !isUuid(input.revisionId)
+    || input.correctionKind !== "same_recipe" || input.acknowledgeGlobalImpact !== true) {
+    return { ok: false as const, code: "INVALID" as const, reference: "recipe-correct" };
+  }
+  return publishRecipeCorrection(input);
+}
+
 export async function withdrawRecipeAction(input: WithdrawCommand) {
   if (!isUuid(input.recipeId) || !isUuid(input.operationId)) {
     return { ok: false as const, code: "INVALID" as const, reference: "recipe-withdraw" };
@@ -213,11 +224,12 @@ export async function withdrawRecipeAction(input: WithdrawCommand) {
   return withdrawAdminRecipe(input);
 }
 
-export async function refreshRecipeAction(
-  receipt: Parameters<typeof refreshAdminRecipe>[0],
-  options?: { slug?: string; campaignSlugs?: string[] }
-) {
-  return refreshAdminRecipe(receipt, options);
+/** Display refresh straight after a committed command; staff and paths are checked on the server. */
+export async function refreshRecipeAction(receipt: { operationId: string; recipeId: string }): Promise<RefreshReceipt> {
+  if (!isUuid(receipt.operationId) || !isUuid(receipt.recipeId)) {
+    return { operationId: String(receipt.operationId), state: "pending" };
+  }
+  return refreshCommittedRecipe(receipt.operationId, receipt.recipeId);
 }
 
 export async function retryRefreshAction(operationId: string, recipeId: string) {

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createAdminFixture } from "./admin-fixtures";
+import { setCollectionStage } from "./collections-admin-fixtures";
 
 test.describe.configure({ mode: "serial" });
 
@@ -68,6 +69,7 @@ test("viewer cannot manage the team", async ({ page }) => {
 test("admin navigation exposes only permitted destinations and keeps actions visible at 320px", async ({ page }) => {
   const owner = await createAdminFixture("shell-owner", ["owner"]);
   const viewer = await createAdminFixture("shell-viewer", ["viewer"]);
+  const collectionStage = await setCollectionStage("disabled");
   try {
     await owner.login(page, "aal2");
     await page.setViewportSize({ width: 320, height: 700 });
@@ -89,7 +91,14 @@ test("admin navigation exposes only permitted destinations and keeps actions vis
     const viewerNav = page.getByRole("navigation", { name: "Admin" });
     await expect(viewerNav.getByRole("link", { name: "Recipes" })).toHaveAttribute("aria-current", "page");
     await expect(viewerNav.getByRole("link", { name: "Team" })).toHaveCount(0);
+
+    // Collections appears only while its own workspace stage is switched on.
+    await setCollectionStage("inspection");
+    await page.goto("/admin/recipes");
+    await expect(viewerNav.getByRole("link", { name: "Collections" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   } finally {
+    await setCollectionStage(collectionStage);
     await viewer.dispose();
     await owner.dispose();
   }

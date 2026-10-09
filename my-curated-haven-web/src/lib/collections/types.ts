@@ -66,7 +66,7 @@ export interface ShowroomCollection {
   /** Drafts render everywhere but production, like draft campaigns. */
   status: "draft" | "published";
   /**
-   * "open": has 8-12 recipes and its own page (with "Opening soon" until an offer exists).
+   * "open": has its own page (with "Opening soon" until an offer exists). Chosen per collection; no recipe-count rule.
    * "coming-soon": still collecting recipes; it stands on the shelf greyed out, with no page.
    */
   availability: "open" | "coming-soon";

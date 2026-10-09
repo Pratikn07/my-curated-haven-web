@@ -1,7 +1,5 @@
 import { Pool } from "pg";
 import type {
-  CommercialOffer,
-  PurchaseOrder,
   CollectionOfferDto,
   OrderSummaryDto,
   OwnershipStatus,
@@ -32,75 +30,6 @@ export function formatPrice(amountMinor: number, currency: string): string {
   return `${symbol}${amount}`;
 }
 
-export async function getCommercialOfferBySlug(slug: string): Promise<{
-  offer: CommercialOffer;
-  collectionId: string;
-  collectionTitle: string;
-  releaseId: string;
-} | null> {
-  const pool = getCommercePool();
-  const query = `
-    SELECT
-      o.id,
-      o.release_id,
-      o.provider_account_id,
-      o.provider_mode,
-      o.provider_product_id,
-      o.provider_price_id,
-      o.currency,
-      o.base_minor_amount,
-      o.tax_mode,
-      o.quantity,
-      o.terms_version,
-      o.refund_policy_version,
-      o.access_policy_version,
-      o.sale_enabled,
-      o.manifest_hash,
-      o.created_at,
-      o.updated_at,
-      c.id as collection_id,
-      c.title as collection_title,
-      r.id as resolved_release_id
-    FROM public.recipe_collections c
-    JOIN public.collection_releases r ON r.collection_id = c.id
-    JOIN private.commercial_offers o ON o.release_id = r.id
-    WHERE c.slug = $1
-      AND o.sale_enabled = true
-      AND r.state IN ('published', 'sealed')
-    ORDER BY r.version DESC
-    LIMIT 1;
-  `;
-
-  const { rows } = await pool.query(query, [slug]);
-  if (rows.length === 0) return null;
-
-  const row = rows[0];
-  return {
-    collectionId: row.collection_id,
-    collectionTitle: row.collection_title,
-    releaseId: row.resolved_release_id,
-    offer: {
-      id: row.id,
-      releaseId: row.release_id,
-      providerAccountId: row.provider_account_id,
-      providerMode: row.provider_mode,
-      providerProductId: row.provider_product_id,
-      providerPriceId: row.provider_price_id,
-      currency: row.currency,
-      baseMinorAmount: row.base_minor_amount,
-      taxMode: row.tax_mode,
-      quantity: row.quantity,
-      termsVersion: row.terms_version,
-      refundPolicyVersion: row.refund_policy_version,
-      accessPolicyVersion: row.access_policy_version,
-      saleEnabled: row.sale_enabled,
-      manifestHash: row.manifest_hash,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    },
-  };
-}
-
 export async function getCollectionOfferDetails(
   slug: string,
   userId?: string | null
@@ -126,7 +55,7 @@ export async function getCollectionOfferDetails(
     LEFT JOIN private.commercial_offers o ON o.release_id = r.id AND o.sale_enabled = true
     WHERE c.slug = $1
       AND r.state IN ('published', 'sealed')
-    ORDER BY r.version DESC
+    ORDER BY r.version DESC, o.created_at DESC NULLS LAST, o.id
     LIMIT 1;
   `;
 
@@ -161,45 +90,25 @@ export async function getCollectionOfferDetails(
     totalMinutes: r.total_minutes,
   }));
 
-  // 3. Determine user ownership state
+  // What is on sale right now; the Buy button sends it back so checkout can refuse a stale page.
+  const { loadCheckoutExpectation } = await import("./collection-reservation");
+  const expected = await loadCheckoutExpectation(coll.collection_id);
+
+  // 3. Ownership covers every release of the collection, so a buyer of an earlier release still owns it.
   let ownershipState: OwnershipStatus = "unauthenticated";
-
   if (userId) {
-    const entitlementQuery = `
-      SELECT state
-      FROM public.access_entitlements
-      WHERE user_id = $1
-        AND release_id = $2
-        AND state = 'active'
-        AND valid_from <= now()
-        AND (expires_at IS NULL OR expires_at > now())
-        AND revoked_at IS NULL;
-    `;
-    const { rows: entRows } = await pool.query(entitlementQuery, [userId, coll.release_id]);
-
-    if (entRows.length > 0) {
-      ownershipState = "owned";
-    } else {
-      // Check for pending/open order attempt
-      const attemptQuery = `
-        SELECT attempt_state
-        FROM private.purchase_orders
-        WHERE user_id = $1
-          AND release_id = $2
-          AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-        LIMIT 1;
-      `;
-      const { rows: attRows } = await pool.query(attemptQuery, [userId, coll.release_id]);
-      if (attRows.length > 0) {
-        ownershipState = "pending_payment";
-      } else {
-        ownershipState = "not_owned";
-      }
-    }
+    const { getCollectionCustomerState } = await import("@/lib/collections/customer-state");
+    const state = await getCollectionCustomerState(coll.collection_id, userId);
+    ownershipState = state.ok ? state.value.ownership : "unavailable";
   }
 
-  const basePriceMinor = coll.base_minor_amount || 1500;
-  const currency = coll.currency || "usd";
+  // The price shown is the price of the offer checkout would charge (the one collection_sellable picks).
+  const sold = expected
+    ? (await pool.query("SELECT base_minor_amount, currency, terms_version FROM private.commercial_offers WHERE id = $1",
+      [expected.offerId])).rows[0]
+    : undefined;
+  const basePriceMinor = sold?.base_minor_amount ?? (coll.base_minor_amount || 1500);
+  const currency = sold?.currency ?? (coll.currency || "usd");
 
   return {
     collectionId: coll.collection_id,
@@ -211,162 +120,10 @@ export async function getCollectionOfferDetails(
     currency,
     formattedPrice: formatPrice(basePriceMinor, currency),
     saleEnabled: Boolean(coll.sale_enabled),
-    termsVersion: coll.terms_version || "2026-09-v1",
+    termsVersion: sold?.terms_version ?? (coll.terms_version || "2026-09-v1"),
     ownershipState,
+    expected,
     recipes,
-  };
-}
-
-export async function getUserActiveEntitlement(
-  userId: string,
-  releaseId: string
-): Promise<boolean> {
-  const pool = getCommercePool();
-  const query = `
-    SELECT 1
-    FROM public.access_entitlements
-    WHERE user_id = $1
-      AND release_id = $2
-      AND state = 'active'
-      AND valid_from <= now()
-      AND (expires_at IS NULL OR expires_at > now())
-      AND revoked_at IS NULL;
-  `;
-  const { rows } = await pool.query(query, [userId, releaseId]);
-  return rows.length > 0;
-}
-
-export async function getActiveOrderAttempt(
-  userId: string,
-  releaseId: string
-): Promise<PurchaseOrder | null> {
-  const pool = getCommercePool();
-  const query = `
-    SELECT
-      id,
-      support_reference,
-      owner_principal,
-      user_id,
-      offer_id,
-      release_id,
-      snapshot,
-      attempt_state,
-      session_id,
-      checkout_url,
-      idempotency_key,
-      version,
-      created_at,
-      updated_at
-    FROM private.purchase_orders
-    WHERE user_id = $1
-      AND release_id = $2
-      AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-    ORDER BY created_at DESC
-    LIMIT 1;
-  `;
-  const { rows } = await pool.query(query, [userId, releaseId]);
-  if (rows.length === 0) return null;
-  const r = rows[0];
-  return {
-    id: r.id,
-    supportReference: r.support_reference,
-    ownerPrincipal: r.owner_principal,
-    userId: r.user_id,
-    offerId: r.offer_id,
-    releaseId: r.release_id,
-    snapshot: r.snapshot,
-    attemptState: r.attempt_state,
-    sessionId: r.session_id,
-    checkoutUrl: r.checkout_url,
-    idempotencyKey: r.idempotency_key,
-    version: r.version,
-    createdAt: r.created_at.toISOString(),
-    updatedAt: r.updated_at.toISOString(),
-  };
-}
-
-export async function reservePurchaseOrder(params: {
-  userId: string;
-  offerId: string;
-  releaseId: string;
-  snapshot: Record<string, unknown>;
-  idempotencyKey: string;
-}): Promise<PurchaseOrder> {
-  const pool = getCommercePool();
-  const supportRef = "MCH-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  const insertWithReuseQuery = `
-    INSERT INTO private.purchase_orders (
-      support_reference,
-      owner_principal,
-      user_id,
-      offer_id,
-      release_id,
-      snapshot,
-      attempt_state,
-      idempotency_key
-    ) VALUES ($1, $2, $2, $3, $4, $5, 'creating', $6)
-    ON CONFLICT (user_id, release_id)
-      WHERE attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-      DO NOTHING
-    RETURNING
-      id,
-      support_reference,
-      owner_principal,
-      user_id,
-      offer_id,
-      release_id,
-      snapshot,
-      attempt_state,
-      session_id,
-      checkout_url,
-      idempotency_key,
-      version,
-      created_at,
-      updated_at;
-  `;
-
-  const { rows: insertedRows } = await pool.query(insertWithReuseQuery, [
-    supportRef,
-    params.userId,
-    params.offerId,
-    params.releaseId,
-    JSON.stringify(params.snapshot),
-    params.idempotencyKey,
-  ]);
-
-  let r = insertedRows[0];
-  if (!r) {
-    const existing = await pool.query(
-      `SELECT id, support_reference, owner_principal, user_id, offer_id, release_id,
-              snapshot, attempt_state, session_id, checkout_url, idempotency_key,
-              version, created_at, updated_at
-       FROM private.purchase_orders
-       WHERE user_id = $1 AND release_id = $2
-         AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-       ORDER BY created_at DESC
-       LIMIT 1`,
-      [params.userId, params.releaseId]
-    );
-    r = existing.rows[0];
-    if (!r) throw new Error("Unable to reserve or reuse the checkout attempt.");
-  }
-
-  return {
-    id: r.id,
-    supportReference: r.support_reference,
-    ownerPrincipal: r.owner_principal,
-    userId: r.user_id,
-    offerId: r.offer_id,
-    releaseId: r.release_id,
-    snapshot: r.snapshot,
-    attemptState: r.attempt_state,
-    sessionId: r.session_id,
-    checkoutUrl: r.checkout_url,
-    idempotencyKey: r.idempotency_key,
-    version: r.version,
-    createdAt: r.created_at.toISOString(),
-    updatedAt: r.updated_at.toISOString(),
   };
 }
 
@@ -506,65 +263,14 @@ export async function getUserPurchasedCollections(userId: string): Promise<
     recipes: Array<{ id: string; slug: string; title: string; previewImagePath: string; totalMinutes: number | null }>;
   }>
 > {
-  const pool = getCommercePool();
-  const query = `
-    SELECT
-      c.id as collection_id,
-      c.slug,
-      c.title,
-      c.public_summary,
-      cr.id as release_id,
-      cr.version as release_version,
-      ae.state as entitlement_state,
-      ae.valid_from
-    FROM public.access_entitlements ae
-    JOIN public.collection_releases cr ON cr.id = ae.release_id
-    JOIN public.recipe_collections c ON c.id = cr.collection_id
-    WHERE ae.user_id = $1
-      AND ae.state = 'active'
-      AND ae.valid_from <= now()
-      AND (ae.expires_at IS NULL OR ae.expires_at > now())
-      AND ae.revoked_at IS NULL
-    ORDER BY ae.valid_from DESC;
-  `;
-
-  const { rows: collRows } = await pool.query(query, [userId]);
-  const results = [];
-
-  for (const coll of collRows) {
-    const recQuery = `
-      SELECT
-        rc.id,
-        rc.slug,
-        rc.title,
-        rc.preview_image_path,
-        rc.total_minutes
-      FROM public.collection_recipes cr
-      JOIN public.recipe_catalog rc ON rc.id = cr.recipe_id
-      WHERE cr.release_id = $1
-        AND rc.publication_state = 'published'
-      ORDER BY cr.position ASC;
-    `;
-    const { rows: recipeRows } = await pool.query(recQuery, [coll.release_id]);
-    results.push({
-      collectionId: coll.collection_id,
-      slug: coll.slug,
-      title: coll.title,
-      summary: coll.public_summary,
-      releaseVersion: coll.release_version,
-      entitlementState: coll.entitlement_state,
-      validFrom: coll.valid_from.toISOString(),
-      recipes: recipeRows.map((r) => ({
-        id: r.id,
-        slug: r.slug,
-        title: r.title,
-        previewImagePath: r.preview_image_path,
-        totalMinutes: r.total_minutes,
-      })),
-    });
-  }
-
-  return results;
+  // One entry per owned collection with the recipes the access resolver grants, including approved
+  // additions from later releases. The resolver is the same one recipe-body policies use.
+  const { rows } = await getCommercePool().query("SELECT private.user_collection_library($1) AS library", [userId]);
+  return (rows[0]?.library ?? []) as Array<{
+    collectionId: string; slug: string; title: string; summary: string; releaseVersion: number;
+    entitlementState: string; validFrom: string;
+    recipes: Array<{ id: string; slug: string; title: string; previewImagePath: string; totalMinutes: number | null }>;
+  }>;
 }
 
 export async function recordPaymentAndGrantAccess(params: {

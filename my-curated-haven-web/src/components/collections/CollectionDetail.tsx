@@ -22,6 +22,8 @@ export interface DetailModel {
   refresh: string | null;
   price: string;
   offer: CollectionOfferDto | null;
+  /** The commerce lookup failed: say so instead of "Opening soon", and infer nothing about price or ownership. */
+  commerceUnavailable?: boolean;
   recipes: readonly CollectionRecipe[];
 }
 
@@ -108,11 +110,12 @@ export function DetailHero({ model }: { model: DetailModel }) {
                   collectionSlug={offer.collectionSlug}
                   formattedPrice={offer.formattedPrice}
                   ownershipState={offer.ownershipState}
+                  expected={offer.expected}
                   appearance="cloth"
                 />
               ) : (
                 <span className="cl-button" aria-disabled="true">
-                  Opening soon
+                  {model.commerceUnavailable ? "Purchase unavailable right now" : "Opening soon"}
                 </span>
               )}
             </div>
@@ -123,6 +126,8 @@ export function DetailHero({ model }: { model: DetailModel }) {
                 <>
                   Not sure yet? <Link href="/recipes">Cook a free recipe first</Link>.
                 </>
+              ) : model.commerceUnavailable ? (
+                "We could not load checkout just now. Please refresh in a moment."
               ) : (
                 <>
                   This collection is being finished. Meanwhile, <Link href="/recipes">cook a free recipe</Link>.

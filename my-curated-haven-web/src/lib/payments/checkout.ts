@@ -1,21 +1,17 @@
 import crypto from "crypto";
 import { canUseMockCheckout, getStripeConfig, isStripeConfigured } from "./config";
 import { getStripeClient } from "./stripe";
-import {
-  getCommercialOfferBySlug,
-  getUserActiveEntitlement,
-  getActiveOrderAttempt,
-  reservePurchaseOrder,
-  bindSessionToOrder,
-  recordCheckoutMeasurement,
-} from "./repository";
-import type { CheckoutResult } from "./types";
+import { bindSessionToOrder, recordCheckoutMeasurement } from "./repository";
+import { findCollectionIdBySlug, reserveCollectionOrder } from "./collection-reservation";
+import type { CheckoutExpectation, CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
 import { reusableCheckoutUrl } from "./guardrails";
 
 export interface CreateCheckoutParams {
   collectionSlug: string;
+  /** What the buyer's page showed for sale; a mismatch returns "stale" instead of charging. */
+  expected: CheckoutExpectation | null;
   user: {
     id: string;
     email?: string;
@@ -27,6 +23,7 @@ export interface CreateCheckoutParams {
 
 export async function createCheckoutSession({
   collectionSlug,
+  expected,
   user,
   requestOrigin,
   analyticsConsent = false,
@@ -42,47 +39,42 @@ export async function createCheckoutSession({
     };
   }
 
-  // 1. Resolve offer
-  const resolved = await getCommercialOfferBySlug(collectionSlug);
-  if (!resolved) {
+  // 1. Reserve or reuse the order under the collection lock. Ownership covers every release, and an
+  //    unresolved attempt for any release is reused with its own frozen snapshot.
+  const collectionId = await findCollectionIdBySlug(collectionSlug);
+  if (!collectionId) {
+    return { status: "error", message: "This collection is not currently available for purchase.", code: "OFFER_NOT_FOUND" };
+  }
+  const reservation = await reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID());
+  if (reservation.state === "owned") return { status: "already_owned", collectionSlug };
+  if (reservation.state === "stale") return { status: "stale", expected: reservation.expected };
+  if (reservation.state === "unavailable") {
+    return { status: "error", message: "This collection is not currently available for purchase.", code: "OFFER_NOT_FOUND" };
+  }
+  if (reservation.state === "review_required") {
     return {
       status: "error",
-      message: "This collection is not currently available for purchase.",
-      code: "OFFER_NOT_FOUND",
+      message: "An earlier checkout for this collection needs a quick check. Please contact support before buying again.",
+      code: "CHECKOUT_REVIEW_REQUIRED",
     };
   }
+  const order = reservation.order;
 
-  const { offer, releaseId } = resolved;
-
-  // 2. Fast check: is user already entitled?
-  const isEntitled = await getUserActiveEntitlement(user.id, releaseId);
-  if (isEntitled) {
-    return {
-      status: "already_owned",
-      collectionSlug,
-    };
-  }
-
-  // 3. Check for reusable open attempt
-  const existingAttempt = await getActiveOrderAttempt(user.id, releaseId);
-  if (existingAttempt && existingAttempt.sessionId && existingAttempt.attemptState === "open") {
+  // 2. An open attempt with a session is reused as it is.
+  if (order.sessionId && order.attemptState === "open") {
     let retrievedUrl: string | null = null;
-    if (!existingAttempt.checkoutUrl) {
-      if (isStripeConfigured() && !existingAttempt.sessionId.startsWith("cs_test_mock_")) {
-        const session = await getStripeClient().checkout.sessions.retrieve(
-          existingAttempt.sessionId
-        );
+    if (!order.checkoutUrl) {
+      if (isStripeConfigured() && !order.sessionId.startsWith("cs_test_mock_")) {
+        const session = await getStripeClient().checkout.sessions.retrieve(order.sessionId);
         retrievedUrl = session.url;
-      } else if (canUseMockCheckout() && existingAttempt.sessionId.startsWith("cs_test_mock_")) {
-        retrievedUrl = `/checkout/return?session_id=${encodeURIComponent(existingAttempt.sessionId)}`;
+      } else if (canUseMockCheckout() && order.sessionId.startsWith("cs_test_mock_")) {
+        retrievedUrl = `/checkout/return?session_id=${encodeURIComponent(order.sessionId)}`;
       }
-
       if (retrievedUrl) {
-        await bindSessionToOrder(existingAttempt.id, existingAttempt.sessionId, retrievedUrl);
+        await bindSessionToOrder(order.id, order.sessionId, retrievedUrl);
       }
     }
-
-    const checkoutUrl = reusableCheckoutUrl(existingAttempt.checkoutUrl, retrievedUrl);
+    const checkoutUrl = reusableCheckoutUrl(order.checkoutUrl, retrievedUrl);
     if (!checkoutUrl) {
       return {
         status: "error",
@@ -90,34 +82,14 @@ export async function createCheckoutSession({
         code: "CHECKOUT_URL_UNAVAILABLE",
       };
     }
-
-    return {
-      status: "success",
-      checkoutUrl,
-      supportReference: existingAttempt.supportReference,
-    };
+    return { status: "success", checkoutUrl, supportReference: order.supportReference };
   }
 
-  // 4. Reserve order attempt in database
-  const idempotencyKey = crypto.randomUUID();
-  const snapshot = {
-    offer_id: offer.id,
-    release_id: releaseId,
-    price_id: offer.providerPriceId,
-    price_minor: offer.baseMinorAmount,
-    currency: offer.currency,
-    provider_account_id: offer.providerAccountId,
-    provider_mode: offer.providerMode,
-    terms_version: offer.termsVersion,
-  };
-
-  const order = await reservePurchaseOrder({
-    userId: user.id,
-    offerId: offer.id,
-    releaseId,
-    snapshot,
-    idempotencyKey,
-  });
+  // 3. Otherwise create the provider session from the order's frozen snapshot, never the live offer row.
+  const priceId = typeof order.snapshot.price_id === "string" ? order.snapshot.price_id : null;
+  if (!priceId) {
+    return { status: "error", message: "This checkout needs support to finish. Please contact us.", code: "CHECKOUT_SNAPSHOT_INCOMPLETE" };
+  }
 
   const origin = requestOrigin || config.appOrigin;
   let sessionId: string;
@@ -131,7 +103,7 @@ export async function createCheckoutSession({
         payment_method_types: ["card"],
         line_items: [
           {
-            price: offer.providerPriceId,
+            price: priceId,
             quantity: 1,
           },
         ],
@@ -139,8 +111,8 @@ export async function createCheckoutSession({
         client_reference_id: order.id,
         metadata: {
           order_id: order.id,
-          release_id: releaseId,
-          offer_id: offer.id,
+          release_id: order.releaseId,
+          offer_id: order.offerId,
         },
         success_url: `${origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/checkout/cancel?order_id=${order.id}`,

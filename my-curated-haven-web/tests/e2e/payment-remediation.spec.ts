@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { POST as stripeWebhookPost } from "@/app/api/stripe/webhook/route";
 import { canUseMockCheckout, getStripeConfig } from "@/lib/payments/config";
 import { getCommercePool } from "@/lib/payments/repository";
-import { resolveCommerceDatabaseConnectionString } from "@/lib/payments/database-config";
+import { commerceDatabaseConfigured, resolveCommerceDatabaseConnectionString } from "@/lib/payments/database-config";
 import { constructWebhookEvent } from "@/lib/payments/stripe";
 import {
   paymentCaptureMatchesSnapshot,
@@ -124,6 +124,14 @@ test.describe("Payment remediation guardrails", () => {
         COMMERCE_DATABASE_URL: "https://db.example.com/postgres",
       }),
     ).toThrow("Commerce database URL must identify a PostgreSQL database.");
+  });
+
+  test("a deployment without COMMERCE_DATABASE_URL reads as not configured, never as an outage", () => {
+    expect(commerceDatabaseConfigured({ VERCEL_ENV: "production" })).toBe(false);
+    expect(commerceDatabaseConfigured({ VERCEL_ENV: "production", COMMERCE_DATABASE_URL: "  " })).toBe(false);
+    expect(commerceDatabaseConfigured({ VERCEL_ENV: "production",
+      COMMERCE_DATABASE_URL: "postgresql://commerce@db.project-ref.supabase.co:5432/postgres" })).toBe(true);
+    expect(commerceDatabaseConfigured({})).toBe(true);
   });
 
   test("P8-R1: production rejects an unsigned paid event before database access", async () => {

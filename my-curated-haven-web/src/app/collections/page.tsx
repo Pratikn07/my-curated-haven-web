@@ -6,12 +6,12 @@ import { SERIES, SHELVES } from "@/config/collections";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { featuredSlug, toBookcaseEntry } from "@/lib/collections/bookcase";
 import type { SeriesKey } from "@/lib/collections/types";
-import { listShowroomCollections, loadLiveOffer } from "@/lib/data/collections-showroom";
+import { listPublishedCollections, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 
 /**
  * The bookcase: every collection as a cloth book on its shelf, found by the
  * age a parent is cooking for and by filter chips (concepts approved
- * 2026-10-06). Books with enough recipes open to their own page; the rest stand
+ * 2026-10-06). Books marked open have their own page; the rest stand
  * greyed out as "coming soon". The first showroom stays at /collections/test.
  * Nothing depends on who is signed in, so the page is built once an hour.
  */
@@ -34,11 +34,11 @@ export const metadata: Metadata = {
 };
 
 export default async function CollectionsPage() {
-  const collections = listShowroomCollections();
+  const collections = (await listPublishedCollections()).map((published) => published.collection);
   if (collections.length === 0) notFound();
 
   const offers = await Promise.all(
-    collections.map((collection) => (collection.availability === "open" ? loadLiveOffer(collection.slug) : Promise.resolve(null)))
+    collections.map(async (collection) => (collection.availability === "open" ? offerOrNull(await loadLiveOffer(collection.slug)) : null))
   );
   const entries = collections.map((collection, index) =>
     toBookcaseEntry(collection, offers[index]?.formattedPrice ?? collection.placeholderPrice)

@@ -11,6 +11,7 @@ import type { AdminRecipeOperation } from "@/lib/admin/receipts";
 import {
   loadImpactAction,
   loadRecipeOperationsAction,
+  publishRecipeCorrectionAction,
   publishRevisionAction,
   recordFailureAction,
   refreshRecipeAction,
@@ -27,6 +28,7 @@ export default function AdminRecipePublication({
   context,
   onChanged,
   mode = "publish",
+  correction = false,
   publicationBlocked = false,
   initialImpactToken = null,
   recoveryReceipt = null,
@@ -35,6 +37,8 @@ export default function AdminRecipePublication({
   context: AdminContext;
   onChanged?: () => void;
   mode?: "publish" | "withdraw";
+  /** Publish as an acknowledged correction to a recipe people have bought. */
+  correction?: boolean;
   publicationBlocked?: boolean;
   initialImpactToken?: string | null;
   recoveryReceipt?: AdminRecipeOperation | null;
@@ -42,6 +46,7 @@ export default function AdminRecipePublication({
   const [reason, setReason] = useState("");
   const [emergency, setEmergency] = useState(false);
   const [acknowledge, setAcknowledge] = useState(false);
+  const [acknowledgeGlobal, setAcknowledgeGlobal] = useState(false);
   const [confirming, setConfirming] = useState<"publish" | "withdraw" | null>(null);
   const [impactToken, setImpactToken] = useState<string | null>(null);
   const [impactBase, setImpactBase] = useState<{ contentVersion: number | null; activeHash: string } | null>(null);
@@ -88,17 +93,20 @@ export default function AdminRecipePublication({
     setPending(true);
     const operationId = crypto.randomUUID();
     let result: Awaited<ReturnType<typeof publishRevisionAction>>;
+    const command = {
+      operationId,
+      recipeId: detail.active.recipeId,
+      reason: reason.trim(),
+      revisionId: working.id,
+      expectedVersion: working.version,
+      expectedDigest: working.digest,
+      base: working.base,
+      impactToken,
+    };
     try {
-      result = await publishRevisionAction({
-        operationId,
-        recipeId: detail.active.recipeId,
-        reason: reason.trim(),
-        revisionId: working.id,
-        expectedVersion: working.version,
-        expectedDigest: working.digest,
-        base: working.base,
-        impactToken,
-      });
+      result = correction
+        ? await publishRecipeCorrectionAction({ ...command, correctionKind: "same_recipe", acknowledgeGlobalImpact: true })
+        : await publishRevisionAction(command);
     } catch {
       setPending(false);
       setConfirming(null);
@@ -117,11 +125,11 @@ export default function AdminRecipePublication({
       }
       return;
     }
-    const refresh = await refreshRecipeAction(result.value, { slug: detail.active.slug });
+    const refresh = await refreshRecipeAction(result.value);
     setPending(false);
     setConfirming(null);
     if (refresh.state === "complete") {
-      setStatus("Published.");
+      setStatus(correction ? "Correction published." : "Published.");
     } else {
       setPendingOp(operationId);
       setStatus("Saved; display refresh pending.");
@@ -204,7 +212,7 @@ export default function AdminRecipePublication({
       }
       return;
     }
-    const refresh = await refreshRecipeAction(result.value, { slug: detail.active.slug });
+    const refresh = await refreshRecipeAction(result.value);
     setConfirming(null);
     if (refresh.state === "complete") {
       setStatus("Withdrawn.");
@@ -248,10 +256,22 @@ export default function AdminRecipePublication({
             </p>
           ) : null}
           {campaignCount > 0 ? <p>Affected campaigns: {campaignCount}</p> : null}
+          {correction ? (
+            <label htmlFor="publish-correction-ack">
+              <input
+                id="publish-correction-ack"
+                type="checkbox"
+                checked={acknowledgeGlobal}
+                onChange={(e) => setAcknowledgeGlobal(e.target.checked)}
+                disabled={!hydrated || confirming === "publish"}
+              />
+              I understand this corrects the recipe for everyone who can open it, including existing buyers
+            </label>
+          ) : null}
           {confirming === "publish" ? (
             <div role="dialog" aria-label="Confirm publication">
               <p>
-                Publish version {working?.version} ({changedFields.join(", ") || "no field changes"})
+                {correction ? "Publish this correction as" : "Publish"} version {working?.version} ({changedFields.join(", ") || "no field changes"})
                 {releases.length > 0
                   ? ` affecting ${releases.length} release(s)`
                   : ""}
@@ -268,7 +288,7 @@ export default function AdminRecipePublication({
                 onClick={executePublish}
                 disabled={pending || reason.trim().length === 0}
               >
-                Confirm publication
+                {correction ? "Confirm correction" : "Confirm publication"}
               </button>
               <button
                 type="button"
@@ -282,8 +302,9 @@ export default function AdminRecipePublication({
               </button>
             </div>
           ) : (
-            <button type="button" onClick={confirmPublish} disabled={!hydrated || pending || publicationBlocked || Boolean(pendingOp)}>
-              Publish this revision
+            <button type="button" onClick={confirmPublish}
+              disabled={!hydrated || pending || publicationBlocked || Boolean(pendingOp) || (correction && !acknowledgeGlobal)}>
+              {correction ? "Publish correction" : "Publish this revision"}
             </button>
           )}
         </div>

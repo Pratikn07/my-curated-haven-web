@@ -11,7 +11,7 @@ import {
   type ShowroomEntry,
 } from "@/components/collections/Showroom";
 import { SITE_ORIGIN } from "@/config/site-navigation";
-import { listShowroomChapters, loadLiveOffer } from "@/lib/data/collections-showroom";
+import { listPublishedShowroomChapters, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import { getFreeRecipeCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
 import { createPublicClient } from "@/lib/supabase/public";
 
@@ -54,11 +54,11 @@ async function loadFreeRecipes(): Promise<RecipeCatalogItem[]> {
 }
 
 export default async function CollectionsPage() {
-  const collections = listShowroomChapters();
+  const collections = (await listPublishedShowroomChapters()).map((published) => published.collection);
   if (collections.length === 0) notFound();
 
   const [offers, freeRecipes] = await Promise.all([
-    Promise.all(collections.map((collection) => loadLiveOffer(collection.slug))),
+    Promise.all(collections.map(async (collection) => offerOrNull(await loadLiveOffer(collection.slug)))),
     loadFreeRecipes(),
   ]);
   const entries: ShowroomEntry[] = collections.map((collection, index) => ({

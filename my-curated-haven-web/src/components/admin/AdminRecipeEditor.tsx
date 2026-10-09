@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { Base, RecipeSnapshot, Revision } from "@/lib/admin/contracts";
 import { diffSnapshots } from "@/lib/admin/snapshot";
+import { tagLabel, type TagCategory } from "@/lib/admin/recipe-tags";
 import {
   rebaseDraftAction,
   refreshDraftAction,
@@ -13,6 +13,7 @@ import {
 } from "@/lib/admin/actions";
 import AdminRecipeCompare from "./AdminRecipeCompare";
 import AdminRecipeAssets, { useAdminAssets } from "./AdminRecipeAssets";
+import { useUnsavedGuard } from "./useUnsavedGuard";
 
 type Ingredient = { item: string; amount?: string; unit?: string; [key: string]: unknown };
 type Step = { step: number; text: string; [key: string]: unknown };
@@ -46,6 +47,44 @@ function withBody(prev: RecipeSnapshot, patch: Record<string, unknown>): RecipeS
   return { ...prev, body: { ...prev.body, ...patch } as RecipeSnapshot["body"] };
 }
 
+type Tags = NonNullable<RecipeSnapshot["tags"]>;
+
+/** Reviewed global tags, chosen from the existing vocabulary only. Absent until the recipe's tags are imported. */
+function TagFields({ tags, vocabulary, onChange }: {
+  tags: RecipeSnapshot["tags"];
+  vocabulary: TagCategory[] | null;
+  onChange: (tags: Tags) => void;
+}) {
+  if (tags === undefined) return <p>Tags have not been imported for this recipe yet.</p>;
+  if (!vocabulary) return <p role="status">The tag vocabulary is unavailable, so tags cannot be changed right now.</p>;
+  return <fieldset className="admin-editor__tags">
+    <legend>Tags</legend>
+    <p>Tags belong to the recipe: a change applies in every collection that includes it.</p>
+    {vocabulary.map((category) => {
+      const value = tags[category.category];
+      if (!category.multiple) {
+        return <label key={category.category}>{tagLabel(category.category)}
+          <select value={typeof value === "string" ? value : ""}
+            onChange={(e) => onChange({ ...tags, [category.category]: e.target.value || null })}>
+            <option value="">None</option>
+            {category.values.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </label>;
+      }
+      const list = Array.isArray(value) ? value : [];
+      return <fieldset key={category.category} className="admin-editor__tag-group">
+        <legend>{tagLabel(category.category)}</legend>
+        {category.values.map((option) => <label key={option}>
+          <input type="checkbox" checked={list.includes(option)}
+            onChange={(e) => onChange({ ...tags, [category.category]: e.target.checked
+              ? [...list, option] : list.filter((item) => item !== option) })} />
+          {option}
+        </label>)}
+      </fieldset>;
+    })}
+  </fieldset>;
+}
+
 function asJson(value: unknown): import("@/lib/types/database").Json {
   return value as import("@/lib/types/database").Json;
 }
@@ -55,11 +94,13 @@ export default function AdminRecipeEditor({
   active,
   base,
   returnTo,
+  vocabulary,
 }: {
   initial: Revision;
   active: RecipeSnapshot;
   base: Base;
   returnTo: string;
+  vocabulary: TagCategory[] | null;
 }) {
   const [candidate, setCandidate] = useState<RecipeSnapshot>(() =>
     JSON.parse(JSON.stringify(initial.snapshot))
@@ -79,64 +120,12 @@ export default function AdminRecipeEditor({
   const [showCompare, setShowCompare] = useState(false);
   const [needsRebase, setNeedsRebase] = useState(false);
   const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
-  const [leaveHref, setLeaveHref] = useState<string | null>(null);
-  const allowLeaving = useRef(false);
-  const leaveDialog = useRef<HTMLDialogElement>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const dialog = leaveDialog.current;
-    if (!leaveHref || !dialog) return;
-    dialog.showModal();
-    return () => { if (dialog.open) dialog.close(); };
-  }, [leaveHref]);
-
   const dirty = useMemo(
     () => JSON.stringify(candidate) !== JSON.stringify(revision.snapshot),
     [candidate, revision.snapshot]
   );
 
-  useEffect(() => {
-    if (!dirty) return;
-    const handler = (event: BeforeUnloadEvent) => {
-      if (allowLeaving.current) return;
-      event.preventDefault();
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [dirty]);
-
-  useEffect(() => {
-    if (!dirty) return;
-    const guardLink = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      const link = target.closest("a[href]");
-      if (!(link instanceof HTMLAnchorElement) || link.hasAttribute("download") || link.target === "_blank") return;
-      let destination: URL;
-      try { destination = new URL(link.href); } catch { return; }
-      const here = window.location;
-      if (destination.origin === here.origin && destination.pathname === here.pathname && destination.search === here.search) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setLeaveHref(destination.href);
-    };
-    document.addEventListener("click", guardLink, true);
-    return () => document.removeEventListener("click", guardLink, true);
-  }, [dirty]);
-
-  function discardAndLeave() {
-    if (!leaveHref) return;
-    const destination = new URL(leaveHref);
-    allowLeaving.current = true;
-    setLeaveHref(null);
-    if (destination.origin === window.location.origin) {
-      router.push(`${destination.pathname}${destination.search}${destination.hash}`);
-    } else {
-      window.location.assign(destination.href);
-    }
-  }
+  const guard = useUnsavedGuard(dirty, "recipe");
 
   const needsReopen =
     (initial.state === "submitted" || initial.state === "approved") && dirty;
@@ -310,11 +299,7 @@ export default function AdminRecipeEditor({
   return (
     <div className="admin-editor">
       <Link href={returnTo}>Back to recipes</Link>
-      {leaveHref ? <dialog ref={leaveDialog} className="admin-editor__leave" aria-label="Unsaved recipe changes" onClose={() => setLeaveHref(null)}>
-        <p>You have unsaved recipe changes. Discard them and leave this page?</p>
-        <button type="button" autoFocus onClick={() => setLeaveHref(null)}>Stay and keep editing</button>
-        <button type="button" onClick={discardAndLeave}>Discard changes</button>
-      </dialog> : null}
+      {guard.dialog}
       <h1>Edit draft: {active.catalog.title}</h1>
       <p>
         Recipe {initial.recipeId} · working version {expectedVersion} · base {currentBase.activeHash.slice(0, 12)}
@@ -386,6 +371,9 @@ export default function AdminRecipeEditor({
           })
         }
       />
+
+      <TagFields tags={candidate.tags} vocabulary={vocabulary}
+        onChange={(tags) => setCandidate((prev) => ({ ...prev, tags }))} />
 
       {candidate.body ? (
         <>

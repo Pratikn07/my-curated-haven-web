@@ -13,6 +13,8 @@ const LABELS: Record<string, string> = {
   "revision.publish": "Revision published",
   "recipe.publish": "Recipe published",
   "recipe.withdraw": "Recipe withdrawn",
+  "recipe.correct": "Correction published",
+  "recipe.emergency_withdraw": "Recipe withdrawn in an emergency",
   "asset.check": "Image availability checked",
 };
 

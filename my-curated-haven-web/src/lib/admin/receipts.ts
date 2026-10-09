@@ -1,7 +1,7 @@
 export type AdminRecipeOperation = {
   operationId: string;
   recipeId: string;
-  action: "revision.publish" | "recipe.withdraw";
+  action: "revision.publish" | "recipe.withdraw" | "recipe.correct";
   revisionId: string | null;
   version: number;
   digest: string;
@@ -22,7 +22,7 @@ export function decodeAdminRecipeOperations(data: unknown, recipeId: string): Ad
   if (!Array.isArray(data) || data.length > 10) throw new Error("Invalid receipt list");
   return data.map((item): AdminRecipeOperation => {
     if (!record(item) || !uuid(item.operationId) || item.recipeId !== recipeId ||
-      (item.action !== "revision.publish" && item.action !== "recipe.withdraw") ||
+      (item.action !== "revision.publish" && item.action !== "recipe.withdraw" && item.action !== "recipe.correct") ||
       (item.revisionId !== null && !uuid(item.revisionId)) ||
       !Number.isInteger(item.version) || Number(item.version) < 0 ||
       typeof item.digest !== "string" || typeof item.noChange !== "boolean" ||

@@ -7,7 +7,7 @@ import { SERIES } from "@/config/collections";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { STAGE_OPTIONS, fitsStage, stageLabel } from "@/lib/collections/bookcase";
 import type { SeriesKey } from "@/lib/collections/types";
-import { listShowroomCollections, loadLiveOffer } from "@/lib/data/collections-showroom";
+import { listPublishedCollections, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 
 interface SeriesPageProps {
   params: Promise<{ series: string }>;
@@ -43,12 +43,12 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
   const { series } = await params;
   if (!isSeriesKey(series)) notFound();
   const info = SERIES[series];
-  const volumes = listShowroomCollections()
+  const volumes = (await listPublishedCollections()).map((published) => published.collection)
     .filter((collection) => collection.series?.key === series)
     .sort((a, b) => (a.series?.volume ?? 0) - (b.series?.volume ?? 0));
   if (volumes.length === 0) notFound();
 
-  const offers = await Promise.all(volumes.map((v) => (v.availability === "open" ? loadLiveOffer(v.slug) : Promise.resolve(null))));
+  const offers = await Promise.all(volumes.map(async (v) => (v.availability === "open" ? offerOrNull(await loadLiveOffer(v.slug)) : null)));
   // Which age band each volume answers to, for the "Your child is here" marker.
   const stops = volumes.map((volume) => STAGE_OPTIONS.find((option) => option.key !== "all" && fitsStage(volume.stage, option.key))?.key ?? null);
   const allOpen = volumes.every((volume) => volume.availability === "open");

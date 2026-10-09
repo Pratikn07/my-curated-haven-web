@@ -16,7 +16,7 @@ export function listShowroomCollections(): readonly ShowroomCollection[] {
   return SHOWROOM_COLLECTIONS.filter((collection) => collection.status === "published" || !isProduction());
 }
 
-/** Collections with their own page: enough recipes to open. */
+/** Collections with their own page: availability "open", chosen per collection (no recipe-count rule). */
 export function listOpenCollections(): readonly ShowroomCollection[] {
   return listShowroomCollections().filter((collection) => collection.availability === "open");
 }
@@ -45,6 +45,7 @@ export function hasShowroomCollections(): boolean {
 export function collectionFacts(collection: Pick<ShowroomCollection, "recipes">): string[] {
   const { recipes } = collection;
   const facts = [recipeCount(recipes.length)];
+  if (recipes.length === 0) return facts; // "all ..." would be vacuously true of an empty book.
   const timed = recipes.filter((recipe) => recipe.minutes !== null);
   const underHour = timed.filter((recipe) => (recipe.minutes ?? 0) <= 60).length;
   if (timed.length === recipes.length && underHour === recipes.length) facts.push("all under an hour");

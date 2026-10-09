@@ -1,14 +1,16 @@
 import type { MetadataRoute } from "next";
 import { SITE_ORIGIN, indexableRoutes, linksFor } from "@/config/site-navigation";
 import { SERIES } from "@/config/collections";
-import { listOpenCollections } from "@/lib/collections/visibility";
+import { listOpenPublishedCollections } from "@/lib/collections/publication";
 import { createClient } from "@/lib/supabase/server";
 import { getFreeRecipeCatalog } from "@/lib/data/recipes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const defaultDate = new Date("2026-09-22");
 
-  const collections = listOpenCollections();
+  // Not caught: in registry mode a failed read fails this regeneration, so the last good sitemap keeps
+  // serving instead of being replaced by one without the collections.
+  const collections = (await listOpenPublishedCollections()).map((published) => published.collection);
   const staticEntries: MetadataRoute.Sitemap = [
     ...linksFor(indexableRoutes, collections.length > 0).map((route) => ({
       url: `${SITE_ORIGIN}${route.path}`,

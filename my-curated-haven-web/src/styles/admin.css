@@ -70,7 +70,17 @@
 .admin-console__nav {
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
+}
+
+.admin-console__nav-group {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
+}
+
+.admin-console__nav-group .admin-console__rail-label {
+  margin: 0;
 }
 
 .admin-console__nav-link {
@@ -236,7 +246,7 @@
   display: grid;
   gap: var(--space-2);
   margin: var(--space-2) 0 var(--space-4);
-  padding-left: var(--space-5);
+  padding-left: var(--space-6);
 }
 
 .admin-review__form {
@@ -472,11 +482,11 @@
 }
 
 .admin-history {
-  margin-top: var(--space-5);
+  margin-top: var(--space-6);
 }
 
 .admin-history ol {
-  padding-left: var(--space-5);
+  padding-left: var(--space-6);
 }
 
 .admin-history li {
@@ -512,7 +522,7 @@
   min-width: 0;
   margin: 0;
   max-width: 62rem;
-  padding: var(--space-5);
+  padding: var(--space-6);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -597,7 +607,7 @@
 }
 
 .admin-editor__fields .admin-editor__save {
-  margin-top: var(--space-5);
+  margin-top: var(--space-6);
   border-color: var(--action);
   background: var(--action);
   color: var(--action-foreground);
@@ -622,7 +632,7 @@
 .admin-editor__leave {
   width: min(30rem, calc(100vw - 2rem));
   max-width: 100%;
-  padding: var(--space-5);
+  padding: var(--space-6);
   border: 2px solid var(--border-control);
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -795,6 +805,13 @@
   .admin-console__nav {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .admin-console__nav-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .admin-console__main {
@@ -854,4 +871,517 @@
   .admin-recipe-changes__compare {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Collections (Phase 2). Each fact keeps its own label; badges never stand in for a state. */
+.admin-collection__section {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-collection__section h2 {
+  margin-bottom: var(--space-2);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admin-collection__section h3 {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.admin-collection__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+}
+
+.admin-collection__facts dt {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-collection__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-collection__tagline {
+  font-style: italic;
+}
+
+.admin-collection__columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.admin-collection__members {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-6);
+}
+
+.admin-collection__members li > span:first-child {
+  margin-right: var(--space-2);
+}
+
+.admin-collection__note {
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.admin-collection__check {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.admin-badge {
+  display: inline-block;
+  margin: 0 var(--space-1);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-badge--attention,
+.admin-badge--added {
+  border-color: var(--action);
+}
+
+.admin-library__filters .admin-library__check {
+  display: flex;
+  align-items: center;
+  align-self: end;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+}
+
+.admin-library__filters .admin-library__check input {
+  width: 1.25rem;
+  min-height: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  accent-color: var(--action);
+}
+
+@media (max-width: 48rem) {
+  .admin-collection__columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.admin-library__new {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+  color: var(--action);
+  font-weight: 700;
+}
+
+.admin-collection-editor legend {
+  font-weight: 700;
+}
+
+.admin-collection__members--edit {
+  padding-left: 0;
+  list-style: none;
+}
+
+.admin-collection__members--edit > li {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+.admin-collection__member-head,
+.admin-collection__member-controls,
+.admin-collection__save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-collection__member-controls {
+  margin: var(--space-2) 0;
+}
+
+.admin-collection__member-title {
+  font-weight: 700;
+}
+
+.admin-collection__member-fields {
+  display: grid;
+  grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.admin-collection__search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.admin-collection__results {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.admin-collection__results > li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-collection__conflict {
+  border-color: var(--action);
+}
+
+@media (max-width: 48rem) {
+  .admin-collection__member-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Controls inside labels (not direct fieldset children) must also shrink to the column. */
+.admin-collection-editor label,
+.admin-collection__member-fields label,
+.admin-collection__search label {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.admin-collection-editor select,
+.admin-collection-editor textarea,
+.admin-collection-editor input:not([type="checkbox"]) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.admin-collection-editor input[readonly] {
+  background: var(--surface-muted);
+}
+
+.admin-collection-editor .admin-library__check {
+  display: flex;
+}
+
+.admin-collection__search label {
+  flex: 1 1 12rem;
+}
+
+/* Buttons outside the editor fieldsets (recipe list, search, conflict) match the editor's buttons. */
+.admin-collection-editor .admin-collection__section button,
+.admin-workspace-action button {
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-collection-editor .admin-collection__section button:disabled,
+.admin-workspace-action button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-collection-preview > .admin-record__header {
+  margin-bottom: var(--space-4);
+}
+
+.admin-collection__preview-nav,
+.admin-workspace-action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.admin-collection__preview-nav a,
+.admin-workspace-action a {
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.admin-collection__changes {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-collection__changes dt {
+  font-weight: 700;
+}
+
+.admin-collection__changes dd {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-collection__before {
+  color: var(--text-muted);
+}
+
+.admin-collection__private-banner,
+.admin-collection__stale {
+  padding: var(--space-3);
+  border: 1px solid var(--action);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.admin-collection__stale p {
+  margin: 0 0 var(--space-2);
+}
+
+.admin-collection__preview-page .cl {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+
+.admin-collection__review-step {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.admin-collection-review label {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  font-weight: 700;
+}
+
+.admin-collection-review .admin-library__check {
+  display: flex;
+  font-weight: 400;
+}
+
+.admin-collection-review select,
+.admin-collection-review textarea,
+.admin-collection-review input:not([type="checkbox"]) {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.admin-collection-review button {
+  justify-self: start;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-collection-review button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Publication decision page and receipts. */
+.admin-collection-publication .admin-library__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  font-weight: 400;
+}
+
+.admin-collection-publication .admin-library__check input {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.admin-collection-publication [role="status"]:focus {
+  outline: 2px solid var(--action);
+  outline-offset: 2px;
+}
+
+.admin-collection-receipts ol {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-collection-receipts li {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.admin-collection-receipts li > p {
+  margin: 0 0 var(--space-2);
+}
+
+.admin-collection-receipts code {
+  overflow-wrap: anywhere;
+}
+
+.admin-collection-receipts button {
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-collection-receipts button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Publishing Home. */
+.admin-home > .admin-record__header {
+  margin-bottom: var(--space-4);
+}
+
+.admin-home__lane + .admin-home__lane {
+  margin-top: var(--space-6);
+}
+
+.admin-home__counts,
+.admin-home__meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.admin-home__rows {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-home__rows li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.admin-home__rows li > div {
+  flex: 1 1 14rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-home__rows p {
+  margin: 0 0 var(--space-1);
+}
+
+.admin-home__title {
+  font-weight: 700;
+}
+
+.admin-home__rows a,
+.admin-home__lane > p a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Reviewed recipe tags in the editor. */
+.admin-editor__tags {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  min-width: 0;
+}
+
+.admin-editor__tags > label {
+  display: grid;
+  gap: var(--space-1);
+  font-weight: 700;
+}
+
+.admin-editor__tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.admin-editor__tag-group > legend {
+  width: 100%;
+  margin-bottom: var(--space-1);
+  font-weight: 700;
+}
+
+.admin-editor__tag-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.75rem;
 }
