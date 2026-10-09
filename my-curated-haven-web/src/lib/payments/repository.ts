@@ -161,41 +161,12 @@ export async function getCollectionOfferDetails(
     totalMinutes: r.total_minutes,
   }));
 
-  // 3. Determine user ownership state
+  // 3. Ownership covers every release of the collection, so a buyer of an earlier release still owns it.
   let ownershipState: OwnershipStatus = "unauthenticated";
-
   if (userId) {
-    const entitlementQuery = `
-      SELECT state
-      FROM public.access_entitlements
-      WHERE user_id = $1
-        AND release_id = $2
-        AND state = 'active'
-        AND valid_from <= now()
-        AND (expires_at IS NULL OR expires_at > now())
-        AND revoked_at IS NULL;
-    `;
-    const { rows: entRows } = await pool.query(entitlementQuery, [userId, coll.release_id]);
-
-    if (entRows.length > 0) {
-      ownershipState = "owned";
-    } else {
-      // Check for pending/open order attempt
-      const attemptQuery = `
-        SELECT attempt_state
-        FROM private.purchase_orders
-        WHERE user_id = $1
-          AND release_id = $2
-          AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-        LIMIT 1;
-      `;
-      const { rows: attRows } = await pool.query(attemptQuery, [userId, coll.release_id]);
-      if (attRows.length > 0) {
-        ownershipState = "pending_payment";
-      } else {
-        ownershipState = "not_owned";
-      }
-    }
+    const { getCollectionCustomerState } = await import("@/lib/collections/customer-state");
+    const state = await getCollectionCustomerState(coll.collection_id, userId);
+    ownershipState = state.ok ? state.value.ownership : "unavailable";
   }
 
   const basePriceMinor = coll.base_minor_amount || 1500;
@@ -506,65 +477,14 @@ export async function getUserPurchasedCollections(userId: string): Promise<
     recipes: Array<{ id: string; slug: string; title: string; previewImagePath: string; totalMinutes: number | null }>;
   }>
 > {
-  const pool = getCommercePool();
-  const query = `
-    SELECT
-      c.id as collection_id,
-      c.slug,
-      c.title,
-      c.public_summary,
-      cr.id as release_id,
-      cr.version as release_version,
-      ae.state as entitlement_state,
-      ae.valid_from
-    FROM public.access_entitlements ae
-    JOIN public.collection_releases cr ON cr.id = ae.release_id
-    JOIN public.recipe_collections c ON c.id = cr.collection_id
-    WHERE ae.user_id = $1
-      AND ae.state = 'active'
-      AND ae.valid_from <= now()
-      AND (ae.expires_at IS NULL OR ae.expires_at > now())
-      AND ae.revoked_at IS NULL
-    ORDER BY ae.valid_from DESC;
-  `;
-
-  const { rows: collRows } = await pool.query(query, [userId]);
-  const results = [];
-
-  for (const coll of collRows) {
-    const recQuery = `
-      SELECT
-        rc.id,
-        rc.slug,
-        rc.title,
-        rc.preview_image_path,
-        rc.total_minutes
-      FROM public.collection_recipes cr
-      JOIN public.recipe_catalog rc ON rc.id = cr.recipe_id
-      WHERE cr.release_id = $1
-        AND rc.publication_state = 'published'
-      ORDER BY cr.position ASC;
-    `;
-    const { rows: recipeRows } = await pool.query(recQuery, [coll.release_id]);
-    results.push({
-      collectionId: coll.collection_id,
-      slug: coll.slug,
-      title: coll.title,
-      summary: coll.public_summary,
-      releaseVersion: coll.release_version,
-      entitlementState: coll.entitlement_state,
-      validFrom: coll.valid_from.toISOString(),
-      recipes: recipeRows.map((r) => ({
-        id: r.id,
-        slug: r.slug,
-        title: r.title,
-        previewImagePath: r.preview_image_path,
-        totalMinutes: r.total_minutes,
-      })),
-    });
-  }
-
-  return results;
+  // One entry per owned collection with the recipes the access resolver grants, including approved
+  // additions from later releases. The resolver is the same one recipe-body policies use.
+  const { rows } = await getCommercePool().query("SELECT private.user_collection_library($1) AS library", [userId]);
+  return (rows[0]?.library ?? []) as Array<{
+    collectionId: string; slug: string; title: string; summary: string; releaseVersion: number;
+    entitlementState: string; validFrom: string;
+    recipes: Array<{ id: string; slug: string; title: string; previewImagePath: string; totalMinutes: number | null }>;
+  }>;
 }
 
 export async function recordPaymentAndGrantAccess(params: {

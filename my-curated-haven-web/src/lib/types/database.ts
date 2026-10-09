@@ -1596,12 +1596,19 @@ export type Database = {
         Args: { p_operation_id: string; p_reason: string; p_user_id: string }
         Returns: Json
       }
+      collection_effective_access: {
+        Args: { p_collection_id: string }
+        Returns: Json
+      }
       increment_shop_click: {
         Args: { product_id_input: string }
         Returns: undefined
       }
       is_console_recipe_reader: { Args: never; Returns: boolean }
       is_recipe_admin: { Args: never; Returns: boolean }
+      is_recipe_entitled: { Args: { p_recipe_id: string }; Returns: boolean }
+      owns_collection: { Args: { p_collection_id: string }; Returns: boolean }
+      recipe_effective_access: { Args: { p_recipe_id: string }; Returns: Json }
       search_shop_products: {
         Args: { query_text: string; result_limit?: number }
         Returns: {

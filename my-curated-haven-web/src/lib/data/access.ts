@@ -99,49 +99,22 @@ async function resolveRecipeAccess(
     return { type: "admin" };
   }
 
-  const { data: entitlements, error: entitlementError } = await client
-    .from("access_entitlements")
-    .select("id, release_id, state, valid_from, expires_at, revoked_at")
-    .eq("user_id", user.id)
-    .eq("state", "active")
-    .is("revoked_at", null);
+  // 4. Purchases, including approved additions from later releases, come from the one database
+  //    resolver that recipe body and protected-file policies also use.
+  const { data: effective, error: effectiveError } = await client.rpc("recipe_effective_access", {
+    p_recipe_id: recipeId,
+  });
 
-  if (entitlementError) {
-    return { type: "error", message: entitlementError.message };
+  if (effectiveError) {
+    return { type: "error", message: effectiveError.message };
   }
 
-  if (!entitlements || entitlements.length === 0) {
+  const access = effective as { type?: unknown; releaseId?: unknown } | null;
+  if (access?.type === "entitled" && typeof access.releaseId === "string") {
+    return { type: "entitled", releaseId: access.releaseId };
+  }
+  if (access?.type === "denied" || access?.type === "free") {
     return { type: "denied" };
   }
-
-  const activeReleaseIds = entitlements
-    .filter((e) => {
-      const now = new Date();
-      const validFrom = new Date(e.valid_from);
-      if (validFrom > now) return false;
-      if (e.expires_at && new Date(e.expires_at) <= now) return false;
-      return true;
-    })
-    .map((e) => e.release_id);
-
-  if (activeReleaseIds.length === 0) {
-    return { type: "denied" };
-  }
-
-  const { data: matchedRecipes, error: membershipError } = await client
-    .from("collection_recipes")
-    .select("release_id")
-    .eq("recipe_id", recipeId)
-    .in("release_id", activeReleaseIds)
-    .limit(1);
-
-  if (membershipError) {
-    return { type: "error", message: membershipError.message };
-  }
-
-  if (matchedRecipes && matchedRecipes.length > 0) {
-    return { type: "entitled", releaseId: matchedRecipes[0].release_id };
-  }
-
-  return { type: "denied" };
+  return { type: "error", message: "Unexpected recipe access response" };
 }
