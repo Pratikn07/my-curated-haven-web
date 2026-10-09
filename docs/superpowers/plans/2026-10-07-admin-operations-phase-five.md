@@ -487,7 +487,7 @@ select throws_like(
 
 ## Task 10: Build functional overview, item evidence and safe landing navigation
 
-**Files:** Create `WEB/src/app/admin/overview/page.tsx`, `WEB/src/app/admin/operations/items/[itemId]/page.tsx`, components `{Overview,AttentionList,ItemEvidence,SourceCoverage}.tsx`, `WEB/tests/e2e/admin-operations-fixtures.ts`, `WEB/tests/e2e/admin-operations-overview.spec.ts`. Modify existing `AdminShell.tsx`, `/admin/page.tsx` and permitted return-query handling.
+**Files:** Create `WEB/src/app/admin/overview/page.tsx`, `WEB/src/app/admin/operations/items/[itemId]/page.tsx`, components `{Overview,AttentionList,ItemEvidence,SourceCoverage}.tsx`, `WEB/tests/e2e/admin-operations-fixtures.ts`, `WEB/tests/e2e/admin-operations-overview.spec.ts`. Modify existing `AdminShell.tsx` and permitted return-query handling. Do not change `/admin/page.tsx`; Home wiring belongs to [Phase 5 UI](2026-10-08-admin-console-phase-five-ui.md) Task 3.
 
 **Interfaces:** Server pages use `loadOverview`/`loadItem`; components receive safe DTOs only. Source destinations come from `destinationFor` and are authorised again by the original workflow. No client component gets a database/producer credential.
 
@@ -505,7 +505,7 @@ test("overview routes routine work to the original recipe", async ({ page }) => 
 
 - [ ] Run `npx playwright test tests/e2e/admin-operations-overview.spec.ts --project=chromium-desktop`; expect the new destination to be absent. Reuse the guarded existing admin fixture/session approach; do not authenticate a real owner in fixture tests.
 - [ ] Render distinct urgent/attention/routine/verification groups, source coverage, actual first-observed/checked times and source-generated next steps. Preserve last-confirmed urgency with stale badges. Provide loading, no matches, genuine zero, no authorised sources, partial and unavailable states. Use accessible headings, keyboard links, focus and mobile layouts without approving new visual styling.
-- [ ] Make Overview the landing route only for activated overview authority after rehearsal. Otherwise retain a permitted existing module landing; support-only staff must not be sent to Recipes. Hide new links when disabled, preserve safe filter/return state and handle authority loss between page and destination without leaking the old item.
+- [ ] Keep Home at `/admin` as the landing route (owner decision 2026-10-08). Expose `loadOverview` so Home can read its lanes from it once overview authority is activated after rehearsal; `/admin/overview` is the full filterable attention list, not a second landing page. When the operations stage is disabled, Home keeps its existing module feeds; support-only staff must not be sent to Recipes. Hide new links when disabled, preserve safe filter/return state and handle authority loss between page and destination without leaking the old item.
 - [ ] Run desktop/mobile browser cases, targeted accessibility checks and typecheck; commit `feat: add functional owner overview and evidence navigation`.
 
 ## Task 11: Build the bounded private history destination
