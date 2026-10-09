@@ -1568,15 +1568,23 @@ export type Database = {
       admin_collection_review: { Args: { p_command: Json }; Returns: Json }
       admin_collection_submit: { Args: { p_command: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }
-      admin_home_continue_work: { Args: { p_limit: number }; Returns: Json }
-      admin_home_publishing_results: { Args: { p_limit: number }; Returns: Json }
       admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }
       admin_draft_save: { Args: { p_command: Json }; Returns: Json }
       admin_draft_start: {
         Args: { p_operation_id: string; p_recipe_id: string }
         Returns: Json
       }
+      admin_home_continue_work: { Args: { p_limit: number }; Returns: Json }
+      admin_home_publishing_results: {
+        Args: { p_limit: number }
+        Returns: Json
+      }
       admin_recipe_assets: { Args: never; Returns: Json }
+      admin_recipe_correct: { Args: { p_command: Json }; Returns: Json }
+      admin_recipe_correction_impact: {
+        Args: { p_recipe_id: string }
+        Returns: Json
+      }
       admin_recipe_detail: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_history: {
         Args: { p_cursor?: string; p_limit?: number; p_recipe_id: string }
@@ -1589,11 +1597,9 @@ export type Database = {
         Args: { p_recipe_id: string; p_revision_id: string }
         Returns: Json
       }
+      admin_recipe_tag_vocabulary: { Args: never; Returns: Json }
       admin_recipe_usage: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_withdraw: { Args: { p_command: Json }; Returns: Json }
-      admin_recipe_correct: { Args: { p_command: Json }; Returns: Json }
-      admin_recipe_tag_vocabulary: { Args: never; Returns: Json }
-      admin_recipe_correction_impact: { Args: { p_recipe_id: string }; Returns: Json }
       admin_review_state: { Args: { p_revision_id: string }; Returns: Json }
       admin_revision_issue: { Args: { p_command: Json }; Returns: Json }
       admin_revision_publish: { Args: { p_command: Json }; Returns: Json }

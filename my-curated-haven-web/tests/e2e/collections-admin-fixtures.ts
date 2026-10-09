@@ -29,11 +29,13 @@ export interface CollectionsFixture {
   rpcAs(role: Exclude<CollectionRole, "customer">, fn: string, command: Record<string, unknown>): Promise<Record<string, unknown>>;
   /** Record a campaign snapshot so evidence is known; restored on dispose. */
   recordCampaigns(): Promise<void>;
-  /** The open draft head, if any. */
-  head(): Promise<DraftHead | undefined>;
+  /** The open draft head of this collection (or `target`), if any. */
+  head(target?: string): Promise<DraftHead | undefined>;
   /** Save a fully checkable draft (current recipe references, fit confirmed) with `patch`, as the owner. */
-  prepareDraft(patch: Record<string, unknown>): Promise<DraftHead>;
-  impactToken(revisionId: string): Promise<string>;
+  prepareDraft(patch: Record<string, unknown>, target?: string): Promise<DraftHead>;
+  impactToken(revisionId: string, target?: string): Promise<string>;
+  /** A complete owner publish command for the open draft of this collection (or `target`). */
+  buildPublishCommand(target?: string): Promise<Record<string, unknown>>;
   /** Prepare and publish a draft through the RPC only, as a server that stopped before its refresh would leave it. */
   publishWithoutRefresh(note: string): Promise<Record<string, unknown>>;
   dispose(): Promise<void>;
@@ -239,10 +241,10 @@ export async function createCollectionsFixture(options: {
     });
   }
 
-  async function head(): Promise<DraftHead | undefined> {
+  async function head(target: string = collectionId): Promise<DraftHead | undefined> {
     return (await withPg((pg) => pg.query(`SELECT h.revision_id, h.version, h.submission_id, r.digest, r.snapshot,
       r.base_publication_id, r.base_digest FROM private.collection_draft_heads h
-      JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=$1`, [collectionId]))).rows[0] as DraftHead | undefined;
+      JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=$1`, [target]))).rows[0] as DraftHead | undefined;
   }
 
   /** A member reference to a recipe's current reviewed version, confirmed as fitting. */
@@ -253,24 +255,35 @@ export async function createCollectionsFixture(options: {
       tagsDigest: "b".repeat(64), placementNote: "", fit: "accepted" };
   }
 
-  async function prepareDraft(patch: Record<string, unknown>): Promise<DraftHead> {
-    let current = await head();
+  async function prepareDraft(patch: Record<string, unknown>, target: string = collectionId): Promise<DraftHead> {
+    let current = await head(target);
     if (!current) {
-      await rpcAs("owner", "admin_collection_draft_start", { collection_id: collectionId, operation_id: crypto.randomUUID(),
+      await rpcAs("owner", "admin_collection_draft_start", { collection_id: target, operation_id: crypto.randomUUID(),
         reason: "Synthetic draft" });
-      current = (await head())!;
+      current = (await head(target))!;
     }
     const members = [await member(owner.recipeId), await member(extraRecipes.reviewed.id)];
-    await rpcAs("owner", "admin_collection_draft_save", { collection_id: collectionId, operation_id: crypto.randomUUID(),
+    await rpcAs("owner", "admin_collection_draft_save", { collection_id: target, operation_id: crypto.randomUUID(),
       reason: "Synthetic draft", expected_version: current.version, expected_digest: current.digest,
       base: { publication_id: current.base_publication_id, digest: current.base_digest },
       snapshot: { ...current.snapshot, members, ...patch }, reopen_reviewed: true });
-    return (await head())!;
+    return (await head(target))!;
   }
 
-  async function impactToken(revisionId: string): Promise<string> {
+  async function impactToken(revisionId: string, target: string = collectionId): Promise<string> {
     return (await withPg((pg) => pg.query("SELECT private.collection_evaluate($1,$2)#>>'{value,token}' t",
-      [collectionId, revisionId]))).rows[0].t as string;
+      [target, revisionId]))).rows[0].t as string;
+  }
+
+  async function buildPublishCommand(target: string = collectionId): Promise<Record<string, unknown>> {
+    const draft = (await head(target))!;
+    const undecided = (await withPg((pg) => pg.query("SELECT private.collection_unmapped_access($1) u", [target])))
+      .rows[0].u as { releaseId: string; sourceKind: string }[];
+    return { collection_id: target, operation_id: crypto.randomUUID(), reason: "Synthetic publication",
+      revision_id: draft.revision_id, expected_version: draft.version, expected_digest: draft.digest,
+      impact_token: await impactToken(draft.revision_id, target),
+      base: { publication_id: draft.base_publication_id, digest: draft.base_digest }, approve_now: true,
+      access_decisions: undecided.map((u) => ({ release_id: u.releaseId, source_kind: u.sourceKind, policy: "additions-v1" })) };
   }
 
   return {
@@ -300,15 +313,10 @@ export async function createCollectionsFixture(options: {
     head,
     prepareDraft,
     impactToken,
+    buildPublishCommand,
     async publishWithoutRefresh(note) {
-      const draft = await prepareDraft({ tagline: note });
-      const undecided = (await withPg((pg) => pg.query("SELECT private.collection_unmapped_access($1) u", [collectionId])))
-        .rows[0].u as { releaseId: string; sourceKind: string }[];
-      return rpcAs("owner", "admin_collection_publish", { collection_id: collectionId, operation_id: crypto.randomUUID(),
-        reason: note, revision_id: draft.revision_id, expected_version: draft.version, expected_digest: draft.digest,
-        impact_token: await impactToken(draft.revision_id),
-        base: { publication_id: draft.base_publication_id, digest: draft.base_digest }, approve_now: true,
-        access_decisions: undecided.map((u) => ({ release_id: u.releaseId, source_kind: u.sourceKind, policy: "additions-v1" })) });
+      await prepareDraft({ tagline: note });
+      return rpcAs("owner", "admin_collection_publish", { ...(await buildPublishCommand()), reason: note });
     },
     dispose,
   };

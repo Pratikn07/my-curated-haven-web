@@ -90,6 +90,46 @@ Ruling: the plan named five operator procedures; a sixth, `recipe_operator_previ
 
 Ruling: an operator cannot revalidate Next.js page caches. Operator publications leave their refresh job pending until someone with publish access uses Retry refresh, or the pages revalidate on their hourly schedule; the CLI says so.
 
+Progress (Task 17, 2026-10-09): races, scale and CI.
+- **Races:** `tests/e2e/admin-collections-concurrency.spec.ts` runs five races with independent Postgres sessions. A second session is released only once `pg_stat_activity` shows it waiting on a lock; nothing relies on a guessed delay. The winning transaction commits before the harness waits for the loser. Results:
+  - Two publishers on the same draft: one publication and one manifest; the loser gets `ADM_CONFLICT`, writes no ledger row and leaves revisions intact.
+  - Two collections claiming the same series volume: the second gets `ADM_CONFLICT` and keeps its draft.
+  - Publication then checkout: the waiting checkout is told `stale`.
+  - Checkout then publication: the publication runs after the order commits; the single order references the release it froze, with frozen members equal to that release's members.
+  - Recipe correction then collection publication: no deadlock; the publication refuses on changed evidence.
+  - A held collection row lock makes publication fail with `55P03` after its 5 s bound, with no publication.
+- **CLI:** `scripts/admin-collections-concurrency.mjs` runs each race by name (loopback only), plus a `scale` scenario.
+- **Scale:** migration `20261008001200_collection_library_scale.sql`.
+  - The buyer library was rewritten as a set-based query: 3,354 ms with about 25,300 sequential scans became 10–13 ms, at 12 collections up to 200 members × 100 releases. A recipe now appears under a collection only when that collection delivers it.
+  - Protected members probe the release index instead of scanning all memberships.
+  - New indexes on offers by release and publications by collection.
+  - A 5 s `lock_timeout` on the checkout reservation and the operator procedures; browser commands already had it through their authority check.
+- **SQL suite:** `27_admin_collections_concurrency.test.sql` 9/9: all 16 writers have a bounded lock wait; checkout reservation is 5 s; reusing an operation id with a different request is refused and the original still returns its receipt; scale indexes exist.
+- **Generated types:** `src/lib/types/database.ts` replaced with the generated output. Earlier hand edits differed only in order and formatting, which CI's drift diff would have failed.
+- **CI** (`.github/workflows/web-ci.yml`):
+  - adds `test:collections:unit` (also in `verify`);
+  - fails if any of ten collection or Home browser specs is not discovered;
+  - adds a registry-source build that runs the storefront and collections specs on chromium-desktop;
+  - backend: Node setup moves before SQL, the two SQL steps become `node scripts/test-admin-db.mjs --all` with a check that the 12 collection admin suites exist, and the generated-type drift check is kept.
+
+Evidence:
+- All database suites on a clean replay: 754/754 (31 files).
+- Concurrency spec: 5/5 four times.
+- Scale scenario: passes, with no per-row loops and no membership scans.
+- Unit: admin 83/83 and collections 54/54. Lint and typecheck pass.
+- CI's spec-discovery check simulated locally: 774 tests in 34 files, all ten required specs found.
+- Registry-build step locally: 21/21.
+- Full browser suite as CI runs it (fresh seed database, default build, every spec except privacy, three projects): 688 passed, 83 skipped, 3 failed. The failures are chromium-mobile in `collections.spec.ts`:
+  - the collections accessibility walk times out navigating to a series page;
+  - the "tapping a book" case never leaves `/collections`;
+  - the reduced-motion book link case never leaves `/collections`.
+  - The same three fail identically on `origin/main` at `2df211a`, built and run separately without any Phase 2 code (15 passed, 3 failed there).
+  - Diagnosis: on a Pixel 7 profile, the bookcase page blocks the next navigation (curl with a mobile user agent answers in milliseconds), so this is client-side public bookcase code that this branch does not change. Raised as a separate task; not fixed here.
+
+Ruling: the registry-build CI step runs on chromium-desktop only. Its purpose is to prove the database-backed storefront; all three projects already cover the configured pages in the main browser step, which also carries the pre-existing mobile bookcase failures above.
+
+Ruling: CI's failure diagnostics artifact is unchanged: Playwright report and traces on failure only, kept 7 days, as Phase 1 set it up. Admin traces can contain request payloads; narrowing that artifact belongs with the Phase 1 CI owner. Cost if wrong: failure traces stay visible to repository readers for 7 days.
+
 Ruling: The plan's `20261007` migration timestamps precede the applied Phase 1 audit migrations through `20261007233000`. Allocate every Phase 2 migration after that timestamp in dependency order; update all references and verification commands before implementation. Cost if wrong: migration replay or production upgrade could execute in the wrong order.
 
 - [ ] A1: Existing collection experience is reconciled against source mappings; inspection and public browser paths preserve intended behavior.
