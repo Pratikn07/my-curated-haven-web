@@ -4,6 +4,7 @@
 @import "../styles/house.css";
 @import "../styles/campaign.css";
 @import "../styles/admin.css";
+@import "../styles/collections.css";
 
 @theme inline {
   --color-background: var(--canvas);

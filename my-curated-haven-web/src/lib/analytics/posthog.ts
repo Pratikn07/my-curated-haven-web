@@ -24,6 +24,9 @@ export function initPostHog(): boolean {
     capture_pageview: "history_change",
     capture_pageleave: true,
     autocapture: true,
+    // Page speed as visitors feel it (LCP, INP, CLS, FCP), split by device and browser
+    // in PostHog's web vitals view. Decides whether heavier book effects are affordable.
+    capture_performance: { web_vitals: true },
     // Recording starts per page in syncSessionRecording, never on private pages.
     disable_session_recording: true,
     session_recording: {

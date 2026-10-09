@@ -14,6 +14,8 @@ interface CheckoutButtonProps {
   ownershipState: OwnershipStatus;
   releaseId?: string;
   className?: string;
+  /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
+  appearance?: "default" | "cloth";
 }
 
 export default function CheckoutButton({
@@ -22,7 +24,9 @@ export default function CheckoutButton({
   ownershipState,
   releaseId,
   className = "",
+  appearance = "default",
 }: CheckoutButtonProps) {
+  const look = (defaults: string) => (appearance === "cloth" ? "cl-button" : defaults);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -30,7 +34,7 @@ export default function CheckoutButton({
     return (
       <Link
         href={`/sign-in?returnTo=/collections/${collectionSlug}`}
-        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action text-center ${className}`}
+        className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action text-center")} ${className}`}
       >
         <Lock className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="break-words">Sign in to buy ({formattedPrice})</span>
@@ -42,7 +46,7 @@ export default function CheckoutButton({
     return (
       <a
         href="#collection-recipes"
-        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-surface-muted px-6 py-3 text-base font-semibold text-action border border-action/20 hover:bg-action/5 focus-visible:outline-2 focus-visible:outline-action ${className}`}
+        className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-surface-muted px-6 py-3 text-base font-semibold text-action border border-action/20 hover:bg-action/5 focus-visible:outline-2 focus-visible:outline-action")} ${className}`}
       >
         <CheckCircle2 className="h-4 w-4 text-action" aria-hidden="true" />
         <span>Open your collection</span>
@@ -54,7 +58,7 @@ export default function CheckoutButton({
     return (
       <button
         disabled
-        className={`inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-xl bg-surface-muted px-6 py-3 text-base font-medium text-text-muted border border-border ${className}`}
+        className={`${look("inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-xl bg-surface-muted px-6 py-3 text-base font-medium text-text-muted border border-border")} ${className}`}
       >
         Purchase currently unavailable
       </button>
@@ -130,7 +134,7 @@ export default function CheckoutButton({
         onClick={handleCheckout}
         disabled={isLoading}
         aria-busy={isLoading}
-        className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:opacity-75 text-center ${className}`}
+        className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:opacity-75 text-center")} ${className}`}
       >
         {isLoading ? (
           <>

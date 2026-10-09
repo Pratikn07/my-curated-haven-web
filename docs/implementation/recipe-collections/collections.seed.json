@@ -1,0 +1,525 @@
+{
+  "$comment": "Collections and recipe tags for the admin panel. Spec: COLLECTIONS.md (same folder). Agreed 2026-10-05.",
+  "version": 1,
+  "shelves": [
+    {
+      "key": "mornings",
+      "label": "Mornings",
+      "order": 1
+    },
+    {
+      "key": "everyday-meals",
+      "label": "Everyday meals",
+      "order": 2
+    },
+    {
+      "key": "cook-once",
+      "label": "Cook once",
+      "order": 3
+    },
+    {
+      "key": "nourish",
+      "label": "Nourish",
+      "order": 4
+    },
+    {
+      "key": "snacks-and-treats",
+      "label": "Snacks & treats",
+      "order": 5
+    },
+    {
+      "key": "seasons-and-parties",
+      "label": "Seasons & parties",
+      "order": 6
+    }
+  ],
+  "series": [
+    {
+      "key": "breakfast",
+      "label": "Breakfast"
+    },
+    {
+      "key": "meal-prep",
+      "label": "Meal Prep"
+    }
+  ],
+  "collections": [
+    {
+      "order": 1,
+      "slug": "first-tastes",
+      "title": "First Tastes",
+      "stage_min_months": 6,
+      "stage_max_months": 8,
+      "shelf": "everyday-meals",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Single-ingredient and simple purées, first spoonfuls",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 2,
+      "slug": "first-finger-foods",
+      "title": "First Finger Foods",
+      "stage_min_months": 9,
+      "stage_max_months": 12,
+      "shelf": "everyday-meals",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Soft foods babies pick up and feed themselves",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 3,
+      "slug": "iron-rich-first-foods",
+      "title": "Iron-Rich First Foods",
+      "stage_min_months": 6,
+      "stage_max_months": 12,
+      "shelf": "nourish",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Iron plus vitamin C pairings",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 4,
+      "slug": "first-breakfasts",
+      "title": "First Breakfasts",
+      "stage_min_months": 6,
+      "stage_max_months": 12,
+      "shelf": "mornings",
+      "series": "breakfast",
+      "volume": 1,
+      "cloth": null,
+      "contents": "Soft pancakes, oat fingers, fruit and yogurt",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 5,
+      "slug": "batch-and-freeze-for-babies",
+      "title": "Batch & Freeze for Babies",
+      "stage_min_months": 6,
+      "stage_max_months": 12,
+      "shelf": "cook-once",
+      "series": "meal-prep",
+      "volume": 1,
+      "cloth": null,
+      "contents": "Ice-cube-tray purées and mashes",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 6,
+      "slug": "toddler-breakfasts",
+      "title": "Toddler Breakfasts",
+      "stage_min_months": 12,
+      "stage_max_months": 24,
+      "shelf": "mornings",
+      "series": "breakfast",
+      "volume": 2,
+      "cloth": null,
+      "contents": "Waffles, egg muffins, overnight oats",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 7,
+      "slug": "meal-prep",
+      "title": "Meal Prep for Toddlers",
+      "stage_min_months": 12,
+      "stage_max_months": 24,
+      "shelf": "cook-once",
+      "series": "meal-prep",
+      "volume": 2,
+      "cloth": "forest",
+      "contents": "One prep session, meals all week",
+      "status": "published",
+      "live_on_site": true
+    },
+    {
+      "order": 8,
+      "slug": "protein-packs",
+      "title": "Protein Packs",
+      "stage_min_months": 12,
+      "stage_max_months": 24,
+      "shelf": "nourish",
+      "series": null,
+      "volume": null,
+      "cloth": "plum",
+      "contents": "Meals and snacks built around one protein",
+      "status": "published",
+      "live_on_site": true
+    },
+    {
+      "order": 9,
+      "slug": "everyday-treats",
+      "title": "Everyday Treats",
+      "stage_min_months": 12,
+      "stage_max_months": null,
+      "shelf": "snacks-and-treats",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Desserts with no added sugar",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 10,
+      "slug": "fruit-gummies",
+      "title": "Fruit Gummies",
+      "stage_min_months": 12,
+      "stage_max_months": null,
+      "shelf": "snacks-and-treats",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Real-fruit gummies",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 11,
+      "slug": "on-the-go-snacks",
+      "title": "On-the-Go Snacks",
+      "stage_min_months": 12,
+      "stage_max_months": 24,
+      "shelf": "snacks-and-treats",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "For the bag, the car and the park",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 12,
+      "slug": "big-kid-breakfasts",
+      "title": "Big-Kid Breakfasts",
+      "stage_min_months": 24,
+      "stage_max_months": 48,
+      "shelf": "mornings",
+      "series": "breakfast",
+      "volume": 3,
+      "cloth": null,
+      "contents": "Fuller, faster school-morning breakfasts",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 13,
+      "slug": "freezer-dinners",
+      "title": "Freezer Dinners",
+      "stage_min_months": 24,
+      "stage_max_months": 48,
+      "shelf": "cook-once",
+      "series": "meal-prep",
+      "volume": 3,
+      "cloth": null,
+      "contents": "Batch, freeze, reheat on busy nights",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 14,
+      "slug": "lunchbox-and-daycare",
+      "title": "Lunchbox & Daycare",
+      "stage_min_months": 24,
+      "stage_max_months": 48,
+      "shelf": "everyday-meals",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Lunches that travel",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 15,
+      "slug": "picky-eater-favorites",
+      "title": "Picky Eater Favorites",
+      "stage_min_months": 24,
+      "stage_max_months": 48,
+      "shelf": "everyday-meals",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Gentle wins for the \"won't eat it\" years",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 16,
+      "slug": "family-dinners",
+      "title": "Family Dinners",
+      "stage_min_months": null,
+      "stage_max_months": null,
+      "shelf": "everyday-meals",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "One meal for everyone, with stage notes for little ones",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 17,
+      "slug": "halloween",
+      "title": "Halloween",
+      "stage_min_months": null,
+      "stage_max_months": null,
+      "shelf": "seasons-and-parties",
+      "series": null,
+      "volume": null,
+      "cloth": "ember",
+      "contents": "October",
+      "status": "published",
+      "live_on_site": true
+    },
+    {
+      "order": 18,
+      "slug": "thanksgiving-table",
+      "title": "Thanksgiving Table",
+      "stage_min_months": null,
+      "stage_max_months": null,
+      "shelf": "seasons-and-parties",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "November",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 19,
+      "slug": "holiday-baking",
+      "title": "Holiday Baking",
+      "stage_min_months": null,
+      "stage_max_months": null,
+      "shelf": "seasons-and-parties",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "December",
+      "status": "draft",
+      "live_on_site": false
+    },
+    {
+      "order": 20,
+      "slug": "birthday-party",
+      "title": "Birthday Party",
+      "stage_min_months": null,
+      "stage_max_months": null,
+      "shelf": "seasons-and-parties",
+      "series": null,
+      "volume": null,
+      "cloth": null,
+      "contents": "Any time of year",
+      "status": "draft",
+      "live_on_site": false
+    }
+  ],
+  "recipe_tags": {
+    "stage": [
+      {
+        "key": "6-8m",
+        "label": "6–8 months",
+        "min_months": 6,
+        "max_months": 8
+      },
+      {
+        "key": "9-12m",
+        "label": "9–12 months",
+        "min_months": 9,
+        "max_months": 12
+      },
+      {
+        "key": "1-2y",
+        "label": "1–2 years",
+        "min_months": 12,
+        "max_months": 24
+      },
+      {
+        "key": "2-3y",
+        "label": "2–3 years",
+        "min_months": 24,
+        "max_months": 36
+      },
+      {
+        "key": "3-5y",
+        "label": "3–5 years",
+        "min_months": 36,
+        "max_months": 60
+      }
+    ],
+    "meal": [
+      {
+        "key": "breakfast",
+        "label": "Breakfast"
+      },
+      {
+        "key": "lunch",
+        "label": "Lunch"
+      },
+      {
+        "key": "dinner",
+        "label": "Dinner"
+      },
+      {
+        "key": "snack",
+        "label": "Snack"
+      },
+      {
+        "key": "treat",
+        "label": "Treat"
+      },
+      {
+        "key": "drink",
+        "label": "Drink"
+      }
+    ],
+    "goal": [
+      {
+        "key": "protein",
+        "label": "Protein"
+      },
+      {
+        "key": "iron",
+        "label": "Iron"
+      },
+      {
+        "key": "fiber",
+        "label": "Fiber"
+      },
+      {
+        "key": "veg-packed",
+        "label": "Veg-packed"
+      },
+      {
+        "key": "picky-friendly",
+        "label": "Picky-eater friendly"
+      },
+      {
+        "key": "sick-days",
+        "label": "Sick days"
+      }
+    ],
+    "practical": [
+      {
+        "key": "under-15-min",
+        "label": "Under 15 min"
+      },
+      {
+        "key": "freezes",
+        "label": "Freezes"
+      },
+      {
+        "key": "make-ahead",
+        "label": "Make-ahead"
+      },
+      {
+        "key": "one-pot",
+        "label": "One-pot"
+      },
+      {
+        "key": "no-cook",
+        "label": "No-cook"
+      },
+      {
+        "key": "on-the-go",
+        "label": "On the go"
+      },
+      {
+        "key": "whole-family",
+        "label": "Whole family eats it"
+      }
+    ],
+    "free_from": [
+      {
+        "key": "egg-free",
+        "label": "Egg-free"
+      },
+      {
+        "key": "dairy-free",
+        "label": "Dairy-free"
+      },
+      {
+        "key": "nut-free",
+        "label": "Nut-free"
+      },
+      {
+        "key": "gluten-free",
+        "label": "Gluten-free"
+      },
+      {
+        "key": "vegetarian",
+        "label": "Vegetarian"
+      },
+      {
+        "key": "vegan",
+        "label": "Vegan"
+      }
+    ],
+    "occasion": [
+      {
+        "key": "halloween",
+        "label": "Halloween"
+      },
+      {
+        "key": "thanksgiving",
+        "label": "Thanksgiving"
+      },
+      {
+        "key": "holidays",
+        "label": "Holidays"
+      },
+      {
+        "key": "birthday",
+        "label": "Birthday"
+      },
+      {
+        "key": "back-to-school",
+        "label": "Back to school"
+      },
+      {
+        "key": "summer",
+        "label": "Summer"
+      }
+    ],
+    "texture": [
+      {
+        "key": "puree",
+        "label": "Purée"
+      },
+      {
+        "key": "mash",
+        "label": "Mash"
+      },
+      {
+        "key": "finger-food",
+        "label": "Finger food"
+      },
+      {
+        "key": "bites",
+        "label": "Bites"
+      },
+      {
+        "key": "bowl",
+        "label": "Bowl"
+      }
+    ]
+  },
+  "rules": {
+    "recipes_per_collection": {
+      "min": 8,
+      "max": 12
+    },
+    "slug_pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+  }
+}

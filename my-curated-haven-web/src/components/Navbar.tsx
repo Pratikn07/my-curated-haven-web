@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { headerLinks } from "@/config/site-navigation";
+import { headerLinks, type NavLink } from "@/config/site-navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { HOMEPAGE_CONTENT_VERSION, HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
-export default function Navbar() {
+export default function Navbar({ links = headerLinks }: { links?: NavLink[] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
@@ -117,7 +117,7 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-5 lg:flex">
-          {headerLinks.map((link) => (
+          {links.map((link) => (
             <Link key={link.href} href={link.href} className="font-semibold text-foreground" onClick={() => handleNavigation(link.href)}>
               {link.label}
             </Link>
@@ -145,7 +145,7 @@ export default function Navbar() {
 
       {mobileMenuOpen ? (
         <div id={menuId} className="border-t border-border bg-canvas px-4 py-2 lg:hidden">
-          {headerLinks.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}

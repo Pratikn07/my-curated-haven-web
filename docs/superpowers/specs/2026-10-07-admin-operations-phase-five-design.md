@@ -484,7 +484,7 @@ Repository references for implementation review:
 - [Existing production smoke workflow](../../../.github/workflows/production-smoke.yml).
 - [Existing public smoke assertions](../../../my-curated-haven-web/scripts/production-smoke.mjs).
 - [Backup and recovery runbook](../../../ops/README.md).
-- [Admin console operating runbook](../../../ops/ADMIN-CONSOLE.md).
+- [Admin console operating runbook](https://github.com/Pratikn07/my-curated-haven-web/blob/45ca05941efd9ce7bfc0e897e0b9048b00b22750/ops/ADMIN-CONSOLE.md).
 - Phase 1–4 designs linked at the start of this document, plus their corresponding approved implementation plans.
 
 After review of this written design, prepare the detailed Phase 5 implementation plan against the current repository. Product implementation and visual UI design remain separate next steps.

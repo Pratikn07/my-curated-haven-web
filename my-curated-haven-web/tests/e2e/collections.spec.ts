@@ -1,0 +1,236 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test } from "@playwright/test";
+
+/**
+ * The bookcase (/collections), the series pages, the first showroom
+ * (/collections/test) and the collection pages (src/config/collections.ts).
+ */
+
+/** The DOM is enough: waiting for every remote recipe photo makes a cold first run slow. */
+const LOAD = { waitUntil: "domcontentloaded" } as const;
+
+const COLLECTIONS = [
+  { slug: "halloween", title: "Halloween", recipes: 8 },
+  { slug: "meal-prep", title: "Meal Prep", recipes: 10 },
+  { slug: "protein-packs", title: "Protein Packs", recipes: 10 },
+];
+
+test("the showroom shows each collection as a chapter with its price and a way in", async ({ page }) => {
+  const response = await page.goto("/collections/test", LOAD);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Little cookbooks for the moments that fill the week.");
+
+  for (const collection of COLLECTIONS) {
+    const chapter = page.locator(`#${collection.slug}`);
+    await expect(chapter.getByRole("heading", { level: 2, name: collection.title })).toBeVisible();
+    await expect(chapter.getByText(`${collection.recipes} recipes`, { exact: true })).toBeVisible();
+    await expect(chapter.getByRole("link", { name: `Explore ${collection.title}` })).toHaveAttribute(
+      "href",
+      `/collections/${collection.slug}`
+    );
+  }
+
+  // The shelf rail jumps to each chapter.
+  await expect(page.getByRole("navigation", { name: "Jump to a collection" }).getByRole("link")).toHaveCount(3);
+  await expect(page.getByRole("link", { name: /Try a free recipe/ }).first()).toHaveAttribute("href", "/recipes");
+});
+
+test("the header offers Collections and Recipes", async ({ page }) => {
+  await page.goto("/", LOAD);
+  const header = page.locator("header").first();
+  const menu = header.getByRole("button", { name: "Open menu" });
+  if (await menu.isVisible()) {
+    // The menu answers only once the page has hydrated; tap until it opens.
+    await expect(async () => {
+      if (await menu.isVisible()) await menu.click();
+      await expect(header.getByRole("button", { name: "Close menu" })).toBeVisible({ timeout: 1000 });
+    }).toPass();
+  }
+  await expect(header.getByRole("link", { name: "Collections" }).first()).toHaveAttribute("href", "/collections");
+  await expect(header.getByRole("link", { name: "Recipes", exact: true }).first()).toHaveAttribute("href", "/recipes");
+});
+
+test("a collection page lists every recipe with its allergens and is honest about buying", async ({ page }) => {
+  const response = await page.goto("/collections/meal-prep", LOAD);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Meal Prep");
+  await expect(page.locator(".cl-row")).toHaveCount(10);
+  await expect(page.getByText("Contains wheat, milk, egg").first()).toBeVisible();
+  await expect(page.getByText("One-time purchase")).toBeVisible();
+  await expect(page.getByText(/all sales are final/i).first()).toBeVisible();
+  // No live offer yet: no checkout control, a plain statement instead.
+  await expect(page.getByRole("button", { name: /Buy Collection/ })).toHaveCount(0);
+  await expect(page.getByText("Opening soon")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Next on the shelf Freezer Dinners" })).toBeVisible();
+});
+
+test("an unknown collection is a 404", async ({ page }) => {
+  const response = await page.goto("/collections/not-a-collection", LOAD);
+  expect(response?.status()).toBe(404);
+});
+
+test("collections pages fit a 320px screen", async ({ page }) => {
+  // Visits several pages in one test; a cold first build is slow.
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const path of ["/collections", "/collections?stage=6-12m&f=iron,freezes", "/collections/series/breakfast", "/collections/test", "/collections/protein-packs", "/collections/first-tastes"]) {
+    await page.goto(path, LOAD);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, path).toBeLessThanOrEqual(1);
+  }
+});
+
+test("with reduced motion every recipe card rests in its fanned place", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections/test", LOAD);
+  const card = page.locator("#halloween .cl-fan-card").first();
+  const transform = await card.evaluate((element) => getComputedStyle(element).transform);
+  // The first card leans left: a rotation, not the identity matrix of the stacked state.
+  expect(transform).not.toBe("none");
+  expect(transform).not.toBe("matrix(1, 0, 0, 1, 0, 0)");
+});
+
+test("collections pages have no serious accessibility violations", async ({ page }) => {
+  // Visits several pages in one test; a cold first build is slow.
+  test.setTimeout(90_000);
+  for (const path of ["/collections", "/collections/series/breakfast", "/collections/test", "/collections/halloween"]) {
+    await page.goto(path, LOAD);
+    const results = await new AxeBuilder({ page }).analyze();
+    const serious = results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""));
+    expect(serious.map((violation) => violation.id), path).toEqual([]);
+  }
+});
+
+test("a recipe page turns over on a tap to show its details, one at a time", async ({ page }) => {
+  await page.goto("/collections/test", LOAD);
+  const pages = page.locator("#meal-prep .cl-page");
+  await pages.nth(1).scrollIntoViewIfNeeded();
+  await pages.nth(1).click();
+  await expect(pages.nth(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(pages.nth(1)).toHaveAccessibleName(/Veggie-Packed Lasagna: 75 min, freezes 2 months, contains wheat, milk, egg/);
+  await pages.nth(2).click();
+  await expect(pages.nth(1)).toHaveAttribute("aria-pressed", "false");
+  await expect(pages.nth(2)).toHaveAttribute("aria-pressed", "true");
+});
+
+test("scroll scenes run with motion allowed and stay off with reduced motion", async ({ page }) => {
+  await page.goto("/collections/test", LOAD);
+  await expect(page.locator(".cl")).toHaveAttribute("data-scenes", "");
+  await expect(page.locator(".cl-chapters")).toHaveAttribute("data-ink", "");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections/test", LOAD);
+  await page.waitForTimeout(1500);
+  await expect(page.locator(".cl")).not.toHaveAttribute("data-scenes", "");
+});
+
+test("tapping a book lands in its chapter", async ({ page }) => {
+  await page.goto("/collections/test", LOAD);
+  await page.locator('.cl-stack-book[data-flood-to="protein-packs"]').click();
+  await expect(page).toHaveURL(/#protein-packs$/);
+  await expect(page.locator("#protein-packs .cl-chapter-title")).toBeInViewport();
+  await expect(page.locator(".cl-tap-ink")).toHaveCount(0);
+});
+
+test("the bookcase shows every book on its shelf; open books link to their page, coming-soon books do not", async ({ page }) => {
+  const response = await page.goto("/collections", LOAD);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1, name: "Collections" })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute("content", /noindex/);
+
+  const meals = page.getByRole("region", { name: "Everyday meals" });
+  await expect(meals.getByRole("link", { name: /First Tastes/ })).toHaveAttribute("href", "/collections/first-tastes");
+  const snacks = page.getByRole("region", { name: "Snacks & treats" });
+  await expect(snacks.getByRole("group", { name: "Fruit Gummies, coming soon" })).toBeVisible();
+  await expect(snacks.getByRole("link", { name: /Fruit Gummies/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Breakfast series/ })).toHaveAttribute("href", "/collections/series/breakfast");
+});
+
+test("choosing an age and filters narrows the books, and the address keeps the choice", async ({ page }) => {
+  await page.goto("/collections", LOAD);
+  const ages = page.getByRole("group", { name: "Cooking for" });
+  const chips = page.getByRole("group", { name: "Filter collections" });
+  // The bookcase answers only once it has hydrated; tap until the age sticks.
+  await expect(async () => {
+    await ages.getByRole("button", { name: "6–12 m" }).click();
+    await expect(ages.getByRole("button", { name: "6–12 m" })).toHaveAttribute("aria-pressed", "true", { timeout: 1000 });
+  }).toPass();
+  await expect(page.getByRole("link", { name: /First Tastes/ }).first()).toBeVisible();
+  await expect(page.getByText("Toddler Breakfasts", { exact: true })).toHaveCount(0);
+
+  await chips.getByRole("button", { name: "Iron" }).click();
+  await chips.getByRole("button", { name: "Freezes" }).click();
+  await expect(page.getByRole("heading", { name: "3 collections match" })).toBeVisible();
+  await expect(chips.getByRole("button", { name: /Breakfast/ })).toBeDisabled();
+  await expect(page).toHaveURL(/stage=6-12m/);
+
+  await page.getByRole("button", { name: "Clear all" }).click();
+  await expect(page.getByRole("heading", { name: /collections match/ })).toHaveCount(0);
+});
+
+test("a series page shows its volumes and where the child is", async ({ page }) => {
+  const response = await page.goto("/collections/series/breakfast?stage=1-2y", LOAD);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Breakfast, from first bites to big kids");
+  await expect(page.getByText("Vol. 3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Your child is here")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Get all 3/ })).toBeVisible();
+  expect((await page.goto("/collections/series/not-a-series", LOAD))?.status()).toBe(404);
+});
+
+test("open books have their own page; coming-soon books do not", async ({ page }) => {
+  const response = await page.goto("/collections/first-tastes", LOAD);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("First Tastes");
+  await expect(page.locator(".cl-row")).toHaveCount(8);
+  await expect(page.getByText("Opening soon")).toBeVisible();
+  expect((await page.goto("/collections/fruit-gummies", LOAD))?.status()).toBe(404);
+});
+
+test("the first showroom keeps its three chapters at /collections/test", async ({ page }) => {
+  await page.goto("/collections/test", LOAD);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await expect(page.locator(".cl-chapter-title")).toHaveCount(3);
+});
+
+test("every book stands level on its shelf, whatever the length of its title", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections", LOAD);
+  const rows = page.locator(".bk-row");
+  await expect(rows.first()).toBeVisible();
+  for (const row of await rows.all()) {
+    const tops = await row.locator(".cl-book").evaluateAll((books) => books.map((book) => Math.round(book.getBoundingClientRect().top)));
+    expect(new Set(tops).size, (await row.getAttribute("aria-labelledby")) ?? "shelf").toBe(1);
+  }
+});
+
+test("tapping a book opens it to its contents and lands on its page", async ({ page }) => {
+  await page.goto("/collections", LOAD);
+  // The bookcase answers once hydrated; choosing an age proves it.
+  const ages = page.getByRole("group", { name: "Cooking for" });
+  await expect(async () => {
+    await ages.getByRole("button", { name: "6–12 m" }).click();
+    await expect(ages.getByRole("button", { name: "6–12 m" })).toHaveAttribute("aria-pressed", "true", { timeout: 1000 });
+  }).toPass();
+
+  await page.getByRole("region", { name: "Everyday meals" }).getByRole("link", { name: /First Tastes/ }).click();
+  const overlay = page.locator(".bk-open");
+  await expect(overlay).toBeAttached();
+  await expect(overlay.locator(".bk-open-list li").first()).toHaveText("Silky Carrot Apple Starter Purée");
+  await expect(page).toHaveURL(/\/collections\/first-tastes$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("First Tastes");
+  await expect(overlay).toHaveCount(0, { timeout: 10_000 });
+});
+
+test("with reduced motion a book link goes straight to its page", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/collections", LOAD);
+  const ages = page.getByRole("group", { name: "Cooking for" });
+  await expect(async () => {
+    await ages.getByRole("button", { name: "6–12 m" }).click();
+    await expect(ages.getByRole("button", { name: "6–12 m" })).toHaveAttribute("aria-pressed", "true", { timeout: 1000 });
+  }).toPass();
+  await page.getByRole("region", { name: "Everyday meals" }).getByRole("link", { name: /First Tastes/ }).click();
+  await expect(page).toHaveURL(/\/collections\/first-tastes$/);
+  await expect(page.locator(".bk-open")).toHaveCount(0);
+});

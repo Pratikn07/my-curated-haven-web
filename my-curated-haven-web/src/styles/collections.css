@@ -1,0 +1,2957 @@
+/*
+ * Collections (/collections and /collections/<slug>): cloth-bound chapters.
+ *
+ * The showroom opens on a fanned hand of three cloth cookbooks. Scrolling into
+ * each collection floods the page with that book's cloth, the way a shelf of
+ * cookbooks reads as blocks of colour. Paper sections (how it works, free
+ * recipes, contents) sit between the cloth fields.
+ *
+ * Motion, each layer optional:
+ * 1. CSS always: the covers deal into a fan on load, recipe cards fan out when
+ *    a chapter arrives, the cloth colour crossfades between chapters.
+ * 2. CollectionsMotion on every screen: marks chapters in view, sets the active
+ *    cloth, shows the buy dock.
+ * 3. Mouse only: covers tilt toward the pointer with a light sweep across the
+ *    foil; the contents list shows each recipe's photo beside the pointer.
+ * 4. Large screens with motion allowed: GSAP opens each book on its spine as
+ *    its chapter scrolls in, showing a real contents page.
+ * Without the script every element sits in its final place. With reduced
+ * motion nothing moves. Text a parent reads is never faded in.
+ */
+
+.cl {
+  --cl-paper: #fbf6ee;
+  --cl-paper-deep: #f3eadb;
+  --cl-ink: #241b17;
+  --cl-ink-soft: #5d4d45;
+  --cl-line: rgb(36 27 23 / 0.14);
+  --cl-line-strong: rgb(36 27 23 / 0.3);
+  --cl-card: #fffdf9;
+  --cl-cream: #f6ecdc;
+  --cl-cream-soft: #e3d3bf;
+  --cl-gold: #dcb468;
+  --cl-gold-bright: #f3d899;
+  --cl-ember: #7a3312;
+  --cl-forest: #22382b;
+  --cl-plum: #3e2238;
+  --cl-terracotta: #8a3f2c;
+  --cl-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --cl-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --cl-gutter: clamp(1.15rem, 5vw, 3.5rem);
+  --cl-max: 78rem;
+  --cl-header: 4.1rem;
+  --cl-shadow-book: 0 1px 1px rgb(20 10 4 / 0.25), 0 18px 30px -12px rgb(20 10 4 / 0.55), 0 40px 60px -30px rgb(20 10 4 / 0.5);
+  --cl-shadow-card: 0 1px 2px rgb(30 18 10 / 0.12), 0 14px 28px -14px rgb(30 18 10 / 0.5);
+
+  position: relative;
+  overflow-x: clip;
+  color: var(--cl-ink);
+  font-family: var(--font-body);
+  background-color: var(--cl-paper);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.cl :where(h1, h2, h3, p, ol, ul, figure, dl, dd) {
+  margin: 0;
+}
+
+.cl :where(ol, ul) {
+  padding: 0;
+  list-style: none;
+}
+
+/* Each book's cloth. --cloth is the field, --cloth-deep its shadow side. */
+.cl [data-cloth="ember"],
+.cl[data-cloth="ember"] {
+  --cloth: var(--cl-ember);
+  --cloth-deep: #5a240b;
+  --cloth-lift: #934019;
+}
+
+.cl [data-cloth="forest"],
+.cl[data-cloth="forest"] {
+  --cloth: var(--cl-forest);
+  --cloth-deep: #15241b;
+  --cloth-lift: #31503e;
+}
+
+.cl [data-cloth="plum"],
+.cl[data-cloth="plum"] {
+  --cloth: var(--cl-plum);
+  --cloth-deep: #29151f;
+  --cloth-lift: #573150;
+}
+
+.cl [data-cloth="terracotta"],
+.cl[data-cloth="terracotta"] {
+  --cloth: var(--cl-terracotta);
+  --cloth-deep: #6a2e1f;
+  --cloth-lift: #a2513b;
+}
+
+.cl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.cl-wrap {
+  width: 100%;
+  max-width: var(--cl-max);
+  margin-inline: auto;
+  padding-inline: var(--cl-gutter);
+}
+
+/* ---------- Type ---------- */
+
+.cl-display {
+  font-family: var(--font-display);
+  font-weight: 330;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.cl-display em {
+  font-style: italic;
+  font-weight: 360;
+}
+
+.cl-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 7.5vw, 3.6rem);
+  font-weight: 340;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.cl-lede {
+  max-width: 34rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--cl-ink-soft);
+  text-wrap: pretty;
+}
+
+/* Words behind a mask: they rise into place, never fade. */
+.cl-word {
+  display: inline-block;
+  padding: 0.06em 0.08em 0.18em;
+  margin: -0.06em -0.08em -0.18em;
+  overflow: clip;
+  vertical-align: top;
+}
+
+.cl-word-in {
+  display: inline-block;
+}
+
+/* ---------- Buttons and links ---------- */
+
+.cl-button {
+  --button-bg: var(--cl-ink);
+  --button-fg: var(--cl-cream);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3.25rem;
+  padding: 0.85rem 1.7rem;
+  border-radius: 999px;
+  overflow: hidden;
+  isolation: isolate;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.005em;
+  color: var(--button-fg);
+  background: var(--button-bg);
+  text-decoration: none;
+  box-shadow: 0 1px 1px rgb(20 10 4 / 0.2), 0 12px 24px -14px rgb(20 10 4 / 0.6);
+  transition: transform 0.35s var(--cl-ease), box-shadow 0.35s var(--cl-ease);
+}
+
+/* A fill that grows from where the pointer entered (set by script; centre without it). */
+.cl-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), rgb(255 255 255 / 0.16) 0 0, transparent 0);
+  transition: background 0.45s var(--cl-ease);
+}
+
+.cl-button:hover::before {
+  background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), rgb(255 255 255 / 0.16) 0 140%, transparent 140%);
+}
+
+.cl-button:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.cl-button:focus-visible,
+.cl-link:focus-visible,
+.cl-rail-link:focus-visible,
+.cl-stack-book:focus-visible,
+.cl-row-link:focus-visible,
+.cl-next:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.cl-button-arrow {
+  width: 1.1em;
+  height: 1.1em;
+  transition: transform 0.35s var(--cl-ease);
+}
+
+.cl-button:hover .cl-button-arrow {
+  transform: translateX(4px);
+}
+
+.cl-button[data-tone="cream"] {
+  --button-bg: var(--cl-cream);
+  --button-fg: var(--cloth, var(--cl-ink));
+}
+
+.cl-button[data-tone="cream"]::before {
+  background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), rgb(255 255 255 / 0.55) 0 0, transparent 0);
+}
+
+.cl-button[data-tone="cream"]:hover::before {
+  background: radial-gradient(circle at var(--px, 50%) var(--py, 50%), rgb(255 255 255 / 0.55) 0 140%, transparent 140%);
+}
+
+.cl-button[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.cl-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  transition: text-decoration-color 0.25s ease, gap 0.3s var(--cl-ease);
+}
+
+.cl-link:hover {
+  gap: 0.7rem;
+  text-decoration-color: currentColor;
+}
+
+/* ---------- The book ---------- */
+
+.cl-book {
+  position: relative;
+  display: block;
+  container-type: inline-size;
+  aspect-ratio: 1040 / 1412;
+  border-radius: 2.2% / 1.6%;
+  color: var(--cl-gold);
+  filter: drop-shadow(0 1px 1px rgb(20 10 4 / 0.28)) drop-shadow(0 22px 22px rgb(20 10 4 / 0.32));
+}
+
+.cl-book-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* A plain cloth book when no cover art exists: cloth, a hinge, a foil rule. */
+.cl-book[data-plain] {
+  background-color: var(--cloth, var(--cl-terracotta));
+  background-image:
+    linear-gradient(90deg, rgb(0 0 0 / 0.22) 0 4.6%, rgb(255 255 255 / 0.06) 4.6% 5.4%, rgb(0 0 0 / 0.12) 5.4% 6.4%, transparent 6.4%),
+    url("/images/collections/linen-384.webp");
+  background-size: 100% 100%, 9rem;
+  background-blend-mode: normal, soft-light;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.18);
+}
+
+.cl-book[data-plain]::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 16%;
+  top: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cl-gold) 15% 85%, transparent);
+}
+
+/* Foil title, stamped into the empty lower third of the cover. */
+.cl-book-title {
+  position: absolute;
+  left: 12%;
+  right: 6%;
+  top: 66%;
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 13cqi, 3.6rem);
+  font-weight: 380;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--cl-gold);
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 0.35), 0 1px 0 rgb(255 236 190 / 0.18);
+  pointer-events: none;
+}
+
+.cl-book-title[data-long] {
+  font-size: clamp(0.85rem, 11cqi, 3.1rem);
+}
+
+/* Light across cloth and foil. Follows the pointer on a mouse; still otherwise. */
+.cl-book-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent calc(var(--sheen, 35%) - 18%),
+    rgb(255 244 214 / 0.22) var(--sheen, 35%),
+    transparent calc(var(--sheen, 35%) + 18%)
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 0.5s var(--cl-ease);
+  pointer-events: none;
+}
+
+.cl-tilt[data-tilting] .cl-book-sheen,
+.cl-stack-book:hover .cl-book-sheen {
+  opacity: 1;
+}
+
+/* ---------- Showroom hero ---------- */
+
+.cl-hero {
+  padding-block: clamp(1.6rem, 6vw, 4.5rem) clamp(3rem, 9vw, 6rem);
+  text-align: center;
+}
+
+.cl-hero-grid {
+  display: grid;
+  gap: clamp(1.4rem, 4vw, 2.5rem);
+  justify-items: center;
+}
+
+.cl-hero-title {
+  max-width: 13ch;
+  font-size: clamp(2.6rem, 11.2vw, 6rem);
+}
+
+.cl-hero-title em {
+  color: var(--cl-ember);
+}
+
+.cl-byline {
+  margin-top: 0.9rem;
+  font-size: 0.9375rem;
+  color: var(--cl-ink-soft);
+}
+
+.cl-byline strong {
+  font-weight: 600;
+  color: var(--cl-ink);
+}
+
+/* The hand of books. Positions are the fan; the load moment deals them out of a stack. */
+.cl-stack {
+  position: relative;
+  width: min(100%, 27rem);
+  aspect-ratio: 1.42;
+  margin-block: 0.4rem 0.2rem;
+}
+
+.cl-stack-book {
+  --x: 0%;
+  --y: 0%;
+  --r: 0deg;
+  --lift: 0px;
+  position: absolute;
+  top: 6%;
+  left: 27%;
+  width: 46%;
+  border-radius: 3%;
+  transform:
+    translate(calc(var(--x) * (1 - var(--gather, 0))), calc(var(--y) * (1 - var(--gather, 0)) + var(--gather, 0) * 6% - var(--lift)))
+    rotate(calc(var(--r) * (1 - var(--gather, 0))));
+  transform-origin: 50% 90%;
+  transition: transform 0.6s var(--cl-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrubbed by scroll: no easing lag behind the finger. */
+.cl[data-scenes] .cl-stack-book {
+  transition: none;
+}
+
+.cl-stack > li:nth-child(1) .cl-stack-book {
+  --x: -52%;
+  --y: 7%;
+  --r: -10deg;
+  z-index: 1;
+}
+
+.cl-stack > li:nth-child(2) .cl-stack-book {
+  z-index: 3;
+}
+
+.cl-stack > li:nth-child(3) .cl-stack-book {
+  --x: 52%;
+  --y: 8%;
+  --r: 9deg;
+  z-index: 2;
+}
+
+.cl-stack > li .cl-stack-book:hover,
+.cl-stack > li .cl-stack-book:focus-visible {
+  --lift: 14px;
+  z-index: 4;
+}
+
+.cl-stack > li:nth-child(1) .cl-stack-book:hover,
+.cl-stack > li:nth-child(1) .cl-stack-book:focus-visible {
+  --r: -6deg;
+}
+
+.cl-stack > li:nth-child(3) .cl-stack-book:hover,
+.cl-stack > li:nth-child(3) .cl-stack-book:focus-visible {
+  --r: 5deg;
+}
+
+.cl-stack-book .cl-book {
+  width: 100%;
+}
+
+.cl-stack-label {
+  position: absolute;
+  left: 50%;
+  bottom: -2.4rem;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cl-ink);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease, transform 0.4s var(--cl-ease);
+  pointer-events: none;
+}
+
+.cl-stack-book:hover .cl-stack-label,
+.cl-stack-book:focus-visible .cl-stack-label {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cl-stack-book {
+    animation: cl-deal 1.15s var(--cl-ease) backwards;
+  }
+
+  .cl-stack > li:nth-child(1) .cl-stack-book {
+    animation-delay: 0.12s;
+  }
+
+  .cl-stack > li:nth-child(3) .cl-stack-book {
+    animation-delay: 0.2s;
+  }
+
+  .cl-hero .cl-word-in {
+    animation: cl-rise 0.95s var(--cl-ease) both;
+    animation-delay: calc(var(--w, 0) * 55ms);
+  }
+}
+
+/* On touch screens the books breathe, slowly and out of step, until the hero leaves the screen. */
+@media (hover: none) and (prefers-reduced-motion: no-preference) {
+  .cl-stack-book .cl-book {
+    animation: cl-breathe 7s ease-in-out 1.4s infinite;
+  }
+
+  .cl-stack > li:nth-child(2) .cl-stack-book .cl-book {
+    animation-delay: 2.6s;
+    animation-duration: 8s;
+  }
+
+  .cl-stack > li:nth-child(3) .cl-stack-book .cl-book {
+    animation-delay: 3.4s;
+    animation-duration: 7.5s;
+  }
+
+  .cl-hero[data-offscreen] .cl-stack-book .cl-book {
+    animation-play-state: paused;
+  }
+
+  /* A finger on a book lifts it, as a mouse does. */
+  .cl-stack > li .cl-stack-book:active {
+    --lift: 12px;
+    z-index: 4;
+  }
+}
+
+@keyframes cl-breathe {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(0.8deg); }
+}
+
+/* Start from a neat stack in the middle (still visible), then fan. */
+@keyframes cl-deal {
+  from {
+    transform: translate(0%, 4%) rotate(0deg);
+  }
+}
+
+@keyframes cl-rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+.cl-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem 1.4rem;
+}
+
+.cl-hero-note {
+  margin-inline: auto;
+  margin-top: 0.4rem;
+}
+
+@media (min-width: 1024px) {
+  .cl-hero {
+    text-align: left;
+  }
+
+  .cl-hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-areas:
+      "copy stack"
+      "actions stack"
+      "note stack";
+    align-items: center;
+    justify-items: start;
+    column-gap: clamp(2rem, 5vw, 5rem);
+    row-gap: 1.6rem;
+  }
+
+  .cl-hero-copy {
+    grid-area: copy;
+    align-self: end;
+  }
+
+  .cl-stack {
+    grid-area: stack;
+    width: 100%;
+    max-width: 38rem;
+    justify-self: center;
+  }
+
+  .cl-hero-actions {
+    grid-area: actions;
+    justify-content: flex-start;
+  }
+
+  .cl-hero-note {
+    grid-area: note;
+    align-self: start;
+    margin: 0;
+  }
+}
+
+/* ---------- Chapters ---------- */
+
+.cl-chapters {
+  position: relative;
+  /* Clip, not hidden: the sticky cloth stays sticky but never spills past the last chapter. */
+  overflow: clip;
+  color: var(--cl-cream);
+}
+
+/*
+ * One cloth behind every chapter. It stays in the viewport while the chapters
+ * scroll and crossfades to the chapter in view. Without the script each
+ * chapter paints its own cloth instead.
+ */
+.cl-cloth {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100lvh;
+  margin-bottom: -100lvh;
+  background-color: var(--cloth, var(--cl-ember));
+  background-image:
+    radial-gradient(120% 80% at 70% 0%, rgb(255 255 255 / 0.07), transparent 60%),
+    radial-gradient(120% 90% at 0% 100%, rgb(0 0 0 / 0.28), transparent 60%),
+    url("/images/collections/linen-384.webp");
+  background-size: auto, auto, 11rem;
+  background-blend-mode: normal, normal, soft-light;
+  transition: background-color 0.9s var(--cl-ease-in-out);
+  pointer-events: none;
+}
+
+.cl-chapters:not([data-flood]) .cl-cloth {
+  display: none;
+}
+
+/* One layer per book; scroll spreads each over the last (scenes.ts). Hidden until then. */
+.cl-ink {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background-color: var(--cloth);
+  background-image:
+    radial-gradient(120% 80% at 70% 0%, rgb(255 255 255 / 0.07), transparent 60%),
+    radial-gradient(120% 90% at 0% 100%, rgb(0 0 0 / 0.28), transparent 60%),
+    url("/images/collections/linen-384.webp");
+  background-size: auto, auto, 11rem;
+  background-blend-mode: normal, normal, soft-light;
+}
+
+.cl-chapters[data-ink] .cl-ink {
+  display: block;
+}
+
+.cl-chapters[data-ink] .cl-cloth {
+  transition: none;
+}
+
+/* The tap flood: the book's cloth spreads from the finger, then the chapter is underneath. */
+.cl-tap-ink {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background-color: var(--cloth);
+  background-image: url("/images/collections/linen-384.webp");
+  background-size: 11rem;
+  background-blend-mode: soft-light;
+  clip-path: circle(0px at 50% 50%);
+  pointer-events: none;
+}
+
+.cl-chapter {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  padding-block: clamp(4.5rem, 12vw, 8rem) clamp(4rem, 10vw, 7rem);
+  background-color: var(--cloth);
+  background-image: url("/images/collections/linen-384.webp");
+  background-size: 11rem;
+  background-blend-mode: soft-light;
+  scroll-margin-top: calc(var(--cl-header) + 3.2rem);
+}
+
+.cl-chapters[data-flood] .cl-chapter {
+  background: transparent;
+}
+
+.cl-chapter-grid {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.cl-chapter-book {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding-block: 1rem 0.5rem;
+}
+
+/* Outlined numeral behind the book: which book of the shelf this is. */
+.cl-numeral {
+  position: absolute;
+  left: -0.04em;
+  top: -0.12em;
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 42vw, 15rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--cl-cream) 55%, transparent);
+  user-select: none;
+  pointer-events: none;
+}
+
+.cl-chapter-book .cl-book3d {
+  width: min(58%, 15rem);
+  transform: rotate(4deg);
+}
+
+/* Room for the open spread on a phone: the book sits centred, its cover swings left. */
+.cl[data-scenes] .cl-chapter-book {
+  padding-block: 1.5rem 1.2rem;
+}
+
+.cl-chapter-text {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.cl-chapter-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.9rem, 13vw, 5.2rem);
+  font-weight: 320;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: var(--cl-cream);
+}
+
+/* With the script: the title rises word by word as its chapter arrives; the lines under it follow. */
+@media (prefers-reduced-motion: no-preference) {
+  .cl-chapter-title .cl-word-in,
+  .cl-chapter-text > :not(h2) {
+    transition: transform 0.9s var(--cl-ease);
+  }
+
+  .cl-chapter-title .cl-word-in {
+    transition-delay: calc(var(--w, 0) * 70ms + 80ms);
+  }
+
+  .cl-chapter-text > .cl-tagline { transition-delay: 0.22s; }
+  .cl-chapter-text > .cl-story { transition-delay: 0.3s; }
+  .cl-chapter-text > .cl-facts { transition-delay: 0.38s; }
+
+  .cl[data-motion-ready] .cl-chapter:not([data-inview]) .cl-chapter-title .cl-word-in {
+    transform: translateY(105%);
+  }
+
+  .cl[data-motion-ready] .cl-chapter:not([data-inview]) .cl-chapter-text > :not(h2) {
+    transform: translateY(1.2rem);
+  }
+}
+
+.cl-tagline {
+  max-width: 26ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+  font-style: italic;
+  font-weight: 330;
+  line-height: 1.3;
+  color: var(--cl-cream);
+  text-wrap: balance;
+}
+
+.cl-story {
+  max-width: 38ch;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--cl-cream-soft);
+  text-wrap: pretty;
+}
+
+.cl-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--cl-cream);
+}
+
+.cl-facts li + li::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 0.7rem;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+/* Recipe cards fanned like loose pages. Final positions are the default. */
+.cl-fan {
+  position: relative;
+  width: min(100%, 30rem);
+  aspect-ratio: 1.9;
+  margin: 1.2rem auto 0.4rem;
+}
+
+.cl-fan-card {
+  --x: 0%;
+  --y: 0%;
+  --r: 0deg;
+  --deal: 1;
+  position: absolute;
+  top: 0;
+  left: 35%;
+  width: 30%;
+  color: var(--cl-ink);
+  perspective: 900px;
+  /* --deal 0: tucked in a stack under the book; 1: fanned. */
+  transform:
+    translate(calc(var(--x) * var(--deal)), calc(var(--y) * var(--deal) + (1 - var(--deal)) * -38%))
+    rotate(calc(var(--r) * var(--deal)))
+    scale(calc(0.86 + 0.14 * var(--deal)));
+  transform-origin: 50% 100%;
+  transition: transform 0.95s var(--cl-ease);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.cl[data-scenes] .cl-fan-card {
+  transition: none;
+}
+
+/* A turned page lifts above its neighbours. */
+.cl-fan-card:has(.cl-page[aria-pressed="true"]) {
+  z-index: 9;
+}
+
+.cl-page {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.75s var(--cl-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cl-page[aria-pressed="true"] {
+  transform: rotateY(180deg) scale(1.12) translateY(-6%);
+}
+
+.cl-page:active {
+  scale: 0.97;
+}
+
+.cl-page:focus-visible {
+  outline: 2px solid var(--cl-cream);
+  outline-offset: 4px;
+}
+
+.cl-page-front,
+.cl-page-back {
+  display: block;
+  padding: 5% 5% 0;
+  border-radius: 3px;
+  background: var(--cl-card);
+  box-shadow: var(--cl-shadow-card);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.cl-page-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 10% 9%;
+  transform: rotateY(180deg);
+  font-size: clamp(0.6rem, 2.5vw, 0.78rem);
+  line-height: 1.3;
+  text-align: left;
+  background:
+    linear-gradient(var(--cl-line) 1px, transparent 1px) 0 2.6em / 100% 1.5em,
+    var(--cl-card);
+}
+
+.cl-page-title {
+  font-family: var(--font-display);
+  font-size: 1.15em;
+  font-weight: 450;
+  line-height: 1.15;
+  color: var(--cl-ink);
+}
+
+.cl-page-facts {
+  display: grid;
+  gap: 0.35em;
+  color: var(--cl-ink-soft);
+}
+
+.cl-page-facts span:last-child {
+  color: var(--cloth, var(--cl-ember));
+  font-weight: 600;
+}
+
+.cl-fan-card:nth-child(1) { --x: -104%; --y: 9%; --r: -9deg; z-index: 1; }
+.cl-fan-card:nth-child(2) { --x: -36%; --y: 1%; --r: -3deg; z-index: 2; }
+.cl-fan-card:nth-child(3) { --x: 34%; --y: 2%; --r: 3.5deg; z-index: 3; }
+.cl-fan-card:nth-child(4) { --x: 103%; --y: 10%; --r: 9deg; z-index: 4; }
+
+/* With the script: cards wait in a stack until their chapter arrives. */
+.cl[data-motion-ready]:not([data-scenes]) .cl-chapter:not([data-inview]) .cl-fan-card {
+  --deal: 0;
+  transition-duration: 0s;
+}
+
+.cl-fan-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--cl-paper-deep);
+}
+
+.cl-fan-photo img {
+  object-fit: cover;
+}
+
+.cl-fan-caption {
+  display: block;
+  padding: 0.55em 0.15em 0.75em;
+  font-size: clamp(0.68rem, 2.7vw, 0.8rem);
+  line-height: 1.25;
+  text-align: center;
+  color: var(--cl-ink-soft);
+}
+
+.cl-fan-caption span {
+  display: -webkit-box;
+  height: 2.5em;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.cl-chapter-pages {
+  text-align: center;
+}
+
+.cl-chapter-more {
+  font-size: 0.875rem;
+  color: var(--cl-cream-soft);
+}
+
+.cl-chapter-buy {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  margin-top: 0.6rem;
+}
+
+.cl-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--cl-cream);
+}
+
+.cl-price small {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cl-cream-soft);
+}
+
+/* Desktop: book on the left with room for its cover to swing open, words and pages on the right. */
+@media (min-width: 1024px) {
+  .cl-chapter {
+    display: grid;
+    align-items: center;
+    padding-block: 6.5rem 4.5rem;
+  }
+
+  .cl-chapter-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "book text"
+      "book fan"
+      "book buy";
+    column-gap: clamp(2rem, 6vw, 6rem);
+    row-gap: 1.4rem;
+    align-items: center;
+  }
+
+  .cl-chapter-book {
+    grid-area: book;
+    padding: 0;
+    min-height: 34rem;
+  }
+
+  .cl-numeral {
+    left: -0.06em;
+    top: -0.32em;
+    font-size: clamp(10rem, 13vw, 13.5rem);
+  }
+
+  .cl-chapter-book .cl-book3d {
+    width: clamp(16rem, 20.5vw, 20.5rem);
+  }
+
+  .cl-chapter-text {
+    grid-area: text;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .cl-facts {
+    justify-content: flex-start;
+  }
+
+  .cl-chapter-pages {
+    grid-area: fan;
+    text-align: left;
+  }
+
+  .cl-fan {
+    margin: 0.2rem 0 0.4rem;
+    width: min(100%, 29rem);
+  }
+
+  .cl-chapter-buy {
+    grid-area: buy;
+    justify-items: start;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 1.6rem;
+  }
+}
+
+/*
+ * The 3D book: cover, inside cover and first page. Closed by default; GSAP
+ * opens it on large screens. The page shows the book's real contents.
+ */
+.cl-book3d {
+  position: relative;
+  perspective: 1800px;
+}
+
+.cl-book3d-page {
+  position: absolute;
+  inset: 1.2% 1.5% 1.2% 3%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 11% 9% 9%;
+  overflow: hidden;
+  border-radius: 1px 4px 4px 1px;
+  color: var(--cl-ink);
+  background: linear-gradient(90deg, rgb(60 40 20 / 0.16), transparent 8%), var(--cl-card);
+  box-shadow: inset -1px 0 0 rgb(0 0 0 / 0.06), 0 12px 30px -16px rgb(10 5 0 / 0.6);
+  font-size: clamp(0.62rem, 2.6vw, 0.8rem);
+  visibility: hidden;
+}
+
+@media (min-width: 1024px) {
+  .cl-book3d-page {
+    font-size: clamp(0.66rem, 0.85vw, 0.82rem);
+  }
+}
+
+.cl-book3d-more {
+  margin-top: auto;
+  font-style: italic;
+  color: var(--cl-ink-soft);
+}
+
+.cl-book3d[data-open] .cl-book3d-page {
+  visibility: visible;
+}
+
+.cl-book3d-page h3 {
+  font-family: var(--font-display);
+  font-size: 1.7em;
+  font-weight: 400;
+  font-style: italic;
+  margin-bottom: 0.4em;
+}
+
+.cl-book3d-page ol {
+  display: grid;
+  gap: 0.42em;
+  counter-reset: page;
+}
+
+.cl-book3d-page li {
+  display: flex;
+  gap: 0.6em;
+  line-height: 1.3;
+}
+
+.cl-book3d-page li span:first-child {
+  flex: none;
+  width: 1.5em;
+  font-variant-numeric: tabular-nums;
+  color: var(--cloth);
+  font-weight: 600;
+}
+
+.cl-book3d-cover {
+  position: relative;
+  transform-origin: 3.5% 50%;
+  transform-style: preserve-3d;
+}
+
+.cl-book3d-cover .cl-book {
+  backface-visibility: hidden;
+}
+
+/* The inside of the cover: cloth turned over the board, then a patterned endpaper with a foil mark. */
+.cl-book3d-inside {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 2.2% / 1.6%;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  background-color: var(--cloth-deep);
+  background-image:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--cl-gold) 55%, transparent) 0 1.2px, transparent 1.6px),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--cl-gold) 30%, transparent) 0 0.8px, transparent 1.2px);
+  background-size: 14px 14px, 14px 14px;
+  background-position: 0 0, 7px 7px;
+  box-shadow: inset 0 0 0 0.75rem var(--cloth), inset 0.9rem 0 1.6rem -0.6rem rgb(0 0 0 / 0.45);
+}
+
+.cl-book3d-inside::after {
+  content: "Tiny Soho";
+  padding: 0.5rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--cl-gold) 60%, transparent);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--cl-gold);
+  background: var(--cloth-deep);
+}
+
+/* ---------- Shelf rail ---------- */
+
+.cl-rail {
+  position: sticky;
+  top: var(--cl-header);
+  z-index: 5;
+  margin-bottom: -3.25rem;
+  padding: 0.6rem var(--cl-gutter);
+  pointer-events: none;
+}
+
+.cl-rail-track {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: 0.3rem;
+  border-radius: 999px;
+  background: rgb(20 12 8 / 0.42);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: inset 0 0 0 1px rgb(255 240 220 / 0.14);
+  pointer-events: auto;
+}
+
+.cl-rail-list {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* The cream pill slides to the current book (placed by script). */
+.cl-rail-pill {
+  position: absolute;
+  top: 0.3rem;
+  /* Offsets are measured from the list, which starts inside the track's padding. */
+  left: 0.3rem;
+  height: calc(100% - 0.6rem);
+  border-radius: 999px;
+  background: var(--cl-cream);
+  opacity: 0;
+  transition: transform 0.55s var(--cl-ease), width 0.55s var(--cl-ease), opacity 0.3s ease;
+}
+
+.cl-rail-track[data-pill] .cl-rail-pill {
+  opacity: 1;
+}
+
+.cl-rail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.3rem 0.85rem 0.3rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cl-cream-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.4s var(--cl-ease), color 0.3s ease;
+}
+
+.cl-rail-swatch {
+  width: 0.95rem;
+  height: 1.35rem;
+  border-radius: 2px 3px 3px 2px;
+  background: var(--cloth);
+  box-shadow: inset 2px 0 0 rgb(0 0 0 / 0.25), inset 0 0 0 1px rgb(255 255 255 / 0.18);
+}
+
+.cl-rail-link[aria-current="true"] {
+  color: var(--cl-ink);
+  background: var(--cl-cream);
+}
+
+.cl-rail-track[data-pill] .cl-rail-link[aria-current="true"] {
+  background: transparent;
+}
+
+.cl-rail-link {
+  position: relative;
+}
+
+@media (max-width: 380px) {
+  .cl-rail-link {
+    padding-right: 0.6rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------- How it works ---------- */
+
+.cl-how {
+  position: relative;
+  padding-block: clamp(4.5rem, 12vw, 8rem);
+}
+
+.cl-how-head {
+  display: grid;
+  gap: 1rem;
+  max-width: 40rem;
+}
+
+.cl-steps {
+  position: relative;
+  margin-top: clamp(2.4rem, 6vw, 4rem);
+}
+
+.cl-steps-list {
+  display: grid;
+  gap: 2.2rem;
+}
+
+/* A stitched thread runs through the steps and draws itself as they arrive. */
+.cl-thread {
+  position: absolute;
+  left: 1.45rem;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  width: 2px;
+  background-image: linear-gradient(var(--cl-ember) 55%, transparent 55%);
+  background-size: 2px 10px;
+  transform-origin: top;
+  transition: transform 1.4s var(--cl-ease);
+}
+
+.cl[data-motion-ready] .cl-steps:not([data-inview]) .cl-thread {
+  transform: scaleY(0);
+}
+
+.cl-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.cl-step-mark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--cl-cream);
+  background: var(--cl-ember);
+  box-shadow: 0 0 0 6px var(--cl-paper);
+}
+
+.cl-step:nth-child(2) .cl-step-mark { background: var(--cl-forest); }
+.cl-step:nth-child(3) .cl-step-mark { background: var(--cl-plum); }
+
+/* With scroll scenes: the thread is scrubbed, and each step lights as the thread reaches it. */
+.cl[data-scenes] .cl-thread {
+  transition: none;
+}
+
+.cl-step-mark,
+.cl-step > div {
+  transition: transform 0.6s var(--cl-ease), background-color 0.4s ease, color 0.4s ease;
+}
+
+.cl[data-scenes] .cl-step:not(.is-lit) .cl-step-mark {
+  transform: scale(0.55);
+  color: var(--cl-ink-soft);
+  background: var(--cl-paper-deep);
+}
+
+.cl[data-scenes] .cl-step:not(.is-lit) > div {
+  transform: translateY(0.8rem);
+}
+
+
+.cl-step h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 380;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.cl-step p {
+  margin-top: 0.45rem;
+  max-width: 34ch;
+  line-height: 1.6;
+  color: var(--cl-ink-soft);
+}
+
+.cl-how-note {
+  margin-top: 2.6rem;
+  max-width: 44ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--cl-ink-soft);
+}
+
+@media (min-width: 900px) {
+  .cl-steps-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.5rem;
+  }
+
+  .cl-thread {
+    left: 1.5rem;
+    right: 1.5rem;
+    top: 1.45rem;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background-image: linear-gradient(90deg, var(--cl-ember) 55%, transparent 55%);
+    background-size: 10px 2px;
+    transform-origin: left;
+  }
+
+  .cl[data-motion-ready] .cl-steps:not([data-inview]) .cl-thread {
+    transform: scaleX(0);
+  }
+
+  .cl-step {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Free recipes ---------- */
+
+.cl-free {
+  padding-block: clamp(4rem, 10vw, 7rem);
+  background: var(--cl-paper-deep);
+  border-block: 1px solid var(--cl-line);
+}
+
+.cl-free-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+}
+
+.cl-free-head p {
+  margin-top: 0.8rem;
+}
+
+.cl-free-grid {
+  display: grid;
+  gap: 1.1rem;
+  margin-top: 2.2rem;
+}
+
+@media (min-width: 720px) {
+  .cl-free-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.cl-free-card {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.6rem;
+  border-radius: 1rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--cl-card);
+  box-shadow: 0 1px 2px rgb(30 18 10 / 0.06);
+  transition: transform 0.45s var(--cl-ease), box-shadow 0.45s var(--cl-ease);
+}
+
+.cl-free-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 1px 2px rgb(30 18 10 / 0.06), 0 22px 36px -24px rgb(30 18 10 / 0.5);
+}
+
+.cl-free-card:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 3px;
+}
+
+.cl-free-photo {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 0.7rem;
+  background: var(--cl-paper-deep);
+}
+
+.cl-free-photo img {
+  object-fit: cover;
+  transition: transform 0.8s var(--cl-ease);
+}
+
+.cl-free-card:hover .cl-free-photo img {
+  transform: scale(1.05);
+}
+
+.cl-free-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 420;
+  line-height: 1.2;
+}
+
+.cl-free-meta {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cl-ember);
+}
+
+@media (min-width: 720px) {
+  .cl-free-card {
+    grid-template-columns: 1fr;
+    padding: 0.7rem 0.7rem 1.1rem;
+  }
+
+  .cl-free-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .cl-free-card > div:last-child {
+    padding-inline: 0.4rem;
+  }
+}
+
+/* ---------- Close ---------- */
+
+.cl-close {
+  padding-block: clamp(4.5rem, 12vw, 8rem);
+  text-align: center;
+}
+
+.cl-close-line {
+  font-size: clamp(2.2rem, 8vw, 4.4rem);
+}
+
+.cl-close-line em {
+  color: var(--cl-ember);
+}
+
+.cl-close p:not(.cl-close-line) {
+  margin-top: 1rem;
+  color: var(--cl-ink-soft);
+}
+
+.cl-close-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.4rem;
+  margin-top: 2rem;
+}
+
+/* ================= Collection page ================= */
+
+.cl-dhero {
+  position: relative;
+  color: var(--cl-cream);
+  background-color: var(--cloth);
+  background-image:
+    radial-gradient(110% 70% at 80% 0%, rgb(255 255 255 / 0.08), transparent 60%),
+    radial-gradient(100% 80% at 0% 100%, rgb(0 0 0 / 0.3), transparent 60%),
+    url("/images/collections/linen-384.webp");
+  background-size: auto, auto, 11rem;
+  background-blend-mode: normal, normal, soft-light;
+  padding-block: 1.1rem clamp(3.5rem, 9vw, 6rem);
+}
+
+.cl-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--cl-cream-soft);
+}
+
+.cl-crumbs a {
+  color: inherit;
+  text-underline-offset: 0.25em;
+}
+
+.cl-crumbs a:hover {
+  color: var(--cl-cream);
+}
+
+.cl-dhero-grid {
+  display: grid;
+  gap: 2rem;
+  margin-top: 1.6rem;
+}
+
+.cl-dhero-book {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.cl-dhero-book .cl-tilt {
+  width: min(60%, 17rem);
+  transform: rotate(-3deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cl-dhero-book {
+    animation: cl-drop 1.1s var(--cl-ease) backwards;
+  }
+
+  .cl-dhero-title .cl-word-in {
+    animation: cl-rise 0.95s var(--cl-ease) backwards;
+    animation-delay: calc(var(--w, 0) * 60ms + 120ms);
+  }
+}
+
+@keyframes cl-drop {
+  from {
+    transform: translateY(-18px) rotate(6deg);
+  }
+}
+
+.cl-dhero-text {
+  display: grid;
+  gap: 1rem;
+}
+
+.cl-dhero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 14vw, 4.2rem);
+  overflow-wrap: normal;
+  word-break: keep-all;
+  font-weight: 320;
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  color: var(--cl-cream);
+  text-wrap: balance;
+}
+
+.cl-dhero .cl-tagline {
+  max-width: 30ch;
+}
+
+.cl-dhero .cl-story {
+  max-width: 44ch;
+}
+
+.cl-dhero .cl-facts {
+  justify-content: flex-start;
+}
+
+.cl-forwhen {
+  padding-left: 1rem;
+  border-left: 1px solid color-mix(in srgb, var(--cl-cream) 40%, transparent);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--cl-cream-soft);
+}
+
+/* The buy card: paper laid on the cloth. */
+.cl-buy {
+  position: relative;
+  display: grid;
+  gap: 1.1rem;
+  padding: clamp(1.3rem, 4vw, 1.9rem);
+  border-radius: 1.1rem;
+  color: var(--cl-ink);
+  background: var(--cl-card);
+  box-shadow: 0 1px 2px rgb(10 5 0 / 0.2), 0 30px 50px -30px rgb(10 5 0 / 0.8);
+  scroll-margin-top: calc(var(--cl-header) + 1rem);
+}
+
+.cl-buy-price {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.cl-buy-kind {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cloth);
+}
+
+.cl-buy-list {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--cl-line);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.cl-buy-list li {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  gap: 0.65rem;
+}
+
+.cl-buy-list svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.12rem;
+  color: var(--cloth);
+}
+
+.cl-buy-cta > * {
+  width: 100%;
+}
+
+.cl-buy-hint {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--cl-ink-soft);
+}
+
+.cl-buy-hint a {
+  color: var(--cl-ink);
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .cl-dhero {
+    padding-block: 1.4rem 6rem;
+  }
+
+  .cl-dhero-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: center;
+    gap: clamp(2rem, 4vw, 4rem);
+    margin-top: 2.6rem;
+  }
+
+  .cl-dhero-book .cl-tilt {
+    width: min(100%, 20rem);
+  }
+
+  .cl-dhero-title {
+    font-size: clamp(3.4rem, 5vw, 5rem);
+  }
+
+  .cl-buy {
+    align-self: center;
+  }
+}
+
+/* ---------- Contents: a cookbook index ---------- */
+
+.cl-contents {
+  padding-block: clamp(4rem, 10vw, 7rem);
+}
+
+.cl-contents-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem 2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--cl-line-strong);
+}
+
+.cl-contents-head p {
+  color: var(--cl-ink-soft);
+}
+
+.cl-rows {
+  counter-reset: row;
+}
+
+.cl-row {
+  position: relative;
+  border-bottom: 1px solid var(--cl-line);
+}
+
+.cl-row-inner {
+  display: grid;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding-block: 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cl-row-thumb {
+  position: relative;
+  width: 4.2rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  background: var(--cl-paper-deep);
+}
+
+.cl-row-thumb img {
+  object-fit: cover;
+}
+
+.cl-row-main {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.cl-row-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 4.4vw, 1.65rem);
+  font-weight: 380;
+  line-height: 1.18;
+  letter-spacing: -0.005em;
+}
+
+.cl-row-num {
+  flex: none;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cloth, var(--cl-ember));
+}
+
+.cl-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.45rem;
+  font-size: 0.8125rem;
+  color: var(--cl-ink-soft);
+}
+
+.cl-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--cl-line);
+  background: var(--cl-card);
+}
+
+.cl-chip[data-kind="allergen"] {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--cloth, var(--cl-ember)) 9%, var(--cl-card));
+  color: var(--cl-ink);
+}
+
+.cl-row-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cl-row-go {
+  display: none;
+}
+
+/* Lists arrive as lists: rows rise a little, one after another. */
+@media (prefers-reduced-motion: no-preference) {
+  .cl[data-motion-ready] .cl-rows:not([data-inview]) .cl-row-inner {
+    transform: translateY(14px);
+  }
+
+  .cl-row-inner {
+    transition: transform 0.8s var(--cl-ease);
+    transition-delay: calc(var(--i, 0) * 45ms);
+  }
+}
+
+@media (min-width: 900px) {
+  .cl-row-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-block: 1.35rem;
+  }
+
+  .cl-row-thumb {
+    display: none;
+  }
+
+  .cl-row-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 2rem;
+  }
+
+  .cl-row-title {
+    transition: transform 0.5s var(--cl-ease), color 0.3s ease;
+  }
+
+  .cl-row:hover .cl-row-title {
+    transform: translateX(0.6rem);
+    color: var(--cloth, var(--cl-ember));
+  }
+
+  .cl-row-go {
+    display: inline-flex;
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--cloth);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.3s ease, transform 0.45s var(--cl-ease);
+  }
+
+  .cl-row:hover .cl-row-go {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The photo that follows the pointer down the index (mouse only, set by script). */
+.cl-peek {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  width: 15rem;
+  aspect-ratio: 4 / 5;
+  padding: 0.55rem 0.55rem 2rem;
+  border-radius: 3px;
+  background: var(--cl-card);
+  box-shadow: var(--cl-shadow-card);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(var(--peek-x, -999px), var(--peek-y, -999px), 0) rotate(var(--peek-r, 0deg)) scale(0.92);
+  transition: opacity 0.25s ease, transform 0.18s linear;
+}
+
+.cl-peek[data-on] {
+  opacity: 1;
+  transform: translate3d(var(--peek-x, -999px), var(--peek-y, -999px), 0) rotate(var(--peek-r, 0deg)) scale(1);
+}
+
+.cl-peek img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Free samples on the collection page ---------- */
+
+.cl-samples {
+  padding-block: clamp(4rem, 10vw, 6.5rem);
+  background: var(--cl-paper-deep);
+  border-block: 1px solid var(--cl-line);
+}
+
+.cl-format {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1.2rem;
+}
+
+/* ---------- Questions ---------- */
+
+.cl-questions {
+  padding-block: clamp(4rem, 10vw, 6.5rem);
+}
+
+.cl-qa {
+  margin-top: 1.8rem;
+  border-top: 1px solid var(--cl-line-strong);
+}
+
+.cl-qa details {
+  border-bottom: 1px solid var(--cl-line);
+}
+
+.cl-qa summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.6rem;
+  padding-block: 1rem;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 4vw, 1.4rem);
+  font-weight: 400;
+}
+
+.cl-qa summary::-webkit-details-marker {
+  display: none;
+}
+
+.cl-qa summary:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 2px;
+}
+
+.cl-qa-icon {
+  flex: none;
+  position: relative;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.cl-qa-icon::before,
+.cl-qa-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 0.35s var(--cl-ease);
+}
+
+.cl-qa-icon::after {
+  transform: rotate(90deg);
+}
+
+.cl-qa details[open] .cl-qa-icon::after {
+  transform: rotate(0deg);
+}
+
+.cl-qa details p {
+  max-width: 62ch;
+  padding-bottom: 1.3rem;
+  line-height: 1.65;
+  color: var(--cl-ink-soft);
+}
+
+/* ---------- Next book ---------- */
+
+.cl-next {
+  position: relative;
+  display: grid;
+  gap: 1.6rem;
+  align-items: center;
+  padding-block: clamp(3.5rem, 9vw, 5.5rem);
+  color: var(--cl-cream);
+  text-decoration: none;
+  background-color: var(--cloth);
+  background-image: url("/images/collections/linen-384.webp");
+  background-size: 11rem;
+  background-blend-mode: soft-light;
+  overflow: hidden;
+}
+
+.cl-next-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7.5rem;
+  gap: 1.4rem;
+  align-items: center;
+}
+
+.cl-next-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cl-cream-soft);
+}
+
+.cl-next-title {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 9vw, 4.6rem);
+  font-weight: 320;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.cl-next .cl-tagline {
+  margin-top: 0.7rem;
+  font-size: 1.05rem;
+}
+
+.cl-next .cl-book {
+  transform: rotate(5deg) translateY(6%);
+  transition: transform 0.7s var(--cl-ease);
+}
+
+.cl-next:hover .cl-book {
+  transform: rotate(1deg) translateY(-2%);
+}
+
+@media (min-width: 900px) {
+  .cl-next-inner {
+    grid-template-columns: minmax(0, 1fr) 12rem;
+  }
+}
+
+/* ---------- Mobile buy dock ---------- */
+
+.cl-dock {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.55rem 0.55rem 1.1rem;
+  border-radius: 999px;
+  color: var(--cl-cream);
+  background: color-mix(in srgb, var(--cloth) 92%, black);
+  box-shadow: 0 18px 40px -16px rgb(10 5 0 / 0.7), inset 0 0 0 1px rgb(255 240 220 / 0.12);
+  transform: translateY(160%);
+  transition: transform 0.55s var(--cl-ease);
+}
+
+.cl-dock[hidden] {
+  display: none;
+}
+
+.cl-dock[data-on] {
+  transform: none;
+}
+
+.cl-dock-text {
+  display: grid;
+  line-height: 1.2;
+}
+
+.cl-dock-text strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 450;
+}
+
+.cl-dock-text span {
+  font-size: 0.75rem;
+  color: var(--cl-cream-soft);
+}
+
+.cl-dock .cl-button {
+  min-height: 2.9rem;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 1024px) {
+  .cl-dock {
+    display: none;
+  }
+}
+
+/* ---------- Reduced motion: everything rests in place ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .cl *,
+  .cl *::before,
+  .cl *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .cl[data-motion-ready] .cl-chapter:not([data-inview]) .cl-fan-card {
+    transform: translate(var(--x), var(--y)) rotate(var(--r));
+  }
+
+  .cl[data-motion-ready] .cl-steps:not([data-inview]) .cl-thread {
+    transform: none;
+  }
+}
+
+/* =====================================================================
+ * The bookcase (/collections) and series pages (/collections/series/<key>).
+ * Concepts approved 2026-10-06: "Cooking for" an age, filter chips, a
+ * featured book, cloth books standing on wooden shelves, and series whose
+ * volumes grow with the child. Mobile first: shelves scroll sideways, chips
+ * scroll sideways, nothing wider than the screen. Only cover art moves; text
+ * a parent reads never fades in.
+ * ===================================================================== */
+
+.cl {
+  --cl-sage: #4f6147;
+  --cl-slate: #34495f;
+  --cl-walnut: #4e3322;
+  --cl-navy: #1f2c43;
+  --cl-rose: #8a4651;
+  --cl-ochre: #a9802a;
+  --cl-berry: #6b2b45;
+  --cl-clay: #9a5a3c;
+  --cl-sky: #3f6a86;
+  --cl-rust: #8a4a1f;
+  --cl-crimson: #7d1f27;
+  --cl-teal: #22585a;
+  --cl-wood: linear-gradient(180deg, #b48660 0%, #8a603d 45%, #6a462a 100%);
+}
+
+.cl [data-cloth="sage"], .cl[data-cloth="sage"] { --cloth: var(--cl-sage); --cloth-deep: #2c3727; --cloth-lift: #627858; }
+.cl [data-cloth="slate"], .cl[data-cloth="slate"] { --cloth: var(--cl-slate); --cloth-deep: #1c2836; --cloth-lift: #4a6280; }
+.cl [data-cloth="walnut"], .cl[data-cloth="walnut"] { --cloth: var(--cl-walnut); --cloth-deep: #2b1b11; --cloth-lift: #66452f; }
+.cl [data-cloth="navy"], .cl[data-cloth="navy"] { --cloth: var(--cl-navy); --cloth-deep: #111826; --cloth-lift: #2f405f; }
+.cl [data-cloth="rose"], .cl[data-cloth="rose"] { --cloth: var(--cl-rose); --cloth-deep: #4f242c; --cloth-lift: #a35a66; }
+.cl [data-cloth="ochre"], .cl[data-cloth="ochre"] { --cloth: var(--cl-ochre); --cloth-deep: #634915; --cloth-lift: #c0973c; }
+.cl [data-cloth="berry"], .cl[data-cloth="berry"] { --cloth: var(--cl-berry); --cloth-deep: #3a1426; --cloth-lift: #85395a; }
+.cl [data-cloth="clay"], .cl[data-cloth="clay"] { --cloth: var(--cl-clay); --cloth-deep: #5a3020; --cloth-lift: #b06e4e; }
+.cl [data-cloth="sky"], .cl[data-cloth="sky"] { --cloth: var(--cl-sky); --cloth-deep: #213b4d; --cloth-lift: #5584a3; }
+.cl [data-cloth="rust"], .cl[data-cloth="rust"] { --cloth: var(--cl-rust); --cloth-deep: #4f2810; --cloth-lift: #a55f2c; }
+.cl [data-cloth="crimson"], .cl[data-cloth="crimson"] { --cloth: var(--cl-crimson); --cloth-deep: #440f14; --cloth-lift: #9a2b35; }
+.cl [data-cloth="teal"], .cl[data-cloth="teal"] { --cloth: var(--cl-teal); --cloth-deep: #103233; --cloth-lift: #2f7477; }
+
+.bk {
+  padding-bottom: clamp(3rem, 9vw, 6rem);
+}
+
+.bk-head {
+  max-width: var(--cl-max);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 6vw, 3.5rem) var(--cl-gutter) 0.9rem;
+}
+
+.bk-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 11vw, 4.6rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.bk-lede {
+  margin-top: 0.55rem;
+  color: var(--cl-ink-soft);
+  font-size: 1.05rem;
+}
+
+/* ---------- Age and filters ---------- */
+
+.bk-controls {
+  display: grid;
+  gap: 0.85rem;
+  max-width: var(--cl-max);
+  margin: 0 auto;
+  padding: 0.4rem var(--cl-gutter) 0;
+}
+
+.bk-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.8rem;
+}
+
+.bk-stage-label {
+  font-size: 0.95rem;
+  color: var(--cl-ink-soft);
+}
+
+.bk-stage-options {
+  display: grid;
+  flex: 1 1 18rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-width: 0;
+  padding: 0.22rem;
+  border: 1px solid var(--cl-line-strong);
+  border-radius: 999px;
+  background: var(--cl-card);
+}
+
+.bk-stage-option {
+  min-height: 44px;
+  padding: 0.5rem 0.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cl-ink);
+  font: inherit;
+  font-size: clamp(0.8rem, 3.4vw, 0.95rem);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.35s var(--cl-ease), color 0.35s var(--cl-ease);
+}
+
+.bk-stage-option[aria-pressed="true"] {
+  background: var(--cl-ink);
+  color: var(--cl-paper);
+}
+
+.bk-stage-option:focus-visible,
+.bk-chip:focus-visible,
+.bk-clear:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 2px;
+}
+
+.bk-chips {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 calc(var(--cl-gutter) * -1);
+  padding: 0.15rem var(--cl-gutter) 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bk-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.bk-chip {
+  flex: none;
+  min-height: 42px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--cl-line-strong);
+  border-radius: 999px;
+  background: var(--cl-card);
+  color: var(--cl-ink);
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.2s var(--cl-ease), background-color 0.3s var(--cl-ease), color 0.3s var(--cl-ease);
+}
+
+.bk-chip[aria-pressed="true"] {
+  border-color: var(--cl-ink);
+  background: var(--cl-ink);
+  color: var(--cl-paper);
+}
+
+.bk-chip:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.bk-chip:disabled {
+  color: var(--cl-ink-soft);
+  background: transparent;
+  opacity: 0.6;
+  cursor: default;
+}
+
+.bk-chip-x {
+  margin-left: 0.45rem;
+}
+
+/* ---------- Featured ---------- */
+
+.bk-featured {
+  max-width: var(--cl-max);
+  margin: 1.3rem auto 0;
+  padding: 0 var(--cl-gutter);
+}
+
+.bk-featured-link {
+  display: grid;
+  grid-template-columns: minmax(0, 36%) 1fr;
+  align-items: center;
+  gap: clamp(1rem, 4vw, 2.2rem);
+  padding: clamp(1rem, 4vw, 1.8rem);
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--cloth) 11%, var(--cl-card));
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--cl-shadow-card);
+}
+
+.bk-featured-link:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 3px;
+}
+
+.bk-featured-cover {
+  display: block;
+  transform: rotate(-2.5deg);
+  transition: transform 0.6s var(--cl-ease);
+}
+
+.bk-featured-link:hover .bk-featured-cover,
+.bk-featured-link:focus-visible .bk-featured-cover {
+  transform: rotate(0deg) translateY(-5px);
+}
+
+.bk-eyebrow {
+  display: block;
+  color: var(--cl-ink-soft);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.bk-featured-title {
+  display: block;
+  margin: 0.35rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 7vw, 2.8rem);
+  line-height: 1;
+}
+
+.bk-featured-tagline {
+  display: block;
+  color: var(--cl-ink-soft);
+  font-size: 0.95rem;
+}
+
+.bk-featured-meta {
+  display: block;
+  margin-top: 0.65rem;
+  font-size: 0.88rem;
+}
+
+/* ---------- Shelves ---------- */
+
+.bk-shelf,
+.bk-results,
+.bk-series {
+  max-width: var(--cl-max);
+  margin: 2.3rem auto 0;
+  padding: 0 var(--cl-gutter);
+}
+
+.bk-shelf-title {
+  margin-bottom: 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 6.5vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.bk-row {
+  --gap: clamp(1rem, 4.5vw, 1.8rem);
+  --book-w: clamp(6.6rem, 27vw, 9.5rem);
+  /* The ledge sits under the covers: top padding plus a cover's height (1040 x 1412). */
+  --ledge-y: calc(0.6rem + var(--book-w) * 1.3577);
+
+  display: flex;
+  /* Tops aligned: every cover is the same height, so every book stands on the ledge
+     however many lines its title takes underneath. */
+  align-items: flex-start;
+  gap: var(--gap);
+  margin: 0 calc(var(--cl-gutter) * -1);
+  padding: 0.6rem var(--cl-gutter) 0.3rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--cl-gutter);
+  scrollbar-width: none;
+  /* One wooden ledge the full length of the row; "local" lets it scroll with the books. */
+  background:
+    linear-gradient(180deg, rgb(40 20 8 / 0.3), transparent) 0 calc(var(--ledge-y) + 0.6rem) / 100% 0.55rem no-repeat,
+    var(--cl-wood) 0 var(--ledge-y) / 100% 0.6rem no-repeat;
+  background-attachment: local;
+}
+
+.bk-row:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 2px;
+}
+
+.bk-row::-webkit-scrollbar {
+  display: none;
+}
+
+.bk-row > li {
+  flex: none;
+  width: var(--book-w);
+  scroll-snap-align: start;
+}
+
+.bk-book {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.bk-book:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 4px;
+  border-radius: 0.4rem;
+}
+
+.bk-book-cover {
+  position: relative;
+  display: block;
+  margin-bottom: 1.15rem;
+}
+
+.bk-book-cover > .cl-book {
+  transform-origin: 50% 100%;
+  transition: transform 0.5s var(--cl-ease);
+}
+
+/* On the bookcase the drop-shadow filter painted a lighter square around each book
+   (its filter layer over the paper texture), so books cast a plain box shadow here. */
+.bk .cl-book {
+  filter: none;
+  box-shadow: 0 1px 1px rgb(20 10 4 / 0.28), 0 16px 18px -10px rgb(20 10 4 / 0.42), 0 30px 34px -24px rgb(20 10 4 / 0.38);
+}
+
+a.bk-book:hover .bk-book-cover > .cl-book,
+a.bk-book:focus-visible .bk-book-cover > .cl-book {
+  transform: translateY(-7px) rotate(-1.5deg);
+}
+
+.bk-book-title {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  line-height: 1.15;
+}
+
+.bk-book-meta {
+  color: var(--cl-ink-soft);
+  font-size: 0.84rem;
+}
+
+.bk-book[data-soon] .bk-book-cover > .cl-book {
+  filter: grayscale(0.35);
+  opacity: 0.78;
+}
+
+.bk-book[data-soon] .bk-book-title {
+  color: var(--cl-ink-soft);
+}
+
+.bk-empty {
+  max-width: var(--cl-max);
+  margin: 2rem auto 0;
+  padding: 0 var(--cl-gutter);
+  color: var(--cl-ink-soft);
+}
+
+/* ---------- Filtered grid ---------- */
+
+.bk-results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.bk-results-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 5.5vw, 1.9rem);
+  font-weight: 400;
+}
+
+.bk-clear {
+  min-height: 44px;
+  padding: 0 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--cl-ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.bk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.7rem 1.1rem;
+}
+
+.bk-grid .bk-book {
+  align-items: center;
+  text-align: center;
+}
+
+.bk-grid .bk-book-cover {
+  width: 84%;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .bk-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  .bk-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Series ---------- */
+
+.bk-series {
+  margin-top: 3rem;
+}
+
+.bk-series-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+@media (min-width: 720px) {
+  .bk-series-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.bk-series-card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--cl-line);
+  border-radius: 1rem;
+  background: var(--cl-card);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.4s var(--cl-ease), box-shadow 0.4s var(--cl-ease);
+}
+
+.bk-series-card:hover,
+.bk-series-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--cl-shadow-card);
+}
+
+.bk-series-card:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 2px;
+}
+
+.bk-series-name {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.bk-series-lede,
+.bk-series-volumes {
+  color: var(--cl-ink-soft);
+}
+
+.bk-series-volumes {
+  font-size: 0.85rem;
+}
+
+.bk-note {
+  max-width: 46rem;
+  margin: 3rem auto 0;
+  padding: 0 var(--cl-gutter);
+  color: var(--cl-ink-soft);
+}
+
+.bk-note h2 {
+  margin-bottom: 0.4rem;
+  color: var(--cl-ink);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.bk-note a {
+  color: var(--cl-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Series page ---------- */
+
+.bk-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: var(--cl-max);
+  margin: 0 auto;
+  padding: 1.2rem var(--cl-gutter) 0;
+  color: var(--cl-ink-soft);
+  font-size: 0.9rem;
+}
+
+.bk-crumbs a {
+  color: inherit;
+}
+
+.bk-title-series {
+  max-width: 16ch;
+  font-size: clamp(2.1rem, 9.5vw, 3.9rem);
+  text-wrap: balance;
+}
+
+.bk-volumes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(0.6rem, 3vw, 1.8rem);
+  max-width: 54rem;
+  margin: 1.8rem auto 0;
+  padding: 0 var(--cl-gutter);
+}
+
+.bk-volume-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+}
+
+.bk-volume-link > span[aria-hidden] {
+  display: contents;
+}
+
+.bk-volume-cover {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  transform-origin: 50% 100%;
+  transition: transform 0.5s var(--cl-ease);
+}
+
+.bk-volume[data-volume="1"] .bk-volume-cover {
+  width: 78%;
+}
+
+.bk-volume[data-volume="2"] .bk-volume-cover {
+  width: 89%;
+}
+
+a.bk-volume-link:hover .bk-volume-cover,
+a.bk-volume-link:focus-visible .bk-volume-cover {
+  transform: translateY(-6px);
+}
+
+a.bk-volume-link:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 4px;
+  border-radius: 0.4rem;
+}
+
+/* A series page is a showcase: volumes still being written stay in colour, labelled "Coming soon". */
+.bk-volume[data-soon] .bk-volume-cover > .cl-book {
+  opacity: 0.94;
+}
+
+.bk-volume-label {
+  color: var(--cl-ink-soft);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.bk-volume-title {
+  font-family: var(--font-display);
+  font-size: clamp(0.92rem, 3.6vw, 1.25rem);
+  line-height: 1.1;
+}
+
+.bk-volume-meta {
+  color: var(--cl-ink-soft);
+  font-size: 0.8rem;
+}
+
+.bk-timeline {
+  max-width: 54rem;
+  margin: 1.3rem auto 0;
+  padding: 0 var(--cl-gutter);
+}
+
+.bk-timeline-line {
+  position: relative;
+  display: grid;
+}
+
+.bk-timeline-line::before {
+  content: "";
+  position: absolute;
+  top: 0.45rem;
+  left: calc(50% / var(--n, 3));
+  right: calc(50% / var(--n, 3));
+  height: 2px;
+  background: var(--cl-ink);
+  opacity: 0.55;
+}
+
+.bk-timeline-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bk-timeline-dot {
+  position: relative;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 50%;
+  background: var(--cl-ink);
+}
+
+.bk-timeline-stop[data-here] .bk-timeline-dot {
+  background: #c9971f;
+  box-shadow: 0 0 0 4px var(--cl-paper), 0 0 0 5.5px var(--cl-ink);
+}
+
+.bk-timeline-flag {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: #f0d898;
+  color: var(--cl-ink);
+  font-size: 0.86rem;
+  white-space: nowrap;
+}
+
+.bk-bundle {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  width: min(34rem, calc(100% - 2 * var(--cl-gutter)));
+  margin: 2rem auto 0;
+  padding: 1.4rem 1.2rem;
+  border: 1px solid var(--cl-line-strong);
+  border-radius: 1rem;
+  background: var(--cl-card);
+  text-align: center;
+}
+
+.bk-bundle-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 6vw, 1.95rem);
+  font-weight: 400;
+}
+
+.bk-bundle-note {
+  color: var(--cl-ink-soft);
+  font-size: 0.92rem;
+}
+
+.bk-bundle-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.8rem 1.7rem;
+  border-radius: 999px;
+  background: var(--cl-ink);
+  color: var(--cl-paper);
+  text-decoration: none;
+}
+
+.bk-bundle-cta:focus-visible {
+  outline: 2px solid var(--cl-ink);
+  outline-offset: 3px;
+}
+
+/* ---------- Motion: covers rise onto the shelf; nothing moves with reduced motion ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .bk-row > li .bk-book-cover > .cl-book,
+  .bk-grid > li .bk-book-cover > .cl-book,
+  .bk-volume-cover > .cl-book {
+    animation: bk-rise 0.8s var(--cl-ease) backwards;
+    animation-delay: calc(var(--i, 0) * 70ms + 60ms);
+  }
+
+  .bk-timeline-flag {
+    animation: bk-pop 0.5s var(--cl-ease) backwards 0.2s;
+  }
+}
+
+@keyframes bk-rise {
+  from {
+    transform: translateY(22px) rotate(2deg);
+  }
+}
+
+@keyframes bk-pop {
+  from {
+    transform: translateY(6px) scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bk-chip,
+  .bk-stage-option,
+  .bk-book-cover > .cl-book,
+  .bk-featured-cover,
+  .bk-series-card,
+  .bk-volume-cover {
+    transition: none;
+  }
+}
+
+/* ---------- Opening a book (motion/openBook.ts) ----------
+ * A fixed layer over the page: paper scrim, then the book at the middle of the
+ * screen with its spine on the centre line. The cover swings open on that spine
+ * to a contents page. Sizes come from the book's width (--bk-open-w).
+ */
+
+.cl.bk-open {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  perspective: 1800px;
+  pointer-events: none;
+}
+
+.bk-open-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--cl-paper);
+}
+
+.bk-open-book {
+  position: absolute;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.bk-open-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--bk-open-w) * 0.03);
+  padding: calc(var(--bk-open-w) * 0.1) calc(var(--bk-open-w) * 0.09);
+  border-radius: 0 2.2% 2.2% 0 / 0 1.6% 1.6% 0;
+  background: var(--cl-card);
+  color: var(--cl-ink);
+  box-shadow: 0 1px 1px rgb(20 10 4 / 0.2), 0 18px 30px -16px rgb(20 10 4 / 0.45);
+  overflow: hidden;
+}
+
+.bk-open-eyebrow {
+  color: var(--cl-ink-soft);
+  font-size: calc(var(--bk-open-w) * 0.042);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.bk-open-title {
+  font-family: var(--font-display);
+  font-size: calc(var(--bk-open-w) * 0.1);
+  line-height: 1.02;
+}
+
+.bk-open-list {
+  display: grid;
+  gap: calc(var(--bk-open-w) * 0.022);
+  margin-top: calc(var(--bk-open-w) * 0.02);
+  font-size: calc(var(--bk-open-w) * 0.05);
+  line-height: 1.25;
+  counter-reset: bk-open;
+}
+
+/* One line per recipe, cut with an ellipsis, so the list always fits the page. */
+.bk-open-list li {
+  overflow: hidden;
+  padding-bottom: calc(var(--bk-open-w) * 0.018);
+  border-bottom: 1px dotted var(--cl-line);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  counter-increment: bk-open;
+}
+
+.bk-open-list li::before {
+  content: counter(bk-open);
+  display: inline-block;
+  width: 1.4em;
+  color: var(--cl-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.bk-open-more {
+  color: var(--cl-ink-soft);
+  font-size: calc(var(--bk-open-w) * 0.045);
+  font-style: italic;
+}
+
+/* The shadow the cover casts on the page as it lifts away. */
+.bk-open-fold {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(20 10 4 / 0.55), rgb(20 10 4 / 0.12) 35%, transparent 70%);
+  pointer-events: none;
+}
+
+.bk-open-cover {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.bk-open-front,
+.bk-open-inside {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.bk-open .bk-open-front {
+  width: 100%;
+}
+
+/* Inside of the cover: the cloth turned in over marbled endpaper. */
+.bk-open-inside {
+  transform: rotateY(180deg);
+  border-radius: 2.2% 0 0 2.2% / 1.6% 0 0 1.6%;
+  background:
+    linear-gradient(90deg, transparent 0 88%, rgb(0 0 0 / 0.25) 100%),
+    radial-gradient(120% 80% at 30% 20%, var(--cloth-lift, #66452f) 0%, transparent 60%),
+    var(--cloth-deep, #2b1b11);
+  box-shadow: inset 0 0 0 calc(var(--bk-open-w) * 0.05) var(--cloth, #4e3322);
+}
