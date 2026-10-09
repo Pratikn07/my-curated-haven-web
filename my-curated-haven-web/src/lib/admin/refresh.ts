@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import type { MutationReceipt, RefreshReceipt, Result } from "./contracts";
 import { getAdminContext } from "./context";
 import { loadAdminRecipe, loadAdminRecipeOperations } from "./context";
+import { recipeCollectionPaths } from "./recipe-corrections";
 import { settleCommittedRefresh } from "./refresh-result";
 
 function reference(): string {
@@ -21,6 +22,8 @@ export async function refreshAdminRecipe(
     for (const slug of options?.campaignSlugs ?? []) {
       revalidatePath(`/stories/${slug}`);
     }
+    // Collection pages show recipe facts (title, time, image), so they refresh with the recipe.
+    for (const path of await recipeCollectionPaths(receipt.recipeId)) revalidatePath(path);
   });
 }
 

@@ -47,7 +47,7 @@ BEGIN
      'action',o.action,'noChange',coalesce((o.result->>'noChange')::boolean,false),'refreshState',NULL,
      'committedAt',o.committed_at) r, o.committed_at at, o.operation_id id
    FROM private.admin_operations o JOIN public.recipe_catalog c ON c.id=o.target
-   WHERE recipes_ok AND o.actor_id=actor AND o.action IN ('revision.publish','recipe.withdraw')
+   WHERE recipes_ok AND o.actor_id=actor AND o.action IN ('revision.publish','recipe.withdraw','recipe.correct')
      AND o.result IS NOT NULL AND o.committed_at IS NOT NULL
    UNION ALL
    SELECT jsonb_build_object('operationId',o.operation_id,'domain','collection','objectId',o.collection_id,'title',rc.title,

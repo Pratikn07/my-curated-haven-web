@@ -18,6 +18,7 @@ import {
   submitAdminRevision,
   withdrawAdminRecipe,
 } from "@/lib/admin/recipes";
+import { publishRecipeCorrection } from "@/lib/admin/recipe-corrections";
 import { refreshAdminRecipe, retryAdminRefresh } from "@/lib/admin/refresh";
 import { loadAdminHistory, loadAdminRecipe, loadAdminRecipeOperations } from "@/lib/admin/context";
 import { adminRpc } from "@/lib/admin/rpc";
@@ -26,6 +27,7 @@ import type {
   DraftCommand,
   Operation,
   PublishCommand,
+  RecipeCorrectionCommand,
   ReviewCommand,
   StaffRow,
   WithdrawCommand,
@@ -204,6 +206,14 @@ export async function publishRevisionAction(input: PublishCommand) {
     return { ok: false as const, code: "INVALID" as const, reference: "revision-publish" };
   }
   return publishAdminRevision(input);
+}
+
+export async function publishRecipeCorrectionAction(input: RecipeCorrectionCommand) {
+  if (!isUuid(input.recipeId) || !isUuid(input.operationId) || !isUuid(input.revisionId)
+    || input.correctionKind !== "same_recipe" || input.acknowledgeGlobalImpact !== true) {
+    return { ok: false as const, code: "INVALID" as const, reference: "recipe-correct" };
+  }
+  return publishRecipeCorrection(input);
 }
 
 export async function withdrawRecipeAction(input: WithdrawCommand) {

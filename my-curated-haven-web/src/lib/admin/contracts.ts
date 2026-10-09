@@ -75,6 +75,10 @@ export type ReviewCommand = Operation & { revisionId: string; expectedVersion: n
   resolvedIssueIds: string[] };
 export type PublishCommand = Operation & { revisionId: string; expectedVersion: number;
   expectedDigest: string; base: Base; impactToken: string };
+/** An exact approved change to the same recipe after people have bought it (Phase 2). */
+export type RecipeCorrectionCommand = PublishCommand & { correctionKind: "same_recipe"; acknowledgeGlobalImpact: true };
+export type CorrectionImpact = { checkedAt: string; collections: { collectionId: string; slug: string; title: string;
+  releases: { version: number; state: string }[]; draft: { state: string; version: number } | null }[] };
 export type WithdrawCommand = Operation & { base: Base; impactToken: string;
   emergency: boolean; acknowledgePromiseImpact: boolean };
 export type RefreshReceipt = { operationId: string; state: "complete" | "pending" };

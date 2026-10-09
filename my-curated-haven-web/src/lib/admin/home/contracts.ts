@@ -14,7 +14,7 @@ export type AttentionFeed =
   | { state: "unavailable"; code: AdminCode; reference: string; inventoryHref: string }
   | { state: "unauthorised" };
 export type HomeResult = { operationId: string; domain: "recipe" | "collection"; objectId: string; title: string;
-  action: "revision.publish" | "recipe.withdraw" | "collection.publish"; noChange: boolean;
+  action: "revision.publish" | "recipe.withdraw" | "recipe.correct" | "collection.publish"; noChange: boolean;
   refreshState: "complete" | "pending" | null; committedAt: string };
 export type ContinueItem = { domain: "recipe" | "collection"; objectId: string; title: string; state: CollectionState;
   version: number; savedAt: string; savedByYou: boolean };
@@ -86,7 +86,8 @@ export function decodeHomeResults(data: unknown): HomeResult[] {
     if (!isRecord(item) || typeof item.operationId !== "string" || !UUID.test(item.operationId)
       || (item.domain !== "recipe" && item.domain !== "collection") || typeof item.objectId !== "string" || !UUID.test(item.objectId)
       || typeof item.title !== "string" || typeof item.noChange !== "boolean" || !isTime(item.committedAt)
-      || !(item.domain === "recipe" ? ["revision.publish", "recipe.withdraw"] : ["collection.publish"]).includes(item.action as string)
+      || !(item.domain === "recipe" ? ["revision.publish", "recipe.withdraw", "recipe.correct"] : ["collection.publish"])
+        .includes(item.action as string)
       || !(item.refreshState === null || item.refreshState === "complete" || item.refreshState === "pending")) {
       throw new Error("Invalid home result");
     }

@@ -39,7 +39,7 @@ function bad(): never {
   throw new Error("bad revision");
 }
 
-function decodeReceipt(data: unknown): MutationReceipt {
+export function decodeReceipt(data: unknown): MutationReceipt {
   if (!isRecord(data) || typeof data["operationId"] !== "string") return bad();
   return data as unknown as MutationReceipt;
 }

@@ -5,6 +5,7 @@ import { formatUtc, workingLabel } from "@/lib/admin/collections/labels";
 const ACTIONS: Record<HomeResult["action"], string> = {
   "revision.publish": "Recipe published",
   "recipe.withdraw": "Recipe withdrawn",
+  "recipe.correct": "Recipe corrected",
   "collection.publish": "Collection published",
 };
 
