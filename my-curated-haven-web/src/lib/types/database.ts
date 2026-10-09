@@ -1621,6 +1621,14 @@ export type Database = {
         Returns: Json
       }
       admin_support_access: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_approve: {
+        Args: {
+          p_digest: string
+          p_operation_id: string
+          p_proposal_id: string
+        }
+        Returns: Json
+      }
       admin_support_case: { Args: { p_command: Json }; Returns: Json }
       admin_support_cases: {
         Args: { p_cursor: string; p_order_id: string }
@@ -1645,6 +1653,17 @@ export type Database = {
       admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
       admin_support_observation: { Args: { p_id: string }; Returns: Json }
       admin_support_order: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_prepare: {
+        Args: {
+          p_kind: string
+          p_observation_id: string
+          p_operation_id: string
+          p_order_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      admin_support_proposals: { Args: { p_order_id: string }; Returns: Json }
       admin_support_queue: {
         Args: { p_cursor: string; p_mode: string }
         Returns: Json

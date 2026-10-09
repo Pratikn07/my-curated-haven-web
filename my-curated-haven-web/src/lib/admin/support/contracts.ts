@@ -87,6 +87,10 @@ export type RepairCommand = { operationId: string; proposalId: string; expectedD
 export type Approval = { id: string; proposalId: string; digest: string; humanAuthoriser: string;
   approvedAt: string; expiresAt: string; channel: "web" | "operator" };
 
+/** One of an order's proposals as staff see it; expired, blocked and unapproved proposals stay listed. */
+export type ProposalListItem = { proposal: RepairProposal; state: "awaiting_approval" | "approved" | "blocked" | "expired";
+  approval: Approval | null; preparedAt: string };
+
 export type RepairReceipt = CommerceReceipt & { proposalId: string; verification: "pending" | "verified" | "unavailable" };
 export type OperationPending = { operationId: string;
   state: "checking" | "blocked" | "failed_no_commit" | "outcome_unknown"; reasonCode: string | null };

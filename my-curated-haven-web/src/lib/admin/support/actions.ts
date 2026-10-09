@@ -1,10 +1,14 @@
 "use server";
 
 import type { Result } from "../contracts";
-import type { CaseCommand, LookupResult, ProviderObservation, SupportCase, SupportHistoryPage, SupportRead } from "./contracts";
+import type {
+  Approval, CaseCommand, LookupResult, ProviderObservation, RepairProposal, SupportCase, SupportHistoryPage, SupportRead,
+} from "./contracts";
 import { diagnoseSupportOrder } from "./diagnosis";
 import { InvalidLookup, parseLookup } from "./query";
-import { commandSupportCase, loadSupportHistory, lookupSupport } from "./repository";
+import {
+  approveSupportRepair, commandSupportCase, loadSupportHistory, lookupSupport, prepareSupportRepair,
+} from "./repository";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const CURSOR = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z\|[0-9a-f-]{36}$/;
@@ -50,4 +54,25 @@ export async function supportHistoryAction(orderId: string, cursor: string): Pro
 export async function diagnoseOrderAction(orderId: string, operationId: string): Promise<Result<SupportRead<ProviderObservation>>> {
   if (!UUID.test(orderId) || !UUID.test(operationId)) return invalid("support-diagnosis");
   return diagnoseSupportOrder(orderId, operationId);
+}
+
+const DIGEST = /^[0-9a-f]{64}$/;
+
+/** Prepare a repair. Only the order, the evidence, the kind and a reason are sent; the database works out the rest. */
+export async function prepareRepairAction(input: { orderId: string; observationId: string; kind: string; reason: string;
+  operationId: string }): Promise<Result<RepairProposal>> {
+  if (typeof input !== "object" || input === null || Object.keys(input).length !== 5 || !UUID.test(input.orderId)
+    || !UUID.test(input.observationId) || !UUID.test(input.operationId)
+    || (input.kind !== "reconcile_order" && input.kind !== "rebuild_projection")
+    || typeof input.reason !== "string" || input.reason.trim().length === 0 || input.reason.length > 500) {
+    return invalid("support-prepare");
+  }
+  return prepareSupportRepair({ orderId: input.orderId, observationId: input.observationId, kind: input.kind,
+    reason: input.reason, operationId: input.operationId });
+}
+
+/** Approve one exact proposal. The approver is the signed-in session; no approver is accepted from the request. */
+export async function approveRepairAction(proposalId: string, digest: string, operationId: string): Promise<Result<Approval>> {
+  if (!UUID.test(proposalId) || !DIGEST.test(digest) || !UUID.test(operationId)) return invalid("support-approve");
+  return approveSupportRepair(proposalId, digest, operationId);
 }

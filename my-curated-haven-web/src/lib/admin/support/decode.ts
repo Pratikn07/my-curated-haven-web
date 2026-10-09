@@ -2,7 +2,7 @@ import type {
   Binding, DisputeFact, FinancialFacts, ProviderObservation, RefundFact, RepairEffect,
 } from "../../payments/reconciliation/contracts";
 import type {
-  AccessExplanation, CustomerSupportDto, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
+  AccessExplanation, Approval, CustomerSupportDto, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 
@@ -95,10 +95,28 @@ const proposal = object<RepairProposal>({
   dependencyToken: text(200),
   policyVersion: text(100),
   effects: array(effect, 50),
-  blockers: array(code, 50),
+  // Blockers are the database's lowercase reason codes (for example policy_missing, no_change, dispute_open).
+  blockers: array(pattern(/^[a-z][a-z0-9_]{1,63}$/), 50),
   digest,
   expiresAt: timestamp,
   reason: text(1000),
+});
+
+const approval = object<Approval>({
+  id: uuid,
+  proposalId: uuid,
+  digest,
+  humanAuthoriser: uuid,
+  approvedAt: timestamp,
+  expiresAt: timestamp,
+  channel: oneOf("web", "operator"),
+});
+
+const proposalItem = object<ProposalListItem>({
+  proposal,
+  state: oneOf("awaiting_approval", "approved", "blocked", "expired"),
+  approval: nullable(approval),
+  preparedAt: timestamp,
 });
 
 const receipt = object<RepairReceipt>({
@@ -378,4 +396,13 @@ export function decodeObservationRead(input: unknown): SupportRead<ProviderObser
 /** The order's latest observation; null when no check was ever recorded. */
 export function decodeLatestObservationRead(input: unknown): SupportRead<ProviderObservation | null> {
   return read(nullable(observation))(input, "observation");
+}
+
+export function decodeApproval(input: unknown): Approval {
+  return approval(input, "approval");
+}
+
+/** An order's proposals, newest first, each with its approval state. */
+export function decodeProposalList(input: unknown): ProposalListItem[] {
+  return array(proposalItem, 25)(input, "proposals");
 }

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { DisputeFact, FinancialFacts, RefundFact } from "../../payments/reconciliation/contracts";
+import type { RepairProposal } from "./contracts";
 
 /**
  * Canonical JSON for support material: object keys sorted by UTF-16 code unit, no whitespace, arrays kept in
@@ -45,4 +46,19 @@ export function materialFactsDigest(facts: FinancialFacts): string {
   const material = { ...facts, refunds: bySortedIdentity(facts.refunds, "refund"),
     disputes: bySortedIdentity(facts.disputes, "dispute") };
   return createHash("sha256").update(canonicalSupport(material)).digest("hex");
+}
+
+/**
+ * The approved material of a repair proposal, canonically: everything except its own id, the observation that
+ * supplied the evidence (its facts are covered by materialDigest), the digest itself and the expiry. The database
+ * computes the same string (private.support_proposal_material) and its SHA-256 is the proposal digest.
+ */
+export function proposalMaterial(input: RepairProposal): string {
+  const { id, observationId, digest, expiresAt, ...material } = input;
+  void id; void observationId; void digest; void expiresAt;
+  return canonicalSupport(material);
+}
+
+export function proposalDigest(input: RepairProposal): string {
+  return createHash("sha256").update(proposalMaterial(input)).digest("hex");
 }

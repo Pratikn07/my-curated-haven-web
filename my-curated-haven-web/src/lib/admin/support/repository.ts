@@ -3,11 +3,11 @@ import type { Result } from "../contracts";
 import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
-  AccessExplanation, CaseCommand, CustomerSupportDto, LookupQuery, LookupResult, Mode, OrderCasesPage, OrderSupportDto, SupportCase,
-  SupportHistoryPage, SupportQueuePage, SupportRead,
+  AccessExplanation, Approval, CaseCommand, CustomerSupportDto, LookupQuery, LookupResult, Mode, OrderCasesPage, OrderSupportDto,
+  ProposalListItem, RepairKind, RepairProposal, SupportCase, SupportHistoryPage, SupportQueuePage, SupportRead,
 } from "./contracts";
 import {
-  decodeAccessRead, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderCases, decodeOrderRead, decodeQueuePage,
+  decodeAccessRead, decodeApproval, decodeProposal, decodeProposalList, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderCases, decodeOrderRead, decodeQueuePage,
   decodeRedaction,
   decodeSupportCase,
 } from "./decode";
@@ -68,4 +68,27 @@ export async function redactSupportNote(eventId: string, reason: string, operati
 export async function loadSupportCases(orderId: string, cursor: string | null): Promise<Result<OrderCasesPage>> {
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_support_cases", { p_order_id: orderId, p_cursor: cursor as string }), decodeOrderCases);
+}
+
+/**
+ * Prepare a repair of one order from one recorded observation. The database works out the effects; the caller only
+ * names the evidence, the kind of repair and why. Repeating the operation returns the same proposal.
+ */
+export async function prepareSupportRepair(input: { orderId: string; observationId: string; kind: RepairKind; reason: string;
+  operationId: string }): Promise<Result<RepairProposal>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_prepare", { p_order_id: input.orderId, p_observation_id: input.observationId,
+    p_kind: input.kind, p_reason: input.reason, p_operation_id: input.operationId }), decodeProposal, true);
+}
+
+/** Approve exactly the proposal with this digest, as the signed-in staff member. */
+export async function approveSupportRepair(proposalId: string, digest: string, operationId: string): Promise<Result<Approval>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_approve", { p_proposal_id: proposalId, p_digest: digest,
+    p_operation_id: operationId }), decodeApproval, true);
+}
+
+export async function loadSupportProposals(orderId: string): Promise<Result<ProposalListItem[]>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_proposals", { p_order_id: orderId }), decodeProposalList);
 }
