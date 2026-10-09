@@ -125,7 +125,7 @@ export default function AdminRecipePublication({
       }
       return;
     }
-    const refresh = await refreshRecipeAction(result.value, { slug: detail.active.slug });
+    const refresh = await refreshRecipeAction(result.value);
     setPending(false);
     setConfirming(null);
     if (refresh.state === "complete") {
@@ -212,7 +212,7 @@ export default function AdminRecipePublication({
       }
       return;
     }
-    const refresh = await refreshRecipeAction(result.value, { slug: detail.active.slug });
+    const refresh = await refreshRecipeAction(result.value);
     setConfirming(null);
     if (refresh.state === "complete") {
       setStatus("Withdrawn.");

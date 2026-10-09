@@ -71,6 +71,10 @@ export default function CollectionPublication({ detail, undecided, receipts, ope
   const mode = !working ? "none"
     : working.state === "approved" ? (canPublish ? "publish" : "none")
     : ["draft", "changes_requested", "submitted"].includes(working.state) && canPublish && canApprove ? "approve" : "none";
+  // Buyer-group decisions need review authority as well. Someone who has it decides under that authority; on an
+  // already approved revision the database keeps the existing approval.
+  const canDecide = mode === "approve" || (mode === "publish" && canApprove);
+  const decidesGroups = mode === "publish" && canApprove && (groups?.length ?? 0) > 0;
 
   async function publish() {
     // A second click before the button re-renders as disabled must not send a second request.
@@ -81,7 +85,7 @@ export default function CollectionPublication({ detail, undecided, receipts, ope
     setStale(false);
     const result = await approveAndPublishCollection({ collectionId: detail.collectionId, operationId, reason: reason.trim(),
       revisionId: working.id, expectedVersion: working.version, expectedDigest: working.digest, base: working.base,
-      impactToken: impact.token, approveNow: mode === "approve",
+      impactToken: impact.token, approveNow: mode === "approve" || decidesGroups,
       accessDecisions: groups.map((g) => ({ releaseId: g.releaseId, sourceKind: g.sourceKind, policy: policies[groupKey(g)] })) });
     inFlight.current = false;
     setPending(false);
@@ -121,7 +125,8 @@ export default function CollectionPublication({ detail, undecided, receipts, ope
 
       {/* Once a receipt is back, only the result shows: the evidence above it described the page before publishing. */}
       {working && !published ? <Evidence detail={detail} groups={groups} undecided={undecided} policies={policies}
-        onPolicy={(key, policy) => setPolicies((current) => ({ ...current, [key]: policy }))} disabled={!hydrated || pending} />
+        onPolicy={(key, policy) => setPolicies((current) => ({ ...current, [key]: policy }))}
+        disabled={!hydrated || pending || !canDecide} canDecide={canDecide} />
         : !published ? <p>Nothing is waiting to publish. Prepare and review a private draft first.</p> : null}
 
       {working && !published ? <section aria-labelledby="publish-decision" className="admin-collection__section admin-collection-review">
@@ -134,6 +139,7 @@ export default function CollectionPublication({ detail, undecided, receipts, ope
         }</p> : <>
           <p>{mode === "approve"
             ? `Recorded as ${operatorEmail}: your approval of exactly revision ${working.version} and its publication, in one step.`
+            : decidesGroups ? `Recorded as ${operatorEmail}: publication of the approved revision ${working.version} and your decisions for its buyer groups.`
             : `Recorded as ${operatorEmail}: publication of the approved revision ${working.version}.`}</p>
           <label>Reason for publishing<input value={reason} maxLength={1000} disabled={!hydrated || pending}
             onChange={(e) => setReason(e.target.value)} /></label>
@@ -141,9 +147,15 @@ export default function CollectionPublication({ detail, undecided, receipts, ope
             disabled={!hydrated || pending || !detail.readiness.readyForApproval || impact === null || groups === null
               || openBlockers.length > 0 || !groups.every((g) => policies[groupKey(g)]) || reason.trim().length === 0}>
             {pending ? "Publishing" : mode === "approve" ? "Approve and publish" : "Publish approved revision"}</button>
-          {!detail.readiness.readyForApproval ? <p className="admin-collection__note">Every readiness check must pass first.</p>
+          {!detail.readiness.readyForApproval ? <div className="admin-collection__note" role="note" aria-label="Checks to resolve">
+              <p>Every readiness check must pass first. Resolve these in the editor or on Preview &amp; changes:</p>
+              <ul>{detail.readiness.checks.filter((c) => c.severity === "blocker" && c.state !== "pass")
+                .map((c) => <li key={`${c.code}-${c.scope}`}>{c.state === "unknown" ? "Not yet known: " : ""}{c.explanation}</li>)}</ul>
+            </div>
             : openBlockers.length > 0 ? <p className="admin-collection__note">Resolve the blocking review issues first.</p>
-            : groups && !groups.every((g) => policies[groupKey(g)]) ? <p className="admin-collection__note">Choose what each buyer group receives.</p>
+            : groups && !groups.every((g) => policies[groupKey(g)]) ? <p className="admin-collection__note">{canDecide
+              ? "Choose what each buyer group receives."
+              : "Someone who can also approve collections must decide what each buyer group receives. They can publish this revision with those decisions."}</p>
             : null}
         </>}
       </section> : null}
@@ -154,13 +166,14 @@ export default function CollectionPublication({ detail, undecided, receipts, ope
   );
 }
 
-function Evidence({ detail, groups, undecided, policies, onPolicy, disabled }: {
+function Evidence({ detail, groups, undecided, policies, onPolicy, disabled, canDecide }: {
   detail: CollectionDetail;
   groups: UndecidedAccess[] | null;
   undecided: Result<UndecidedAccess[]>;
   policies: Record<string, AccessDecision["policy"]>;
   onPolicy: (key: string, policy: AccessDecision["policy"]) => void;
   disabled: boolean;
+  canDecide: boolean;
 }) {
   const working = detail.working!;
   const proposed = working.snapshot;
@@ -215,8 +228,9 @@ function Evidence({ detail, groups, undecided, policies, onPolicy, disabled }: {
         : groups.length === 0 ? <p>Every existing buyer group already has a recorded decision about added recipes and keeps it.</p>
         : <>
           <p>These buyer groups have no decision yet about recipes added after their purchase. Give additions: they also get
-            recipes added now and in later updates. Original only: they keep exactly what they bought. Your choice is recorded
-            with your reason and applies to later updates too.</p>
+            recipes added now and in later updates. Original only: they keep exactly what they bought. {canDecide
+              ? "Your choice is recorded with your reason and applies to later updates too."
+              : "Only someone who can also approve collections makes this choice."}</p>
           {groups.map((g) => {
             const key = groupKey(g);
             return <fieldset key={key} className="admin-collection__review-step" disabled={disabled}>

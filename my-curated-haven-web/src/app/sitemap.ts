@@ -8,6 +8,8 @@ import { getFreeRecipeCatalog } from "@/lib/data/recipes";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const defaultDate = new Date("2026-09-22");
 
+  // Not caught: in registry mode a failed read fails this regeneration, so the last good sitemap keeps
+  // serving instead of being replaced by one without the collections.
   const collections = (await listOpenPublishedCollections()).map((published) => published.collection);
   const staticEntries: MetadataRoute.Sitemap = [
     ...linksFor(indexableRoutes, collections.length > 0).map((route) => ({

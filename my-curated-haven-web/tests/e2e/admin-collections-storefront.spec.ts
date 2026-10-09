@@ -86,3 +86,13 @@ test("an untouched configured collection still renders from its configuration", 
   await expect(page.getByRole("heading", { level: 1, name: "First Tastes" })).toBeVisible();
   await expect(page.locator(".cl-contents")).toContainText("8 recipes");
 });
+
+test("a retired database collection is withheld and not for sale, even with its offer switched on", async ({ page }) => {
+  await f.query(`UPDATE private.commercial_offers o SET sale_enabled=true FROM public.collection_releases r
+    WHERE r.id=o.release_id AND r.collection_id=$1`, [f.collectionId]);
+  await publish(f.collectionId, { listingState: "retired" });
+  const response = await page.goto(`/collections/${f.slug}`);
+  expect(response?.status()).toBe(404);
+  const { rows } = await f.query("SELECT private.collection_sellable($1) s", [f.collectionId]);
+  expect(rows[0].s).toBeNull();
+});

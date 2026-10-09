@@ -120,9 +120,14 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   }
 
   const filteredRecipes = filterRecipes(catalog, filterState);
-  // Three open books, one per stage, as examples of what the bookcase holds.
+  // Three open books, one per stage, as examples of what the bookcase holds. The examples are optional:
+  // a collection registry outage leaves them out rather than failing the recipe list.
   const examples = ["first-tastes", "meal-prep", "lunchbox-and-daycare", "halloween"];
-  const shelf = (await listOpenPublishedCollections()).map((published) => published.collection)
+  const published = await listOpenPublishedCollections().catch((error) => {
+    console.error("[recipes] collection examples unavailable", error instanceof Error ? error.message : error);
+    return [];
+  });
+  const shelf = published.map((entry) => entry.collection)
     .filter((collection) => examples.includes(collection.slug))
     .sort((a, b) => examples.indexOf(a.slug) - examples.indexOf(b.slug))
     .slice(0, 3);

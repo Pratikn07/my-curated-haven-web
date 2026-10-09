@@ -22,8 +22,11 @@ export async function refreshAdminRecipe(
     for (const slug of options?.campaignSlugs ?? []) {
       revalidatePath(`/stories/${slug}`);
     }
-    // Collection pages show recipe facts (title, time, image), so they refresh with the recipe.
-    for (const path of await recipeCollectionPaths(receipt.recipeId)) revalidatePath(path);
+    // Collection pages show recipe facts (title, time, image), so they refresh with the recipe. Without the
+    // commerce database to say which ones, every collection page refreshes.
+    const collectionPaths = await recipeCollectionPaths(receipt.recipeId);
+    if (collectionPaths === null) revalidatePath("/collections", "layout");
+    else for (const path of collectionPaths) revalidatePath(path);
   });
 }
 

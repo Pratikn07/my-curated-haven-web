@@ -110,9 +110,11 @@ export async function approveAndPublishCollection(input: PublishCollectionComman
     return invalid("collection-publish");
   }
   const ready = await readyForApproval(input.collectionId, input.revisionId);
-  if (!ready.ok) return ready;
+  // A commit closes the draft, so a retry of a committed command reads as stale here. The database replays
+  // that operation's receipt (same id and payload) and refuses anything else, so it is still asked.
+  if (!ready.ok && ready.code !== "CONFLICT") return ready;
   const published = await publishCollection(input);
-  if (!published.ok) return published;
+  if (!published.ok) return ready.ok ? published : ready;
   const refresh = await refreshCollectionPublication(published.value);
   return { ok: true as const, value: { ...published.value, refreshState: refresh.state } };
 }

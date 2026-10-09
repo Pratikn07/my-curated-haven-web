@@ -93,6 +93,21 @@ export async function getPublishedCollection(slug: string): Promise<PublicCollec
   return (await allCollections()).find((c) => c.collection.slug === slug && c.collection.availability === "open") ?? null;
 }
 
+/**
+ * Registry mode: a database collection whose publication is retired, coming soon or missing. Its page is
+ * withheld (404) instead of being rebuilt from a stray offer, so it is neither shown nor sold by link.
+ */
+export async function isWithheldCollection(slug: string): Promise<boolean> {
+  if (collectionsSourceBackend() === "legacy" || !SLUG_PATTERN.test(slug)) return false;
+  const { rows } = await getCommercePool().query(`
+    SELECT 1 FROM public.recipe_collections c
+    JOIN private.collection_sources s ON s.collection_id = c.id AND s.source_mode = 'database'
+    LEFT JOIN public.collection_publication_projection p ON p.collection_id = c.id
+    WHERE (c.slug = $1 OR p.slug = $1)
+      AND (p.collection_id IS NULL OR p.listing_state = 'retired' OR p.availability <> 'open')`, [slug]);
+  return rows.length > 0;
+}
+
 /** The chapters of the first showroom (/collections/test), in its original order. */
 const SHOWROOM_ORDER = ["halloween", "meal-prep", "protein-packs"];
 

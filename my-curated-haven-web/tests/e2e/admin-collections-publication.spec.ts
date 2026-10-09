@@ -145,6 +145,45 @@ test("separated roles: a reviewer approves and cannot publish, a publisher publi
   expect(audit.rows[0].reason).toBe("Publish the approved update");
 });
 
+test("a publisher cannot decide a new buyer group; an owner decides it and publishes the approved revision", async ({ page }) => {
+  // A support grant on the current release: a buyer group with no additions decision yet.
+  await f.query(`INSERT INTO private.access_sources(user_id,release_id,source_kind,source_id)
+    SELECT $1::uuid, id, 'support_grant', 'synthetic-grant-' || $1::text FROM public.collection_releases
+    WHERE collection_id=$2 AND state='published' ORDER BY version DESC LIMIT 1`, [f.customerId, f.collectionId]);
+  const draft = await prepareDraft({ tagline: "New buyer group" });
+  const token = await impactToken(draft.revision_id);
+  await f.rpcAs("editor", "admin_collection_submit", { ...exact(draft, token), operation_id: crypto.randomUUID(),
+    reason: "Ready for review" });
+  const submitted = (await head())!;
+  await f.rpcAs("reviewer", "admin_collection_review", { ...exact(submitted, token), operation_id: crypto.randomUUID(),
+    reason: "Checked the effect", submission_id: submitted.submission_id, decision: "approve", resolved_issue_ids: [] });
+
+  await f.login(page, "publisher", "aal2");
+  await openPublish(page);
+  const group = page.getByRole("region", { name: "Buyers" }).getByRole("group", { name: /Access given by support/ });
+  await expect(group.getByRole("radio", { name: "Give additions" })).toBeDisabled();
+  let decision = page.getByRole("region", { name: "Your decision" });
+  await decision.getByLabel("Reason for publishing").fill("Publish the approved update");
+  await expect(decision.getByRole("button", { name: "Publish approved revision" })).toBeDisabled();
+  await expect(decision).toContainText("Someone who can also approve collections must decide what each buyer group receives.");
+
+  await page.context().clearCookies();
+  await f.login(page, "owner", "aal2");
+  await openPublish(page);
+  decision = page.getByRole("region", { name: "Your decision" });
+  await expect(decision).toContainText(`publication of the approved revision ${draft.version} and your decisions for its buyer groups`);
+  await page.getByRole("region", { name: "Buyers" }).getByRole("group", { name: /Access given by support/ })
+    .getByRole("radio", { name: "Original only" }).check();
+  await decision.getByLabel("Reason for publishing").fill("Grant keeps what it covers");
+  await decision.getByRole("button", { name: "Publish approved revision" }).click();
+  await expect(page.getByRole("status", { name: "Publication status" })).toHaveText(`Published revision ${draft.version}.`);
+  const { rows } = await f.query(`SELECT p.policy, (SELECT count(*)::int FROM private.collection_review_decisions d
+      WHERE d.submission_id=$2) decisions
+    FROM private.collection_access_policies p JOIN public.collection_releases r ON r.id=p.release_id
+    WHERE r.collection_id=$1 AND p.source_kind='support_grant'`, [f.collectionId, submitted.submission_id]);
+  expect(rows).toEqual([{ policy: "original-only", decisions: 1 }]);
+});
+
 test("publishing a revision identical to what is live reports no change and creates no publication", async ({ page }) => {
   expect(await head()).toBeUndefined();
   await f.rpcAs("owner", "admin_collection_draft_start", { collection_id: f.collectionId, operation_id: crypto.randomUUID(),
@@ -209,4 +248,21 @@ test("history copies an earlier publication into a new draft that keeps today's 
     .rows.map((r) => r.recipe_id as string);
   expect(protectedIds.length).toBeGreaterThan(0);
   for (const id of protectedIds) expect(members).toContain(id);
+});
+
+test("the publish page names the checks that still block publication", async ({ page }) => {
+  await prepareDraft({ tagline: "Blocked by unknown campaign evidence" });
+  const revision = (await f.query("SELECT campaign_revision FROM private.admin_console_settings WHERE singleton")).rows[0]
+    .campaign_revision as string | null;
+  await f.query("UPDATE private.admin_console_settings SET campaign_revision=NULL WHERE singleton");
+  try {
+    await f.login(page, "owner", "aal2");
+    await page.goto(`/admin/collections/${f.collectionId}/publish`);
+    const checks = page.getByRole("note", { name: "Checks to resolve" });
+    await expect(checks).toContainText("Every readiness check must pass first.");
+    await expect(checks.getByRole("listitem").first()).toContainText("Not yet known:");
+    await expect(page.getByRole("button", { name: "Approve and publish" })).toBeDisabled();
+  } finally {
+    await f.query("UPDATE private.admin_console_settings SET campaign_revision=$1 WHERE singleton", [revision]);
+  }
 });

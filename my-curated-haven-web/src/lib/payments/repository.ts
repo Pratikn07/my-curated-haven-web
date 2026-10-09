@@ -55,7 +55,7 @@ export async function getCollectionOfferDetails(
     LEFT JOIN private.commercial_offers o ON o.release_id = r.id AND o.sale_enabled = true
     WHERE c.slug = $1
       AND r.state IN ('published', 'sealed')
-    ORDER BY r.version DESC
+    ORDER BY r.version DESC, o.created_at DESC NULLS LAST, o.id
     LIMIT 1;
   `;
 
@@ -102,8 +102,13 @@ export async function getCollectionOfferDetails(
     ownershipState = state.ok ? state.value.ownership : "unavailable";
   }
 
-  const basePriceMinor = coll.base_minor_amount || 1500;
-  const currency = coll.currency || "usd";
+  // The price shown is the price of the offer checkout would charge (the one collection_sellable picks).
+  const sold = expected
+    ? (await pool.query("SELECT base_minor_amount, currency, terms_version FROM private.commercial_offers WHERE id = $1",
+      [expected.offerId])).rows[0]
+    : undefined;
+  const basePriceMinor = sold?.base_minor_amount ?? (coll.base_minor_amount || 1500);
+  const currency = sold?.currency ?? (coll.currency || "usd");
 
   return {
     collectionId: coll.collection_id,
@@ -115,7 +120,7 @@ export async function getCollectionOfferDetails(
     currency,
     formattedPrice: formatPrice(basePriceMinor, currency),
     saleEnabled: Boolean(coll.sale_enabled),
-    termsVersion: coll.terms_version || "2026-09-v1",
+    termsVersion: sold?.terms_version ?? (coll.terms_version || "2026-09-v1"),
     ownershipState,
     expected,
     recipes,

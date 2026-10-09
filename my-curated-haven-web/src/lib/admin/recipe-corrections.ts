@@ -1,4 +1,5 @@
 import "server-only";
+import { commerceDatabaseConfigured } from "@/lib/payments/database-config";
 import { getCommercePool } from "@/lib/payments/repository";
 import type { CorrectionImpact, MutationReceipt, RecipeCorrectionCommand, Result } from "./contracts";
 import { decodeReceipt } from "./recipes";
@@ -47,9 +48,13 @@ export async function loadRecipeCorrectionImpact(recipeId: string): Promise<Resu
   return adminRpc(() => supabase.rpc("admin_recipe_correction_impact", { p_recipe_id: recipeId }), decodeCorrectionImpact, true);
 }
 
-/** Public and admin collection pages that show this recipe, taken from the database, never from the caller. */
-export async function recipeCollectionPaths(recipeId: string): Promise<string[]> {
+/**
+ * Public and admin collection pages that show this recipe, taken from the database, never from the caller.
+ * Null where the commerce database is not configured: the caller then refreshes every collection page.
+ */
+export async function recipeCollectionPaths(recipeId: string): Promise<string[] | null> {
   if (!UUID.test(recipeId)) return [];
+  if (!commerceDatabaseConfigured()) return null;
   const { rows } = await getCommercePool().query(`SELECT DISTINCT path FROM public.recipe_collections c
     CROSS JOIN LATERAL unnest(private.collection_refresh_paths(c.id, c.slug)) path
     WHERE c.id = ANY(private.recipe_collection_ids($1))`, [recipeId]);

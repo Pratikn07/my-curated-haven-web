@@ -133,6 +133,8 @@ jobs:
           npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
 
       - name: Rebuild with the registry collection source
+        # Runs even when the browser step above fails, so a registry regression is never hidden behind it.
+        if: ${{ !cancelled() }}
         env:
           COLLECTIONS_SOURCE_BACKEND: registry
         run: npm run build
@@ -140,6 +142,7 @@ jobs:
       - name: Collection storefront tests (registry build)
         # The storefront spec skips itself on the default build, so it runs here with the registry source.
         # Desktop proves the database-backed pages; every project already covers the configured pages above.
+        if: ${{ !cancelled() }}
         env:
           COLLECTIONS_SOURCE_BACKEND: registry
         run: npm run test:e2e -- tests/e2e/admin-collections-storefront.spec.ts tests/e2e/collections.spec.ts --project=chromium-desktop
@@ -241,8 +244,8 @@ jobs:
         # selects no files. The required collection suites must all be present.
         working-directory: my-curated-haven-web
         run: |
-          required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-7]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
-          test "$required" -ge 12 || { echo "Expected 12 collection admin suites, found $required"; exit 1; }
+          required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-8]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
+          test "$required" -ge 13 || { echo "Expected 13 collection admin suites, found $required"; exit 1; }
           node scripts/test-admin-db.mjs --all
 
       - name: Verify generated TypeScript types drift

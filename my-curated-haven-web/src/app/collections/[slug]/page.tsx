@@ -12,7 +12,13 @@ import {
 import CollectionsMotion from "@/components/collections/CollectionsMotion";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import type { ShowroomCollection } from "@/lib/collections/types";
-import { getPublishedCollection, listOpenPublishedCollections, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
+import {
+  getPublishedCollection,
+  isWithheldCollection,
+  listOpenPublishedCollections,
+  loadLiveOffer,
+  offerOrNull,
+} from "@/lib/data/collections-showroom";
 import { getFreeRecipeSlots, type RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 import { usableImageSrc } from "@/lib/recipes/format";
@@ -88,7 +94,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   const live = await loadLiveOffer(slug, (await getCurrentUser())?.id);
   const model = buildModel(slug, published?.collection ?? null, offerOrNull(live), !live.ok);
 
-  if (!model) {
+  if (!model || (!published && (await isWithheldCollection(slug)))) {
     return { title: "Collection Not Found", robots: { index: false, follow: false } };
   }
 
@@ -116,7 +122,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
   const user = await getCurrentUser();
   const [published, live, freeSamples] = await Promise.all([getPublishedCollection(slug), loadLiveOffer(slug, user?.id), loadFreeSamples()]);
   const model = buildModel(slug, published?.collection ?? null, offerOrNull(live), !live.ok);
-  if (!model) notFound();
+  // A retired or coming-soon database collection is not rebuilt from its offer.
+  if (!model || (!published && (await isWithheldCollection(slug)))) notFound();
 
   const shelf = (await listOpenPublishedCollections()).map((entry) => entry.collection);
   const position = shelf.findIndex((collection) => collection.slug === slug);
