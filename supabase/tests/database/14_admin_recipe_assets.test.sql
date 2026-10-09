@@ -11,7 +11,8 @@ INSERT INTO public.recipe_bodies(recipe_id, ingredients, instructions, yield, al
 SELECT id, '[]', '[]', '1 serving', 'reviewed_no_allergens'
 FROM public.recipe_catalog WHERE slug LIKE 'admin-asset-%';
 INSERT INTO storage.objects(id, bucket_id, name, version, metadata)
-VALUES (gen_random_uuid(), 'recipe-previews', 'synth-asset-live.webp', 'v1', '{}');
+VALUES (gen_random_uuid(), 'recipe-previews', 'synth-asset-live.webp', 'v1', '{}'),
+  (gen_random_uuid(), 'recipe-previews', 'synth-asset-other.webp', 'v1', '{}');
 
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
 SET LOCAL ROLE authenticated;
@@ -47,9 +48,20 @@ SET LOCAL ROLE authenticated;
 CREATE TEMP TABLE asset_rev AS
   SELECT public.admin_draft_start('91000000-0000-0000-0000-000000000041', gen_random_uuid()) AS rev;
 RESET ROLE;
+SELECT throws_ok($q$SELECT private.admin_record_asset_check(
+  (SELECT (rev->>'id')::uuid FROM asset_rev), (SELECT rev->>'digest' FROM asset_rev),
+  'recipe-previews', 'synth-asset-live.webp',
+  (SELECT id FROM storage.objects WHERE name = 'synth-asset-other.webp'),
+  'v1', true, now())$q$, '22023', 'ADM_INVALID', 'another storage object cannot prove this revision');
+SELECT throws_ok($q$SELECT private.admin_record_asset_check(
+  (SELECT (rev->>'id')::uuid FROM asset_rev), (SELECT rev->>'digest' FROM asset_rev),
+  'recipe-previews', 'synth-asset-other.webp',
+  (SELECT id FROM storage.objects WHERE name = 'synth-asset-other.webp'),
+  'v1', true, now())$q$, '22023', 'ADM_INVALID', 'another path cannot prove this revision');
 SELECT private.admin_record_asset_check(
   (SELECT (rev->>'id')::uuid FROM asset_rev),
   (SELECT rev->>'digest' FROM asset_rev),
+  'recipe-previews', 'synth-asset-live.webp',
   (SELECT id FROM storage.objects WHERE bucket_id = 'recipe-previews' AND name = 'synth-asset-live.webp'),
   'v1', true, now());
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
@@ -59,6 +71,17 @@ SELECT is(
      public.admin_recipe_detail('91000000-0000-0000-0000-000000000041')->'readiness'->'checks') AS e(value)
    WHERE value->>'code' = 'image-availability'), 'pass', 'fresh matching check passes');
 RESET ROLE;
+UPDATE private.recipe_asset_checks SET object_name = 'synth-asset-other.webp'
+  WHERE revision_id = (SELECT (rev->>'id')::uuid FROM asset_rev);
+SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
+SET LOCAL ROLE authenticated;
+SELECT is(
+  (SELECT value->>'state' FROM jsonb_array_elements(
+     public.admin_recipe_detail('91000000-0000-0000-0000-000000000041')->'readiness'->'checks') AS e(value)
+   WHERE value->>'code' = 'image-availability'), 'unknown', 'forged check name is not ready');
+RESET ROLE;
+UPDATE private.recipe_asset_checks SET object_name = 'synth-asset-live.webp'
+  WHERE revision_id = (SELECT (rev->>'id')::uuid FROM asset_rev);
 UPDATE private.recipe_asset_checks SET checked_at = now() - interval '61 seconds';
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
 SET LOCAL ROLE authenticated;
@@ -68,9 +91,10 @@ SELECT is(
    WHERE value->>'code' = 'image-availability'), 'unknown', 'stale evidence is unknown');
 RESET ROLE;
 DELETE FROM private.recipe_asset_checks WHERE revision_id = (SELECT (rev->>'id')::uuid FROM asset_rev);
-SELECT private.admin_record_asset_check(
+SELECT throws_ok($q$SELECT private.admin_record_asset_check(
   (SELECT (rev->>'id')::uuid FROM asset_rev),
-  'deadbeef', NULL, NULL, false, now());
+  'deadbeef', 'recipe-previews', 'synth-asset-live.webp', NULL, NULL, false, now())$q$,
+  '22023', 'ADM_INVALID', 'forged digest cannot be recorded');
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
 SET LOCAL ROLE authenticated;
 SELECT is(
@@ -82,6 +106,7 @@ DELETE FROM private.recipe_asset_checks WHERE revision_id = (SELECT (rev->>'id')
 SELECT private.admin_record_asset_check(
   (SELECT (rev->>'id')::uuid FROM asset_rev),
   (SELECT rev->>'digest' FROM asset_rev),
+  'recipe-previews', 'synth-asset-live.webp',
   NULL, NULL, false, now());
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
 SET LOCAL ROLE authenticated;
@@ -91,7 +116,9 @@ SELECT is(
    WHERE value->>'code' = 'image-availability'), 'fail', 'fresh negative evidence fails');
 RESET ROLE;
 
-SELECT ok(NOT has_function_privilege('authenticated', 'private.admin_record_asset_check(uuid,text,uuid,text,boolean,timestamptz)', 'EXECUTE'), 'no direct check writes');
+SELECT ok(NOT has_function_privilege('authenticated', 'private.admin_record_asset_check(uuid,text,text,text,uuid,text,boolean,timestamptz)', 'EXECUTE'), 'no direct check writes');
+SELECT is(to_regprocedure('private.admin_record_asset_check(uuid,text,uuid,text,boolean,timestamptz)'),
+  NULL::regprocedure, 'old recorder signature is removed');
 
 SELECT * FROM finish();
 ROLLBACK;

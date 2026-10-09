@@ -73,7 +73,7 @@ export async function proxy(request: NextRequest) {
   const isAuthCallback = pathname === "/auth/callback";
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
 
-  if ((isAccountRoute || isCheckoutReturn) && !user) {
+  if ((isAccountRoute || isCheckoutReturn || isAdminRoute) && !user) {
     const returnTarget = pathname + (request.nextUrl.search || "");
     const redirectUrl = new URL(
       `/sign-in?returnTo=${encodeURIComponent(returnTarget)}`,

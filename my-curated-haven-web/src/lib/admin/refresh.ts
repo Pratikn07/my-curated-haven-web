@@ -2,7 +2,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import type { MutationReceipt, RefreshReceipt, Result } from "./contracts";
 import { getAdminContext } from "./context";
-import { loadAdminRecipe } from "./context";
+import { loadAdminRecipe, loadAdminRecipeOperations } from "./context";
 import { settleCommittedRefresh } from "./refresh-result";
 
 function reference(): string {
@@ -32,6 +32,11 @@ export async function retryAdminRefresh(
   if (!context.ok) return context;
   if (context.value.assurance !== "aal2") {
     return { ok: false, code: "MFA_REQUIRED", reference: reference() };
+  }
+  const receipts = await loadAdminRecipeOperations(recipeId);
+  if (!receipts.ok) return receipts;
+  if (!receipts.value.some((receipt) => receipt.operationId === operationId)) {
+    return { ok: false, code: "DENIED", reference: reference() };
   }
   const detail = await loadAdminRecipe(recipeId);
   if (!detail.ok) return detail;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type {
   AdminContext,
@@ -15,6 +15,10 @@ import {
   submitRevisionAction,
 } from "@/lib/admin/actions";
 
+const subscribeHydration = () => () => {};
+const clientHydrated = () => true;
+const serverHydrated = () => false;
+
 export default function AdminRecipeReview({
   detail: initialDetail,
   context,
@@ -22,10 +26,14 @@ export default function AdminRecipeReview({
 }: {
   detail: RecipeDetail;
   context: AdminContext;
-  onChanged?: () => void;
+  onChanged?: (detail: RecipeDetail) => void;
 }) {
   const router = useRouter();
-  const [detail, setDetail] = useState(initialDetail);
+  const [localDetail, setLocalDetail] = useState({ source: initialDetail, value: initialDetail });
+  const detail = localDetail.source === initialDetail ? localDetail.value : initialDetail;
+  function setDetail(next: RecipeDetail) {
+    setLocalDetail({ source: initialDetail, value: next });
+  }
   const [reviewState, setReviewState] = useState<ReviewState | null>(null);
   const [reason, setReason] = useState("");
   const [issueCode, setIssueCode] = useState("");
@@ -35,37 +43,43 @@ export default function AdminRecipeReview({
   const [resolved, setResolved] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
 
   const working = detail.working;
+  const workingId = working?.id;
+  const workingState = working?.state;
   const canEdit = context.operator.permissions.includes("recipe.edit");
   const canReview = context.operator.permissions.includes("recipe.review");
 
-  const reload = useCallback(
-    async (recipeId: string) => {
+  async function reload(recipeId: string) {
       const fresh = await refreshDraftAction(recipeId);
-      if (fresh.ok) setDetail(fresh.value as RecipeDetail);
-      const target = (fresh.ok ? (fresh.value as RecipeDetail).working : working) ?? working;
-      if (target) {
-        const state = await loadReviewStateAction(target.id);
-        if (state.ok) setReviewState(state.value as ReviewState);
+      if (!fresh.ok) {
+        router.refresh();
+        return false;
       }
-      onChanged?.();
-      router.refresh();
-    },
-    [onChanged, router, working]
-  );
+      const next = fresh.value as RecipeDetail;
+      const state = next.working ? await loadReviewStateAction(next.working.id) : null;
+      if (state && !state.ok) {
+        router.refresh();
+        return false;
+      }
+      setDetail(next);
+      setReviewState(state?.ok ? (state.value as ReviewState) : null);
+      onChanged?.(next);
+      if (!onChanged) router.refresh();
+      return true;
+  }
 
   useEffect(() => {
-    if (!working) return;
+    if (!workingId) return;
     let cancelled = false;
-    void loadReviewStateAction(working.id).then((state) => {
+    void loadReviewStateAction(workingId).then((state) => {
       if (!cancelled && state.ok) setReviewState(state.value as ReviewState);
     });
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [working?.id]);
+  }, [workingId, workingState]);
 
   async function submit() {
     if (!working) return;
@@ -78,9 +92,11 @@ export default function AdminRecipeReview({
       expectedVersion: working.version,
       expectedDigest: working.digest,
     });
+    const refreshed = result.ok ? await reload(detail.active.recipeId) : false;
     setPending(false);
-    setStatus(result.ok ? "Awaiting review" : `Submit failed (${result.code}).`);
-    if (result.ok) void reload(detail.active.recipeId);
+    setStatus(result.ok
+      ? refreshed ? "Awaiting review" : "Submission saved. Refresh the page to see its current review state."
+      : `Submit failed (${result.code}).`);
   }
 
   async function recordIssue() {
@@ -97,16 +113,16 @@ export default function AdminRecipeReview({
       severity: issueSeverity,
       explanation: issueExplanation.trim(),
     });
-    setPending(false);
     if (result.ok) {
       setIssueCode("");
       setIssueField("");
       setIssueExplanation("");
-      setStatus("Issue recorded.");
-      void reload(detail.active.recipeId);
+      const refreshed = await reload(detail.active.recipeId);
+      setStatus(refreshed ? "Issue recorded." : "Issue recorded. Refresh the page to see current issues.");
     } else {
       setStatus(`Issue not recorded (${result.code}).`);
     }
+    setPending(false);
   }
 
   async function decide(decision: "approve" | "changes_requested" | "reject") {
@@ -123,29 +139,37 @@ export default function AdminRecipeReview({
       decision,
       resolvedIssueIds: resolved,
     });
-    setPending(false);
     if (result.ok) {
       setResolved([]);
-      setStatus(
-        decision === "approve"
+      const refreshed = await reload(detail.active.recipeId);
+      setStatus(refreshed
+        ? decision === "approve"
           ? "This revision is approved and ready to publish."
           : `Decision recorded: ${decision}.`
-      );
-      void reload(detail.active.recipeId);
+        : "Decision recorded. Refresh the page to see its current review state.");
     } else {
       setStatus(`Decision failed (${result.code}). Reload and retry on the current revision.`);
     }
+    setPending(false);
   }
 
   const submission = reviewState?.submission ?? null;
   const openBlockers = (reviewState?.issues ?? []).filter((i) => i.severity === "blocker" && !i.resolved);
-  const canReviewCurrentSubmission = canReview && working !== null && submission !== null;
+  const canSubmit = working !== null && ["draft", "changes_requested", "rejected"].includes(working.state);
+  const canReviewCurrentSubmission = canReview && working?.state === "submitted" && submission !== null;
   const reviewStateLabel = working
     ? `Version ${working.version} · ${working.digest.slice(0, 12)} · ${working.state}`
     : "No working revision";
 
+  if (!working) {
+    return <section aria-label="Review and approval" className="admin-review">
+      <h2>Review and approval</h2>
+      <p>No working revision yet. Start a private edit before requesting review.</p>
+    </section>;
+  }
+
   return (
-    <section aria-label="Review and approval">
+    <section aria-label="Review and approval" className="admin-review">
       <h2>Review and approval</h2>
       <p>{reviewStateLabel}</p>
       {submission ? (
@@ -155,7 +179,7 @@ export default function AdminRecipeReview({
       ) : null}
 
       <h3>Readiness</h3>
-      <ul>
+      <ul className="admin-review__checks">
         {detail.readiness.checks.map((check) => (
           <li key={check.code}>
             {check.code}: {check.state} — {check.explanation}
@@ -163,14 +187,16 @@ export default function AdminRecipeReview({
         ))}
       </ul>
 
-      {canEdit && working ? (
-        <button type="button" onClick={submit} disabled={pending}>
+      {canEdit && canSubmit ? (
+        <button type="button" onClick={submit} disabled={pending || !hydrated}>
           Submit for review
         </button>
       ) : null}
+      {working.state === "submitted" ? <p>Awaiting reviewer decision.</p> : null}
+      {working.state === "approved" ? <p>Approved and ready for publication.</p> : null}
 
       <h3>Issues</h3>
-      <ul>
+      <ul className="admin-review__issues">
         {(reviewState?.issues ?? []).map((issue) => (
           <li key={issue.id}>
             <span>
@@ -184,6 +210,7 @@ export default function AdminRecipeReview({
                   type="checkbox"
                   aria-label={`Resolve ${issue.code.replace(/-/g, " ")} issue`}
                   checked={resolved.includes(issue.id)}
+                  disabled={!hydrated}
                   onChange={(e) =>
                     setResolved((prev) =>
                       e.target.checked ? [...prev, issue.id] : prev.filter((id) => id !== issue.id)
@@ -197,22 +224,24 @@ export default function AdminRecipeReview({
         ))}
       </ul>
 
-      {canReview && working ? (
-        <div>
+      {canReviewCurrentSubmission ? (
+        <div className="admin-review__form">
           <h3>Record issue</h3>
           <label htmlFor="issue-code">Issue code</label>
-          <input id="issue-code" value={issueCode} onChange={(e) => setIssueCode(e.target.value)} />
+          <input id="issue-code" value={issueCode} onChange={(e) => setIssueCode(e.target.value)} disabled={!hydrated} />
           <label htmlFor="issue-field">Field (optional)</label>
           <input
             id="issue-field"
             value={issueField}
             onChange={(e) => setIssueField(e.target.value)}
+            disabled={!hydrated}
           />
           <label htmlFor="issue-severity">Severity</label>
           <select
             id="issue-severity"
             value={issueSeverity}
             onChange={(e) => setIssueSeverity(e.target.value as "blocker" | "suggestion")}
+            disabled={!hydrated}
           >
             <option value="blocker">Blocker</option>
             <option value="suggestion">Suggestion</option>
@@ -222,55 +251,57 @@ export default function AdminRecipeReview({
             id="issue-explanation"
             value={issueExplanation}
             onChange={(e) => setIssueExplanation(e.target.value)}
+            disabled={!hydrated}
           />
           <button
             type="button"
             onClick={recordIssue}
-            disabled={pending || issueCode.trim().length === 0 || issueExplanation.trim().length === 0}
+            disabled={!hydrated || pending || issueCode.trim().length === 0 || issueExplanation.trim().length === 0}
           >
             Record issue
           </button>
         </div>
       ) : null}
 
-      {canReview ? (
-        <div>
+      {canReviewCurrentSubmission ? (
+        <div className="admin-review__form">
           <h3>Decision</h3>
           <label htmlFor="review-reason">Review reason</label>
-          <input id="review-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
-          <button
-            type="button"
-            onClick={() => decide("approve")}
-            disabled={pending || reason.trim().length === 0 || !canReviewCurrentSubmission}
-          >
-            Approve this revision
-          </button>
-          <button
-            type="button"
-            onClick={() => decide("changes_requested")}
-            disabled={pending || reason.trim().length === 0 || !canReviewCurrentSubmission}
-          >
-            Request changes
-          </button>
-          <button
-            type="button"
-            onClick={() => decide("reject")}
-            disabled={pending || reason.trim().length === 0 || !canReviewCurrentSubmission}
-          >
-            Reject
-          </button>
-          {!canReviewCurrentSubmission ? (
-            <p>Awaiting a submitted revision before a decision can be recorded.</p>
-          ) : null}
+          <input id="review-reason" value={reason} onChange={(e) => setReason(e.target.value)} disabled={!hydrated} />
+          <div className="admin-review__buttons">
+            <button
+              type="button"
+              onClick={() => decide("approve")}
+              disabled={!hydrated || pending || reason.trim().length === 0 || !canReviewCurrentSubmission}
+            >
+              Approve this revision
+            </button>
+            <button
+              type="button"
+              onClick={() => decide("changes_requested")}
+              disabled={!hydrated || pending || reason.trim().length === 0 || !canReviewCurrentSubmission}
+            >
+              Request changes
+            </button>
+            <button
+              type="button"
+              onClick={() => decide("reject")}
+              disabled={!hydrated || pending || reason.trim().length === 0 || !canReviewCurrentSubmission}
+            >
+              Reject
+            </button>
+          </div>
           {openBlockers.length > 0 ? (
             <p>
               {openBlockers.length} blocker(s) remain open; approval needs every blocker resolved.
             </p>
           ) : null}
         </div>
-      ) : (
+      ) : !canReview ? (
         <p>Review decisions require the reviewer permission.</p>
-      )}
+      ) : working.state !== "approved" ? (
+        <p>Submit the current revision before recording a review decision.</p>
+      ) : null}
 
       {status ? (
         <p role="status" aria-live="polite">

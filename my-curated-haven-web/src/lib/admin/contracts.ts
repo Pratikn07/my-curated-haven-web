@@ -47,7 +47,7 @@ export type RecipeRow = { id: string; slug: string; title: string; imagePath: st
 export type LibraryResult = { rows: RecipeRow[]; filteredTotal: number;
   summary: Record<LibraryView, number>; query: LibraryQuery; sourceRevision: string;
   checkedAt: string; dependencyChecks: Check[] };
-export type AuditEvent = { id: string; actorId: string; action: string; recipeId: string | null;
+export type AuditEvent = { id: string; actorId: string; actorEmail?: string | null; action: string; recipeId: string | null;
   revisionId: string | null; digest: string | null; beforeRef: string | null;
   afterRef: string | null; requestId: string; at: string; reason: string | null; result: string };
 export type HistoryPage = { events: AuditEvent[]; nextCursor: string | null };
@@ -73,6 +73,6 @@ export type ReviewCommand = Operation & { revisionId: string; expectedVersion: n
   resolvedIssueIds: string[] };
 export type PublishCommand = Operation & { revisionId: string; expectedVersion: number;
   expectedDigest: string; base: Base; impactToken: string };
-export type WithdrawCommand = Operation & { base: Base;
+export type WithdrawCommand = Operation & { base: Base; impactToken: string;
   emergency: boolean; acknowledgePromiseImpact: boolean };
 export type RefreshReceipt = { operationId: string; state: "complete" | "pending" };

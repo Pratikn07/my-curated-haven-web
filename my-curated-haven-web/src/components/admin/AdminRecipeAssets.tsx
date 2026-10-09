@@ -20,7 +20,7 @@ export default function AdminRecipeAssets({
   checkStatus: string | null;
 }) {
   return (
-    <section aria-label="Recipe image">
+    <section className="admin-editor__assets" aria-label="Recipe image">
       <h2>Recipe image</h2>
       <label htmlFor="field-imagePath">Existing image</label>
       <select

@@ -10,6 +10,7 @@ import type {
 } from "./contracts";
 import { adminRpc } from "./rpc";
 import { createClient } from "../supabase/server";
+import { decodeAdminRecipeOperations } from "./receipts";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -100,5 +101,13 @@ export async function loadAdminUsage(recipeId: string) {
       if (!isRecord(data)) throw new Error("bad usage");
       return data as unknown as Usage;
     },
+  );
+}
+
+export async function loadAdminRecipeOperations(recipeId: string) {
+  const supabase = await createClient();
+  return adminRpc(
+    () => supabase.rpc("admin_recipe_operations", { p_recipe_id: recipeId as never }),
+    (data) => decodeAdminRecipeOperations(data, recipeId)
   );
 }

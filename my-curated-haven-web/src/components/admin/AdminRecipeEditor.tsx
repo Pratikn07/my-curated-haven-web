@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Base, RecipeSnapshot, Revision } from "@/lib/admin/contracts";
 import { diffSnapshots } from "@/lib/admin/snapshot";
 import {
@@ -15,6 +16,9 @@ import AdminRecipeAssets, { useAdminAssets } from "./AdminRecipeAssets";
 
 type Ingredient = { item: string; amount?: string; unit?: string; [key: string]: unknown };
 type Step = { step: number; text: string; [key: string]: unknown };
+const subscribeHydration = () => () => {};
+const clientHydrated = () => true;
+const serverHydrated = () => false;
 
 function asIngredients(value: unknown): Ingredient[] {
   return Array.isArray(value) ? (value as Ingredient[]) : [];
@@ -74,20 +78,65 @@ export default function AdminRecipeEditor({
   const [pending, setPending] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
   const [needsRebase, setNeedsRebase] = useState(false);
+  const hydrated = useSyncExternalStore(subscribeHydration, clientHydrated, serverHydrated);
+  const [leaveHref, setLeaveHref] = useState<string | null>(null);
+  const allowLeaving = useRef(false);
+  const leaveDialog = useRef<HTMLDialogElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const dialog = leaveDialog.current;
+    if (!leaveHref || !dialog) return;
+    dialog.showModal();
+    return () => { if (dialog.open) dialog.close(); };
+  }, [leaveHref]);
 
   const dirty = useMemo(
-    () => JSON.stringify(candidate) !== JSON.stringify(initial.snapshot),
-    [candidate, initial]
+    () => JSON.stringify(candidate) !== JSON.stringify(revision.snapshot),
+    [candidate, revision.snapshot]
   );
 
   useEffect(() => {
     if (!dirty) return;
     const handler = (event: BeforeUnloadEvent) => {
+      if (allowLeaving.current) return;
       event.preventDefault();
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const guardLink = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest("a[href]");
+      if (!(link instanceof HTMLAnchorElement) || link.hasAttribute("download") || link.target === "_blank") return;
+      let destination: URL;
+      try { destination = new URL(link.href); } catch { return; }
+      const here = window.location;
+      if (destination.origin === here.origin && destination.pathname === here.pathname && destination.search === here.search) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setLeaveHref(destination.href);
+    };
+    document.addEventListener("click", guardLink, true);
+    return () => document.removeEventListener("click", guardLink, true);
+  }, [dirty]);
+
+  function discardAndLeave() {
+    if (!leaveHref) return;
+    const destination = new URL(leaveHref);
+    allowLeaving.current = true;
+    setLeaveHref(null);
+    if (destination.origin === window.location.origin) {
+      router.push(`${destination.pathname}${destination.search}${destination.hash}`);
+    } else {
+      window.location.assign(destination.href);
+    }
+  }
 
   const needsReopen =
     (initial.state === "submitted" || initial.state === "approved") && dirty;
@@ -219,7 +268,7 @@ export default function AdminRecipeEditor({
       return;
     }
     setChecking(true);
-    const result = await verifyAssetAction(revision);
+    const result = await verifyAssetAction(revision.recipeId, revision.id);
     setChecking(false);
     if (result.ok) {
       setCandidate((prev) => ({
@@ -259,12 +308,20 @@ export default function AdminRecipeEditor({
   }
 
   return (
-    <div>
+    <div className="admin-editor">
       <Link href={returnTo}>Back to recipes</Link>
+      {leaveHref ? <dialog ref={leaveDialog} className="admin-editor__leave" aria-label="Unsaved recipe changes" onClose={() => setLeaveHref(null)}>
+        <p>You have unsaved recipe changes. Discard them and leave this page?</p>
+        <button type="button" autoFocus onClick={() => setLeaveHref(null)}>Stay and keep editing</button>
+        <button type="button" onClick={discardAndLeave}>Discard changes</button>
+      </dialog> : null}
       <h1>Edit draft: {active.catalog.title}</h1>
       <p>
         Recipe {initial.recipeId} · working version {expectedVersion} · base {currentBase.activeHash.slice(0, 12)}
       </p>
+      <p role="status" aria-live="polite">{hydrated ? "Editor ready" : "Preparing editor"}</p>
+      {pending || dirty ? <p role="status" aria-live="polite">{pending ? "Saving" : "Unsaved changes"}</p> : null}
+      {!dirty && !pending ? <Link href={`/admin/recipes/${initial.recipeId}/preview`} className="admin-editor__preview-link">Preview &amp; changes</Link> : null}
       {issues.length > 0 ? (
         <div role="alert" aria-label="Validation issues">
           <ul>
@@ -279,6 +336,8 @@ export default function AdminRecipeEditor({
       {unknownNotes.map((note) => (
         <p key={note}>{note}</p>
       ))}
+
+      <fieldset className="admin-editor__fields" disabled={!hydrated} aria-busy={!hydrated}>
 
       <label htmlFor="field-title">Title</label>
       <input
@@ -541,7 +600,7 @@ export default function AdminRecipeEditor({
       <label htmlFor="field-reason">Reason</label>
       <input id="field-reason" value={reason} onChange={(e) => setReason(e.target.value)} />
 
-      <button type="button" onClick={save} disabled={pending || issues.length > 0}>
+      <button className="admin-editor__save" type="button" onClick={save} disabled={pending || issues.length > 0}>
         Save draft
       </button>
       {needsRebase ? (
@@ -571,6 +630,7 @@ export default function AdminRecipeEditor({
       {diffSnapshots(initial.snapshot, candidate).length === 0 ? (
         <p>No unsaved changes.</p>
       ) : null}
+      </fieldset>
     </div>
   );
 }

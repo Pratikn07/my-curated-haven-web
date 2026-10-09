@@ -1,0 +1,857 @@
+.admin-console {
+  min-height: 100vh;
+  background: var(--canvas);
+  color: var(--text);
+}
+
+.admin-console__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) clamp(var(--space-4), 3vw, var(--space-8));
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+.admin-console__identity,
+.admin-console__operator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.admin-console__brand {
+  font-family: var(--font-brand);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-console__label,
+.admin-console__rail-label,
+.admin-console__stage {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.admin-console__operator-email {
+  max-width: min(20rem, 100%);
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}
+
+.admin-console__site-link {
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.admin-console__body {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  max-width: 100rem;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.admin-console__rail {
+  min-width: 0;
+  padding: var(--space-6) var(--space-4);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.admin-console__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.admin-console__nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  font-weight: 650;
+}
+
+.admin-console__nav-link:hover,
+.admin-console__nav-link--current {
+  color: var(--action);
+  background: var(--surface-muted);
+}
+
+.admin-console__main {
+  min-width: 0;
+  padding: var(--space-6) clamp(var(--space-4), 3vw, var(--space-8));
+}
+
+.admin-record,
+.admin-record__evidence {
+  min-width: 0;
+}
+
+.admin-record__header {
+  padding: var(--space-6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-record__eyebrow {
+  color: var(--action);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-record__header h1 {
+  margin-top: var(--space-2);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.admin-record__identifier,
+.admin-record__checked {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-record__states {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.admin-record__states > div {
+  min-width: 10rem;
+  flex: 1;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+}
+
+.admin-record__states dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-record__states dd {
+  margin: var(--space-1) 0 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-record__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+  align-items: start;
+}
+
+.admin-record__actions {
+  grid-column: 2;
+  grid-row: 1;
+  padding: var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-record__actions h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.admin-record__actions a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  margin-top: var(--space-3);
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.admin-record__evidence {
+  grid-column: 1;
+  grid-row: 1;
+  overflow-wrap: anywhere;
+}
+
+.admin-record__evidence pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.admin-record__evidence > a:first-child {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.admin-review,
+.admin-publication,
+.admin-readiness,
+.admin-history {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-review h2,
+.admin-publication h2,
+.admin-readiness h2,
+.admin-history h2 {
+  margin-bottom: var(--space-2);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admin-review h3,
+.admin-publication h3 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.admin-review__checks,
+.admin-review__issues,
+.admin-readiness ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+
+.admin-review__form {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.admin-review__form label,
+.admin-publication label {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.admin-review__form input:not([type="checkbox"]),
+.admin-review__form select,
+.admin-publication input:not([type="checkbox"]) {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.admin-review__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.admin-review button,
+.admin-publication button {
+  justify-self: start;
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.admin-review__buttons button:first-child,
+.admin-publication button:first-of-type {
+  border-color: var(--action);
+  background: var(--action);
+  color: var(--action-foreground);
+}
+
+.admin-review button:disabled,
+.admin-publication button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-publication label {
+  display: block;
+  margin-top: var(--space-3);
+}
+
+.admin-publication label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.admin-publication input[type="checkbox"] {
+  flex: none;
+  margin-top: 0.2em;
+}
+
+.admin-library__header,
+.admin-library__filters,
+.admin-library__result-head,
+.admin-library__card,
+.admin-usage {
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-library__header h1 {
+  margin: var(--space-2) 0;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.admin-library__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.admin-library__filters label {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.admin-library__filters input,
+.admin-library__filters select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: var(--space-2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 400;
+}
+
+.admin-library__filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.admin-library__filter-actions button {
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--action);
+  color: var(--action-foreground);
+  font-weight: 700;
+}
+
+.admin-library__filter-actions a,
+.admin-library__pagination a {
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.admin-library__result-head {
+  margin: var(--space-4) 0;
+}
+
+.admin-library__result-head h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.admin-library__result-head p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.admin-library__table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-library__table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-library__table th,
+.admin-library__table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+
+.admin-library__table thead {
+  background: var(--surface-muted);
+}
+
+.admin-library__table a,
+.admin-library__card a {
+  color: var(--action);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.admin-library__recipe-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.admin-library__thumbnail {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex: none;
+  border-radius: var(--radius-control);
+  object-fit: cover;
+}
+
+.admin-library__cards {
+  display: none;
+}
+
+.admin-library__pagination {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.admin-usage {
+  margin-top: var(--space-4);
+}
+
+.admin-usage > section {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.admin-usage h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.admin-usage__source {
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.admin-history {
+  margin-top: var(--space-5);
+}
+
+.admin-history ol {
+  padding-left: var(--space-5);
+}
+
+.admin-history li {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-wrap: anywhere;
+}
+
+.admin-history li p {
+  color: var(--text-muted);
+}
+
+.admin-history button {
+  min-height: 2.75rem;
+  margin-top: var(--space-3);
+  color: var(--action);
+  text-decoration: underline;
+}
+
+.admin-editor__preview-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  margin: var(--space-3) 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--action);
+  color: var(--action-foreground);
+  font-weight: 700;
+}
+
+.admin-editor__fields {
+  min-width: 0;
+  margin: 0;
+  max-width: 62rem;
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-editor > h1 {
+  margin: var(--space-2) 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.admin-editor > p {
+  max-width: 62rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.admin-editor__fields > label,
+.admin-editor__assets > label {
+  display: block;
+  margin: var(--space-4) 0 var(--space-2);
+  font-weight: 700;
+}
+
+.admin-editor__fields > input,
+.admin-editor__fields > select,
+.admin-editor__assets > select,
+.admin-editor__fields li input {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+
+.admin-editor__fields > h2,
+.admin-editor__assets > h2 {
+  margin: var(--space-6) 0 var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admin-editor__fields ul,
+.admin-editor__fields ol {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.admin-editor__fields li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.admin-editor__fields li label {
+  flex: 1 1 18rem;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.admin-editor__fields li input {
+  margin-top: var(--space-2);
+  font-weight: 400;
+}
+
+.admin-editor__fields button {
+  min-height: 2.75rem;
+  margin: var(--space-2) var(--space-2) var(--space-2) 0;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.admin-editor__fields .admin-editor__save {
+  margin-top: var(--space-5);
+  border-color: var(--action);
+  background: var(--action);
+  color: var(--action-foreground);
+}
+
+.admin-editor__fields button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-editor__assets > p {
+  margin: var(--space-2) 0;
+  color: var(--text-muted);
+}
+
+.admin-editor__fields > label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-editor__leave {
+  width: min(30rem, calc(100vw - 2rem));
+  max-width: 100%;
+  padding: var(--space-5);
+  border: 2px solid var(--border-control);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 20%);
+}
+
+.admin-editor__leave::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.admin-editor__leave button {
+  min-height: 2.75rem;
+  margin: var(--space-3) var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+}
+
+.admin-recipe-changes__compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.admin-recipe-preview,
+.admin-recipe-changes__summary {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.admin-recipe-preview h2,
+.admin-recipe-changes__summary h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.admin-recipe-preview h3 {
+  margin: var(--space-2) 0;
+  font-size: 1.35rem;
+}
+
+.admin-recipe-preview h4 {
+  margin-top: var(--space-4);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.admin-recipe-preview ul,
+.admin-recipe-preview ol {
+  padding-left: var(--space-6);
+}
+
+.admin-recipe-preview li,
+.admin-recipe-changes__summary li {
+  margin: var(--space-2) 0;
+}
+
+.admin-recipe-changes__summary {
+  margin-top: var(--space-4);
+}
+
+.admin-decision,
+.admin-team {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.admin-decision > section,
+.admin-team > form,
+.admin-team__roles,
+.admin-team__list,
+.admin-team__revoke {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.admin-team > form,
+.admin-team__revoke {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.admin-team input:not([type="checkbox"]) {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+}
+
+.admin-team button {
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  font-weight: 700;
+}
+
+.admin-team__roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--space-2);
+}
+
+.admin-team__roles label {
+  display: flex;
+  gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.admin-team__roles small {
+  display: block;
+  color: var(--text-muted);
+}
+
+.admin-team__table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.admin-team table {
+  width: 100%;
+  min-width: 50rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-team th,
+.admin-team td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-wrap: break-word;
+}
+
+.admin-team th:nth-child(2),
+.admin-team th:nth-child(3),
+.admin-team th:nth-child(5) {
+  white-space: nowrap;
+}
+
+.admin-team__list h2,
+.admin-team__revoke h2,
+.admin-decision h2 {
+  margin-bottom: var(--space-2);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+@media (max-width: 48rem) {
+  .admin-console__body {
+    display: block;
+  }
+
+  .admin-console__rail {
+    padding: var(--space-3) var(--space-4);
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .admin-console__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .admin-console__main {
+    padding: var(--space-4);
+  }
+
+  .admin-record__header {
+    padding: var(--space-4);
+  }
+
+  .admin-record__layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .admin-record__actions,
+  .admin-record__evidence {
+    width: 100%;
+  }
+
+  .admin-library__table-wrap {
+    display: none;
+  }
+
+  .admin-library__cards {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .admin-library__card h3 {
+    font-size: 1.15rem;
+  }
+
+  .admin-library__card dl {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .admin-library__card dl > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .admin-library__card dt {
+    font-weight: 700;
+  }
+
+  .admin-library__image-state {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .admin-recipe-changes__compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

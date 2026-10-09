@@ -40,6 +40,49 @@ test("edit title, save draft, reload keeps working revision, active unchanged", 
   }
 });
 
+test("saved draft opens a private Preview and changes comparison", async ({ page }) => {
+  const fixture = await createAdminFixture("preview-changes", ["owner"], "editing");
+  try {
+    const liveTitle = (await fixture.active()).catalog.title;
+    await fixture.login(page, "aal2");
+    await page.goto(`/admin/recipes/${fixture.recipeId}/edit`);
+    await page.getByLabel("Title", { exact: true }).fill("Private preview title");
+    await expect(page.getByText("Unsaved changes", { exact: true })).toBeVisible();
+    await page.getByLabel("Reason").fill("Preview this revision");
+    await page.getByRole("button", { name: "Save draft", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Saved at" })).toBeVisible();
+    await page.getByRole("link", { name: "Preview & changes" }).click();
+    await expect(page.getByRole("heading", { name: "Preview & changes" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Published today" })).toContainText(liveTitle);
+    await expect(page.getByRole("region", { name: "Proposed revision" })).toContainText("Private preview title");
+    await expect(page.getByRole("list", { name: "Changed fields" })).toContainText("Title");
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test("unsaved draft asks whether to stay or discard before leaving", async ({ page }) => {
+  const fixture = await createAdminFixture("unsaved-exit", ["owner"], "editing");
+  try {
+    const liveTitle = (await fixture.active()).catalog.title;
+    await fixture.login(page, "aal2");
+    await page.goto(`/admin/recipes/${fixture.recipeId}/edit`);
+    await page.getByLabel("Title", { exact: true }).fill("Uncommitted title");
+    await page.getByRole("link", { name: "Back to recipes" }).click();
+    const dialog = page.getByRole("dialog", { name: "Unsaved recipe changes" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Stay and keep editing" }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/recipes/${fixture.recipeId}/edit`));
+    await expect(page.getByLabel("Title", { exact: true })).toHaveValue("Uncommitted title");
+    await page.getByRole("link", { name: "Back to recipes" }).click();
+    await dialog.getByRole("button", { name: "Discard changes" }).click();
+    await expect(page).toHaveURL(/\/admin\/recipes(?:\?|$)/);
+    expect(await catalogTitle(fixture.recipeId)).toBe(liveTitle);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
 test("empty title blocks save and recipe identity stays read-only", async ({ page }) => {
   const fixture = await createAdminFixture("private-edit-guard", ["owner"], "editing");
   try {

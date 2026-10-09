@@ -60,16 +60,16 @@ Append-only audit records carry actor, action, target references, operation ID a
 
 ## Publication operations
 
-Publishing needs an approved revision, a fresh (≤60s) asset-availability check, the frozen impact token echoed back unchanged, a trusted campaign snapshot, and zero unresolved blockers or sealed/live/pending/historical/campaign exposure. The confirmation dialog states the version, changed fields and affected releases/campaigns before the operator confirms with a reason.
+Publishing needs an approved revision, a fresh (≤60s) image check bound to its saved bucket, object name, ID, version and digest, the frozen impact token echoed back unchanged, a trusted campaign snapshot, and zero unresolved blockers or sealed/live/pending/historical/campaign exposure. The confirmation screen states the version, changed fields and affected releases/campaigns before the operator confirms with a reason. A catalog-only recipe gains its first body at version 1 in the same publication transaction.
 
 After a committed publish or withdraw, the console revalidates public/admin routes (refresh-only). If the refresh fails, the write stays saved and the receipt reports `pending`; the retry button revalidates displays only and never republishes. Failed attempts are recorded separately in the failure audit (`failure.<action>` with code and request reference) after the rolled-back transaction.
 
-Ordinary withdrawal is blocked by sealed or commercial exposure. Emergency withdrawal is owner-only, requires the acknowledgement checkbox, and does not refund purchases or change customer rights. Withdrawing never deletes drafts, revisions, archives or audit rows; republishing uses a new reviewed revision.
+Withdrawal recomputes the displayed impact under database locks and requires the same token before changing the public state. A campaign or free-slot promise requires owner acknowledgement; the screen names affected campaigns. Missing or malformed campaign evidence blocks impact, publication and withdrawal. Sealed or commercial exposure requires owner emergency authority. Emergency withdrawal does not refund purchases or change customer rights. Withdrawing never deletes drafts, revisions, archives or audit rows; republishing uses a new reviewed revision.
 
 ## Release package (Phase 1 admin workspace)
 
-- Source: branch `codex/admin-recipe-workspace-design` (release SHA recorded at sign-off; Task 13 landed as `44eba2a`).
-- Migrations, in order: `20261005000100_admin_console_access`, `20261005000500_admin_recipe_reads`, `20261005001000_admin_recipe_revisions`, `20261005001100_admin_draft_operations`, `20261005001200_admin_asset_checks`, `20261005001500_admin_reviews`, `20261005001600_admin_review_state`, `20261005002000_admin_publication`, `20261005002100_admin_failure_audit`, `20261005002200_admin_lock_timeout`. Replay verified locally with `supabase db reset`; types verified drift-free with `supabase gen types`.
+- Source: Phase 1 recipe workspace plus the UI/audit implementation PR. Record the final merged SHA at sign-off.
+- Forward migrations after the original Phase 1 set: `20261007215500_admin_recipe_receipt_read`, `20261007220500_admin_recipe_history_page`, `20261007231000_admin_campaign_withdraw_guard`, `20261007232000_admin_asset_identity_guard`, `20261007233000_admin_first_body_publish`. Apply all migrations before enabling writes; existing image checks need a fresh verification because older rows do not contain the saved object name.
 - Configuration: server flag `ADMIN_CONSOLE_ENABLED` plus database stage (`disabled` → `inspection` → `editing` → `publication`); bootstrap one confirmed owner per the procedure above; record the deployed campaign revision/hash through the restricted operator procedure.
 - Rollback: disable the database stage and the server flag, confirm direct RPCs stop, and verify public/customer access still works. Drafts, revisions, archives and audit rows are retained; published content stays as-is until a new reviewed revision corrects it.
 - Production execution and the deployed journey check require separate release authorisation and are out of implementation scope.

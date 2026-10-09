@@ -21,6 +21,9 @@ test("editor submits, reviewer approves, viewer observes", async ({ browser }) =
     await ownerPage.goto(`/admin/recipes/${owner.recipeId}`);
     await ownerPage.getByRole("button", { name: "Submit for review", exact: true }).click();
     await expect(ownerPage.getByRole("status").filter({ hasText: "Awaiting review" })).toBeVisible();
+    await expect(ownerPage.getByText(/submitted · revision/)).toBeVisible();
+    await expect(ownerPage.getByRole("region", { name: "Review and approval" }).getByText(/ · submitted$/)).toBeVisible();
+    await expect(ownerPage.getByRole("button", { name: "Submit for review", exact: true })).toHaveCount(0);
 
     await reviewer.login(reviewerPage, "aal2");
     await reviewerPage.goto(`/admin/recipes/${owner.recipeId}`);
@@ -35,6 +38,9 @@ test("editor submits, reviewer approves, viewer observes", async ({ browser }) =
     await expect(
       reviewerPage.getByText("This revision is approved and ready to publish.", { exact: true })
     ).toBeVisible();
+    await expect(reviewerPage.getByText(/approved · revision/)).toBeVisible();
+    await expect(reviewerPage.getByRole("region", { name: "Review and approval" }).getByText(/ · approved$/)).toBeVisible();
+    await expect(reviewerPage.getByRole("button", { name: "Approve this revision", exact: true })).toHaveCount(0);
 
     await viewer.login(viewerPage, "aal2");
     await viewerPage.goto(`/admin/recipes/${owner.recipeId}`);
@@ -71,6 +77,7 @@ test("metadata edit after approval asks for acknowledgement", async ({ page }) =
     await expect(
       page.getByText("This revision is approved and ready to publish.", { exact: true })
     ).toBeVisible();
+    await expect(page.getByText(/approved · revision/)).toBeVisible();
     await page.goto(`/admin/recipes/${owner.recipeId}/edit`);
     await page.getByLabel("Image alt text").fill("Reopened alt");
     await expect(page.getByText("Reopen reviewed content")).toBeVisible();

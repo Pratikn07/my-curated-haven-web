@@ -1,10 +1,11 @@
 import "server-only";
 import { Client } from "pg";
-import type { Asset, Result, Revision } from "./contracts";
+import type { Asset, Result } from "./contracts";
 import { adminRpc } from "./rpc";
 import { createClient } from "../supabase/server";
 import { getAdminContext } from "./context";
 import { parseRecipeAsset, RECIPE_PREVIEWS_BUCKET } from "./asset-path";
+import { loadAdminRevision } from "./recipes";
 
 function databaseUrl(): string {
   const raw = process.env.COMMERCE_DATABASE_URL;
@@ -27,7 +28,8 @@ export async function listAdminAssets(): Promise<Result<Asset[]>> {
 }
 
 export async function verifyAdminAsset(
-  revision: Revision
+  recipeId: string,
+  revisionId: string
 ): Promise<Result<{ objectId: string | null; checkedAt: string; available: boolean }>> {
   const reference = `admin-asset-${Math.random().toString(36).slice(2, 10)}`;
   const context = await getAdminContext();
@@ -38,6 +40,9 @@ export async function verifyAdminAsset(
   if (!context.value.operator.permissions.includes("recipe.edit")) {
     return { ok: false, code: "DENIED", reference };
   }
+  const saved = await loadAdminRevision(recipeId, revisionId);
+  if (!saved.ok) return saved;
+  const revision = saved.value;
   const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!supabaseOrigin) return { ok: false, code: "UNAVAILABLE", reference };
   const parsed = parseRecipeAsset(revision.snapshot.image.path, supabaseOrigin);
@@ -83,9 +88,11 @@ export async function verifyAdminAsset(
     const pg = new Client({ connectionString: databaseUrl() });
     await pg.connect();
     try {
-      await pg.query("SELECT private.admin_record_asset_check($1,$2,$3,$4,$5,$6)", [
+      await pg.query("SELECT private.admin_record_asset_check($1,$2,$3,$4,$5,$6,$7,$8)", [
         revision.id,
         revision.digest,
+        RECIPE_PREVIEWS_BUCKET,
+        parsed.value.objectName,
         identity?.id ?? null,
         identity?.version ?? null,
         available && identity !== null,

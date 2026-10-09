@@ -55,7 +55,7 @@ test("signed-in admin navigation sends nothing to the SDK sink", async ({ page }
     await page.goto("/admin/recipes");
     await expect(page.getByRole("link", { name: "Recipes" }).first()).toBeVisible();
     await page.getByRole("link", { name: "Team" }).click();
-    await expect(page.getByRole("heading", { name: "Team" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Team", exact: true })).toBeVisible();
     await page.waitForTimeout(1000);
     expect(hits.length).toBe(0);
   } finally {

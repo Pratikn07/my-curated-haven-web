@@ -2,6 +2,7 @@ import AdminRecipeEditor from "@/components/admin/AdminRecipeEditor";
 import { getAdminContext, loadAdminRecipe } from "@/lib/admin/context";
 import { startAdminDraft } from "@/lib/admin/recipes";
 import { randomUUID } from "node:crypto";
+import { safeAdminReturn } from "@/lib/admin/query";
 
 export default async function AdminRecipeEditPage({
   params,
@@ -12,7 +13,7 @@ export default async function AdminRecipeEditPage({
 }) {
   const { recipeId } = await params;
   const query = await searchParams;
-  const returnTo = typeof query.returnTo === "string" ? query.returnTo : "/admin/recipes";
+  const returnTo = safeAdminReturn(typeof query.returnTo === "string" ? query.returnTo : null);
   const [context, detail] = await Promise.all([getAdminContext(), loadAdminRecipe(recipeId)]);
   if (!context.ok || !detail.ok) {
     return <p role="status">Editor unavailable. Try again.</p>;

@@ -33,11 +33,19 @@ test("owner can look up and assign a staff role", async ({ page }) => {
     await page.goto("/admin/team");
     await page.getByLabel("Existing account email").fill(staff.email);
     await page.getByRole("button", { name: "Find account" }).click();
-    await expect(page.getByText(staff.email, { exact: true })).toBeVisible();
-    await page.getByLabel("Editor", { exact: true }).check();
+    await expect(page.getByRole("status")).toContainText(`Found ${staff.email}`);
+    await page.getByRole("checkbox", { name: /^Editor\b/ }).check();
     await page.getByLabel("Reason").fill("Help maintain recipe drafts");
     await page.getByRole("button", { name: "Confirm role assignment" }).click();
     await expect(page.getByRole("status")).toContainText("Roles assigned");
+    await expect(page.getByRole("heading", { name: "Current team" })).toBeVisible();
+    const staffRow = page.getByRole("row", { name: new RegExp(staff.email) });
+    await expect(staffRow).toContainText("Editor");
+    await staffRow.getByRole("button", { name: "Revoke access" }).click();
+    await page.getByLabel("Reason for revocation").fill("Access no longer needed");
+    await page.getByRole("button", { name: "Confirm revocation" }).click();
+    await expect(page.getByRole("status")).toContainText("Access revoked");
+    await expect(staffRow).toContainText("Revoked");
   } finally {
     await staff.dispose();
     await owner.dispose();
@@ -53,6 +61,32 @@ test("viewer cannot manage the team", async ({ page }) => {
     await expect(page.getByText("Team management requires the owner role.")).toBeVisible();
   } finally {
     await staff.dispose();
+    await owner.dispose();
+  }
+});
+
+test("admin navigation exposes only permitted destinations and keeps actions visible at 320px", async ({ page }) => {
+  const owner = await createAdminFixture("shell-owner", ["owner"]);
+  const viewer = await createAdminFixture("shell-viewer", ["viewer"]);
+  try {
+    await owner.login(page, "aal2");
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto("/admin/recipes");
+    const nav = page.getByRole("navigation", { name: "Admin" });
+    await expect(nav.getByRole("link", { name: "Recipes" })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: "Team" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Collections" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Public site" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+
+    await viewer.login(page, "aal2");
+    await page.goto("/admin/recipes");
+    const viewerNav = page.getByRole("navigation", { name: "Admin" });
+    await expect(viewerNav.getByRole("link", { name: "Recipes" })).toHaveAttribute("aria-current", "page");
+    await expect(viewerNav.getByRole("link", { name: "Team" })).toHaveCount(0);
+  } finally {
+    await viewer.dispose();
     await owner.dispose();
   }
 });

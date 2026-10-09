@@ -1455,6 +1455,7 @@ export type Database = {
       }
       admin_recipe_impact: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_list: { Args: { p_query: Json }; Returns: Json }
+      admin_recipe_operations: { Args: { p_recipe_id: string }; Returns: Json }
       admin_recipe_revision: {
         Args: { p_recipe_id: string; p_revision_id: string }
         Returns: Json
@@ -1713,4 +1714,3 @@ export const Constants = {
     },
   },
 } as const
-

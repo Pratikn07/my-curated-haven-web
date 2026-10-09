@@ -26,8 +26,10 @@ export default async function AdminRecipesPage({
   if (!result.ok) {
     return <p role="status">Library unavailable ({result.code}). Try again.</p>;
   }
-  const returnTo = `/admin/recipes?${params.toString()}`;
-  void safeAdminReturn(params.get("returnTo"));
+  const listParams = new URLSearchParams(params);
+  listParams.delete("returnTo");
+  listParams.delete("selected");
+  const returnTo = safeAdminReturn(`/admin/recipes${listParams.size ? `?${listParams}` : ""}`);
   return (
     <AdminLibrary result={result.value} returnTo={returnTo} selectedId={params.get("selected")} />
   );

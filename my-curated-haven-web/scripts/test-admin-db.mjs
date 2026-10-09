@@ -13,7 +13,7 @@ const config = readFileSync(resolve(workdir, 'supabase/config.toml'), 'utf8');
 if (!/^project_id\s*=\s*"(?:my-curated-haven-impl|mch-admin-recipe-test)"/m.test(config)) throw new Error('Unrecognized local test project');
 const fixture = readFileSync(resolve(root, 'supabase/test-fixtures/admin-console.sql'), 'utf8');
 const testsDir = resolve(root, 'supabase/tests/database');
-const files = args.length ? args : readdirSync(testsDir).filter(f => /^1[0-6]_.*admin.*\.test\.sql$/.test(f));
+const files = args.length ? args : readdirSync(testsDir).filter(f => /^(?:1[0-6]|59|60)_.*admin.*\.test\.sql$/.test(f));
 if (!files.length) throw new Error('No admin SQL tests selected');
 const scratch = mkdtempSync(resolve(tmpdir(), 'mch-admin-pgtap-'));
 try {

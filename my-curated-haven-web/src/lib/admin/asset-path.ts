@@ -10,6 +10,7 @@ function fail(reason: string): { ok: false; code: "INVALID"; reference: string }
 export function parseRecipeAsset(path: string, supabaseOrigin: string): Result<{ objectName: string }> {
   const trimmed = (path ?? "").trim();
   if (!trimmed) return fail("empty");
+  if (trimmed.includes("%")) return fail("encoding");
   let origin: URL;
   try {
     origin = new URL(supabaseOrigin);
@@ -29,7 +30,7 @@ export function parseRecipeAsset(path: string, supabaseOrigin: string): Result<{
     }
     const prefix = `/storage/v1/object/public/${RECIPE_PREVIEWS_BUCKET}/`;
     if (!parsed.pathname.startsWith(prefix)) return fail("bucket");
-    const objectName = decodeURIComponent(parsed.pathname.slice(prefix.length));
+    const objectName = parsed.pathname.slice(prefix.length);
     if (!OBJECT_PATTERN.test(objectName) || objectName.includes("..")) return fail("name");
     return { ok: true, value: { objectName } };
   }

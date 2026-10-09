@@ -19,19 +19,33 @@ import {
   withdrawAdminRecipe,
 } from "@/lib/admin/recipes";
 import { refreshAdminRecipe, retryAdminRefresh } from "@/lib/admin/refresh";
-import { loadAdminRecipe } from "@/lib/admin/context";
+import { loadAdminHistory, loadAdminRecipe, loadAdminRecipeOperations } from "@/lib/admin/context";
+import { adminRpc } from "@/lib/admin/rpc";
 import type {
   Base,
   DraftCommand,
   Operation,
   PublishCommand,
-  Revision,
   ReviewCommand,
+  StaffRow,
   WithdrawCommand,
 } from "@/lib/admin/contracts";
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
+export async function listStaff() {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_staff_list"), (data): StaffRow[] => {
+    if (!Array.isArray(data) || data.some((row) =>
+      typeof row !== "object" || row === null || Array.isArray(row) ||
+      typeof row.userId !== "string" || typeof row.email !== "string" ||
+      !Array.isArray(row.roles) || typeof row.active !== "boolean")) {
+      throw new Error("Invalid staff list");
+    }
+    return data as StaffRow[];
+  });
 }
 
 export async function lookupStaff(email: string) {
@@ -113,11 +127,11 @@ export async function listAssetsAction() {
   return listAdminAssets();
 }
 
-export async function verifyAssetAction(revision: Revision) {
-  if (!isUuid(revision.id) || !isUuid(revision.recipeId)) {
+export async function verifyAssetAction(recipeId: string, revisionId: string) {
+  if (!isUuid(recipeId) || !isUuid(revisionId)) {
     return { ok: false as const, code: "INVALID" as const, reference: "asset-verify" };
   }
-  return verifyAdminAsset(revision);
+  return verifyAdminAsset(recipeId, revisionId);
 }
 
 export async function submitRevisionAction(input: Operation & {
@@ -169,6 +183,20 @@ export async function loadImpactAction(recipeId: string) {
     return { ok: false as const, code: "INVALID" as const, reference: "impact" };
   }
   return loadAdminImpact(recipeId);
+}
+
+export async function loadRecipeOperationsAction(recipeId: string) {
+  if (!isUuid(recipeId)) {
+    return { ok: false as const, code: "INVALID" as const, reference: "recipe-operations" };
+  }
+  return loadAdminRecipeOperations(recipeId);
+}
+
+export async function loadHistoryAction(recipeId: string, cursor: string) {
+  if (!isUuid(recipeId) || !/^[0-9a-f]{2,256}$/.test(cursor) || cursor.length % 2 !== 0) {
+    return { ok: false as const, code: "INVALID" as const, reference: "recipe-history" };
+  }
+  return loadAdminHistory(recipeId, cursor);
 }
 
 export async function publishRevisionAction(input: PublishCommand) {

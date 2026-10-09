@@ -44,13 +44,13 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- publication
   EXPECT: ADMIN_GATE_PUBLICATION_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: DB 16 (49: exact publish with archive/version/legacy/head, identical replay, stale/conflict, changed-content block, missing/vanished-asset block with active intact, injected-fault full rollback, campaign/sealed/live/pending/historical blocks, test-only publishes, ordinary + emergency withdraw with audit); browser confirmation flow in Task 13
+  EVIDENCE: DB 16 (75 after audit remediation: exact publish, first-body version 1, injected-fault rollback, receipt replay, image identity, stale campaign impact, ordinary and emergency withdrawal) passed after clean local migration replay. Desktop and WebKit publication browser flows passed, including public read and named campaign-only owner acknowledgement.
 
 - [x] R8: Commercial, sealed and campaign boundaries prevent unsafe corrections
   CHECK: npm run test:admin:gate -- impact
   EXPECT: ADMIN_GATE_IMPACT_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: frozen impact token (stable facts only) echoed and rechecked under SHARE NOWAIT locks; sealed/live/pending/historical/campaign exposure blocks ordinary publish; owner-only emergency withdraw with full refs; missing campaign snapshot blocks; busy locks map to UNAVAILABLE retry
+  EVIDENCE: SQL 16 proves campaign-only withdrawal needs owner acknowledgement, a changed campaign revision rejects the old token, and missing or malformed snapshots block impact and writes. The database recomputes usage and token under locks. Desktop and WebKit screens name the campaign, block a stale page and require acknowledgement.
 
 - [x] R9: Direct entry and SPA navigation suppress optional admin telemetry
   CHECK: npm run test:admin:gate -- privacy
@@ -62,7 +62,7 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- workflow
   EXPECT: ADMIN_GATE_WORKFLOW_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: unmet; no keyboard/narrow-layout workflow spec built in Phase 1. Remaining action: owner reviews final synthetic screens (ADMIN-CONSOLE.md release package) and a workflow spec is added before close.
+  EVIDENCE: narrow-layout admin access, editing, inspection and publication cases passed in the final 72/72 Chromium desktop, Chromium mobile and WebKit mobile matrix on a production build. The owner review of final synthetic screens remains unmet, so this gate stays open.
 
 - [x] R11: Existing customer recipe and campaign access remains correct
   CHECK: npm run test:admin:gate -- regression
@@ -74,7 +74,7 @@ Scope: Complete the approved owner-first multi-admin recipe workspace in three l
   CHECK: npm run test:admin:gate -- release
   EXPECT: ADMIN_GATE_RELEASE_PASSED
   CWD: my-curated-haven-web
-  EVIDENCE: local subgate met — `supabase db reset` clean replay of all 10 admin migrations; legacy pgTAP 123 PASS; admin pgTAP 219 PASS; generated-types diff clean; lint + typecheck clean; units 16/13/23/18 PASS; instrumented production build clean; admin browser set green (access 4, editing 3, inspection 1, concurrency 2, publication 1, review 2, privacy 3); web-ci.yml finalised (instrumented analytics build env for the privacy positive control; pgTAP split into legacy-excluding-admin plus the fixture-bundling admin runner whose default now covers 10-16). Committed/deployed/external subgates unmet: release requires separate authorisation; see ops/ADMIN-CONSOLE.md release package.
+  EVIDENCE: local subgate met at the original Phase 1 head. On the UI/audit branch, a clean reset replayed all forward migrations through `20261007233000`; admin pgTAP 265/265, admin units 27/27, lint, typecheck, production build and the final three-project admin browser matrix 72/72 passed. Committed/deployed/external subgates remain open; see ops/ADMIN-CONSOLE.md.
 
 - [ ] OWNER: Owner reviews final screens and confirms workflow fit
   EVIDENCE: unmet; remaining action: owner walks the inspection/edit/review/publication screens on synthetic data and confirms fit (closes R10).

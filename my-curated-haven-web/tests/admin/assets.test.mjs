@@ -38,5 +38,7 @@ test("absolute public URLs must match origin and bucket exactly", () => {
     false
   );
   assert.equal(parseRecipeAsset("/absolute/path.webp", ORIGIN).ok, false);
+  assert.equal(parseRecipeAsset("recipe-previews/a%2Fb.webp", ORIGIN).ok, false);
+  assert.equal(parseRecipeAsset("https://fixture.supabase.test/storage/v1/object/public/recipe-previews/a%2Fb.webp", ORIGIN).ok, false);
   assert.equal(parseRecipeAsset("", ORIGIN).ok, false);
 });

@@ -300,6 +300,7 @@ export async function withdrawAdminRecipe(
             content_version: input.base.contentVersion,
             active_hash: input.base.activeHash,
           },
+          impact_token: input.impactToken,
           emergency: input.emergency,
           acknowledge_promise_impact: input.acknowledgePromiseImpact,
         } as never,
