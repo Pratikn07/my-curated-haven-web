@@ -108,6 +108,9 @@ jobs:
       - name: Collection unit tests
         run: npm run test:collections:unit
 
+      - name: Payment reconciliation unit tests
+        run: npm run test:reconciliation:unit
+
       - name: Typecheck
         run: npm run typecheck
 

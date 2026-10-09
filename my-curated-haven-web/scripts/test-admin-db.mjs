@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const testsDir = resolve(root, 'supabase/tests/database');
-const fixturePaths = ['admin-console.sql', 'admin-collections.sql', 'admin-support.sql'];
+const fixturePaths = ['admin-console.sql', 'admin-collections.sql', 'admin-support.sql', 'support-eligibility-matrix.sql'];
 const projectIds = ['my-curated-haven-impl', 'mch-admin-recipe-test', 'mch-admin-collections-test', 'mch-admin-support-test'];
 
 /**
