@@ -19,8 +19,10 @@ async function headRevision(): Promise<Record<string, unknown> | null> {
 async function openEditor(page: Page) {
   await page.goto(`/admin/collections/${f.collectionId}`);
   const prepare = page.getByRole("button", { name: "Prepare update" });
+  const edit = page.getByRole("link", { name: "Edit private draft" });
+  await expect(prepare.or(edit)).toBeVisible();
   if (await prepare.isVisible()) await prepare.click();
-  else await page.getByRole("link", { name: "Edit private draft" }).click();
+  else await edit.click();
   await expect(page.getByRole("status", { name: "Save status" })).not.toHaveText("Preparing editor");
 }
 

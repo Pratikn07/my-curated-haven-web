@@ -12,7 +12,7 @@ import {
 import CollectionsMotion from "@/components/collections/CollectionsMotion";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import type { ShowroomCollection } from "@/lib/collections/types";
-import { getShowroomCollection, listOpenCollections, loadLiveOffer } from "@/lib/data/collections-showroom";
+import { getPublishedCollection, listOpenPublishedCollections, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import { getFreeRecipeSlots, type RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 import { usableImageSrc } from "@/lib/recipes/format";
@@ -24,14 +24,17 @@ interface CollectionPageProps {
 
 /**
  * One collection: its book and cloth, the price and purchase, the full
- * contents, free samples and questions. The words and cover come from the
- * showroom config; the price, purchase and ownership come from the commerce
- * database whenever it has an offer for this slug. A collection that exists
+ * contents, free samples and questions. The words, cover and recipes come from
+ * the collection's published record (configured or database, see
+ * src/lib/collections/publication.ts); the price, purchase and ownership come
+ * from the commerce database whenever it has an offer for this slug. A collection that exists
  * only in the database (no config entry) still renders, as a plain cloth book.
  */
-function buildModel(slug: string, config: ShowroomCollection | null, offer: CollectionOfferDto | null): DetailModel | null {
+function buildModel(slug: string, config: ShowroomCollection | null, offer: CollectionOfferDto | null,
+  commerceUnavailable = false): DetailModel | null {
   if (config) {
     return {
+      commerceUnavailable,
       slug,
       title: config.title,
       tagline: config.tagline,
@@ -81,9 +84,9 @@ async function loadFreeSamples(): Promise<RecipeCatalogItem[]> {
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const config = getShowroomCollection(slug);
-  const offer = await loadLiveOffer(slug, (await getCurrentUser())?.id);
-  const model = buildModel(slug, config, offer);
+  const published = await getPublishedCollection(slug);
+  const live = await loadLiveOffer(slug, (await getCurrentUser())?.id);
+  const model = buildModel(slug, published?.collection ?? null, offerOrNull(live), !live.ok);
 
   if (!model) {
     return { title: "Collection Not Found", robots: { index: false, follow: false } };
@@ -110,13 +113,12 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
-  const config = getShowroomCollection(slug);
   const user = await getCurrentUser();
-  const [offer, freeSamples] = await Promise.all([loadLiveOffer(slug, user?.id), loadFreeSamples()]);
-  const model = buildModel(slug, config, offer);
+  const [published, live, freeSamples] = await Promise.all([getPublishedCollection(slug), loadLiveOffer(slug, user?.id), loadFreeSamples()]);
+  const model = buildModel(slug, published?.collection ?? null, offerOrNull(live), !live.ok);
   if (!model) notFound();
 
-  const shelf = listOpenCollections();
+  const shelf = (await listOpenPublishedCollections()).map((entry) => entry.collection);
   const position = shelf.findIndex((collection) => collection.slug === slug);
   const next = shelf.length > 1 ? shelf[(position + 1) % shelf.length] : position === -1 ? shelf[0] : null;
 

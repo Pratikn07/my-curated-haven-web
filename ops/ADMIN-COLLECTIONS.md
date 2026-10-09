@@ -19,6 +19,17 @@ Sections below are filled in by the tasks that own them: catalog import (Task 4)
 
 Apply never writes `collection_publication_projection`, switches source mode, creates review decisions, enables sales, changes releases, free slots or entitlements. Imported placement notes stay `fit: "unverified"`. Re-applying the same content reports `unchanged`; a collection imported earlier with different content is skipped and must change through a reviewed draft.
 
+## Storefront source (Task 13)
+
+The collection pages, bookcase, series, showroom chapters, sitemap and the recipes-page shelf read collections through `src/lib/collections/publication.ts`. The server setting `COLLECTIONS_SOURCE_BACKEND` chooses the backend:
+
+- `legacy` (default when unset): every collection comes from `src/config/collections.ts`, exactly as before. No collection database read.
+- `registry`: each collection follows `private.collection_sources.source_mode`. `legacy` collections are served whole from config; `database` collections only from `public.collection_publication_projection` plus current recipe facts. Display hints that are not part of a publication (showroom chapter flag, placeholder price) still come from config. Unlisted collections leave the shelf but keep their page by link; retired ones leave the storefront, and buyers keep them in their library.
+
+Registry mode never falls back to config when the database read fails; the read throws so a cached page keeps serving its last committed version. Once any collection has a database publication in production, registry-compatible builds are the rollback floor: switching back to `legacy` would show stale configured content for that collection. A commerce lookup failure on a collection page reads "Purchase unavailable right now", never "Opening soon" or a guessed price.
+
+Cutover order: deploy with `registry` while every collection is still `legacy` (pages unchanged), confirm parity, then publish collections one at a time through the admin (each first publication switches that collection to `database` in the same transaction).
+
 ## Local verification stack
 
 Run Phase 2 database work against the owned local project `mch-admin-collections-test`, never the default stack (54321/54322) or the Phase 1 stack (54340–54349).

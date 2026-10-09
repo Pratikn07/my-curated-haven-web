@@ -25,6 +25,10 @@ export interface CollectionsFixture {
   query(sql: string, args?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
   login(page: Page, role: CollectionRole, aal?: Assurance): Promise<void>;
   setCollectionStage(stage: CollectionStage): Promise<void>;
+  /** Run a collection RPC as that staff member (aal2 claims) in its own transaction; returns its JSON result. */
+  rpcAs(role: Exclude<CollectionRole, "customer">, fn: string, command: Record<string, unknown>): Promise<Record<string, unknown>>;
+  /** Record a campaign snapshot so evidence is known; restored on dispose. */
+  recordCampaigns(): Promise<void>;
   dispose(): Promise<void>;
 }
 
@@ -57,10 +61,17 @@ async function withPg<T>(fn: (pg: Client) => Promise<T>): Promise<T> {
 }
 
 /** Remove collections whose slug matches; used for this fixture's own rows and for interrupted runs. */
+export async function deleteCollectionsBySlug(slugPattern: string): Promise<void> {
+  await withPg((pg) => deleteCollections(pg, slugPattern));
+}
+
 async function deleteCollections(pg: Client, slugPattern: string): Promise<void> {
   const ids = (await pg.query("SELECT id FROM public.recipe_collections WHERE slug LIKE $1", [slugPattern])).rows.map((r) => r.id);
   if (ids.length === 0) return;
   for (const [table, trigger] of IMMUTABLE) await pg.query(`ALTER TABLE ${table} DISABLE TRIGGER ${trigger}`);
+  await pg.query("ALTER TABLE public.collection_recipes DISABLE TRIGGER collection_recipes_published_guard");
+  await pg.query("ALTER TABLE public.collection_recipes DISABLE TRIGGER trg_check_release_sealed");
+  await pg.query("ALTER TABLE private.release_manifests DISABLE TRIGGER release_manifests_immutable");
   try {
     await pg.query("DELETE FROM private.collection_audit WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_operations WHERE collection_id = ANY($1)", [ids]);
@@ -96,6 +107,9 @@ async function deleteCollections(pg: Client, slugPattern: string): Promise<void>
     await pg.query("DELETE FROM public.recipe_collections WHERE id = ANY($1)", [ids]);
   } finally {
     for (const [table, trigger] of IMMUTABLE) await pg.query(`ALTER TABLE ${table} ENABLE TRIGGER ${trigger}`);
+    await pg.query("ALTER TABLE public.collection_recipes ENABLE TRIGGER collection_recipes_published_guard");
+    await pg.query("ALTER TABLE public.collection_recipes ENABLE TRIGGER trg_check_release_sealed");
+    await pg.query("ALTER TABLE private.release_manifests ENABLE TRIGGER release_manifests_immutable");
   }
 }
 
@@ -121,6 +135,8 @@ export async function createCollectionsFixture(options: {
   if (scenario !== "inspection") throw new Error(`Scenario ${scenario} arrives with its owning task.`);
   await withPg((pg) => deleteCollections(pg, "synthetic-collection-%"));
   const originalStage = await setCollectionStage("inspection");
+  const originalCampaignRevision = (await withPg((pg) =>
+    pg.query("SELECT campaign_revision FROM private.admin_console_settings WHERE singleton"))).rows[0].campaign_revision as string | null;
 
   const rand = crypto.randomBytes(3).toString("hex");
   const owner = await createAdminFixture(`coll-owner`, ["owner"]);
@@ -147,6 +163,8 @@ export async function createCollectionsFixture(options: {
       await pg.query("DELETE FROM public.recipe_catalog WHERE slug LIKE $1", [`synthetic-colrecipe-${rand}-%`]);
     });
     await setCollectionStage(originalStage);
+    await withPg((pg) => pg.query("UPDATE private.admin_console_settings SET campaign_revision=$1 WHERE singleton",
+      [originalCampaignRevision]));
     for (const person of Object.values(people)) await person?.dispose();
   }
 
@@ -205,6 +223,32 @@ export async function createCollectionsFixture(options: {
     },
     async setCollectionStage(stage) {
       await setCollectionStage(stage);
+    },
+    async rpcAs(role, fn, command) {
+      if (!/^admin_collection_[a-z_]+$/.test(fn)) throw new Error(`Not a collection RPC: ${fn}`);
+      if (!people[role]) people[role] = await createAdminFixture(`coll-${role}`, [role]);
+      const userId = people[role]!.userId;
+      return withPg(async (pg) => {
+        await pg.query("BEGIN");
+        try {
+          await pg.query("SELECT set_config('request.jwt.claim.sub',$1,true), set_config('request.jwt.claims',$2,true)",
+            [userId, JSON.stringify({ sub: userId, aal: "aal2", role: "authenticated" })]);
+          await pg.query("SET LOCAL ROLE authenticated");
+          const { rows } = await pg.query(`SELECT public.${fn}($1::jsonb) AS result`, [command]);
+          await pg.query("COMMIT");
+          return rows[0].result as Record<string, unknown>;
+        } catch (error) {
+          await pg.query("ROLLBACK");
+          throw error;
+        }
+      });
+    },
+    async recordCampaigns() {
+      await withPg(async (pg) => {
+        await pg.query(`INSERT INTO private.admin_campaign_snapshots(deployment_revision,configuration,configuration_hash)
+          VALUES('synthetic-collections-review','{"campaigns":[]}','synthetic') ON CONFLICT (deployment_revision) DO NOTHING`);
+        await pg.query("UPDATE private.admin_console_settings SET campaign_revision='synthetic-collections-review' WHERE singleton");
+      });
     },
     dispose,
   };

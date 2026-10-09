@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listOpenCollections } from "@/lib/collections/visibility";
+import { listOpenPublishedCollections } from "@/lib/collections/publication";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { getFreeRecipeCatalog, getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
 import { isRecipeAdmin } from "@/lib/data/access";
@@ -122,7 +122,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   const filteredRecipes = filterRecipes(catalog, filterState);
   // Three open books, one per stage, as examples of what the bookcase holds.
   const examples = ["first-tastes", "meal-prep", "lunchbox-and-daycare", "halloween"];
-  const shelf = listOpenCollections()
+  const shelf = (await listOpenPublishedCollections()).map((published) => published.collection)
     .filter((collection) => examples.includes(collection.slug))
     .sort((a, b) => examples.indexOf(a.slug) - examples.indexOf(b.slug))
     .slice(0, 3);
@@ -144,7 +144,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
         </p>
         {!isAdmin && shelf.length > 0 ? (
           <p className="mt-4 text-base text-text-muted">
-            Want more for a particular stage or week? Our collections gather 8 to 12 recipes around one theme, such as{" "}
+            Want more for a particular stage or week? Our collections gather recipes around one theme, such as{" "}
             {shelf.map((collection) => collection.title).join(", ")}.{" "}
             <Link href="/collections" className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
               Browse the collections
