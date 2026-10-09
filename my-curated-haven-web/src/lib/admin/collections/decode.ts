@@ -2,6 +2,7 @@ import type { AdminCode, Check, Result } from "../contracts";
 import type {
   CollectionDetail,
   CollectionEvent,
+  CollectionHistoryPage,
   CollectionImpact,
   CollectionLibrary,
   CollectionReadiness,
@@ -9,6 +10,7 @@ import type {
   CollectionRow,
   CollectionSnapshot,
   Member,
+  RecipeSummary,
 } from "./contracts";
 
 /**
@@ -121,15 +123,21 @@ const impact: Decoder<Result<CollectionImpact>> = (v, p) => {
 
 const event = object<CollectionEvent>({
   id: string, action: string, at: timestamp, reason: string, humanAuthoriser: nullable(uuid),
-  executor: string, executorType: oneOf(["human", "operator"]), beforeRef: nullable(string),
+  authoriserEmail: nullable(string), executor: string, executorType: oneOf(["human", "operator"]), beforeRef: nullable(string),
   afterRef: nullable(string), operationId: string,
 });
 
+const recipeSummary = object<RecipeSummary>({ recipeId: uuid, slug: string, title: string, publication: string });
+
 const detail = object<CollectionDetail>({
-  collectionId: uuid, sourceMode: oneOf(["legacy", "database"]),
+  collectionId: uuid, identity: object({ slug: string, title: string }), sourceMode: oneOf(["legacy", "database"]),
+  commerceState: oneOf(["enabled", "disabled", "no_offer", "unavailable"]),
   published: nullable(object({ publicationId: uuid, releaseId: nullable(uuid), snapshot })),
-  working: nullable(revision), readiness, impact, history: array(event),
+  working: nullable(revision), readiness, impact, recipes: array(recipeSummary),
+  history: array(event), historyCursor: nullable(string), checkedAt: timestamp,
 });
+
+const historyPage = object<CollectionHistoryPage>({ events: array(event), nextCursor: nullable(string) });
 
 const row = object<CollectionRow>({
   collectionId: uuid, slug: string, title: string, shelf: string,
@@ -156,6 +164,10 @@ function run<T>(decode: Decoder<T>, value: unknown): Result<T> {
 
 export function decodeCollectionDetail(data: unknown): Result<CollectionDetail> {
   return run(detail, data);
+}
+
+export function decodeCollectionHistory(data: unknown): Result<CollectionHistoryPage> {
+  return run(historyPage, data);
 }
 
 export function decodeCollectionLibrary(data: unknown): Result<CollectionLibrary> {

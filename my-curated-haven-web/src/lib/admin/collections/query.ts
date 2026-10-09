@@ -27,11 +27,11 @@ export function parseCollectionQuery(params: URLSearchParams): Result<Collection
   if (!stage) return fail("INVALID", "stage", "Unknown stage filter");
   const status = parseList(params.get("status"), STATUS_FILTERS) as CollectionStatusFilter[] | null;
   if (!status) return fail("INVALID", "status", "Unknown status filter");
-  const draftRaw = params.get("draft");
+  const draftRaw = params.get("draft") || null;
   if (draftRaw !== null && draftRaw !== "true" && draftRaw !== "false") {
     return fail("INVALID", "draft", "Draft filter must be true or false");
   }
-  const attentionRaw = params.get("attention");
+  const attentionRaw = params.get("attention") || null;
   if (attentionRaw !== null && attentionRaw !== "1") return fail("INVALID", "attention", "Attention filter must be 1");
   const page = Number(params.get("page") ?? "1");
   if (!Number.isInteger(page) || page < 1 || page > 1000) {
@@ -52,4 +52,12 @@ export function serializeCollectionQuery(query: CollectionQuery): URLSearchParam
   if (query.attention) params.set("attention", "1");
   if (query.page !== 1) params.set("page", String(query.page));
   return params;
+}
+
+/** A same-site return path to the collection list (keeping its filters), or the plain list. */
+export function safeCollectionReturn(value: string | null): string {
+  if (!value || !value.startsWith("/admin/collections") || value.startsWith("//")) return "/admin/collections";
+  const url = new URL(value, "https://admin.local");
+  if (url.origin !== "https://admin.local" || url.pathname !== "/admin/collections") return "/admin/collections";
+  return url.pathname + url.search;
 }

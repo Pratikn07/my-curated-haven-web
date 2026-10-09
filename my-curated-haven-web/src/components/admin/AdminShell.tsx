@@ -15,7 +15,7 @@ export default function AdminShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const links = adminNavigation(context.operator, pathname);
+  const links = adminNavigation(context.operator, pathname, context.collectionStage);
   return (
     <div className="admin-console">
       <header className="admin-console__header">

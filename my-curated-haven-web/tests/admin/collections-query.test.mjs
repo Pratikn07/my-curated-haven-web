@@ -47,3 +47,20 @@ test("search text is bounded", () => {
   assert.equal(parsed.ok, true);
   if (parsed.ok) assert.equal(parsed.value.q.length, 200);
 });
+
+test("empty form fields mean no filter", () => {
+  const parsed = parseCollectionQuery(new URLSearchParams("q=&shelf=&stage=&status=&draft="));
+  assert.deepEqual(parsed, {
+    ok: true,
+    value: { q: "", shelf: [], stage: [], status: [], draft: null, attention: false, page: 1, pageSize: 25 },
+  });
+});
+
+test("back links only return to the collection list", async () => {
+  const { safeCollectionReturn } = await import("../../src/lib/admin/collections/query.ts");
+  assert.equal(safeCollectionReturn("/admin/collections?shelf=mornings&page=2"), "/admin/collections?shelf=mornings&page=2");
+  for (const bad of [null, "", "//evil.test/admin/collections", "https://evil.test/admin/collections",
+    "/admin/recipes", "/admin/collectionsx", "/admin/collections/../team", "javascript:alert(1)"]) {
+    assert.equal(safeCollectionReturn(bad), "/admin/collections", String(bad));
+  }
+});

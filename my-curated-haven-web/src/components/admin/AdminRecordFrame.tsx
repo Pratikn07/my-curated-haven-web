@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 export default function AdminRecordFrame({
+  eyebrow = "Recipe workspace",
   title,
   identifier,
   liveState,
@@ -9,6 +10,7 @@ export default function AdminRecordFrame({
   actions,
   children,
 }: {
+  eyebrow?: string;
   title: string;
   identifier?: string;
   liveState: string;
@@ -20,7 +22,7 @@ export default function AdminRecordFrame({
   return (
     <article className="admin-record">
       <header className="admin-record__header">
-        <p className="admin-record__eyebrow">Recipe workspace</p>
+        <p className="admin-record__eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
         {identifier ? <p className="admin-record__identifier">{identifier}</p> : null}
         <dl className="admin-record__states">

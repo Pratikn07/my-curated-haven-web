@@ -17,3 +17,15 @@ test("owner navigation includes Team only when team.manage is current", () => {
     { href: "/admin/team", label: "Team", current: true },
   ]);
 });
+
+const collectionReader = { ...viewer, permissions: ["recipe.read", "collection.read"] };
+
+test("Collections appears only with collection.read and a switched-on collection stage", () => {
+  assert.deepEqual(adminNavigation(collectionReader, "/admin/collections/x", "inspection"), [
+    { href: "/admin/recipes", label: "Recipes", current: false },
+    { href: "/admin/collections", label: "Collections", current: true },
+  ]);
+  assert.equal(adminNavigation(collectionReader, "/admin/recipes", "disabled").some((l) => l.label === "Collections"), false);
+  assert.equal(adminNavigation(collectionReader, "/admin/recipes").some((l) => l.label === "Collections"), false);
+  assert.equal(adminNavigation(viewer, "/admin/recipes", "publication").some((l) => l.label === "Collections"), false);
+});

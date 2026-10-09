@@ -9,7 +9,8 @@ export type AdminCode = "AUTH_REQUIRED" | "MFA_REQUIRED" | "DENIED" | "DISABLED"
 export type Result<T> = { ok: true; value: T }
   | { ok: false; code: AdminCode; reference: string; fields?: Record<string, string> };
 export type Operator = { id: string; email: string; roles: AdminRole[]; permissions: Permission[] };
-export type AdminContext = { stage: ConsoleStage; operator: Operator; assurance: "aal1" | "aal2" };
+export type AdminContext = { stage: ConsoleStage; collectionStage: ConsoleStage; operator: Operator;
+  assurance: "aal1" | "aal2" };
 export type ContextResult = Result<AdminContext>;
 export type PublicationState = "draft" | "published" | "withdrawn";
 export type ReviewState = "unreviewed" | "submitted" | "approved" | "changes_requested" | "rejected";

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createAdminFixture } from "./admin-fixtures";
+import { createCollectionsFixture } from "./collections-admin-fixtures";
 
 test.describe.configure({ mode: "serial" });
 
@@ -58,6 +59,25 @@ test("signed-in admin navigation sends nothing to the SDK sink", async ({ page }
     await expect(page.getByRole("heading", { name: "Team", exact: true })).toBeVisible();
     await page.waitForTimeout(1000);
     expect(hits.length).toBe(0);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test("public-to-admin navigation into collections sends nothing once admin pages load", async ({ page }) => {
+  const fixture = await createCollectionsFixture();
+  try {
+    const hits = await watchSink(page);
+    await fixture.login(page, "owner", "aal2");
+    await page.goto("/");
+    await page.waitForTimeout(1500);
+    const publicHits = hits.length;
+    expect(publicHits).toBeGreaterThan(0);
+    await page.goto(`/admin/collections?q=${fixture.slug}`);
+    await page.getByRole("link", { name: fixture.title, exact: true }).locator("visible=true").click();
+    await expect(page.getByRole("heading", { level: 1, name: fixture.title })).toBeVisible();
+    await page.waitForTimeout(1000);
+    expect(hits.slice(publicHits)).toEqual([]);
   } finally {
     await fixture.dispose();
   }

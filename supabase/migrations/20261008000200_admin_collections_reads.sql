@@ -150,6 +150,7 @@ BEGIN
  SELECT coalesce(jsonb_agg(e ORDER BY ord),'[]'::jsonb) INTO events FROM (
   SELECT row_number() OVER (ORDER BY a.at DESC, a.id DESC) ord,
    jsonb_build_object('id',a.id,'action',a.action,'at',a.at,'reason',a.reason,'humanAuthoriser',a.human_authoriser,
+    'authoriserEmail',(SELECT u.email FROM auth.users u WHERE u.id=a.human_authoriser),
     'executor',a.executor_id,'executorType',a.executor_type,'beforeRef',a.before_ref,'afterRef',a.after_ref,
     'operationId',a.operation_id) e
   FROM private.collection_audit a
@@ -165,7 +166,7 @@ END $$;
 
 CREATE FUNCTION public.admin_collection_detail(p_collection_id uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE published jsonb; working jsonb; published_digest text; working_digest text;
+DECLARE published jsonb; working jsonb; published_digest text; working_digest text; history jsonb; impact jsonb;
 BEGIN
  PERFORM private.collection_assert('collection.read','inspection');
  IF NOT EXISTS(SELECT 1 FROM public.recipe_collections WHERE id=p_collection_id) THEN
@@ -178,16 +179,29 @@ BEGIN
  SELECT private.collection_revision_json(h.revision_id), r.digest INTO working, working_digest
   FROM private.collection_draft_heads h JOIN private.collection_revisions r ON r.id=h.revision_id
   WHERE h.collection_id=p_collection_id;
+ history := public.admin_collection_history(p_collection_id,NULL);
+ impact := private.collection_impact(p_collection_id);
  RETURN jsonb_build_object(
   'collectionId',p_collection_id,
+  'identity',(SELECT jsonb_build_object('slug',slug,'title',title) FROM public.recipe_collections WHERE id=p_collection_id),
   'sourceMode',coalesce((SELECT source_mode FROM private.collection_sources WHERE collection_id=p_collection_id),'legacy'),
+  'commerceState',private.collection_commerce_state(p_collection_id),
   'published',published,
   'working',working,
   -- Task 8 replaces this placeholder with evaluated readiness; until then nothing is ready.
   'readiness',jsonb_build_object('digest',coalesce(working_digest,published_digest,private.collection_digest('{}'::jsonb)),
     'checks','[]'::jsonb,'readyForApproval',false,'readyToPublish',false,'needsVerification',true),
-  'impact',private.collection_impact(p_collection_id),
-  'history',public.admin_collection_history(p_collection_id,NULL)->'events');
+  'impact',impact,
+  -- Titles for every recipe the screen names: published, draft and protected members.
+  'recipes',coalesce((SELECT jsonb_agg(jsonb_build_object('recipeId',c.id,'slug',c.slug,'title',c.title,
+      'publication',c.publication_state) ORDER BY c.id)
+    FROM public.recipe_catalog c WHERE c.id IN (
+      SELECT (m->>'recipeId')::uuid FROM jsonb_array_elements(coalesce(published#>'{snapshot,members}','[]'::jsonb)) m
+      UNION SELECT (m->>'recipeId')::uuid FROM jsonb_array_elements(coalesce(working#>'{snapshot,members}','[]'::jsonb)) m
+      UNION SELECT (x#>>'{}')::uuid FROM jsonb_array_elements(coalesce(impact#>'{value,protectedRecipeIds}','[]'::jsonb)) x)),'[]'::jsonb),
+  'history',history->'events',
+  'historyCursor',history->'nextCursor',
+  'checkedAt',now());
 END $$;
 
 -- Existing recipes an editor can place in a collection. Recipe review stays in the recipe workflow.

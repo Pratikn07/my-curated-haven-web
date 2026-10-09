@@ -44,7 +44,9 @@ const check = { code: "COLLECTION_READY", scope: "collection", state: "pass", se
 
 const detail = () => ({
   collectionId: ID,
+  identity: { slug: "first-foods", title: "First foods" },
   sourceMode: "database",
+  commerceState: "disabled",
   published: { publicationId: PUB, releaseId: null, snapshot: snapshot() },
   working: {
     id: REV, collectionId: ID, version: 3, digest: DIGEST,
@@ -56,8 +58,13 @@ const detail = () => ({
   impact: { ok: true, value: { token: "impact-token", checkedAt: AT, sourceRevision: "rev-1",
     protectedRecipeIds: [], eligibleBuyerCount: 0, pendingLiveCount: 0, offerIds: [],
     affectedCampaignSlugs: [], checks: [] } },
+  recipes: [{ recipeId: "93000000-0000-0000-0000-000000000101", slug: "pear-puree", title: "Pear purée",
+    publication: "published" }],
   history: [{ id: "e1", action: "collection.save", at: AT, reason: "Draft", humanAuthoriser: USER,
-    executor: USER, executorType: "human", beforeRef: null, afterRef: REV, operationId: "op-1" }],
+    authoriserEmail: "owner@synthetic.test", executor: USER, executorType: "human", beforeRef: null, afterRef: REV,
+    operationId: "op-1" }],
+  historyCursor: null,
+  checkedAt: AT,
 });
 
 test("a complete detail decodes", () => {
@@ -89,6 +96,8 @@ test("nested identifiers, states and numbers are checked, not cast", () => {
     (d) => { d.impact.value.eligibleBuyerCount = -2; },
     (d) => { d.history[0].executorType = "robot"; },
     (d) => { d.working.digest = "short"; },
+    (d) => { d.recipes[0].recipeId = "x"; },
+    (d) => { d.checkedAt = "yesterday"; },
   ];
   for (const mutate of broken) {
     const value = detail();

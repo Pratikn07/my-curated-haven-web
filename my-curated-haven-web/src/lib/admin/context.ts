@@ -28,7 +28,13 @@ function decodeContext(data: unknown): AdminContext {
     throw new Error("bad operator");
   }
   if (assurance !== "aal1" && assurance !== "aal2") throw new Error("bad assurance");
-  return data as unknown as AdminContext;
+  // Older databases omit collectionStage; treat that as collections switched off.
+  const collectionStage = data["collectionStage"] ?? "disabled";
+  if (collectionStage !== "disabled" && collectionStage !== "inspection" && collectionStage !== "editing"
+    && collectionStage !== "publication") {
+    throw new Error("bad collection stage");
+  }
+  return { ...(data as unknown as AdminContext), collectionStage };
 }
 
 function decodeLibrary(data: unknown): LibraryResult {

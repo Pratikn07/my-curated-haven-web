@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(34);
+SELECT plan(39);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-collections.sql
 
@@ -81,6 +81,10 @@ SELECT is((SELECT d#>'{impact,value,protectedRecipeIds}' FROM d1),
   '["93000000-0000-0000-0000-000000000101","93000000-0000-0000-0000-000000000102"]'::jsonb,
   'purchased release members are protected');
 SELECT is((SELECT jsonb_array_length(d->'history') FROM d1),25,'history is bounded to 25 events');
+SELECT is((SELECT d->>'commerceState' FROM d1),'disabled','detail reports sales state separately');
+SELECT is((SELECT jsonb_array_length(d->'recipes') FROM d1),3,'detail names every published and draft recipe');
+SELECT is((SELECT d#>>'{history,0,authoriserEmail}' FROM d1),'owner@synthetic.test','history names the human authoriser');
+SELECT ok((SELECT d->>'historyCursor' FROM d1) IS NOT NULL,'detail carries the cursor for older history');
 
 -- History paging continues from the cursor.
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001','aal2');
@@ -88,6 +92,12 @@ SET LOCAL ROLE authenticated;
 SELECT is(jsonb_array_length(public.admin_collection_history('93000000-0000-0000-0000-000000000001',
   public.admin_collection_history('93000000-0000-0000-0000-000000000001',NULL)->>'nextCursor')->'events'),2,
   'second history page holds the remaining events');
+RESET ROLE;
+
+-- The console context reports the collection stage for navigation.
+SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000002','aal2');
+SET LOCAL ROLE authenticated;
+SELECT is(public.admin_console_context()->>'collectionStage','inspection','context reports the collection stage');
 RESET ROLE;
 
 -- Revoked staff with a stale aal2 session lose access; switches are independent.
