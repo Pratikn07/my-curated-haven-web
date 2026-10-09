@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { coarseEntryPoint, pathToCanonicalRouteKey } from "@/lib/analytics/schema";
+import { isAdminPath } from "@/lib/analytics/private-paths";
 import { SIGN_IN_METHOD_COOKIE, isOAuthProvider } from "@/lib/auth/oauth";
 
 function readAndClearMethodMarker(): string | null {
@@ -30,6 +31,7 @@ export default function SignInCompletionTracker() {
 
   useEffect(() => {
     if (firedRef.current) return;
+    if (pathname && isAdminPath(pathname)) return;
 
     const method = readAndClearMethodMarker();
     if (!isOAuthProvider(method)) return;

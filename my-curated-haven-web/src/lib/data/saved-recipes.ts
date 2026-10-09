@@ -57,7 +57,7 @@ export async function getSavedRecipes(
     const { data: catalogRows, error: catalogError } = await supabase
       .from("recipe_catalog")
       .select(
-        "id, slug, title, public_summary, preview_image_path, total_minutes, meal_labels, diet_labels, published_at"
+        "id, slug, title, public_summary, preview_image_path, preview_image_alt, preview_image_description, total_minutes, meal_labels, diet_labels, published_at"
       )
       .in("id", recipeIds)
       .eq("publication_state", "published");
@@ -74,6 +74,8 @@ export async function getSavedRecipes(
         title: row.title,
         publicSummary: row.public_summary,
         previewImagePath: row.preview_image_path,
+        imageAlt: row.preview_image_alt,
+        imageDescription: row.preview_image_description,
         totalMinutes: row.total_minutes,
         mealLabels: row.meal_labels || [],
         dietLabels: row.diet_labels || [],

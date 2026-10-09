@@ -11,6 +11,7 @@ import {
 import { parseAndRecordCampaign } from "./campaigns";
 import { buildAnalyticsEnvelope } from "./sanitize";
 import { getAnalyticsProvider } from "./provider";
+import { isAdminNavigationContext } from "./private-paths";
 
 const SESSION_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes inactivity
 const VIEW_DEDUP_MS = 50;
@@ -76,6 +77,14 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
   routeKey?: CanonicalRouteKey
 ): Promise<void> {
   if (!isAnalyticsPermitted() || typeof window === "undefined") {
+    return;
+  }
+
+  // Refuse admin custom events: navigation into /admin (including a validated
+  // admin returnTo on sign-in completion) must never initialise the SDK.
+  try {
+    if (isAdminNavigationContext(window.location.href)) return;
+  } catch {
     return;
   }
 

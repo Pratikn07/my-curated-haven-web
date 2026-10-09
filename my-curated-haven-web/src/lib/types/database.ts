@@ -609,6 +609,10 @@ export type Database = {
           diet_labels: string[]
           id: string
           meal_labels: string[]
+          preview_image_alt: string | null
+          preview_image_description: string | null
+          preview_image_object_id: string | null
+          preview_image_object_version: string | null
           preview_image_path: string
           public_summary: string
           publication_state: string
@@ -623,6 +627,10 @@ export type Database = {
           diet_labels?: string[]
           id?: string
           meal_labels?: string[]
+          preview_image_alt?: string | null
+          preview_image_description?: string | null
+          preview_image_object_id?: string | null
+          preview_image_object_version?: string | null
           preview_image_path: string
           public_summary: string
           publication_state?: string
@@ -637,6 +645,10 @@ export type Database = {
           diet_labels?: string[]
           id?: string
           meal_labels?: string[]
+          preview_image_alt?: string | null
+          preview_image_description?: string | null
+          preview_image_object_id?: string | null
+          preview_image_object_version?: string | null
           preview_image_path?: string
           public_summary?: string
           publication_state?: string
@@ -1428,10 +1440,53 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_console_context: { Args: never; Returns: Json }
+      admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }
+      admin_draft_save: { Args: { p_command: Json }; Returns: Json }
+      admin_draft_start: {
+        Args: { p_operation_id: string; p_recipe_id: string }
+        Returns: Json
+      }
+      admin_recipe_assets: { Args: never; Returns: Json }
+      admin_recipe_detail: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_recipe_history: {
+        Args: { p_cursor?: string; p_limit?: number; p_recipe_id: string }
+        Returns: Json
+      }
+      admin_recipe_impact: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_recipe_list: { Args: { p_query: Json }; Returns: Json }
+      admin_recipe_operations: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_recipe_revision: {
+        Args: { p_recipe_id: string; p_revision_id: string }
+        Returns: Json
+      }
+      admin_recipe_usage: { Args: { p_recipe_id: string }; Returns: Json }
+      admin_recipe_withdraw: { Args: { p_command: Json }; Returns: Json }
+      admin_review_state: { Args: { p_revision_id: string }; Returns: Json }
+      admin_revision_issue: { Args: { p_command: Json }; Returns: Json }
+      admin_revision_publish: { Args: { p_command: Json }; Returns: Json }
+      admin_revision_review: { Args: { p_command: Json }; Returns: Json }
+      admin_revision_submit: { Args: { p_command: Json }; Returns: Json }
+      admin_staff_assign: {
+        Args: {
+          p_operation_id: string
+          p_reason: string
+          p_roles: string[]
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      admin_staff_list: { Args: never; Returns: Json }
+      admin_staff_lookup: { Args: { p_email: string }; Returns: Json }
+      admin_staff_revoke: {
+        Args: { p_operation_id: string; p_reason: string; p_user_id: string }
+        Returns: Json
+      }
       increment_shop_click: {
         Args: { product_id_input: string }
         Returns: undefined
       }
+      is_console_recipe_reader: { Args: never; Returns: boolean }
       is_recipe_admin: { Args: never; Returns: boolean }
       search_shop_products: {
         Args: { query_text: string; result_limit?: number }

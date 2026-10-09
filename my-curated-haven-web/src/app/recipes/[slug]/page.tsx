@@ -9,7 +9,7 @@ import {
   getFreeRecipeCatalog,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
-import { formatIngredient, normalizeInstructions } from "@/lib/recipes/format";
+import { formatIngredient, normalizeInstructions, usableImageSrc } from "@/lib/recipes/format";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import { checkRecipeAccess, isRecipeAdmin } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
@@ -55,6 +55,7 @@ export async function generateMetadata({
   const title = `${catalog.title} | Toddler Recipe | My Curated Haven`;
   const description = catalog.publicSummary;
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
+  const imageSrc = usableImageSrc(catalog.previewImagePath);
 
   return {
     // absolute: the full branded title is already built, so skip the layout template.
@@ -69,8 +70,8 @@ export async function generateMetadata({
       description,
       url: canonicalUrl,
       type: "article",
-      images: catalog.previewImagePath
-        ? [{ url: catalog.previewImagePath, alt: catalog.title }]
+      images: imageSrc
+        ? [{ url: imageSrc, alt: catalog.imageAlt ?? catalog.title }]
         : [],
     },
   };
@@ -93,6 +94,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
   const body = isAccessDenied ? null : result.recipe.body;
   const instructions = body ? normalizeInstructions(body.instructions) : [];
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
+  const imageSrc = usableImageSrc(catalog.previewImagePath);
 
   // Fetch auth and saved recipe state
   const isAdmin = await getCachedAdminStatus();
@@ -125,7 +127,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     "@type": "Recipe",
     name: catalog.title,
     description: catalog.publicSummary,
-    image: catalog.previewImagePath ? [catalog.previewImagePath] : [],
+    image: imageSrc ? [imageSrc] : [],
     ...(body
       ? {
           recipeYield: body.yield,
@@ -265,17 +267,20 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
       </header>
 
       {/* Hero Image */}
-      {catalog.previewImagePath ? (
+      {imageSrc ? (
         <div className="recipe-print-figure relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface-muted">
           <Image
-            src={catalog.previewImagePath}
-            alt={catalog.title}
+            src={imageSrc}
+            alt={catalog.imageAlt ?? catalog.title}
             fill
             sizes="(min-width: 1024px) 896px, 100vw"
             priority
             className="recipe-print-image object-cover"
           />
         </div>
+      ) : null}
+      {catalog.imageDescription ? (
+        <p className="mb-8 text-sm text-text-muted">{catalog.imageDescription}</p>
       ) : null}
 
       {/* Main Recipe Content Anchor */}

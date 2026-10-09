@@ -31,5 +31,17 @@ export function formatIngredient(ingredient: RecipeIngredient | string): string 
 export function usableImageSrc(path: string | null | undefined): string | null {
   if (!path) return null;
   const trimmed = path.trim();
+  if (trimmed.startsWith("recipe-previews/")) {
+    const objectName = trimmed.slice("recipe-previews/".length);
+    const origin = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!origin || !/^[A-Za-z0-9][A-Za-z0-9._/-]{0,300}$/.test(objectName) || objectName.includes("..")) return null;
+    try {
+      const parsed = new URL(origin);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+      return `${parsed.origin}/storage/v1/object/public/recipe-previews/${objectName.split("/").map(encodeURIComponent).join("/")}`;
+    } catch {
+      return null;
+    }
+  }
   return /^https?:\/\//.test(trimmed) || trimmed.startsWith("/") ? trimmed : null;
 }

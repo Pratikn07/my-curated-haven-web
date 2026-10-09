@@ -21,7 +21,7 @@ jobs:
   web-quality:
     name: web-quality
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: my-curated-haven-web
@@ -65,6 +65,13 @@ jobs:
           done
           supabase db reset
 
+      - name: Export local Supabase test keys for browser fixtures
+        working-directory: ${{ github.workspace }}
+        run: |
+          SERVICE_KEY="$(supabase status -o env | sed -n 's/^SERVICE_ROLE_KEY=//p' | tr -d '"')"
+          echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_KEY}" >> "$GITHUB_ENV"
+          echo 'ADMIN_TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres' >> "$GITHUB_ENV"
+
       - name: Set up Node from .nvmrc
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -95,6 +102,9 @@ jobs:
       - name: Data access error-handling unit tests
         run: npm run test:data:unit
 
+      - name: Admin inspection unit tests
+        run: npm run test:admin:unit
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -105,11 +115,26 @@ jobs:
         run: npm run build
 
       - name: Browser tests
+        # The privacy spec needs its own instrumented build below; the rest of
+        # the suite assumes the default build (no remote SDK).
         run: |
-          list="$(npx playwright test --list)"
+          list="$(npx playwright test --list $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts'))"
           printf '%s\n' "$list"
           printf '%s\n' "$list" | grep -Eq 'Total: [1-9][0-9]* tests'
-          npm run test:e2e
+          npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
+
+      - name: Rebuild with instrumented analytics for the privacy spec
+        env:
+          # Test-only values baked in for the loopback sink intercepted by
+          # Playwright (see ops/ADMIN-CONSOLE.md). Never point them at production.
+          NEXT_PUBLIC_ANALYTICS_ENABLED: "true"
+          NEXT_PUBLIC_APP_ENV: staging
+          NEXT_PUBLIC_POSTHOG_KEY: test-key-staging
+          NEXT_PUBLIC_POSTHOG_HOST: http://127.0.0.1:54349/sink
+        run: npm run build
+
+      - name: Privacy browser tests (instrumented build)
+        run: npm run test:e2e -- tests/e2e/admin-privacy.spec.ts
 
       - name: Assemble Phase 10 scenario evidence
         if: always()
@@ -179,8 +204,15 @@ jobs:
       - name: Verify clean migration replay
         run: supabase db reset
 
-      - name: Run database access matrix tests (pgTAP)
-        run: supabase test db
+      - name: Run database access matrix tests (pgTAP, excluding admin workspace)
+        # Admin workspace tests inline their fixture via scripts/test-admin-db.mjs
+        # because raw `supabase test db` cannot resolve their \ir include.
+        run: supabase test db $(ls supabase/tests/database/*.test.sql | grep -Ev '/[^/]*admin[^/]*\.test\.sql$')
+
+      - name: Run admin workspace database tests (pgTAP)
+        env:
+          ADMIN_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: node my-curated-haven-web/scripts/test-admin-db.mjs
 
       - name: Verify generated TypeScript types drift
         run: |
