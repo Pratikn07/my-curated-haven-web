@@ -1621,12 +1621,25 @@ export type Database = {
         Returns: Json
       }
       admin_support_access: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_case: { Args: { p_command: Json }; Returns: Json }
       admin_support_customer: {
         Args: { p_cursor: string; p_user_id: string }
         Returns: Json
       }
+      admin_support_history: {
+        Args: { p_cursor: string; p_order_id: string }
+        Returns: Json
+      }
       admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
       admin_support_order: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_queue: {
+        Args: { p_cursor: string; p_mode: string }
+        Returns: Json
+      }
+      admin_support_redact_note: {
+        Args: { p_event_id: string; p_operation_id: string; p_reason: string }
+        Returns: Json
+      }
       collection_effective_access: {
         Args: { p_collection_id: string }
         Returns: Json

@@ -33,10 +33,61 @@ LANGUAGE sql IMMUTABLE SET search_path='' AS $$
    jsonb_build_object('userId', p_user, 'orderId', p_order, 'ownerPrincipal', p_principal))
 $$;
 
+-- Cases, order history and the read audit arrive with 20261009010300; until then these return nothing.
+CREATE FUNCTION private.support_customer_cases(p_user uuid) RETURNS jsonb
+LANGUAGE sql STABLE SET search_path='' AS $$ SELECT '[]'::jsonb $$;
+CREATE FUNCTION private.support_order_history(p_order uuid, p_cursor text) RETURNS jsonb
+LANGUAGE sql STABLE SET search_path='' AS $$ SELECT '{"events":[],"nextCursor":null}'::jsonb $$;
+CREATE FUNCTION private.support_audit_read(p_actor uuid, p_action text, p_target text, p_outcome text) RETURNS void
+LANGUAGE plpgsql SET search_path='' AS $$ BEGIN NULL; END $$;
+
+-- The match itself, for an already authorised and validated query.
+CREATE FUNCTION private.support_lookup_match(p_kind text, p_value text, p_account text, p_mode text) RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
+DECLARE matches uuid[]; target auth.users; orders uuid[]; o private.purchase_orders;
+BEGIN
+ IF p_kind = 'email' THEN
+  matches := private.support_email_matches(p_value);
+  IF cardinality(matches) = 0 THEN RETURN '{"status":"not_found"}'; END IF;
+  IF cardinality(matches) > 1 THEN RETURN '{"status":"ambiguous"}'; END IF;
+  SELECT * INTO target FROM auth.users WHERE id = matches[1];
+  IF target.email_confirmed_at IS NULL THEN RETURN '{"status":"unconfirmed"}'; END IF;
+  RETURN private.support_found(target.id, NULL, target.id);
+ ELSIF p_kind = 'user_id' THEN
+  IF EXISTS (SELECT 1 FROM auth.users WHERE id = p_value::uuid) THEN
+   RETURN private.support_found(p_value::uuid, NULL, p_value::uuid);
+  END IF;
+  -- A closed account is found only through orders it owned; no account is reconstructed.
+  IF EXISTS (SELECT 1 FROM private.purchase_orders WHERE owner_principal = p_value::uuid) THEN
+   RETURN private.support_found(NULL, NULL, p_value::uuid);
+  END IF;
+  RETURN '{"status":"not_found"}';
+ ELSIF p_kind = 'support_reference' THEN
+  SELECT array_agg(id) INTO orders FROM private.purchase_orders WHERE support_reference = p_value;
+ ELSE
+  SELECT array_agg(DISTINCT order_id) INTO orders FROM (
+   SELECT po.id order_id FROM private.purchase_orders po
+    WHERE po.session_id = p_value AND po.snapshot->>'provider_account_id' = p_account AND po.snapshot->>'provider_mode' = p_mode
+   UNION ALL
+   SELECT p.order_id FROM private.provider_payments p
+    WHERE (p.payment_intent_id = p_value OR p.charge_id = p_value) AND p.provider_account_id = p_account AND p.provider_mode = p_mode
+   UNION ALL
+   SELECT r.order_id FROM private.payment_refunds r JOIN private.provider_payments p ON p.id = r.payment_id
+    WHERE r.provider_refund_id = p_value AND p.provider_account_id = p_account AND p.provider_mode = p_mode
+   UNION ALL
+   SELECT d.order_id FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.payment_id
+    WHERE d.provider_dispute_id = p_value AND p.provider_account_id = p_account AND p.provider_mode = p_mode) m;
+ END IF;
+ IF coalesce(cardinality(orders), 0) = 0 THEN RETURN '{"status":"not_found"}'; END IF;
+ IF cardinality(orders) > 1 THEN RETURN '{"status":"ambiguous"}'; END IF;
+ SELECT * INTO o FROM private.purchase_orders WHERE id = orders[1];
+ RETURN private.support_found(o.user_id, o.id, o.owner_principal);
+END $$;
+
 CREATE FUNCTION public.admin_support_lookup(p_query jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE actor uuid; kind text := p_query->>'kind'; v text := p_query->>'value'; matches uuid[]; target auth.users;
- orders uuid[]; principal uuid; account text := p_query->>'accountId'; mode text := p_query->>'mode';
+DECLARE actor uuid; kind text := p_query->>'kind'; v text := p_query->>'value'; result jsonb;
+ account text := p_query->>'accountId'; mode text := p_query->>'mode';
 BEGIN
  actor := private.support_assert('support.read', 'inspection');
  IF jsonb_typeof(p_query) IS DISTINCT FROM 'object' OR jsonb_typeof(p_query->'value') IS DISTINCT FROM 'string'
@@ -51,52 +102,22 @@ BEGIN
   RAISE EXCEPTION USING ERRCODE='PT429', MESSAGE='ADM_RATE_LIMITED';
  END IF;
  v := trim(v);
- IF kind = 'email' THEN
-  matches := private.support_email_matches(v);
-  IF cardinality(matches) = 0 THEN RETURN private.support_read('{"status":"not_found"}', true); END IF;
-  IF cardinality(matches) > 1 THEN RETURN private.support_read('{"status":"ambiguous"}', true); END IF;
-  SELECT * INTO target FROM auth.users WHERE id = matches[1];
-  IF target.email_confirmed_at IS NULL THEN RETURN private.support_read('{"status":"unconfirmed"}', true); END IF;
-  RETURN private.support_read(private.support_found(target.id, NULL, target.id), true);
- ELSIF kind = 'user_id' THEN
-  IF v !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
-   RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
-  END IF;
-  IF EXISTS (SELECT 1 FROM auth.users WHERE id = v::uuid) THEN
-   RETURN private.support_read(private.support_found(v::uuid, NULL, v::uuid), true);
-  END IF;
-  -- A closed account is found only through orders it owned; no account is reconstructed.
-  IF EXISTS (SELECT 1 FROM private.purchase_orders WHERE owner_principal = v::uuid) THEN
-   RETURN private.support_read(private.support_found(NULL, NULL, v::uuid), true);
-  END IF;
-  RETURN private.support_read('{"status":"not_found"}', true);
+ IF kind = 'user_id' AND v !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+  RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
  ELSIF kind = 'support_reference' THEN
   v := upper(v);
   IF v !~ '^MCH-[0-9A-Z]{1,6}$' THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
-  SELECT array_agg(id) INTO orders FROM private.purchase_orders WHERE support_reference = v;
- ELSE
+ ELSIF kind = 'provider_id' THEN
   PERFORM private.support_assert('support.provider.inspect', 'inspection');
   IF v !~ '^(cs_(test|live)_|pi_|ch_|py_|re_|dp_|du_)[A-Za-z0-9_]{1,255}$' THEN
    RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
   END IF;
-  SELECT array_agg(DISTINCT order_id) INTO orders FROM (
-   SELECT o.id order_id FROM private.purchase_orders o
-    WHERE o.session_id = v AND o.snapshot->>'provider_account_id' = account AND o.snapshot->>'provider_mode' = mode
-   UNION ALL
-   SELECT p.order_id FROM private.provider_payments p
-    WHERE (p.payment_intent_id = v OR p.charge_id = v) AND p.provider_account_id = account AND p.provider_mode = mode
-   UNION ALL
-   SELECT r.order_id FROM private.payment_refunds r JOIN private.provider_payments p ON p.id = r.payment_id
-    WHERE r.provider_refund_id = v AND p.provider_account_id = account AND p.provider_mode = mode
-   UNION ALL
-   SELECT d.order_id FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.payment_id
-    WHERE d.provider_dispute_id = v AND p.provider_account_id = account AND p.provider_mode = mode) m;
  END IF;
- IF coalesce(cardinality(orders), 0) = 0 THEN RETURN private.support_read('{"status":"not_found"}', true); END IF;
- IF cardinality(orders) > 1 THEN RETURN private.support_read('{"status":"ambiguous"}', true); END IF;
- SELECT owner_principal INTO principal FROM private.purchase_orders WHERE id = orders[1];
- RETURN private.support_read(private.support_found(
-   (SELECT user_id FROM private.purchase_orders WHERE id = orders[1]), orders[1], principal), true);
+ result := private.support_lookup_match(kind, v, account, mode);
+ -- The audit keeps what was found, never what was searched for.
+ PERFORM private.support_audit_read(actor, 'lookup.' || kind,
+   coalesce(result#>>'{target,orderId}', result#>>'{target,ownerPrincipal}'), result->>'status');
+ RETURN private.support_read(result, true);
 END $$;
 
 -- An account's state as support sees it: never reconstructed from an email.
@@ -174,12 +195,13 @@ $$;
 -- The access explanation for an order's owner and collection.
 CREATE FUNCTION public.admin_support_access(p_order_id uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE o private.purchase_orders; explanation jsonb;
+DECLARE actor uuid; o private.purchase_orders; explanation jsonb;
 BEGIN
- PERFORM private.support_assert('support.read', 'inspection');
+ actor := private.support_assert('support.read', 'inspection');
  SELECT * INTO o FROM private.purchase_orders WHERE id = p_order_id;
  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
  explanation := private.support_access_explanation(coalesce(o.user_id, o.owner_principal), private.support_order_collection(o));
+ PERFORM private.support_audit_read(actor, 'access', o.id::text, explanation->>'effective');
  RETURN jsonb_set(private.support_read(explanation, true), '{resolverVersion}', explanation->'resolverVersion');
 END $$;
 
@@ -235,7 +257,8 @@ BEGIN
     ORDER BY d.created_at, d.id) FROM private.payment_disputes d WHERE d.order_id = o.id), '[]'::jsonb),
   'providerVerifiedAt', (SELECT max(verified_at) FROM private.provider_payments WHERE order_id = o.id),
   'access', private.support_access_explanation(coalesce(o.user_id, o.owner_principal), private.support_order_collection(o)),
-  'history', jsonb_build_object('events', '[]'::jsonb, 'nextCursor', NULL));
+  'history', private.support_order_history(o.id, NULL));
+ PERFORM private.support_audit_read(actor, 'order', o.id::text, 'found');
  RETURN private.support_read(value, complete);
 END $$;
 
@@ -273,17 +296,20 @@ BEGIN
  SELECT coalesce(jsonb_agg(jsonb_build_object('orderId', id, 'supportReference', support_reference, 'mode', mode,
    'collectionId', collection_id, 'historicalTitle', NULL) ORDER BY created_at DESC, id DESC), '[]'::jsonb) INTO page
  FROM (SELECT * FROM pg_temp.support_customer_page ORDER BY created_at DESC, id DESC LIMIT 25) p;
+ PERFORM private.support_audit_read(actor, 'customer', p_user_id::text, 'found');
  RETURN private.support_read(jsonb_build_object('userId', p_user_id, 'email', target.email,
    'confirmed', target.email_confirmed_at IS NOT NULL,
    'available', private.support_account_state(p_user_id) IN ('active','unconfirmed'),
-   'orders', page, 'cases', '[]'::jsonb,
+   'orders', page, 'cases', private.support_customer_cases(p_user_id),
    'nextCursor', CASE WHEN more THEN to_char(last_row.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')
      || '|' || last_row.id END), true);
 END $$;
 
 REVOKE ALL ON FUNCTION private.support_email_matches(text), private.support_has(uuid,text), private.support_read(jsonb,boolean),
  private.support_found(uuid,uuid,uuid), private.support_account_state(uuid), private.support_dispute_classification(text),
- private.support_access_explanation(uuid,uuid), private.support_order_collection(private.purchase_orders)
+ private.support_access_explanation(uuid,uuid), private.support_order_collection(private.purchase_orders),
+ private.support_customer_cases(uuid), private.support_order_history(uuid,text), private.support_audit_read(uuid,text,text,text),
+ private.support_lookup_match(text,text,text,text)
  FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_support_lookup(jsonb), public.admin_support_order(uuid), public.admin_support_customer(uuid,text),
  public.admin_support_access(uuid) FROM PUBLIC, anon;

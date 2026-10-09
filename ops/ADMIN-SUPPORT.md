@@ -10,6 +10,19 @@ Gates: `docs/implementation/admin-support/GATES.md`. Policy: `docs/implementatio
 - The owner approves repairs and is the only person who can prepare, approve and submit refunds or approve a dispute notice.
 - A registered agent login may apply an exact repair the owner approved within the last 30 minutes. Agents never move money or send email.
 
+## Cases and notes
+
+Support staff open a case on an order, an account, or both (they must agree). Cases move through open, investigating, waiting on the customer, waiting on the provider and resolved; resolving needs the recorded outcome, and reopening keeps the history. Every change is kept as an event that cannot be edited.
+
+Notes contain personal details, so they stay off until the owner records how long they are kept. Until then a note is refused with `ADM_BLOCKED`, and everything else keeps working. To turn notes on, the owner sets the number of days in the database (owner-approved value only):
+
+```sql
+UPDATE private.support_workspace_settings SET note_retention_days = <days>, updated_by = '<owner user id>', updated_at = now(),
+ reason = '<why this period>';
+```
+
+The owner can redact a note's text (`admin_support_redact_note`); the text is cleared and the reason, time and owner are recorded. Every support read is audited by who read, what kind of read, what was found and the outcome, never by what was searched for.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

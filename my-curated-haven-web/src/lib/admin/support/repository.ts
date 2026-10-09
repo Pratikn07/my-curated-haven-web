@@ -3,9 +3,13 @@ import type { Result } from "../contracts";
 import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
-  AccessExplanation, CustomerSupportDto, LookupQuery, LookupResult, OrderSupportDto, SupportRead,
+  AccessExplanation, CaseCommand, CustomerSupportDto, LookupQuery, LookupResult, Mode, OrderSupportDto, SupportCase,
+  SupportHistoryPage, SupportQueuePage, SupportRead,
 } from "./contracts";
-import { decodeAccessRead, decodeCustomerRead, decodeLookupRead, decodeOrderRead } from "./decode";
+import {
+  decodeAccessRead, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderRead, decodeQueuePage, decodeRedaction,
+  decodeSupportCase,
+} from "./decode";
 
 /**
  * Support reads through the signed-in staff member's own session. The database checks authority, the support stage
@@ -33,4 +37,29 @@ export async function loadSupportCustomer(userId: string, cursor: string | null)
 export async function loadSupportAccess(orderId: string): Promise<Result<SupportRead<AccessExplanation>>> {
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_support_access", { p_order_id: orderId }), decodeAccessRead);
+}
+
+/** Create a case, add or amend a note, or move its state. Repeating the same operation returns the same case. */
+export async function commandSupportCase(command: CaseCommand): Promise<Result<SupportCase>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_case", { p_command: command }), decodeSupportCase, true);
+}
+
+export async function loadSupportQueue(mode: Mode, cursor: string | null): Promise<Result<SupportQueuePage>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_queue", { p_mode: mode, p_cursor: cursor as string }), decodeQueuePage);
+}
+
+export async function loadSupportHistory(orderId: string, cursor: string | null): Promise<Result<SupportHistoryPage>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_history", { p_order_id: orderId, p_cursor: cursor as string }),
+    decodeHistoryPage);
+}
+
+/** Owner only: clear a note's text, keeping who, when and why. */
+export async function redactSupportNote(eventId: string, reason: string, operationId: string):
+  Promise<Result<{ eventId: string; redactedAt: string }>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_redact_note", { p_event_id: eventId, p_reason: reason,
+    p_operation_id: operationId }), decodeRedaction, true);
 }

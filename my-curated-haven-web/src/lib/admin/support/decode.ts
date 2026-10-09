@@ -1,7 +1,7 @@
 import type { Binding, RepairEffect } from "../../payments/reconciliation/contracts";
 import type {
   AccessExplanation, CustomerSupportDto, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
-  SupportDisputeDto, SupportHistoryPage, SupportRead, SupportRefundDto, TimelineEvent,
+  SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 
 /**
@@ -182,7 +182,27 @@ const timelineEvent = object<TimelineEvent>({
   note: nullable(text(2000)),
 });
 
-const history = object<SupportHistoryPage>({ events: array(timelineEvent, 100), nextCursor: nullable(text(200)) });
+const history = object<SupportHistoryPage>({ events: array(timelineEvent, 25), nextCursor: nullable(text(200)) });
+
+const supportCase = object<SupportCase>({
+  id: uuid,
+  orderId: nullable(uuid),
+  userId: nullable(uuid),
+  state: oneOf("open", "investigating", "waiting_on_customer", "waiting_on_provider", "resolved"),
+  version: (v, p) => (Number.isSafeInteger(v) && (v as number) >= 1 ? (v as number) : bad(p)),
+});
+
+const queuePage = object<SupportQueuePage>({
+  items: array(object<SupportQueuePage["items"][number]>({
+    orderId: nullable(uuid),
+    caseId: nullable(uuid),
+    supportReference: nullable(pattern(SUPPORT_REFERENCE)),
+    mode: oneOf("test", "live"),
+    reasonCode: code,
+    observedAt: timestamp,
+  }), 25),
+  nextCursor: nullable(text(200)),
+});
 
 const orderDto = object<OrderSupportDto>({
   orderId: uuid,
@@ -227,7 +247,7 @@ const customerDto = object<CustomerSupportDto>({
     collectionId: uuid,
     historicalTitle: nullable(text(200)),
   }), 25),
-  cases: (v, p) => (Array.isArray(v) && v.length === 0 ? [] : bad(p)),
+  cases: array(supportCase, 25),
   nextCursor: nullable(text(200)),
 });
 
@@ -255,4 +275,20 @@ export function decodeProposal(input: unknown): RepairProposal {
 export function decodeOperation(input: unknown): OperationStatus {
   const state = (input as { state?: unknown } | null)?.state;
   return state === "applied" || state === "already_satisfied" ? receipt(input, "operation") : pending(input, "operation");
+}
+
+export function decodeSupportCase(input: unknown): SupportCase {
+  return supportCase(input, "case");
+}
+
+export function decodeQueuePage(input: unknown): SupportQueuePage {
+  return queuePage(input, "queue");
+}
+
+export function decodeHistoryPage(input: unknown): SupportHistoryPage {
+  return history(input, "history");
+}
+
+export function decodeRedaction(input: unknown): { eventId: string; redactedAt: string } {
+  return object<{ eventId: string; redactedAt: string }>({ eventId: uuid, redactedAt: timestamp })(input, "redaction");
 }
