@@ -116,6 +116,73 @@ LANGUAGE sql IMMUTABLE SET search_path='' AS $$
    ELSE 'unknown' END
 $$;
 
+-- Why p_user_id has (or lacks) access to p_collection_id, from the same Phase 2 rules the customer's library and
+-- recipe pages use: releases held through a valid entitlement supply their own recipes; the delivered release adds
+-- its recipes when a held release's source has an additions-v1 decision. Withdrawn recipes are listed as held.
+-- Nothing is written; reading an explanation can never restore or change access.
+CREATE FUNCTION private.support_access_explanation(p_user_id uuid, p_collection_id uuid) RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
+DECLARE delivered uuid := private.collection_delivered_release(p_collection_id); delivered_version integer;
+ publication uuid; held uuid[]; originals uuid[]; additions uuid[] := '{}'; holds uuid[]; sources jsonb; entitlements jsonb;
+BEGIN
+ SELECT version INTO delivered_version FROM public.collection_releases WHERE id = delivered;
+ SELECT publication_id INTO publication FROM private.collection_active_publications WHERE collection_id = p_collection_id;
+ SELECT coalesce(array_agg(r.id), '{}') INTO held FROM public.access_entitlements e
+  JOIN public.collection_releases r ON r.id = e.release_id
+  WHERE e.user_id = p_user_id AND r.collection_id = p_collection_id AND private.entitlement_valid(e)
+    AND r.state IN ('published','sealed','retired');
+ SELECT coalesce(array_agg(DISTINCT recipe_id ORDER BY recipe_id), '{}') INTO originals
+  FROM public.collection_recipes WHERE release_id = ANY(held);
+ IF delivered IS NOT NULL AND EXISTS (SELECT 1 FROM public.collection_releases r WHERE r.id = ANY(held)
+   AND delivered_version >= r.version AND private.collection_release_policy(p_user_id, r.id) = 'additions-v1') THEN
+  SELECT coalesce(array_agg(DISTINCT recipe_id ORDER BY recipe_id), '{}') INTO additions
+   FROM public.collection_recipes WHERE release_id = delivered AND NOT (recipe_id = ANY(originals));
+ END IF;
+ SELECT coalesce(array_agg(id ORDER BY id), '{}') INTO holds FROM public.recipe_catalog
+  WHERE (id = ANY(originals) OR id = ANY(additions)) AND publication_state <> 'published';
+ SELECT coalesce(jsonb_agg(jsonb_build_object('id', s.id, 'kind', s.source_kind, 'originReleaseId', s.release_id,
+   'eligible', s.is_eligible AND s.valid_from <= now() AND (s.expires_at IS NULL OR s.expires_at > now()),
+   'reason', CASE WHEN NOT s.is_eligible THEN coalesce(s.ineligibility_reason, 'ineligible')
+     WHEN s.valid_from > now() THEN 'not_yet_valid' WHEN s.expires_at <= now() THEN 'expired' END,
+   'validFrom', s.valid_from, 'expiresAt', s.expires_at,
+   'policyVersion', (SELECT p.policy FROM private.collection_access_policies p
+     WHERE p.release_id = s.release_id AND p.source_kind = s.source_kind))
+   ORDER BY r.version, s.valid_from, s.id), '[]'::jsonb) INTO sources
+  FROM private.access_sources s JOIN public.collection_releases r ON r.id = s.release_id
+  WHERE s.user_id = p_user_id AND r.collection_id = p_collection_id;
+ SELECT coalesce(jsonb_agg(jsonb_build_object('release', e.release_id, 'state', e.state, 'validFrom', e.valid_from,
+   'expiresAt', e.expires_at, 'revokedAt', e.revoked_at) ORDER BY e.release_id), '[]'::jsonb) INTO entitlements
+  FROM public.access_entitlements e JOIN public.collection_releases r ON r.id = e.release_id
+  WHERE e.user_id = p_user_id AND r.collection_id = p_collection_id;
+ RETURN jsonb_build_object('collectionId', p_collection_id, 'publicationId', publication,
+  'resolverVersion', 'phase2-additions-v1',
+  -- Changes whenever anything the explanation depends on changes, so a repair prepared against it can be refused.
+  'dependencyToken', private.support_digest(jsonb_build_object('delivered', delivered, 'publication', publication,
+    'originals', to_jsonb(originals), 'additions', to_jsonb(additions), 'holds', to_jsonb(holds), 'sources', sources,
+    'entitlements', entitlements)),
+  'effective', CASE WHEN private.collection_has_access(p_user_id, p_collection_id) THEN 'active' ELSE 'denied' END,
+  'originalRecipeIds', to_jsonb(originals), 'additionRecipeIds', to_jsonb(additions),
+  'contentHoldRecipeIds', to_jsonb(holds), 'sources', sources);
+END $$;
+
+CREATE FUNCTION private.support_order_collection(p_order private.purchase_orders) RETURNS uuid
+LANGUAGE sql STABLE SET search_path='' AS $$
+ SELECT coalesce((p_order.snapshot->>'collection_id')::uuid,
+   (SELECT collection_id FROM public.collection_releases WHERE id = p_order.release_id))
+$$;
+
+-- The access explanation for an order's owner and collection.
+CREATE FUNCTION public.admin_support_access(p_order_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE o private.purchase_orders; explanation jsonb;
+BEGIN
+ PERFORM private.support_assert('support.read', 'inspection');
+ SELECT * INTO o FROM private.purchase_orders WHERE id = p_order_id;
+ IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
+ explanation := private.support_access_explanation(coalesce(o.user_id, o.owner_principal), private.support_order_collection(o));
+ RETURN jsonb_set(private.support_read(explanation, true), '{resolverVersion}', explanation->'resolverVersion');
+END $$;
+
 CREATE FUNCTION public.admin_support_order(p_order_id uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE actor uuid; o private.purchase_orders; snap jsonb; inspect boolean; pay private.provider_payments;
@@ -167,7 +234,7 @@ BEGIN
     'providerDisputeId', CASE WHEN inspect THEN d.provider_dispute_id END)
     ORDER BY d.created_at, d.id) FROM private.payment_disputes d WHERE d.order_id = o.id), '[]'::jsonb),
   'providerVerifiedAt', (SELECT max(verified_at) FROM private.provider_payments WHERE order_id = o.id),
-  'access', NULL,
+  'access', private.support_access_explanation(coalesce(o.user_id, o.owner_principal), private.support_order_collection(o)),
   'history', jsonb_build_object('events', '[]'::jsonb, 'nextCursor', NULL));
  RETURN private.support_read(value, complete);
 END $$;
@@ -215,9 +282,10 @@ BEGIN
 END $$;
 
 REVOKE ALL ON FUNCTION private.support_email_matches(text), private.support_has(uuid,text), private.support_read(jsonb,boolean),
- private.support_found(uuid,uuid,uuid), private.support_account_state(uuid), private.support_dispute_classification(text)
+ private.support_found(uuid,uuid,uuid), private.support_account_state(uuid), private.support_dispute_classification(text),
+ private.support_access_explanation(uuid,uuid), private.support_order_collection(private.purchase_orders)
  FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION public.admin_support_lookup(jsonb), public.admin_support_order(uuid), public.admin_support_customer(uuid,text)
- FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.admin_support_lookup(jsonb), public.admin_support_order(uuid), public.admin_support_customer(uuid,text)
- TO authenticated;
+REVOKE ALL ON FUNCTION public.admin_support_lookup(jsonb), public.admin_support_order(uuid), public.admin_support_customer(uuid,text),
+ public.admin_support_access(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_support_lookup(jsonb), public.admin_support_order(uuid), public.admin_support_customer(uuid,text),
+ public.admin_support_access(uuid) TO authenticated;

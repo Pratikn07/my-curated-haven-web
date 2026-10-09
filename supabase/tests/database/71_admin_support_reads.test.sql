@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(46);
+SELECT plan(65);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -123,6 +123,95 @@ SELECT throws_ok($$SELECT pg_temp.support_as('92000000-0000-0000-0000-0000000000
   '42501', 'ADM_DENIED', 'a recipe editor cannot read orders');
 SELECT ok(NOT EXISTS(SELECT 1 FROM pg_proc WHERE proname IN ('admin_support_lookup','admin_support_order','admin_support_customer')
   AND prosrc ~* '(children|chat|preferences|saved_recipes)'), 'support reads never touch children, chats or preferences');
+
+-- Task 5: access explanations. Release A (five recipes) is followed by release B (A plus three additions), which the
+-- active publication delivers. Recipe ...103 has been withdrawn.
+INSERT INTO public.recipe_catalog(id,slug,title,public_summary,preview_image_path,total_minutes,publication_state)
+SELECT ('f3000000-0000-4000-8000-000000000'||(100+n)::text)::uuid, 'support-recipe-'||n, 'Support recipe '||n,
+ 'Synthetic', 'recipe-previews/support-'||n||'.webp', 10, 'published' FROM generate_series(6,8) n;
+INSERT INTO public.recipe_bodies(recipe_id,yield,allergen_review_state,allergens)
+SELECT ('f3000000-0000-4000-8000-000000000'||(100+n)::text)::uuid, '2 portions', 'reviewed_no_allergens', '{}' FROM generate_series(6,8) n;
+INSERT INTO public.collection_releases(id,collection_id,version,state) VALUES
+ ('f3000000-0000-4000-8000-000000000005','f3000000-0000-4000-8000-000000000003',2,'published');
+INSERT INTO public.collection_recipes(release_id,recipe_id,position)
+SELECT 'f3000000-0000-4000-8000-000000000005', ('f3000000-0000-4000-8000-000000000'||(100+n)::text)::uuid, n FROM generate_series(1,8) n;
+UPDATE public.collection_releases SET state='sealed', sealed_at=now() WHERE id='f3000000-0000-4000-8000-000000000004';
+INSERT INTO private.collection_publications(id,collection_id,release_id,snapshot,digest,imported,operation_id,executor_id) VALUES
+ ('f3000000-0000-4000-8000-000000000061','f3000000-0000-4000-8000-000000000003','f3000000-0000-4000-8000-000000000005',
+  '{"collectionId":"f3000000-0000-4000-8000-000000000003"}', repeat('d',64), true, gen_random_uuid(), 'synthetic fixture');
+INSERT INTO private.collection_active_publications(collection_id,publication_id) VALUES
+ ('f3000000-0000-4000-8000-000000000003','f3000000-0000-4000-8000-000000000061');
+UPDATE public.recipe_catalog SET publication_state='withdrawn' WHERE id='f3000000-0000-4000-8000-000000000103';
+-- ...002 bought A with additions; ...00b holds A original-only; ...00e holds A with no recorded decision;
+-- ...00f was fully refunded for A but holds B through a native grant; ...00d only had the refunded A.
+INSERT INTO private.collection_access_policies(release_id,source_kind,policy,approved_by,approval_reason) VALUES
+ ('f3000000-0000-4000-8000-000000000004','stripe_purchase','additions-v1','92000000-0000-0000-0000-000000000001','synthetic'),
+ ('f3000000-0000-4000-8000-000000000004','native_legacy','original-only','92000000-0000-0000-0000-000000000001','synthetic');
+INSERT INTO private.access_sources(user_id,release_id,source_kind,source_id,is_eligible,ineligibility_reason) VALUES
+ ('f3000000-0000-4000-8000-000000000002','f3000000-0000-4000-8000-000000000004','stripe_purchase','f3000000-0000-4000-8000-000000000001',true,NULL),
+ ('f3000000-0000-4000-8000-00000000000b','f3000000-0000-4000-8000-000000000004','native_legacy','legacy-b',true,NULL),
+ ('f3000000-0000-4000-8000-00000000000e','f3000000-0000-4000-8000-000000000004','support_grant','grant-e',true,NULL),
+ ('f3000000-0000-4000-8000-00000000000f','f3000000-0000-4000-8000-000000000004','stripe_purchase','refunded-f',false,'fully_refunded'),
+ ('f3000000-0000-4000-8000-00000000000f','f3000000-0000-4000-8000-000000000005','native_legacy','legacy-f',true,NULL),
+ ('f3000000-0000-4000-8000-00000000000d','f3000000-0000-4000-8000-000000000004','stripe_purchase','refunded-d',false,'fully_refunded');
+INSERT INTO public.access_entitlements(user_id,release_id,state,revoked_at) VALUES
+ ('f3000000-0000-4000-8000-000000000002','f3000000-0000-4000-8000-000000000004','active',NULL),
+ ('f3000000-0000-4000-8000-00000000000b','f3000000-0000-4000-8000-000000000004','active',NULL),
+ ('f3000000-0000-4000-8000-00000000000e','f3000000-0000-4000-8000-000000000004','active',NULL),
+ ('f3000000-0000-4000-8000-00000000000f','f3000000-0000-4000-8000-000000000004','revoked',now()),
+ ('f3000000-0000-4000-8000-00000000000f','f3000000-0000-4000-8000-000000000005','active',NULL),
+ ('f3000000-0000-4000-8000-00000000000d','f3000000-0000-4000-8000-000000000004','revoked',now());
+CREATE FUNCTION pg_temp.explain(p_user uuid) RETURNS jsonb LANGUAGE sql AS $$
+ SELECT private.support_access_explanation(p_user, 'f3000000-0000-4000-8000-000000000003')
+$$;
+
+SELECT is(jsonb_array_length(pg_temp.explain('f3000000-0000-4000-8000-000000000002')->'additionRecipeIds'), 3,
+  'approved additions are explained from the original source');
+SELECT is(jsonb_array_length(pg_temp.explain('f3000000-0000-4000-8000-000000000002')->'originalRecipeIds'), 5,
+  'the original purchase keeps its five recipes');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-000000000002')->'contentHoldRecipeIds',
+  '["f3000000-0000-4000-8000-000000000103"]'::jsonb, 'a withdrawn recipe is shown as held, not lost');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-000000000002')#>>'{sources,0,policyVersion}', 'additions-v1',
+  'the source names its additions decision');
+SELECT is((SELECT count(*)::int FROM generate_series(1,8) n
+  WHERE private.recipe_access_release('f3000000-0000-4000-8000-000000000002',
+    ('f3000000-0000-4000-8000-000000000'||(100+n)::text)::uuid) IS NOT NULL), 8,
+  'the explanation agrees with the customer resolver recipe by recipe');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-00000000000b')->'additionRecipeIds', '[]'::jsonb,
+  'an original-only buyer receives no additions');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-00000000000e')->'additionRecipeIds', '[]'::jsonb,
+  'a buyer group with no recorded decision receives no additions');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-00000000000e')#>'{sources,0,policyVersion}', 'null'::jsonb,
+  'and its missing decision is shown as unknown');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-00000000000f')->>'effective', 'active',
+  'a separate valid grant still gives access after a full refund');
+SELECT is((SELECT jsonb_agg(s->>'reason' ORDER BY s->>'originReleaseId') FROM jsonb_array_elements(
+  pg_temp.explain('f3000000-0000-4000-8000-00000000000f')->'sources') s), '["fully_refunded", null]'::jsonb,
+  'the refunded source is explained and the grant is not');
+SELECT is(jsonb_array_length(pg_temp.explain('f3000000-0000-4000-8000-00000000000f')->'originalRecipeIds'), 8,
+  'the grant supplies release B''s eight recipes');
+SELECT is(pg_temp.explain('f3000000-0000-4000-8000-00000000000d')->>'effective', 'denied',
+  'a fully refunded purchase alone supplies no access');
+CREATE TEMP TABLE entitlements_before AS SELECT count(*) n, count(*) FILTER (WHERE state='active') active FROM public.access_entitlements;
+SELECT pg_temp.explain('f3000000-0000-4000-8000-00000000000d');
+SELECT ok((SELECT n=(SELECT count(*) FROM public.access_entitlements) AND active=(SELECT count(*) FROM public.access_entitlements WHERE state='active')
+  FROM entitlements_before), 'reading an explanation changes no access');
+SELECT isnt(pg_temp.explain('f3000000-0000-4000-8000-000000000002')->>'dependencyToken',
+  pg_temp.explain('f3000000-0000-4000-8000-00000000000b')->>'dependencyToken', 'different access has a different dependency token');
+CREATE TEMP TABLE token_before AS SELECT pg_temp.explain('f3000000-0000-4000-8000-000000000002')->>'dependencyToken' t;
+UPDATE public.recipe_catalog SET publication_state='published' WHERE id='f3000000-0000-4000-8000-000000000103';
+SELECT isnt(pg_temp.explain('f3000000-0000-4000-8000-000000000002')->>'dependencyToken', (SELECT t FROM token_before),
+  'a recipe coming back changes the dependency token');
+SELECT is(pg_temp.support_as('f3000000-0000-4000-8000-0000000000a1','aal2',
+  'SELECT public.admin_support_access(''f3000000-0000-4000-8000-000000000001'')')#>>'{value,effective}', 'active',
+  'support reads an order''s access explanation');
+SELECT isnt(pg_temp.support_as('f3000000-0000-4000-8000-0000000000a1','aal2',
+  'SELECT public.admin_support_access(''f3000000-0000-4000-8000-000000000001'')')->>'resolverVersion', NULL,
+  'with the resolver version it used');
+SELECT is(pg_temp.order_read('f3000000-0000-4000-8000-0000000000a1', 'f3000000-0000-4000-8000-000000000001')#>>'{value,access,effective}',
+  'active', 'the order read embeds the same explanation');
+SELECT is(has_function_privilege('authenticated', 'private.support_access_explanation(uuid,uuid)', 'EXECUTE'), false,
+  'browser roles cannot call the private explanation');
 
 SELECT * FROM finish();
 ROLLBACK;

@@ -2,8 +2,10 @@ import "server-only";
 import type { Result } from "../contracts";
 import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
-import type { CustomerSupportDto, LookupQuery, LookupResult, OrderSupportDto, SupportRead } from "./contracts";
-import { decodeCustomerRead, decodeLookupRead, decodeOrderRead } from "./decode";
+import type {
+  AccessExplanation, CustomerSupportDto, LookupQuery, LookupResult, OrderSupportDto, SupportRead,
+} from "./contracts";
+import { decodeAccessRead, decodeCustomerRead, decodeLookupRead, decodeOrderRead } from "./decode";
 
 /**
  * Support reads through the signed-in staff member's own session. The database checks authority, the support stage
@@ -25,4 +27,10 @@ export async function loadSupportCustomer(userId: string, cursor: string | null)
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_support_customer", { p_user_id: userId, p_cursor: cursor as string }),
     decodeCustomerRead);
+}
+
+/** Why the order's owner has (or lacks) access to its collection, from the same rules the customer's pages use. */
+export async function loadSupportAccess(orderId: string): Promise<Result<SupportRead<AccessExplanation>>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_access", { p_order_id: orderId }), decodeAccessRead);
 }

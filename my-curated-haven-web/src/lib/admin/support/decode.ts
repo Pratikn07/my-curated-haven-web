@@ -1,6 +1,6 @@
 import type { Binding, RepairEffect } from "../../payments/reconciliation/contracts";
 import type {
-  CustomerSupportDto, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
+  AccessExplanation, CustomerSupportDto, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportDisputeDto, SupportHistoryPage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 
@@ -151,6 +151,27 @@ const disputeDto = object<SupportDisputeDto>({
   providerDisputeId: nullable(text(255)),
 });
 
+const accessExplanation = object<AccessExplanation>({
+  collectionId: uuid,
+  publicationId: nullable(uuid),
+  resolverVersion: text(100),
+  dependencyToken: digest,
+  effective: oneOf("active", "denied", "unavailable"),
+  originalRecipeIds: array(uuid),
+  additionRecipeIds: array(uuid),
+  contentHoldRecipeIds: array(uuid),
+  sources: array(object<AccessExplanation["sources"][number]>({
+    id: uuid,
+    kind: oneOf("stripe_purchase", "native_legacy", "support_grant", "promotional"),
+    originReleaseId: uuid,
+    eligible: bool,
+    reason: nullable(text(200)),
+    validFrom: timestamp,
+    expiresAt: nullable(timestamp),
+    policyVersion: nullable(text(100)),
+  }), 100),
+});
+
 const timelineEvent = object<TimelineEvent>({
   id: uuid,
   kind: oneOf("provider", "case", "approval", "attempt", "commit", "postcheck"),
@@ -190,8 +211,7 @@ const orderDto = object<OrderSupportDto>({
   refunds: array(refundDto, 100),
   disputes: array(disputeDto, 100),
   providerVerifiedAt: nullable(timestamp),
-  // The access explanation arrives with Task 5; until then it is always null.
-  access: (v, p) => (v === null ? null : bad(p)),
+  access: nullable(accessExplanation),
   history,
 });
 
@@ -217,6 +237,10 @@ export function decodeLookupRead(input: unknown): SupportRead<LookupResult> {
 
 export function decodeOrderRead(input: unknown): SupportRead<OrderSupportDto> {
   return read(orderDto)(input, "order");
+}
+
+export function decodeAccessRead(input: unknown): SupportRead<AccessExplanation> {
+  return read(accessExplanation)(input, "access");
 }
 
 export function decodeCustomerRead(input: unknown): SupportRead<CustomerSupportDto> {
