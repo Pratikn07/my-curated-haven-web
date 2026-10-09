@@ -2,6 +2,7 @@ import "server-only";
 import { Pool } from "pg";
 import type { Binding, FinancialFacts } from "./contracts";
 import { classifyDispute, type ProviderReader } from "./provider-read";
+import type { SystemPurpose } from "./ledger";
 import type { Claim, Recorded, SourcedRead } from "./verifier";
 import { verifierConnectionString } from "./verifier-config";
 
@@ -44,6 +45,21 @@ export async function recordObservation(jobId: string, fence: number, read: Sour
   if (recorded?.state === "complete" && typeof recorded.observationId === "string") return { state: "complete", observationId: recorded.observationId };
   if (recorded?.state === "failed" && typeof recorded.code === "string") return { state: "failed", code: recorded.code };
   throw new Error("Unexpected observation record");
+}
+
+/** Automated processing asks for a check of one order; a live check for the same purpose is joined. */
+export async function requestVerification(orderId: string, purpose: SystemPurpose): Promise<string> {
+  const { rows } = await verifierPool().query("SELECT private.commerce_verification_request($1, $2) AS job", [orderId, purpose]);
+  const job = rows[0]?.job;
+  if (typeof job !== "string") throw new Error("Unexpected verification request");
+  return job;
+}
+
+/** Apply a webhook or recovery observation through the shared writer; returns the raw receipt for strict decoding. */
+export async function applySystemObservation(observationId: string, operationId: string, eventId: string | null): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.commerce_reconcile_system($1, $2, $3) AS receipt",
+    [observationId, operationId, eventId]);
+  return rows[0]?.receipt;
 }
 
 const iso = (value: Date | string) => new Date(value).toISOString();

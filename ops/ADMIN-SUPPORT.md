@@ -37,6 +37,22 @@ The server reads Stripe and records the answer through its own database login, s
 
 Never set `SUPPORT_PROVIDER_FIXTURE` on a deployment; it is ignored there anyway.
 
+## Payment reconciliation
+
+A verified Stripe answer is applied to an order by one database writer (`private.commerce_reconcile_core`). It records the payment, refunds and disputes Stripe reported, judges the purchase under the order's approved policy, updates that purchase's access and writes the audit event and any confirmation email in one transaction. Other access (app purchases, grants) is never touched. Without an approved policy for the order's versions it records the facts and leaves access as it is ("blocked: policy_missing").
+
+The older payment and refund procedures still serve the live webhook until Task 12 moves it to the shared writer, which needs the v1 policy approved first. They are guarded: a replayed payment success cannot restore a purchase that refunds or a dispute removed, and a refund must belong to its payment's order and currency.
+
+Before applying migration `20261009010600_commerce_reconciliation.sql` to production, run this read-only check. It must return no rows; the migration's new constraints refuse to apply otherwise, and nothing is relinked automatically.
+
+```sql
+SELECT 'refund' AS kind, r.provider_refund_id AS provider_id, r.order_id, p.order_id AS payment_order_id
+FROM private.payment_refunds r JOIN private.provider_payments p ON p.id = r.payment_id WHERE r.order_id <> p.order_id
+UNION ALL
+SELECT 'dispute', d.provider_dispute_id, d.order_id, p.order_id
+FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.payment_id WHERE d.order_id <> p.order_id;
+```
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.
