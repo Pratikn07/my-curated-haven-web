@@ -108,6 +108,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
                   collectionSlug={offer.collectionSlug}
                   formattedPrice={offer.formattedPrice}
                   ownershipState={offer.ownershipState}
+                  expected={offer.expected}
                   appearance="cloth"
                 />
               ) : (

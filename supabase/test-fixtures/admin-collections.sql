@@ -148,3 +148,7 @@ CREATE FUNCTION pg_temp.collection_review_command(p_decision text DEFAULT 'appro
   'submission_id',(SELECT submission_id FROM private.collection_draft_heads WHERE collection_id=p_collection),
   'decision',p_decision,'resolved_issue_ids','[]'::jsonb)
 $$;
+
+-- Task 11: what the collection page would send as its checkout expectation right now.
+CREATE FUNCTION pg_temp.collection_checkout_expectation(p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001')
+RETURNS jsonb LANGUAGE sql AS $$ SELECT private.collection_sellable(p_collection) - 'offer' - 'memberIds' $$;

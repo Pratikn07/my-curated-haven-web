@@ -1,7 +1,5 @@
 import { Pool } from "pg";
 import type {
-  CommercialOffer,
-  PurchaseOrder,
   CollectionOfferDto,
   OrderSummaryDto,
   OwnershipStatus,
@@ -30,75 +28,6 @@ export function formatPrice(amountMinor: number, currency: string): string {
   const amount = (amountMinor / 100).toFixed(2);
   const symbol = currency.toUpperCase() === "USD" ? "$" : `${currency.toUpperCase()} `;
   return `${symbol}${amount}`;
-}
-
-export async function getCommercialOfferBySlug(slug: string): Promise<{
-  offer: CommercialOffer;
-  collectionId: string;
-  collectionTitle: string;
-  releaseId: string;
-} | null> {
-  const pool = getCommercePool();
-  const query = `
-    SELECT
-      o.id,
-      o.release_id,
-      o.provider_account_id,
-      o.provider_mode,
-      o.provider_product_id,
-      o.provider_price_id,
-      o.currency,
-      o.base_minor_amount,
-      o.tax_mode,
-      o.quantity,
-      o.terms_version,
-      o.refund_policy_version,
-      o.access_policy_version,
-      o.sale_enabled,
-      o.manifest_hash,
-      o.created_at,
-      o.updated_at,
-      c.id as collection_id,
-      c.title as collection_title,
-      r.id as resolved_release_id
-    FROM public.recipe_collections c
-    JOIN public.collection_releases r ON r.collection_id = c.id
-    JOIN private.commercial_offers o ON o.release_id = r.id
-    WHERE c.slug = $1
-      AND o.sale_enabled = true
-      AND r.state IN ('published', 'sealed')
-    ORDER BY r.version DESC
-    LIMIT 1;
-  `;
-
-  const { rows } = await pool.query(query, [slug]);
-  if (rows.length === 0) return null;
-
-  const row = rows[0];
-  return {
-    collectionId: row.collection_id,
-    collectionTitle: row.collection_title,
-    releaseId: row.resolved_release_id,
-    offer: {
-      id: row.id,
-      releaseId: row.release_id,
-      providerAccountId: row.provider_account_id,
-      providerMode: row.provider_mode,
-      providerProductId: row.provider_product_id,
-      providerPriceId: row.provider_price_id,
-      currency: row.currency,
-      baseMinorAmount: row.base_minor_amount,
-      taxMode: row.tax_mode,
-      quantity: row.quantity,
-      termsVersion: row.terms_version,
-      refundPolicyVersion: row.refund_policy_version,
-      accessPolicyVersion: row.access_policy_version,
-      saleEnabled: row.sale_enabled,
-      manifestHash: row.manifest_hash,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    },
-  };
 }
 
 export async function getCollectionOfferDetails(
@@ -161,6 +90,10 @@ export async function getCollectionOfferDetails(
     totalMinutes: r.total_minutes,
   }));
 
+  // What is on sale right now; the Buy button sends it back so checkout can refuse a stale page.
+  const { loadCheckoutExpectation } = await import("./collection-reservation");
+  const expected = await loadCheckoutExpectation(coll.collection_id);
+
   // 3. Ownership covers every release of the collection, so a buyer of an earlier release still owns it.
   let ownershipState: OwnershipStatus = "unauthenticated";
   if (userId) {
@@ -184,160 +117,8 @@ export async function getCollectionOfferDetails(
     saleEnabled: Boolean(coll.sale_enabled),
     termsVersion: coll.terms_version || "2026-09-v1",
     ownershipState,
+    expected,
     recipes,
-  };
-}
-
-export async function getUserActiveEntitlement(
-  userId: string,
-  releaseId: string
-): Promise<boolean> {
-  const pool = getCommercePool();
-  const query = `
-    SELECT 1
-    FROM public.access_entitlements
-    WHERE user_id = $1
-      AND release_id = $2
-      AND state = 'active'
-      AND valid_from <= now()
-      AND (expires_at IS NULL OR expires_at > now())
-      AND revoked_at IS NULL;
-  `;
-  const { rows } = await pool.query(query, [userId, releaseId]);
-  return rows.length > 0;
-}
-
-export async function getActiveOrderAttempt(
-  userId: string,
-  releaseId: string
-): Promise<PurchaseOrder | null> {
-  const pool = getCommercePool();
-  const query = `
-    SELECT
-      id,
-      support_reference,
-      owner_principal,
-      user_id,
-      offer_id,
-      release_id,
-      snapshot,
-      attempt_state,
-      session_id,
-      checkout_url,
-      idempotency_key,
-      version,
-      created_at,
-      updated_at
-    FROM private.purchase_orders
-    WHERE user_id = $1
-      AND release_id = $2
-      AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-    ORDER BY created_at DESC
-    LIMIT 1;
-  `;
-  const { rows } = await pool.query(query, [userId, releaseId]);
-  if (rows.length === 0) return null;
-  const r = rows[0];
-  return {
-    id: r.id,
-    supportReference: r.support_reference,
-    ownerPrincipal: r.owner_principal,
-    userId: r.user_id,
-    offerId: r.offer_id,
-    releaseId: r.release_id,
-    snapshot: r.snapshot,
-    attemptState: r.attempt_state,
-    sessionId: r.session_id,
-    checkoutUrl: r.checkout_url,
-    idempotencyKey: r.idempotency_key,
-    version: r.version,
-    createdAt: r.created_at.toISOString(),
-    updatedAt: r.updated_at.toISOString(),
-  };
-}
-
-export async function reservePurchaseOrder(params: {
-  userId: string;
-  offerId: string;
-  releaseId: string;
-  snapshot: Record<string, unknown>;
-  idempotencyKey: string;
-}): Promise<PurchaseOrder> {
-  const pool = getCommercePool();
-  const supportRef = "MCH-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  const insertWithReuseQuery = `
-    INSERT INTO private.purchase_orders (
-      support_reference,
-      owner_principal,
-      user_id,
-      offer_id,
-      release_id,
-      snapshot,
-      attempt_state,
-      idempotency_key
-    ) VALUES ($1, $2, $2, $3, $4, $5, 'creating', $6)
-    ON CONFLICT (user_id, release_id)
-      WHERE attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-      DO NOTHING
-    RETURNING
-      id,
-      support_reference,
-      owner_principal,
-      user_id,
-      offer_id,
-      release_id,
-      snapshot,
-      attempt_state,
-      session_id,
-      checkout_url,
-      idempotency_key,
-      version,
-      created_at,
-      updated_at;
-  `;
-
-  const { rows: insertedRows } = await pool.query(insertWithReuseQuery, [
-    supportRef,
-    params.userId,
-    params.offerId,
-    params.releaseId,
-    JSON.stringify(params.snapshot),
-    params.idempotencyKey,
-  ]);
-
-  let r = insertedRows[0];
-  if (!r) {
-    const existing = await pool.query(
-      `SELECT id, support_reference, owner_principal, user_id, offer_id, release_id,
-              snapshot, attempt_state, session_id, checkout_url, idempotency_key,
-              version, created_at, updated_at
-       FROM private.purchase_orders
-       WHERE user_id = $1 AND release_id = $2
-         AND attempt_state IN ('creating', 'creation_unknown', 'open', 'processing')
-       ORDER BY created_at DESC
-       LIMIT 1`,
-      [params.userId, params.releaseId]
-    );
-    r = existing.rows[0];
-    if (!r) throw new Error("Unable to reserve or reuse the checkout attempt.");
-  }
-
-  return {
-    id: r.id,
-    supportReference: r.support_reference,
-    ownerPrincipal: r.owner_principal,
-    userId: r.user_id,
-    offerId: r.offer_id,
-    releaseId: r.release_id,
-    snapshot: r.snapshot,
-    attemptState: r.attempt_state,
-    sessionId: r.session_id,
-    checkoutUrl: r.checkout_url,
-    idempotencyKey: r.idempotency_key,
-    version: r.version,
-    createdAt: r.created_at.toISOString(),
-    updatedAt: r.updated_at.toISOString(),
   };
 }
 

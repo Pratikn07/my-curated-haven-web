@@ -80,6 +80,14 @@ async function deleteCollections(pg: Client, slugPattern: string): Promise<void>
       (SELECT id FROM public.collection_releases WHERE collection_id = ANY($1))`, [ids]);
     await pg.query(`DELETE FROM public.access_entitlements WHERE release_id IN
       (SELECT id FROM public.collection_releases WHERE collection_id = ANY($1))`, [ids]);
+    const orders = `(SELECT po.id FROM private.purchase_orders po JOIN public.collection_releases r ON r.id=po.release_id
+      WHERE r.collection_id = ANY($1))`;
+    for (const table of ["analytics_exports", "commerce_outbox", "payment_disputes", "payment_refunds", "provider_payments"]) {
+      await pg.query(`DELETE FROM private.${table} WHERE order_id IN ${orders}`, [ids]);
+    }
+    await pg.query(`DELETE FROM private.purchase_orders WHERE id IN ${orders}`, [ids]);
+    await pg.query(`DELETE FROM private.release_manifests WHERE release_id IN
+      (SELECT id FROM public.collection_releases WHERE collection_id = ANY($1))`, [ids]);
     await pg.query(`DELETE FROM private.commercial_offers WHERE release_id IN
       (SELECT id FROM public.collection_releases WHERE collection_id = ANY($1))`, [ids]);
     await pg.query(`DELETE FROM public.collection_recipes WHERE release_id IN
