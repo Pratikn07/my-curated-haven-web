@@ -105,6 +105,9 @@ jobs:
       - name: Admin inspection unit tests
         run: npm run test:admin:unit
 
+      - name: Collection unit tests
+        run: npm run test:collections:unit
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -121,7 +124,28 @@ jobs:
           list="$(npx playwright test --list $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts'))"
           printf '%s\n' "$list"
           printf '%s\n' "$list" | grep -Eq 'Total: [1-9][0-9]* tests'
+          # Every collection acceptance spec must be discovered; a missing file fails here, not silently later.
+          for spec in admin-collections-inspection admin-collections-editing admin-collections-review \
+            admin-collections-publication admin-collections-access admin-collections-checkout \
+            admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home; do
+            printf '%s\n' "$list" | grep -q "${spec}.spec.ts" || { echo "Required spec ${spec} was not discovered"; exit 1; }
+          done
           npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
+
+      - name: Rebuild with the registry collection source
+        # Runs even when the browser step above fails, so a registry regression is never hidden behind it.
+        if: ${{ !cancelled() }}
+        env:
+          COLLECTIONS_SOURCE_BACKEND: registry
+        run: npm run build
+
+      - name: Collection storefront tests (registry build)
+        # The storefront spec skips itself on the default build, so it runs here with the registry source.
+        # Desktop proves the database-backed pages; every project already covers the configured pages above.
+        if: ${{ !cancelled() }}
+        env:
+          COLLECTIONS_SOURCE_BACKEND: registry
+        run: npm run test:e2e -- tests/e2e/admin-collections-storefront.spec.ts tests/e2e/collections.spec.ts --project=chromium-desktop
 
       - name: Rebuild with instrumented analytics for the privacy spec
         env:
@@ -204,21 +228,6 @@ jobs:
       - name: Verify clean migration replay
         run: supabase db reset
 
-      - name: Run database access matrix tests (pgTAP, excluding admin workspace)
-        # Admin workspace tests inline their fixture via scripts/test-admin-db.mjs
-        # because raw `supabase test db` cannot resolve their \ir include.
-        run: supabase test db $(ls supabase/tests/database/*.test.sql | grep -Ev '/[^/]*admin[^/]*\.test\.sql$')
-
-      - name: Run admin workspace database tests (pgTAP)
-        env:
-          ADMIN_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-        run: node my-curated-haven-web/scripts/test-admin-db.mjs
-
-      - name: Verify generated TypeScript types drift
-        run: |
-          supabase gen types typescript --local > types.gen.ts
-          diff -u my-curated-haven-web/src/lib/types/database.ts types.gen.ts
-
       - name: Set up Node from .nvmrc
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -229,6 +238,20 @@ jobs:
       - name: Install dependencies
         working-directory: my-curated-haven-web
         run: npm ci
+
+      - name: Run every database test (pgTAP)
+        # The runner bundles the shared fixtures that raw `supabase test db` cannot include and fails when it
+        # selects no files. The required collection suites must all be present.
+        working-directory: my-curated-haven-web
+        run: |
+          required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-8]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
+          test "$required" -ge 13 || { echo "Expected 13 collection admin suites, found $required"; exit 1; }
+          node scripts/test-admin-db.mjs --all
+
+      - name: Verify generated TypeScript types drift
+        run: |
+          supabase gen types typescript --local > types.gen.ts
+          diff -u my-curated-haven-web/src/lib/types/database.ts types.gen.ts
 
       - name: Install Chromium for data tests
         working-directory: my-curated-haven-web

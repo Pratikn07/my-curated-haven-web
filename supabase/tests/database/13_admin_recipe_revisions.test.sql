@@ -221,7 +221,7 @@ SELECT is(
   pg_temp.before_revision_count()::int, 'pre-conflict baseline');
 SELECT throws_ok($q$SELECT public.admin_draft_save(
   pg_temp.head_command('91000000-0000-0000-0000-000000000031', 'Stale edit', gen_random_uuid(), false, 0))$q$,
-  '40001', 'ADM_CONFLICT', 'stale version conflicts');
+  'PT409', 'ADM_CONFLICT', 'stale version conflicts');
 SELECT is(pg_temp.revision_count(),
   pg_temp.before_revision_count()::int, 'conflict adds no snapshot');
 
@@ -294,7 +294,7 @@ SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
 SET LOCAL ROLE authenticated;
 SELECT throws_ok($q$SELECT public.admin_draft_save(
   pg_temp.head_command('91000000-0000-0000-0000-000000000032', 'After band change', gen_random_uuid()))$q$,
-  '40001', 'ADM_CONFLICT', 'out-of-band change conflicts');
+  'PT409', 'ADM_CONFLICT', 'out-of-band change conflicts');
 RESET ROLE;
 
 SELECT ok(NOT has_table_privilege('authenticated','private.recipe_revisions','INSERT'), 'no direct revision writes');

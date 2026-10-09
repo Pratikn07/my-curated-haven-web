@@ -1,14 +1,16 @@
 import type { Json } from "@/lib/types/database";
 export type AdminRole = "owner" | "viewer" | "editor" | "reviewer" | "publisher";
 export type Permission = "recipe.read" | "recipe.edit" | "recipe.review"
-  | "recipe.publish" | "recipe.withdraw" | "recipe.emergency_withdraw" | "team.manage";
+  | "recipe.publish" | "recipe.withdraw" | "recipe.emergency_withdraw" | "team.manage"
+  | "collection.read" | "collection.edit" | "collection.review" | "collection.publish";
 export type ConsoleStage = "disabled" | "inspection" | "editing" | "publication";
 export type AdminCode = "AUTH_REQUIRED" | "MFA_REQUIRED" | "DENIED" | "DISABLED"
   | "INVALID" | "NOT_FOUND" | "CONFLICT" | "UNAVAILABLE" | "BLOCKED";
 export type Result<T> = { ok: true; value: T }
   | { ok: false; code: AdminCode; reference: string; fields?: Record<string, string> };
 export type Operator = { id: string; email: string; roles: AdminRole[]; permissions: Permission[] };
-export type AdminContext = { stage: ConsoleStage; operator: Operator; assurance: "aal1" | "aal2" };
+export type AdminContext = { stage: ConsoleStage; collectionStage: ConsoleStage; operator: Operator;
+  assurance: "aal1" | "aal2" };
 export type ContextResult = Result<AdminContext>;
 export type PublicationState = "draft" | "published" | "withdrawn";
 export type ReviewState = "unreviewed" | "submitted" | "approved" | "changes_requested" | "rejected";
@@ -28,7 +30,9 @@ export type RecipeSnapshot = { recipeId: string; slug: string;
     allergenReviewState: "unknown" | "reviewed_listed" | "reviewed_no_allergens";
     allergens: string[] | null; storageNotes: string | null };
   image: { path: string; alt: string | null; description: string | null;
-    objectId: string | null; objectVersion: string | null } };
+    objectId: string | null; objectVersion: string | null };
+  /** Reviewed global tags; absent until the recipe's tags are imported (Phase 2). */
+  tags?: Record<string, string[] | string | null> };
 export type Base = { contentVersion: number | null; activeHash: string };
 export type Revision = { id: string; draftId: string; recipeId: string; version: number;
   digest: string; base: Base; state: "draft" | "submitted" | "approved" | "changes_requested"
@@ -73,6 +77,10 @@ export type ReviewCommand = Operation & { revisionId: string; expectedVersion: n
   resolvedIssueIds: string[] };
 export type PublishCommand = Operation & { revisionId: string; expectedVersion: number;
   expectedDigest: string; base: Base; impactToken: string };
+/** An exact approved change to the same recipe after people have bought it (Phase 2). */
+export type RecipeCorrectionCommand = PublishCommand & { correctionKind: "same_recipe"; acknowledgeGlobalImpact: true };
+export type CorrectionImpact = { checkedAt: string; collections: { collectionId: string; slug: string; title: string;
+  releases: { version: number; state: string }[]; draft: { state: string; version: number } | null }[] };
 export type WithdrawCommand = Operation & { base: Base; impactToken: string;
   emergency: boolean; acknowledgePromiseImpact: boolean };
 export type RefreshReceipt = { operationId: string; state: "complete" | "pending" };

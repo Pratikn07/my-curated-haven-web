@@ -170,19 +170,28 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     expect(tamperedCheckout.status()).toBe(400);
     expect(await tamperedCheckout.json()).toMatchObject({ error: "Unknown checkout field." });
 
+    // A request without the page's sale expectation must refresh instead of charging.
+    const missingExpectation = await page.request.post("/api/checkout", {
+      data: { collectionSlug: "comfort-haven-collection" },
+    });
+    expect(missingExpectation.status()).toBe(409);
+    expect(await missingExpectation.json()).toMatchObject({ code: "refresh_required" });
+
     // Two simultaneous requests must reserve one order and reuse one Checkout URL.
-    const checkoutReplies = await page.evaluate(async () => {
+    const expected = JSON.parse((await buyButton.getAttribute("data-checkout-expected")) ?? "null");
+    expect(expected).toMatchObject({ offerId: expect.any(String), sourceDigest: expect.any(String) });
+    const checkoutReplies = await page.evaluate(async (expectation) => {
       const createAttempt = async () => {
         const response = await fetch("/api/checkout", {
           method: "POST",
           credentials: "same-origin",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ collectionSlug: "comfort-haven-collection" }),
+          body: JSON.stringify({ collectionSlug: "comfort-haven-collection", expected: expectation }),
         });
         return { status: response.status, body: await response.json() };
       };
       return Promise.all([createAttempt(), createAttempt()]);
-    });
+    }, expected);
 
     expect(checkoutReplies.map((reply) => reply.status)).toEqual([200, 200]);
     expect(checkoutReplies[0].body.supportReference).toBe(checkoutReplies[1].body.supportReference);

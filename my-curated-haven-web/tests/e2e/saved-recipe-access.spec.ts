@@ -23,6 +23,7 @@ interface Scenario {
     error: { name?: string; message: string } | null;
   };
   writeError?: { message: string } | null;
+  effective?: { type: string; releaseId: string | null };
 }
 
 function makeClient(scenario: Scenario = {}) {
@@ -80,7 +81,13 @@ function makeClient(scenario: Scenario = {}) {
       };
       return query;
     },
-    rpc: async () => ({ data: scenario.admin ?? false, error: null }),
+    rpc: async (name: string) => {
+      calls.push(`rpc:${name}`);
+      if (name === "recipe_effective_access") {
+        return { data: scenario.effective ?? { type: "denied", releaseId: null }, error: null };
+      }
+      return { data: scenario.admin ?? false, error: null };
+    },
     auth: {
       getUser: async () =>
         scenario.user ?? { data: { user: null }, error: null },
@@ -152,36 +159,27 @@ test.describe("Phase 7 save access guard", () => {
     expect(calls).toContain("upsert:saved_recipes");
   });
 
-  test("allows an entitled recipe after checking the caller's entitlement", async () => {
+  test("allows an entitled recipe after asking the database resolver", async () => {
     const { client, calls } = makeClient({
       user: { data: { user: { id: userId } }, error: null },
-      rows: {
-        access_entitlements: {
-          data: [
-            {
-              id: "entitlement-1",
-              release_id: "release-1",
-              state: "active",
-              valid_from: "2025-01-01T00:00:00.000Z",
-              expires_at: null,
-              revoked_at: null,
-            },
-          ],
-          error: null,
-        },
-        collection_recipes: {
-          data: [{ release_id: "release-1" }],
-          error: null,
-        },
-      },
+      effective: { type: "entitled", releaseId: "release-2" },
     });
 
     const result = await saveRecipe(client, userId, recipeId);
 
     expect(result).toMatchObject({ status: "ok", isSaved: true });
-    expect(calls).toContain("from:access_entitlements");
-    expect(calls).toContain("from:collection_recipes");
+    expect(calls).toContain("rpc:recipe_effective_access");
+    expect(calls).not.toContain("from:access_entitlements");
     expect(calls).toContain("upsert:saved_recipes");
+  });
+
+  test("denies a paid recipe the resolver does not grant", async () => {
+    const { client, calls } = makeClient({
+      user: { data: { user: { id: userId } }, error: null },
+      effective: { type: "denied", releaseId: null },
+    });
+    expect(await saveRecipe(client, userId, recipeId)).toMatchObject({ status: "error" });
+    expect(calls).not.toContain("upsert:saved_recipes");
   });
 
   test("allows an admin to save a recipe without a free slot or purchase", async () => {
@@ -191,7 +189,7 @@ test.describe("Phase 7 save access guard", () => {
     });
     expect(await saveRecipe(client, userId, recipeId)).toMatchObject({ status: "ok", isSaved: true });
     expect(calls).toContain("upsert:saved_recipes");
-    expect(calls).not.toContain("from:access_entitlements");
+    expect(calls).not.toContain("rpc:recipe_effective_access");
   });
 
   test("keeps removal available without rechecking recipe access", async () => {

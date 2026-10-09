@@ -12,6 +12,7 @@ import type {
   Usage,
   WithdrawCommand,
 } from "./contracts";
+import type { TagCategory } from "./recipe-tags";
 import { adminRpc } from "./rpc";
 import { createClient } from "../supabase/server";
 import { loadAdminHistory, loadAdminLibrary, loadAdminRecipe } from "./context";
@@ -39,7 +40,7 @@ function bad(): never {
   throw new Error("bad revision");
 }
 
-function decodeReceipt(data: unknown): MutationReceipt {
+export function decodeReceipt(data: unknown): MutationReceipt {
   if (!isRecord(data) || typeof data["operationId"] !== "string") return bad();
   return data as unknown as MutationReceipt;
 }
@@ -308,4 +309,16 @@ export async function withdrawAdminRecipe(
     decodeReceipt,
     true
   );
+}
+
+/** The reviewed tag vocabulary the editor offers. */
+export async function loadTagVocabulary(): Promise<Result<TagCategory[]>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_recipe_tag_vocabulary"), (data) => {
+    if (!Array.isArray(data) || !data.every((c) => c && typeof c.category === "string" && typeof c.multiple === "boolean"
+      && Array.isArray(c.values) && c.values.every((v: unknown) => typeof v === "string"))) {
+      throw new Error("Invalid tag vocabulary");
+    }
+    return data as TagCategory[];
+  }, true);
 }

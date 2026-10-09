@@ -99,6 +99,8 @@ export interface CollectionOfferDto {
   saleEnabled: boolean;
   termsVersion: string;
   ownershipState: OwnershipStatus;
+  /** Null when nothing is on sale right now (no enabled offer for the current release). */
+  expected: CheckoutExpectation | null;
   recipes: CollectionRecipeSummary[];
 }
 
@@ -124,6 +126,15 @@ export interface OrderSummaryDto {
     | "not_found";
 }
 
+/** What the collection page showed for sale; checkout refuses a stale expectation instead of charging for it. */
+export interface CheckoutExpectation {
+  publicationId: string | null;
+  releaseId: string;
+  offerId: string;
+  manifestHash: string;
+  sourceDigest: string;
+}
+
 export type CheckoutResult =
   | {
       status: "success";
@@ -132,5 +143,6 @@ export type CheckoutResult =
       analyticsAttemptRef?: string | null;
     }
   | { status: "already_owned"; collectionSlug: string }
+  | { status: "stale"; expected: CheckoutExpectation | null }
   | { status: "unauthenticated" }
   | { status: "error"; message: string; code?: string };

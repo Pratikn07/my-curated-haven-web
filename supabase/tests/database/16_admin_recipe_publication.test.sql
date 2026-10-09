@@ -223,7 +223,7 @@ SELECT throws_ok($q$SELECT public.admin_revision_publish(jsonb_set((SELECT cmd F
 SELECT lives_ok($q$SELECT pg_temp.approve_recipe(67)$q$, 'approved pipeline 67');
 SELECT throws_ok($q$SELECT public.admin_revision_publish(jsonb_set(pg_temp.pub_command(67, gen_random_uuid()),
   '{expected_version}', '0'))$q$,
-  '40001', 'ADM_CONFLICT', 'stale version cannot publish');
+  'PT409', 'ADM_CONFLICT', 'stale version cannot publish');
 SELECT lives_ok($q$SELECT public.admin_draft_save(
   pg_temp.exact_save_cmd(67, gen_random_uuid(), 'Changed 67', true))$q$, 'change after approval saves');
 SELECT throws_ok($q$SELECT public.admin_revision_publish(pg_temp.pub_command(67, gen_random_uuid()))$q$,
@@ -388,7 +388,7 @@ SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');
 SET LOCAL ROLE authenticated;
 SELECT throws_ok($q$SELECT public.admin_recipe_withdraw(jsonb_set(
   (SELECT cmd FROM campaign_withdraw_cmd), '{acknowledge_promise_impact}', 'true'))$q$,
-  '40001', 'ADM_CONFLICT', 'changed campaign revision invalidates the impact token');
+  'PT409', 'ADM_CONFLICT', 'changed campaign revision invalidates the impact token');
 RESET ROLE;
 UPDATE private.admin_console_settings SET campaign_revision = 'missing-revision' WHERE singleton;
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000001', 'aal2');

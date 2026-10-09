@@ -32,6 +32,16 @@ function isLoopbackHost(hostname: string): boolean {
   );
 }
 
+/**
+ * False only for a deployment without COMMERCE_DATABASE_URL: the commerce database is not deployed everywhere
+ * yet (R8-05), so callers treat that as "no commerce data" instead of an outage. Locally a database is resolved.
+ */
+export function commerceDatabaseConfigured(
+  environment: CommerceDatabaseEnvironment = process.env,
+): boolean {
+  return environment.VERCEL_ENV === undefined || Boolean(environment.COMMERCE_DATABASE_URL?.trim());
+}
+
 /** Resolve the commerce database without ever guessing a deployed database target. */
 export function resolveCommerceDatabaseConnectionString(
   environment: CommerceDatabaseEnvironment = process.env,

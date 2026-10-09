@@ -99,10 +99,42 @@ async function resolveRecipeAccess(
     return { type: "admin" };
   }
 
+  // 4. Purchases, including approved additions from later releases, come from the one database
+  //    resolver that recipe body and protected-file policies also use.
+  const { data: effective, error: effectiveError } = await client.rpc("recipe_effective_access", {
+    p_recipe_id: recipeId,
+  });
+
+  // PGRST202: the database predates the resolver (migrations are applied by hand after a deploy). Until
+  // then, purchases are read the way they were before it existed: the held release's own recipes.
+  if (effectiveError?.code === "PGRST202") {
+    return heldReleaseAccess(client, user.id, recipeId);
+  }
+
+  if (effectiveError) {
+    return { type: "error", message: effectiveError.message };
+  }
+
+  const access = effective as { type?: unknown; releaseId?: unknown } | null;
+  if (access?.type === "entitled" && typeof access.releaseId === "string") {
+    return { type: "entitled", releaseId: access.releaseId };
+  }
+  if (access?.type === "denied" || access?.type === "free") {
+    return { type: "denied" };
+  }
+  return { type: "error", message: "Unexpected recipe access response" };
+}
+
+/** Pre-resolver access: an active, in-date entitlement to a release that contains the recipe. */
+async function heldReleaseAccess(
+  client: SupabaseClient<Database>,
+  userId: string,
+  recipeId: string
+): Promise<AccessStatus> {
   const { data: entitlements, error: entitlementError } = await client
     .from("access_entitlements")
-    .select("id, release_id, state, valid_from, expires_at, revoked_at")
-    .eq("user_id", user.id)
+    .select("release_id, valid_from, expires_at")
+    .eq("user_id", userId)
     .eq("state", "active")
     .is("revoked_at", null);
 
@@ -110,38 +142,24 @@ async function resolveRecipeAccess(
     return { type: "error", message: entitlementError.message };
   }
 
-  if (!entitlements || entitlements.length === 0) {
-    return { type: "denied" };
-  }
-
-  const activeReleaseIds = entitlements
-    .filter((e) => {
-      const now = new Date();
-      const validFrom = new Date(e.valid_from);
-      if (validFrom > now) return false;
-      if (e.expires_at && new Date(e.expires_at) <= now) return false;
-      return true;
-    })
+  const now = new Date();
+  const releaseIds = (entitlements ?? [])
+    .filter((e) => new Date(e.valid_from) <= now && (!e.expires_at || new Date(e.expires_at) > now))
     .map((e) => e.release_id);
-
-  if (activeReleaseIds.length === 0) {
+  if (releaseIds.length === 0) {
     return { type: "denied" };
   }
 
-  const { data: matchedRecipes, error: membershipError } = await client
+  const { data: matched, error: membershipError } = await client
     .from("collection_recipes")
     .select("release_id")
     .eq("recipe_id", recipeId)
-    .in("release_id", activeReleaseIds)
+    .in("release_id", releaseIds)
     .limit(1);
 
   if (membershipError) {
     return { type: "error", message: membershipError.message };
   }
 
-  if (matchedRecipes && matchedRecipes.length > 0) {
-    return { type: "entitled", releaseId: matchedRecipes[0].release_id };
-  }
-
-  return { type: "denied" };
+  return matched && matched.length > 0 ? { type: "entitled", releaseId: matched[0].release_id } : { type: "denied" };
 }

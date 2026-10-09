@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Loader2, Lock, CheckCircle2 } from "lucide-react";
-import type { OwnershipStatus } from "@/lib/payments/types";
+import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
 import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
@@ -12,6 +12,8 @@ interface CheckoutButtonProps {
   collectionSlug: string;
   formattedPrice: string;
   ownershipState: OwnershipStatus;
+  /** What this page shows for sale; checkout refuses a stale expectation and asks for a refresh. */
+  expected: CheckoutExpectation | null;
   releaseId?: string;
   className?: string;
   /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
@@ -22,6 +24,7 @@ export default function CheckoutButton({
   collectionSlug,
   formattedPrice,
   ownershipState,
+  expected,
   releaseId,
   className = "",
   appearance = "default",
@@ -54,7 +57,8 @@ export default function CheckoutButton({
     );
   }
 
-  if (ownershipState === "unavailable") {
+  // Nothing is on sale right now (no enabled offer for the current release); a pending checkout can still resume.
+  if (ownershipState === "unavailable" || (ownershipState === "not_owned" && !expected)) {
     return (
       <button
         disabled
@@ -84,6 +88,7 @@ export default function CheckoutButton({
       const campaign = getSessionCampaign();
       const bodyPayload = {
         collectionSlug,
+        expected,
         analyticsConsent: isAnalyticsPermitted(),
         attribution: campaign
           ? {
@@ -133,6 +138,7 @@ export default function CheckoutButton({
       <button
         onClick={handleCheckout}
         disabled={isLoading}
+        data-checkout-expected={expected ? JSON.stringify(expected) : undefined}
         aria-busy={isLoading}
         className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:opacity-75 text-center")} ${className}`}
       >

@@ -15,7 +15,8 @@ export default function AdminShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const links = adminNavigation(context.operator, pathname);
+  const links = adminNavigation(context.operator, pathname, context.collectionStage);
+  const groups = [...new Set(links.map((link) => link.group))];
   return (
     <div className="admin-console">
       <header className="admin-console__header">
@@ -31,13 +32,17 @@ export default function AdminShell({
       </header>
       <div className="admin-console__body">
         <aside className="admin-console__rail" aria-label="Admin workspace navigation">
-          <p className="admin-console__rail-label">Publishing</p>
           <nav aria-label="Admin" className="admin-console__nav">
-            {links.map((link) => (
-              <Link key={link.href} href={link.href} aria-current={link.current ? "page" : undefined}
-                className={link.current ? "admin-console__nav-link admin-console__nav-link--current" : "admin-console__nav-link"}>
-                {link.label}
-              </Link>
+            {groups.map((group) => (
+              <div key={group} role="group" aria-labelledby={`admin-nav-${group}`} className="admin-console__nav-group">
+                <p id={`admin-nav-${group}`} className="admin-console__rail-label">{group}</p>
+                {links.filter((link) => link.group === group).map((link) => (
+                  <Link key={link.href} href={link.href} aria-current={link.current ? "page" : undefined}
+                    className={link.current ? "admin-console__nav-link admin-console__nav-link--current" : "admin-console__nav-link"}>
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
           <p className="admin-console__stage">Console stage: {context.stage}</p>

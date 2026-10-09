@@ -28,7 +28,8 @@ const CATALOG_ROW = {
  * Fake Supabase client. `tables` maps a table name to the response its query resolves to.
  * Every builder method returns the builder, so any select/eq/order chain works.
  */
-function fakeClient({ tables = {}, user = { data: { user: null }, error: null }, throwOn, admin = { data: false, error: null } } = {}) {
+function fakeClient({ tables = {}, user = { data: { user: null }, error: null }, throwOn, admin = { data: false, error: null },
+  effective = { data: { type: "denied" }, error: null } } = {}) {
   return {
     from(table) {
       if (table === throwOn) throw new Error("network down");
@@ -45,7 +46,7 @@ function fakeClient({ tables = {}, user = { data: { user: null }, error: null },
       return builder;
     },
     auth: { getUser: async () => user },
-    rpc: async () => admin,
+    rpc: async (name) => (name === "recipe_effective_access" ? effective : admin),
   };
 }
 
@@ -106,7 +107,19 @@ test("checkRecipeAccess treats a missing session as denied, not as an error", as
   assert.deepEqual(await checkRecipeAccess(client, RECIPE_ID), { type: "denied" });
 });
 
-test("checkRecipeAccess reports an error when the entitlement query fails", async () => {
+test("checkRecipeAccess reports an error when the access resolver fails", async () => {
+  const client = fakeClient({
+    tables: { recipe_catalog: { data: { id: RECIPE_ID }, error: null }, free_recipe_slots: { data: null, error: null } },
+    user: { data: { user: { id: "20000000-0000-0000-0000-000000000001" } }, error: null },
+    effective: FAILURE,
+  });
+  assert.deepEqual(await checkRecipeAccess(client, RECIPE_ID), { type: "error", message: "backend unavailable" });
+});
+
+// A database that predates the resolver (PGRST202) reads purchases the way it did before it existed.
+const NO_RESOLVER = { data: null, error: { code: "PGRST202", message: "Could not find the function public.recipe_effective_access" } };
+
+test("checkRecipeAccess reports an error when the entitlement query fails on a database without the resolver", async () => {
   const client = fakeClient({
     tables: {
       recipe_catalog: { data: { id: RECIPE_ID }, error: null },
@@ -114,8 +127,28 @@ test("checkRecipeAccess reports an error when the entitlement query fails", asyn
       access_entitlements: FAILURE,
     },
     user: { data: { user: { id: "20000000-0000-0000-0000-000000000001" } }, error: null },
+    effective: NO_RESOLVER,
   });
   assert.equal((await checkRecipeAccess(client, RECIPE_ID)).type, "error");
+});
+
+test("without the resolver, a held release containing the recipe grants access and nothing else does", async () => {
+  const base = {
+    recipe_catalog: { data: { id: RECIPE_ID }, error: null },
+    free_recipe_slots: { data: null, error: null },
+  };
+  const held = { data: [{ release_id: "release-1", valid_from: "2026-01-01T00:00:00Z", expires_at: null }], error: null };
+  const user = { data: { user: { id: "20000000-0000-0000-0000-000000000001" } }, error: null };
+  const entitled = fakeClient({ user, effective: NO_RESOLVER,
+    tables: { ...base, access_entitlements: held, collection_recipes: { data: [{ release_id: "release-1" }], error: null } } });
+  assert.deepEqual(await checkRecipeAccess(entitled, RECIPE_ID), { type: "entitled", releaseId: "release-1" });
+  const otherRecipe = fakeClient({ user, effective: NO_RESOLVER,
+    tables: { ...base, access_entitlements: held, collection_recipes: { data: [], error: null } } });
+  assert.deepEqual(await checkRecipeAccess(otherRecipe, RECIPE_ID), { type: "denied" });
+  const expired = fakeClient({ user, effective: NO_RESOLVER, tables: { ...base,
+    access_entitlements: { data: [{ release_id: "release-1", valid_from: "2026-01-01T00:00:00Z", expires_at: "2026-02-01T00:00:00Z" }], error: null },
+    collection_recipes: { data: [{ release_id: "release-1" }], error: null } } });
+  assert.deepEqual(await checkRecipeAccess(expired, RECIPE_ID), { type: "denied" });
 });
 
 test("checkRecipeAccess turns a thrown client error into a typed error", async () => {

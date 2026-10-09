@@ -3,7 +3,7 @@ import type { Json } from "@/lib/types/database";
 
 export type SnapshotDiff = { field: string; before: Json; after: Json };
 
-const SECTIONS = ["catalog", "body", "image"] as const;
+const SECTIONS = ["catalog", "body", "image", "tags"] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -26,8 +26,11 @@ export function patchSnapshot(
     body: patch.body !== undefined ? patch.body : base.body,
     image: patch.image ?? base.image,
   };
+  // Tags travel with the snapshot once imported; a patch may change them but never drops them.
+  const tags = patch.tags ?? base.tags;
+  if (tags !== undefined) next.tags = tags;
   for (const key of Object.keys(patch) as (keyof RecipeSnapshot)[]) {
-    if (!["catalog", "body", "image"].includes(key)) {
+    if (!["catalog", "body", "image", "tags"].includes(key)) {
       throw new Error(`unknown snapshot section: ${String(key)}`);
     }
   }

@@ -6,7 +6,7 @@ import type { CollectionRecipe, SeriesKey, ShelfKey, ShowroomCollection } from "
  * shelves and series come from docs/implementation/recipe-collections/
  * COLLECTIONS.md; each collection's recipes from recipe-tags.json.
  *
- * Collections with 8-12 recipes are "open": they have a page, with a PLACEHOLDER
+ * "Open" collections (an explicit per-collection choice) have a page, with a PLACEHOLDER
  * price and "Opening soon" until a commerce offer exists for the slug (plan
  * RC-01 to RC-05). The rest are "coming-soon": they stand on the shelf greyed
  * out and have no page. Halloween, Meal Prep and Protein Packs are also the

@@ -4,6 +4,7 @@ import AdminRecipeChanges from "@/components/admin/AdminRecipeChanges";
 import AdminRecipeReview from "@/components/admin/AdminRecipeReview";
 import { getAdminContext, loadAdminRecipe } from "@/lib/admin/context";
 import { loadAdminImpact } from "@/lib/admin/recipes";
+import { loadRecipeCorrectionImpact } from "@/lib/admin/recipe-corrections";
 
 export default async function AdminRecipePreviewPage({ params }: { params: Promise<{ recipeId: string }> }) {
   const { recipeId } = await params;
@@ -13,7 +14,8 @@ export default async function AdminRecipePreviewPage({ params }: { params: Promi
   if (!permissions.some((permission) => ["recipe.edit", "recipe.review", "recipe.publish"].includes(permission))) {
     return <p role="status">Preview requires recipe editing, review, or publication access.</p>;
   }
-  const [detail, impact] = await Promise.all([loadAdminRecipe(recipeId), loadAdminImpact(recipeId)]);
+  const [detail, impact, reach] = await Promise.all([loadAdminRecipe(recipeId), loadAdminImpact(recipeId),
+    loadRecipeCorrectionImpact(recipeId)]);
   if (!detail.ok) return <p role="status">Recipe preview unavailable. Try again.</p>;
   const working = detail.value.working;
   if (!working) return <p role="status">No saved working revision to preview.</p>;
@@ -31,7 +33,8 @@ export default async function AdminRecipePreviewPage({ params }: { params: Promi
       <Link href={`/admin/recipes/${recipeId}/edit`}>Back to editor</Link>
     </>}
   >
-    <AdminRecipeChanges active={detail.value.active} revision={working} />
+    <AdminRecipeChanges active={detail.value.active} revision={working}
+      collections={reach.ok ? reach.value.collections.map((collection) => collection.title) : null} />
     <section aria-label="Impact and readiness" className="admin-usage">
       <h2>Impact and readiness</h2>
       <p>Review: {detail.value.readiness.review} · evaluated at {detail.value.readiness.evaluatedAt}</p>
