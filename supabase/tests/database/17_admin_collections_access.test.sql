@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(33);
+SELECT plan(34);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-collections.sql
 
@@ -45,8 +45,11 @@ SELECT is((SELECT count(*)::int FROM generate_series(1,5) n
   WHERE (pg_temp.library_for(n,'{"q":"synthetic-p"}')->>'filteredTotal')::int=2),5,
   'owner, viewer, editor, reviewer and publisher can read the library');
 
--- Library rows keep published, draft and commerce states independent.
+-- Library rows keep published, draft and commerce states independent. An imported identity stays
+-- unlisted while the legacy site serves it; the row must show what is actually published.
+UPDATE public.recipe_collections SET listing_state='unlisted' WHERE id='93000000-0000-0000-0000-000000000001';
 CREATE TEMP TABLE lib AS SELECT jsonb_array_elements(pg_temp.library_for(1,'{"q":"synthetic-p"}')->'rows') r;
+SELECT is((SELECT r->>'listingState' FROM lib WHERE r->>'slug'='synthetic-published-shelf'),'listed','listing state comes from the current publication');
 SELECT is((SELECT r->>'publishedCount' FROM lib WHERE r->>'slug'='synthetic-published-shelf'),'2','published count is the active publication membership');
 SELECT is((SELECT r->>'draftCount' FROM lib WHERE r->>'slug'='synthetic-published-shelf'),'3','draft count is the open draft membership');
 SELECT is((SELECT r->>'commerceState' FROM lib WHERE r->>'slug'='synthetic-published-shelf'),'disabled','offer exists with sales disabled');

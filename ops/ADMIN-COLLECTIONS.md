@@ -6,6 +6,19 @@ Publication stays disabled until every coupled gate in `docs/implementation/admi
 
 Sections below are filled in by the tasks that own them: catalog import (Task 4), source cutover (Task 13), refresh recovery (Task 14), operator SQL (Task 16) and the gated release steps (Task 18).
 
+## Catalog import (Task 4)
+
+`scripts/admin-collections-import.mjs` maps the 20 configured collections (`src/config/collections.ts`) and the reviewed tag data (`docs/implementation/recipe-collections/recipe-tags.json`) to private candidates and checks them against a database. Run it from `my-curated-haven-web/`. It reads the connection string from the environment variable you name; there is no default target, and it prints only the host, port and database.
+
+1. Dry run (the default). Inventory queries run in a `READ ONLY` transaction. The JSON report holds candidates, discrepancies, blocked collections, display-only hints and tag evidence, plus `reportDigest`. It contains no customer or order identifiers.
+   `node scripts/admin-collections-import.mjs --db-url-env <ENV_NAME> --out import-report.json`
+2. The owner reviews the report. Blockers: `RECIPE_MISSING`, `RECIPE_UNREVIEWED`, `TAGS_MISSING`, `COVER_INVALID`, `COVER_UNVERIFIED`, `COLLECTION_DUPLICATE_SLUG`, `MEMBERSHIP_MISMATCH` (configured members differ from a sold or committed release; never unioned), `ORDER_SNAPSHOT_INCOMPLETE`, `ACCESS_POLICY_UNKNOWN` (buyers of a release with no recorded additions policy). Suggestions: `COLLECTION_IDENTITY_NEW`, `DATABASE_ONLY_COLLECTION`, `TAGS_CHANGED`, `TEST_ACTIVITY`.
+3. Private apply, only with the reviewed report and the active console owner as authoriser:
+   `node scripts/admin-collections-import.mjs --db-url-env <ENV_NAME> --apply-private --report import-report.json --authoriser <owner-uuid> --reason "<why>"`
+   It refuses if the source files or database changed since the report (digest mismatch). In one transaction, for each unblocked collection it creates a missing identity as `unlisted`, records `collection_sources` (mode stays `legacy`, with source SHA and candidate digest), stores a listed collection's current presentation as an `imported` baseline publication with its current-publication pointer, and writes audit and operation rows with executor `catalog-import` and the named human authoriser. Blocked collections are skipped.
+
+Apply never writes `collection_publication_projection`, switches source mode, creates review decisions, enables sales, changes releases, free slots or entitlements. Imported placement notes stay `fit: "unverified"`. Re-applying the same content reports `unchanged`; a collection imported earlier with different content is skipped and must change through a reviewed draft.
+
 ## Local verification stack
 
 Run Phase 2 database work against the owned local project `mch-admin-collections-test`, never the default stack (54321/54322) or the Phase 1 stack (54340–54349).

@@ -80,7 +80,8 @@ LANGUAGE sql STABLE SET search_path='' AS $$
  head AS (SELECT h.state, r.snapshot FROM private.collection_draft_heads h
    JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=p_collection_id)
  SELECT jsonb_build_object('collectionId',c.id,'slug',c.slug,'title',snap.s->>'title','shelf',snap.s->>'shelf',
-  'stage',snap.s->'stage','series',snap.s->'series','listingState',c.listing_state,
+  'stage',snap.s->'stage','series',snap.s->'series',
+  'listingState',coalesce((SELECT snapshot->>'listingState' FROM pub),c.listing_state),
   'availability',snap.s->>'availability',
   'publicationId',(SELECT publication_id FROM pub),
   'publishedCount',coalesce((SELECT jsonb_array_length(snapshot->'members') FROM pub),0),
