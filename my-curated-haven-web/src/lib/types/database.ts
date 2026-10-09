@@ -1622,6 +1622,10 @@ export type Database = {
       }
       admin_support_access: { Args: { p_order_id: string }; Returns: Json }
       admin_support_case: { Args: { p_command: Json }; Returns: Json }
+      admin_support_cases: {
+        Args: { p_cursor: string; p_order_id: string }
+        Returns: Json
+      }
       admin_support_customer: {
         Args: { p_cursor: string; p_user_id: string }
         Returns: Json

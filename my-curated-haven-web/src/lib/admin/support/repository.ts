@@ -3,11 +3,12 @@ import type { Result } from "../contracts";
 import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
-  AccessExplanation, CaseCommand, CustomerSupportDto, LookupQuery, LookupResult, Mode, OrderSupportDto, SupportCase,
+  AccessExplanation, CaseCommand, CustomerSupportDto, LookupQuery, LookupResult, Mode, OrderCasesPage, OrderSupportDto, SupportCase,
   SupportHistoryPage, SupportQueuePage, SupportRead,
 } from "./contracts";
 import {
-  decodeAccessRead, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderRead, decodeQueuePage, decodeRedaction,
+  decodeAccessRead, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderCases, decodeOrderRead, decodeQueuePage,
+  decodeRedaction,
   decodeSupportCase,
 } from "./decode";
 
@@ -62,4 +63,9 @@ export async function redactSupportNote(eventId: string, reason: string, operati
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_support_redact_note", { p_event_id: eventId, p_reason: reason,
     p_operation_id: operationId }), decodeRedaction, true);
+}
+
+export async function loadSupportCases(orderId: string, cursor: string | null): Promise<Result<OrderCasesPage>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_cases", { p_order_id: orderId, p_cursor: cursor as string }), decodeOrderCases);
 }

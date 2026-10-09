@@ -136,6 +136,35 @@ BEGIN
  RETURN page;
 END $$;
 
+-- Cases on an order, most recently changed first, 25 a page ("<updated_at>|<case id>"), and whether notes are on.
+CREATE FUNCTION public.admin_support_cases(p_order_id uuid, p_cursor text) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor uuid; after_at timestamptz; after_id uuid; cases jsonb; more boolean; last_at timestamptz; last_id uuid;
+BEGIN
+ actor := private.support_assert('support.read', 'inspection');
+ IF NOT EXISTS (SELECT 1 FROM private.purchase_orders WHERE id = p_order_id) THEN
+  RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND';
+ END IF;
+ IF p_cursor IS NOT NULL THEN
+  IF length(p_cursor) > 80 OR p_cursor !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z\|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+   RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
+  END IF;
+  after_at := split_part(p_cursor, '|', 1)::timestamptz;
+  after_id := split_part(p_cursor, '|', 2)::uuid;
+ END IF;
+ WITH numbered AS (
+  SELECT c.*, row_number() OVER (ORDER BY c.updated_at DESC, c.id DESC) rn FROM private.support_cases c
+  WHERE c.order_id = p_order_id AND (after_at IS NULL OR (c.updated_at, c.id) < (after_at, after_id)))
+ SELECT coalesce(jsonb_agg(jsonb_build_object('id', id, 'orderId', order_id, 'userId', user_id, 'state', state,
+   'version', version, 'category', category, 'resolutionReference', resolution_reference) ORDER BY rn) FILTER (WHERE rn <= 25),
+   '[]'::jsonb), count(*) > 25, max(updated_at) FILTER (WHERE rn = 25), max(id::text) FILTER (WHERE rn = 25)::uuid
+ INTO cases, more, last_at, last_id FROM numbered;
+ PERFORM private.support_audit_read(actor, 'cases', p_order_id::text, 'found');
+ RETURN jsonb_build_object('cases', cases,
+  'notesEnabled', (SELECT note_retention_days IS NOT NULL FROM private.support_workspace_settings WHERE singleton),
+  'nextCursor', CASE WHEN more THEN to_char(last_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') || '|' || last_id END);
+END $$;
+
 -- JSON field readers that refuse the wrong type instead of guessing.
 CREATE FUNCTION private.support_json_uuid(p_value jsonb) RETURNS uuid
 LANGUAGE plpgsql IMMUTABLE SET search_path='' AS $$
@@ -343,6 +372,8 @@ END $$;
 REVOKE ALL ON FUNCTION private.support_case_json(private.support_cases), private.support_json_uuid(jsonb),
  private.support_json_text(jsonb,integer) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_support_case(jsonb), public.admin_support_redact_note(uuid,text,uuid),
- public.admin_support_queue(text,text), public.admin_support_history(uuid,text) FROM PUBLIC, anon;
+ public.admin_support_queue(text,text), public.admin_support_history(uuid,text), public.admin_support_cases(uuid,text)
+ FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_support_case(jsonb), public.admin_support_redact_note(uuid,text,uuid),
- public.admin_support_queue(text,text), public.admin_support_history(uuid,text) TO authenticated;
+ public.admin_support_queue(text,text), public.admin_support_history(uuid,text), public.admin_support_cases(uuid,text)
+ TO authenticated;

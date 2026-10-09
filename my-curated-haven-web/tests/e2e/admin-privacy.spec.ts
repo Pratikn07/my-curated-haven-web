@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createAdminFixture } from "./admin-fixtures";
 import { createCollectionsFixture } from "./collections-admin-fixtures";
+import { createSupportFixture } from "./support-admin-fixtures";
 
 test.describe.configure({ mode: "serial" });
 
@@ -99,6 +100,32 @@ test("Home and the collection publish page send nothing once admin pages load", 
     await expect(page.getByRole("heading", { level: 1, name: "Review collection effect" })).toBeVisible();
     await page.waitForTimeout(1000);
     expect(hits.slice(publicHits)).toEqual([]);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test("support lookups and order pages send nothing once admin pages load", async ({ page }) => {
+  const fixture = await createSupportFixture("support_operator");
+  try {
+    const hits = await watchSink(page);
+    await fixture.login(page, "aal2");
+    await page.goto("/");
+    await page.waitForTimeout(1500);
+    const publicHits = hits.length;
+    expect(publicHits).toBeGreaterThan(0);
+    await page.goto("/admin/support");
+    await page.getByLabel("Search by").selectOption("email");
+    await page.getByLabel("Email").fill(fixture.customerEmail);
+    await page.getByRole("button", { name: "Search" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(fixture.customerEmail);
+    await page.getByRole("link", { name: fixture.supportReference }).click();
+    await expect(page.getByRole("region", { name: "Where this order stands" })).toBeVisible();
+    await page.waitForTimeout(1000);
+    const later = hits.slice(publicHits);
+    expect(later).toEqual([]);
+    expect(JSON.stringify(hits)).not.toContain(fixture.customerEmail);
+    expect(JSON.stringify(hits)).not.toContain(fixture.supportReference);
   } finally {
     await fixture.dispose();
   }

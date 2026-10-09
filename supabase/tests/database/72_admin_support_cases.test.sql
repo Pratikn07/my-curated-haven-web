@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(40);
+SELECT plan(42);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -113,6 +113,11 @@ SELECT is((SELECT r#>>'{events,0,kind}' FROM hist), 'case', 'timeline entries sa
 SELECT is(pg_temp.support_as((SELECT viewer FROM ops), 'aal2',
   'SELECT public.admin_support_customer(''f3000000-0000-4000-8000-00000000000c'', NULL)')#>>'{value,cases,0,state}', 'open',
   'a customer read lists their cases');
+
+CREATE TEMP TABLE order_cases AS SELECT pg_temp.support_as((SELECT viewer FROM ops), 'aal2',
+ 'SELECT public.admin_support_cases(''f3000000-0000-4000-8000-000000000001'', NULL)') r;
+SELECT is((SELECT jsonb_array_length(r->'cases') FROM order_cases), 2, 'an order lists its cases');
+SELECT is((SELECT r->>'notesEnabled' FROM order_cases), 'true', 'and says whether notes are on');
 
 -- The attention queue: local signals only, per mode, paginated.
 CREATE TEMP TABLE q AS SELECT pg_temp.support_as((SELECT viewer FROM ops), 'aal2', 'SELECT public.admin_support_queue(''test'', NULL)') r;

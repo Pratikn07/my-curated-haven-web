@@ -127,7 +127,8 @@ jobs:
           # Every collection acceptance spec must be discovered; a missing file fails here, not silently later.
           for spec in admin-collections-inspection admin-collections-editing admin-collections-review \
             admin-collections-publication admin-collections-access admin-collections-checkout \
-            admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home; do
+            admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home \
+            admin-support-inspection; do
             printf '%s\n' "$list" | grep -q "${spec}.spec.ts" || { echo "Required spec ${spec} was not discovered"; exit 1; }
           done
           npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
@@ -246,6 +247,8 @@ jobs:
         run: |
           required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-9]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
           test "$required" -ge 14 || { echo "Expected 14 collection admin suites, found $required"; exit 1; }
+          support="$(ls ../supabase/tests/database | grep -cE '^7[0-9]_[a-z_]*admin_support[a-z_]*\.test\.sql$')"
+          test "$support" -ge 3 || { echo "Expected 3 support admin suites, found $support"; exit 1; }
           node scripts/test-admin-db.mjs --all
 
       - name: Verify generated TypeScript types drift

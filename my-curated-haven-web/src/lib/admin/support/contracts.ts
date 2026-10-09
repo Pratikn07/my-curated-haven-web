@@ -109,6 +109,9 @@ export type CaseCommand = {
   resolutionReference: string | null;
 };
 export type SupportCase = { id: string; orderId: string | null; userId: string | null; state: CaseState; version: number };
+export type OrderCase = SupportCase & { category: CaseCategory; resolutionReference: string | null };
+/** Cases on one order. `notesEnabled` is false until the owner approves how long notes are kept. */
+export type OrderCasesPage = { cases: OrderCase[]; notesEnabled: boolean; nextCursor: string | null };
 export type TimelineEvent = { id: string; kind: "provider" | "case" | "approval" | "attempt" | "commit" | "postcheck";
   at: string; code: string; actorLabel: string | null; operationId: string | null; note: string | null };
 export type SupportHistoryPage = { events: TimelineEvent[]; nextCursor: string | null };

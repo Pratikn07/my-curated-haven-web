@@ -1,6 +1,6 @@
 import type { Binding, RepairEffect } from "../../payments/reconciliation/contracts";
 import type {
-  AccessExplanation, CustomerSupportDto, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
+  AccessExplanation, CustomerSupportDto, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 
@@ -192,6 +192,21 @@ const supportCase = object<SupportCase>({
   version: (v, p) => (Number.isSafeInteger(v) && (v as number) >= 1 ? (v as number) : bad(p)),
 });
 
+const orderCasesPage = object<OrderCasesPage>({
+  cases: array(object<OrderCase>({
+    id: uuid,
+    orderId: nullable(uuid),
+    userId: nullable(uuid),
+    state: oneOf("open", "investigating", "waiting_on_customer", "waiting_on_provider", "resolved"),
+    version: (v, p) => (Number.isSafeInteger(v) && (v as number) >= 1 ? (v as number) : bad(p)),
+    category: oneOf("missing_access", "unresolved_payment", "account_mismatch", "refund_followup", "dispute_followup",
+      "duplicate_purchase", "content_availability"),
+    resolutionReference: nullable(text(1000)),
+  }), 25),
+  notesEnabled: bool,
+  nextCursor: nullable(text(200)),
+});
+
 const queuePage = object<SupportQueuePage>({
   items: array(object<SupportQueuePage["items"][number]>({
     orderId: nullable(uuid),
@@ -291,4 +306,8 @@ export function decodeHistoryPage(input: unknown): SupportHistoryPage {
 
 export function decodeRedaction(input: unknown): { eventId: string; redactedAt: string } {
   return object<{ eventId: string; redactedAt: string }>({ eventId: uuid, redactedAt: timestamp })(input, "redaction");
+}
+
+export function decodeOrderCases(input: unknown): OrderCasesPage {
+  return orderCasesPage(input, "cases");
 }
