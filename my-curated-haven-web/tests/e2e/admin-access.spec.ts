@@ -78,6 +78,10 @@ test("admin navigation exposes only permitted destinations and keeps actions vis
     await expect(nav.getByRole("link", { name: "Collections" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Public site" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+    await expect(page.getByRole("main")).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "Skip to content" })).toHaveAttribute("href", "#admin-main");
+    await expect(page.getByRole("contentinfo")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 
     await viewer.login(page, "aal2");

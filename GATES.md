@@ -1,6 +1,6 @@
 # Gates: Phase 1 admin console UI implementation PR
 
-OWNS: my-curated-haven-web/src/components/admin/**, my-curated-haven-web/src/app/admin/**, my-curated-haven-web/src/lib/admin/**, my-curated-haven-web/src/styles/admin.css, my-curated-haven-web/src/app/globals.css, my-curated-haven-web/src/app/recipes/[slug]/page.tsx, my-curated-haven-web/src/lib/recipes/format.ts, my-curated-haven-web/src/lib/types/database.ts, my-curated-haven-web/src/proxy.ts, my-curated-haven-web/next.config.ts, my-curated-haven-web/scripts/test-admin-db.mjs, my-curated-haven-web/tests/admin/**, my-curated-haven-web/tests/e2e/admin-*.spec.ts, supabase/migrations/*admin*sql, supabase/tests/database/*admin*sql, ops/ADMIN-CONSOLE.md, docs/implementation/admin-recipes/GATES.md, GATES.md
+OWNS: my-curated-haven-web/src/components/admin/**, my-curated-haven-web/src/components/layout/SiteFrame.tsx, my-curated-haven-web/src/components/layout/SiteShell.tsx, my-curated-haven-web/src/app/admin/**, my-curated-haven-web/src/lib/admin/**, my-curated-haven-web/src/styles/admin.css, my-curated-haven-web/src/app/globals.css, my-curated-haven-web/src/app/recipes/[slug]/page.tsx, my-curated-haven-web/src/lib/recipes/format.ts, my-curated-haven-web/src/lib/types/database.ts, my-curated-haven-web/src/proxy.ts, my-curated-haven-web/next.config.ts, my-curated-haven-web/scripts/test-admin-db.mjs, my-curated-haven-web/tests/admin/**, my-curated-haven-web/tests/e2e/admin-*.spec.ts, supabase/migrations/*admin*sql, supabase/tests/database/*admin*sql, ops/ADMIN-CONSOLE.md, docs/implementation/admin-recipes/GATES.md, GATES.md
 
 Scope: Deliver the approved Phase 1 recipe admin UI and close the seven confirmed Phase 1 audit gaps on the integrated database contracts. Create a clearly named UI implementation PR and merge it after required checks pass.
 
@@ -15,11 +15,11 @@ Audit acceptance, reconciled against `docs/superpowers/plans/2026-10-07-admin-ph
 - [x] A7: WebKit mobile editor and withdrawal controls retain input through hydration. The final three-project admin matrix passed 72/72 cases on the production build.
 - [ ] Owner workflow review: owner sees the final synthetic inspection, editor, preview, review, publication and Team screens before release readiness is claimed.
 
-- [x] G1: The protected admin shell shows only permitted destinations, the active destination, operator and public-site/sign-out exits at desktop and phone widths.
+- [x] G1: The protected admin shell shows only permitted destinations, the active destination, operator and public-site/sign-out exits at desktop and phone widths, without duplicating the public site header or footer.
   CHECK: npm run test:e2e -- tests/e2e/admin-access.spec.ts --project=chromium-desktop --project=chromium-mobile
   EXPECT: passed
   CWD: my-curated-haven-web
-  EVIDENCE: access browser cases passed on Chromium desktop and mobile; focused WebKit owner Team lookup passed after hydration gating.
+  EVIDENCE: admin access cases passed 15/15 on Chromium desktop, Chromium mobile and WebKit mobile after the site-shell correction; assertions confirm one main landmark, an admin skip target and no public navigation or footer.
 
 - [x] G2: Recipe inventory and inspection support filters, selected-row return, readable usage and history, and honest empty/unavailable states.
   CHECK: npm run test:e2e -- tests/e2e/admin-inspection.spec.ts --project=chromium-desktop --project=chromium-mobile
