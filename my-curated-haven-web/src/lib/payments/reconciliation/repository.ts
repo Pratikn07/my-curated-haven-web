@@ -1,6 +1,6 @@
-import "server-only";
 import { Pool } from "pg";
-import type { Binding, FinancialFacts } from "./contracts";
+import type { Binding, FinancialFacts, Mode } from "./contracts";
+import type { EventClaim, EventOutcome } from "./events";
 import { classifyDispute, type ProviderReader } from "./provider-read";
 import type { SystemPurpose } from "./ledger";
 import type { Claim, Recorded, SourcedRead } from "./verifier";
@@ -60,6 +60,52 @@ export async function applySystemObservation(observationId: string, operationId:
   const { rows } = await verifierPool().query("SELECT private.commerce_reconcile_system($1, $2, $3) AS receipt",
     [observationId, operationId, eventId]);
   return rows[0]?.receipt;
+}
+
+/** Claim one inbox event under a new fence, or learn that it was already processed. */
+export async function claimEvent(inboxId: string): Promise<EventClaim> {
+  const { rows } = await verifierPool().query("SELECT private.commerce_event_claim($1) AS claim", [inboxId]);
+  const claim = rows[0]?.claim as Record<string, unknown> | undefined;
+  if (claim?.state === "done" && typeof claim.processingState === "string") return { state: "done", processingState: claim.processingState };
+  if (claim?.state === "claimed" && Number.isSafeInteger(claim.fence) && typeof claim.eventId === "string" && typeof claim.type === "string"
+    && (claim.mode === "test" || claim.mode === "live") && (claim.orderId === null || typeof claim.orderId === "string")) {
+    return { state: "claimed", fence: claim.fence as number, eventId: claim.eventId, type: claim.type, mode: claim.mode,
+      orderId: claim.orderId as string | null };
+  }
+  throw new Error("Unexpected event claim");
+}
+
+export async function finishEvent(inboxId: string, fence: number, outcome: EventOutcome): Promise<void> {
+  await verifierPool().query("SELECT private.commerce_event_finish($1, $2, $3::jsonb)", [inboxId, fence, JSON.stringify(outcome)]);
+}
+
+export async function orderPolicyReady(orderId: string): Promise<boolean> {
+  const { rows } = await verifierPool().query("SELECT private.commerce_order_policy_ready($1) AS ready", [orderId]);
+  return rows[0]?.ready === true;
+}
+
+/** When the order's provider facts were last confirmed complete, or null. */
+export async function orderLastVerified(orderId: string): Promise<Date | null> {
+  const { rows } = await verifierPool().query("SELECT private.commerce_last_verified($1) AS at", [orderId]);
+  return rows[0]?.at ? new Date(rows[0].at) : null;
+}
+
+export type RecoveryCandidates = { events: string[]; unboundEvents: number; orders: string[] };
+
+export async function recoveryCandidates(mode: Mode, limit: number): Promise<RecoveryCandidates> {
+  const { rows } = await verifierPool().query("SELECT private.commerce_recovery_candidates($1, $2) AS c", [mode, limit]);
+  const c = rows[0]?.c as { events?: unknown; unboundEvents?: unknown; orders?: unknown } | undefined;
+  if (!c || !Array.isArray(c.events) || !Array.isArray(c.orders) || !Number.isSafeInteger(Number(c.unboundEvents))) {
+    throw new Error("Unexpected recovery candidates");
+  }
+  return { events: c.events as string[], unboundEvents: Number(c.unboundEvents), orders: c.orders as string[] };
+}
+
+/** Close the verifier connection (command-line runs only). */
+export async function closeVerifierPool(): Promise<void> {
+  const current = pool;
+  pool = null;
+  await current?.end();
 }
 
 const iso = (value: Date | string) => new Date(value).toISOString();

@@ -1,4 +1,3 @@
-import "server-only";
 import type Stripe from "stripe";
 import { getStripeClient } from "../stripe";
 import type { Binding, DisputeFact, RefundFact } from "./contracts";

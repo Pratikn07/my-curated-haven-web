@@ -32,6 +32,9 @@ export interface SupportFixture {
   /** Delete the customer's account, as a closed account would leave it; orders keep their principal. */
   closeCustomer(): Promise<void>;
   setNoteRetention(days: number | null): Promise<void>;
+  collectionId: string;
+  paymentIntentId: string;
+  paymentId: string;
   /** Revoke the local verifier registration (only when the fixture registered one). */
   revokeVerifier(): Promise<void>;
   query(sql: string, args?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -66,10 +69,14 @@ export async function setSupportStage(stage: SupportStage): Promise<SupportStage
 
 /**
  * `verifier` registers this test database login as the provider verifier, so the app's verifier connection (the same
- * loopback login) may claim checks; the registration is removed on dispose.
+ * loopback login) may claim checks; the registration is removed on dispose. `policyVersion` freezes the order under
+ * that refund and access policy version and approves a synthetic policy for it (removed on dispose), so automated
+ * reconciliation may judge this order without approving `v1` on the shared stack.
  */
 export async function createSupportFixture(role: SupportRole, stage: SupportStage = "inspection",
-  options: { verifier?: boolean } = {}): Promise<SupportFixture> {
+  options: { verifier?: boolean; policyVersion?: string } = {}): Promise<SupportFixture> {
+  const policyVersion = options.policyVersion ?? "v1";
+  let insertedPolicy = false;
   const rand = crypto.randomBytes(3).toString("hex").toUpperCase();
   const staff = await createAdminFixture(`support-${role}`.slice(0, 12), ROLES[role]);
   const customer = await createAdminFixture("support-cust", []);
@@ -94,6 +101,16 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
         [originalStage, originalRetention]);
       if (options.verifier) {
         await pg.query("DELETE FROM private.commerce_verifier_principals WHERE principal = current_user AND registered_by = $1", [staff.userId]);
+      }
+      if (insertedPolicy) {
+        // Approved policies cannot be removed in normal use; this synthetic one is removed with its guard paused.
+        await pg.query("ALTER TABLE private.commerce_access_policies DISABLE TRIGGER commerce_access_policies_immutable");
+        try {
+          await pg.query("DELETE FROM private.commerce_access_policies WHERE refund_policy_version=$1 AND access_policy_version=$1",
+            [policyVersion]);
+        } finally {
+          await pg.query("ALTER TABLE private.commerce_access_policies ENABLE TRIGGER commerce_access_policies_immutable");
+        }
       }
       // Orders that a support case or provider check refers to stay (that history cannot be deleted); the rest is removed.
       const referenced = (await pg.query(`SELECT 1 FROM private.support_cases WHERE order_id = ANY($1)
@@ -126,8 +143,8 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
         [offerId, releaseId, `prod_support_${rand}`, `price_support_${rand}`, "b".repeat(64)]);
       const snapshot = { offer_id: offerId, release_id: releaseId, price_id: `price_support_${rand}`, price_minor: 1500, currency: "usd",
         provider_account_id: "acct_synthetic", provider_mode: "test", terms_version: "v1", collection_id: collectionId,
-        publication_id: null, product_id: `prod_support_${rand}`, tax_mode: "exclusive", quantity: 1, refund_policy_version: "v1",
-        access_policy_version: "v1", member_recipe_ids: [staff.recipeId], manifest_hash: "b".repeat(64), source_digest: "c".repeat(64),
+        publication_id: null, product_id: `prod_support_${rand}`, tax_mode: "exclusive", quantity: 1, refund_policy_version: policyVersion,
+        access_policy_version: policyVersion, member_recipe_ids: [staff.recipeId], manifest_hash: "b".repeat(64), source_digest: "c".repeat(64),
         frozen_at: new Date().toISOString() };
       await pg.query(`INSERT INTO private.purchase_orders(id,support_reference,owner_principal,user_id,offer_id,release_id,snapshot,
           attempt_state,session_id,idempotency_key,version) VALUES($1,$2,$3,$3,$4,$5,$6::jsonb,'closed',$7,$8,2)`,
@@ -147,6 +164,13 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
       await pg.query("INSERT INTO public.access_entitlements(user_id,release_id,state) VALUES($1,$2,'active')", [customer.userId, releaseId]);
       await pg.query(`INSERT INTO private.collection_access_policies(release_id,source_kind,policy,approved_by,approval_reason)
         VALUES($1,'stripe_purchase','additions-v1',$2,'Synthetic support fixture')`, [releaseId, staff.userId]);
+      if (options.policyVersion) {
+        insertedPolicy = (await pg.query(`INSERT INTO private.commerce_access_policies(refund_policy_version,access_policy_version,policy,
+            approved_by,evidence) VALUES($1,$1,$2::jsonb,$3,'Synthetic browser test policy') ON CONFLICT DO NOTHING RETURNING 1`,
+          [policyVersion, { id: `synthetic-${policyVersion}`, approved: true, version: policyVersion, pendingRefund: "retain",
+            partialRefund: "retain", fullRefund: "ineligible", inquiry: "retain", formalOpen: "hold", formalLost: "ineligible",
+            duration: "indefinite", fixedSeconds: null }, staff.userId])).rowCount === 1;
+      }
       if (options.verifier) {
         await pg.query(`INSERT INTO private.commerce_verifier_principals(principal,label,registered_by)
           VALUES(current_user,'Local test verifier',$1)
@@ -166,6 +190,9 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     supportReference,
     legacyOrderId,
     legacyReference,
+    collectionId,
+    paymentIntentId: `pi_support_${rand}`,
+    paymentId,
     login: (page, aal = "aal2") => role === "customer" ? customer.login(page, aal) : staff.login(page, aal),
     revoke: () => staff.revoke(),
     closeCustomer: async () => {

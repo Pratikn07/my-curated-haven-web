@@ -53,6 +53,20 @@ SELECT 'dispute', d.provider_dispute_id, d.order_id, p.order_id
 FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.payment_id WHERE d.order_id <> p.order_id;
 ```
 
+## Webhooks and recovery
+
+Every signed Stripe event is stored once per account, mode and event id, with the order it concerns. When the verifier login is registered and the order's policy is approved, the event is claimed under a fence, the order is re-checked with Stripe and the answer goes through the shared writer; the event body only identifies the order. Otherwise the guarded older processing handles the delivery, so purchases keep working while no policy is approved. Revoking the verifier login (above) is the emergency stop for automated reconciliation: webhooks fall back to the older path.
+
+A retryable failure (Stripe unreachable, a check already running, an order not yet known) answers 500 so Stripe delivers again, and the inbox waits 1, 2, 4 … up to 60 minutes between attempts. After 10 attempts an event is set aside (`dead_letter`), as are events whose evidence needs a person.
+
+Recovery, on demand, for one mode at a time. A dry run (the default) prints counts only:
+
+```bash
+node scripts/commerce-reconcile.mjs --mode test --limit 10
+```
+
+`--apply` re-checks due events and orders left open for 15 minutes, under each order's approved policy; at most 100 per run. It never scans Stripe or creates checkouts, and orders without an approved policy are counted as `policy_missing`. It needs `SUPPORT_VERIFIER_DATABASE_URL` and, to apply, the Stripe key for that mode.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

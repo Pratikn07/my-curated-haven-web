@@ -647,7 +647,7 @@ CREATE FUNCTION private.commerce_reconcile_system(p_observation_id uuid, p_opera
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_verifier text := private.commerce_verifier(); v_obs private.commerce_provider_observations;
 BEGIN
- IF p_event_id IS NOT NULL AND p_event_id !~ '^evt_[A-Za-z0-9_]{1,255}$' THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
+ IF p_event_id IS NOT NULL AND p_event_id !~ '^evt_[A-Za-z0-9_-]{1,255}$' THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
  SELECT * INTO v_obs FROM private.commerce_provider_observations WHERE id = p_observation_id;
  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
  IF v_obs.purpose NOT IN ('webhook','recovery') THEN RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_DENIED'; END IF;
