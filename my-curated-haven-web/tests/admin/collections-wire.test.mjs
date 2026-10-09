@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { controlWire, createWire, saveWire, startWire } from "../../src/lib/admin/collections/wire.ts";
+import { controlWire, createWire, reviewWire, saveWire, startWire } from "../../src/lib/admin/collections/wire.ts";
 import { decodeDraftResult } from "../../src/lib/admin/collections/decode.ts";
 
 const ID = "93000000-0000-0000-0000-000000000001";
@@ -28,4 +28,12 @@ test("a discard result has no revision; anything malformed is unavailable", () =
   assert.equal(decodeDraftResult({ operationId: OP, noChange: false, revision: null, committedAt: "2026-10-08T00:00:00Z" }).ok, true);
   assert.equal(decodeDraftResult({ operationId: OP, noChange: "no", revision: null, committedAt: "2026-10-08T00:00:00Z" }).ok, false);
   assert.equal(decodeDraftResult(null).ok, false);
+});
+
+test("review commands name the exact revision, submission and evidence token", () => {
+  assert.deepEqual(reviewWire({ collectionId: ID, operationId: OP, reason: "Looks right", revisionId: ID, expectedVersion: 3,
+    expectedDigest: "d".repeat(64), impactToken: "t", submissionId: OP, decision: "approve", resolvedIssueIds: [OP] }), {
+    collection_id: ID, operation_id: OP, reason: "Looks right", revision_id: ID, expected_version: 3,
+    expected_digest: "d".repeat(64), impact_token: "t", submission_id: OP, decision: "approve", resolved_issue_ids: [OP],
+  });
 });

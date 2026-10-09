@@ -2,6 +2,7 @@ import type { AdminCode, Check, Result } from "../contracts";
 import type {
   CatalogPage,
   CatalogRecipe,
+  CollectionReview,
   CollectionDetail,
   CollectionEvent,
   CollectionHistoryPage,
@@ -14,6 +15,8 @@ import type {
   DraftResult,
   Member,
   RecipeSummary,
+  ReviewDecision,
+  ReviewIssue,
 } from "./contracts";
 
 /**
@@ -65,6 +68,9 @@ function nullable<T>(decode: Decoder<T>): Decoder<T | null> {
 }
 function array<T>(decode: Decoder<T>): Decoder<T[]> {
   return (v, p) => (Array.isArray(v) ? v.map((item, i) => decode(item, `${p}[${i}]`)) : bad(p));
+}
+function optional<T>(decode: Decoder<T>): Decoder<T | undefined> {
+  return (v, p) => (v === undefined ? undefined : decode(v, p));
 }
 function literal<T>(expected: T): Decoder<T> {
   return (v, p) => (v === expected ? expected : bad(p));
@@ -130,6 +136,20 @@ const event = object<CollectionEvent>({
   afterRef: nullable(string), operationId: string,
 });
 
+const reviewIssue = object<ReviewIssue>({
+  id: uuid, code: string, field: nullable(string), severity: oneOf(["blocker", "suggestion"]),
+  origin: oneOf(["human", "validation", "source", "import", "ai"]), explanation: string, raisedBy: nullable(string),
+  raisedAt: timestamp, resolved: boolean,
+});
+const reviewDecision = object<ReviewDecision>({
+  id: uuid, decision: oneOf(["approve", "changes_requested", "reject"]), reason: string, decidedAt: timestamp,
+  decidedBy: nullable(string), revisionId: uuid, version: positive, digest,
+});
+const review = object<CollectionReview>({
+  submission: nullable(object({ id: uuid, submittedAt: timestamp, submittedBy: nullable(string), reason: string })),
+  issues: array(reviewIssue), decisions: array(reviewDecision),
+});
+
 const recipeSummary = object<RecipeSummary>({ recipeId: uuid, slug: string, title: string, publication: string,
   totalMinutes: nullable(count), imagePath: string, allergens: array(string), storageNotes: nullable(string) });
 
@@ -137,7 +157,7 @@ const detail = object<CollectionDetail>({
   collectionId: uuid, identity: object({ slug: string, title: string }), sourceMode: oneOf(["legacy", "database"]),
   commerceState: oneOf(["enabled", "disabled", "no_offer", "unavailable"]),
   published: nullable(object({ publicationId: uuid, releaseId: nullable(uuid), snapshot })),
-  working: nullable(revision), readiness, impact, recipes: array(recipeSummary),
+  working: nullable(revision), readiness, impact, review, recipes: array(recipeSummary),
   history: array(event), historyCursor: nullable(string), checkedAt: timestamp,
 });
 
@@ -171,7 +191,7 @@ export function decodeCollectionDetail(data: unknown): Result<CollectionDetail> 
 }
 
 const draftResult = object<DraftResult>({ operationId: uuid, noChange: boolean, revision: nullable(revision),
-  committedAt: timestamp });
+  committedAt: timestamp, issueId: optional(uuid), decisionId: optional(uuid) });
 
 const catalogRecipe = object<CatalogRecipe>({
   recipeId: uuid, slug: string, title: string, publication: string, contentVersion: nullable(positive),

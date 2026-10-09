@@ -29,6 +29,8 @@ export interface CollectionsFixture {
 }
 
 const IMMUTABLE: [string, string][] = [
+  ["private.collection_issue_resolutions", "collection_issue_resolutions_immutable"],
+  ["private.collection_issues", "collection_issues_immutable"],
   ["private.collection_audit", "collection_audit_immutable"],
   ["private.collection_publications", "collection_publications_immutable"],
   ["private.collection_review_decisions", "collection_review_decisions_immutable"],
@@ -67,6 +69,9 @@ async function deleteCollections(pg: Client, slugPattern: string): Promise<void>
     await pg.query("UPDATE private.collection_draft_heads SET submission_id=NULL WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_draft_heads WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_publications WHERE collection_id = ANY($1)", [ids]);
+    await pg.query(`DELETE FROM private.collection_issue_resolutions WHERE issue_id IN
+      (SELECT id FROM private.collection_issues WHERE collection_id = ANY($1))`, [ids]);
+    await pg.query("DELETE FROM private.collection_issues WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_review_decisions WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_submissions WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_revisions WHERE collection_id = ANY($1)", [ids]);

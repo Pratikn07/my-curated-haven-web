@@ -8,6 +8,7 @@ import {
 import { Contents, DetailHero, type DetailModel } from "@/components/collections/CollectionDetail";
 import type { ClothName, CollectionRecipe } from "@/lib/collections/types";
 import { usableImageSrc } from "@/lib/recipes/format";
+import CollectionReview from "./CollectionReview";
 
 const FIELD_LABELS: Record<string, string> = {
   title: "Title", tagline: "Tagline", story: "Story", forWhen: "Who it helps", refresh: "Refresh promise",
@@ -43,10 +44,12 @@ function CheckList({ title, checks }: { title: string; checks: Check[] }) {
   </div>;
 }
 
-export default function CollectionPreview({ detail, working, returnTo }: {
+export default function CollectionPreview({ detail, working, returnTo, canEdit, canReview }: {
   detail: CollectionDetail;
   working: CollectionRevision;
   returnTo: string;
+  canEdit: boolean;
+  canReview: boolean;
 }) {
   const proposed = working.snapshot;
   const published = detail.published?.snapshot ?? null;
@@ -127,6 +130,8 @@ export default function CollectionPreview({ detail, working, returnTo }: {
         <CheckList title="Not yet known" checks={unknown} />
         <CheckList title="Notes" checks={notes} />
       </section>
+
+      <CollectionReview detail={detail} working={working} canEdit={canEdit} canReview={canReview} />
 
       <section aria-labelledby="preview-page" className="admin-collection__section admin-collection__preview-page">
         <h2 id="preview-page">Proposed collection page</h2>

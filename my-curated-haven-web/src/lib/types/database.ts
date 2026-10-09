@@ -1550,7 +1550,10 @@ export type Database = {
         Args: { p_collection_id: string; p_revision_id: string }
         Returns: Json
       }
+      admin_collection_issue: { Args: { p_command: Json }; Returns: Json }
       admin_collection_library: { Args: { p_query: Json }; Returns: Json }
+      admin_collection_review: { Args: { p_command: Json }; Returns: Json }
+      admin_collection_submit: { Args: { p_command: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }
       admin_draft_rebase: { Args: { p_command: Json }; Returns: Json }
       admin_draft_save: { Args: { p_command: Json }; Returns: Json }

@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(26);
+SELECT plan(47);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-collections.sql
 
@@ -114,6 +114,87 @@ INSERT INTO private.provider_payments(order_id,provider_account_id,provider_mode
 VALUES('93000000-0000-0000-0000-000000000032','acct_synthetic','live','pi_syn_live','refunded',900,'usd',now());
 SELECT is((SELECT count(*)::int FROM private.collection_protected_members('93000000-0000-0000-0000-000000000002')),1,
   'a live payment protects its recipes, even after a refund');
+
+-- Review (Task 9). Bring collection 1 back to a ready draft.
+UPDATE private.admin_console_settings SET campaign_revision='synthetic-deploy';
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(3,'admin_collection_submit',pg_temp.collection_submit_command())$$,
+  '42501','ADM_BLOCKED','a draft with stale recipe references cannot be submitted');
+SELECT pg_temp.collection_cmd(1,'admin_collection_draft_save',pg_temp.collection_save_command('93000000-0000-0000-0000-000000000001',
+  jsonb_build_object('members',pg_temp.collection_current_members('93000000-0000-0000-0000-000000000001','accepted'))));
+SELECT is(pg_temp.collection_cmd(3,'admin_collection_submit',pg_temp.collection_submit_command())#>>'{revision,state}','submitted',
+  'an editor submits the exact ready revision');
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(4,'admin_collection_review',
+  pg_temp.collection_review_command() || jsonb_build_object('expected_digest',repeat('0',64)))$$,
+  'PT409','ADM_CONFLICT','approval cannot target altered content');
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(5,'admin_collection_review',pg_temp.collection_review_command())$$,
+  '42501','ADM_DENIED','a publisher cannot make a review decision');
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(3,'admin_collection_review',pg_temp.collection_review_command())$$,
+  '42501','ADM_DENIED','an editor cannot approve their own submission');
+
+-- A human blocker must be resolved by the decision; tampered references are refused.
+CREATE TEMP TABLE issue1 AS SELECT (pg_temp.collection_cmd(4,'admin_collection_issue',pg_temp.collection_submit_command()
+  - 'impact_token' || '{"code":"COPY_TONE","field":"story","severity":"blocker","explanation":"Story repeats the tagline."}'::jsonb)
+  ->>'issueId')::uuid id;
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(4,'admin_collection_review',pg_temp.collection_review_command())$$,
+  '42501','ADM_BLOCKED','an open blocker stops approval');
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(4,'admin_collection_review',pg_temp.collection_review_command()
+  || jsonb_build_object('resolved_issue_ids',jsonb_build_array(gen_random_uuid())))$$,
+  '22023','ADM_INVALID','a resolved issue must belong to this revision');
+
+-- Authority and stage are rechecked at decision time.
+UPDATE private.collection_workspace_settings SET stage='inspection';
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(4,'admin_collection_review',pg_temp.collection_review_command())$$,
+  '42501','ADM_DISABLED','an inspection stage refuses decisions');
+UPDATE private.collection_workspace_settings SET stage='editing';
+UPDATE private.admin_memberships SET active=false, revoked_by='92000000-0000-0000-0000-000000000001', revoked_at=now()
+ WHERE user_id='92000000-0000-0000-0000-000000000004';
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(4,'admin_collection_review',pg_temp.collection_review_command())$$,
+  '42501','ADM_DENIED','a revoked reviewer cannot decide');
+
+-- Evidence that changed after submission makes the reviewed token stale.
+CREATE TEMP TABLE stale AS SELECT pg_temp.collection_review_command() || jsonb_build_object('resolved_issue_ids',
+  jsonb_build_array((SELECT id FROM issue1))) c;
+UPDATE public.recipe_bodies SET content_version=content_version+1 WHERE recipe_id='93000000-0000-0000-0000-000000000102';
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_review',(SELECT c FROM stale))$$,
+  'PT409','ADM_CONFLICT','a dependency change after submission invalidates the reviewed evidence');
+UPDATE public.recipe_bodies SET content_version=content_version-1 WHERE recipe_id='93000000-0000-0000-0000-000000000102';
+
+-- The owner approves their own submission, resolving the issue.
+CREATE TEMP TABLE approved AS SELECT pg_temp.collection_cmd(1,'admin_collection_review',pg_temp.collection_review_command()
+  || jsonb_build_object('resolved_issue_ids',jsonb_build_array((SELECT id FROM issue1)))) r;
+SELECT is((SELECT r#>>'{revision,state}' FROM approved),'approved','owner self-review approves the exact revision');
+SELECT is((SELECT count(*)::int FROM private.collection_issue_resolutions WHERE issue_id=(SELECT id FROM issue1)),1,
+  'the resolution is recorded against the decision');
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_review',pg_temp.collection_review_command('reject'))$$,
+  'PT409','ADM_CONFLICT','a submission gets one decision');
+
+-- After approval: identical content keeps the approval; a change needs reopen and leaves the old decision in history.
+SELECT is(pg_temp.collection_cmd(1,'admin_collection_draft_save',pg_temp.collection_save_command('93000000-0000-0000-0000-000000000001','{}'))
+  ->>'noChange','true','a no-change save after approval changes nothing');
+SELECT is((SELECT state FROM private.collection_draft_heads WHERE collection_id='93000000-0000-0000-0000-000000000001'),'approved',
+  'and the draft stays approved');
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_draft_save',
+  pg_temp.collection_save_command('93000000-0000-0000-0000-000000000001','{"tagline":"After approval"}'))$$,
+  '42501','ADM_BLOCKED','approved content is not edited without reopening');
+SELECT is(pg_temp.collection_cmd(1,'admin_collection_draft_save',
+  pg_temp.collection_save_command('93000000-0000-0000-0000-000000000001','{"tagline":"After approval"}')
+  || '{"reopen_reviewed":true}'::jsonb)#>>'{revision,state}','draft','reopening returns the draft for another review');
+SELECT is((SELECT count(*)::int FROM private.collection_review_decisions WHERE collection_id='93000000-0000-0000-0000-000000000001'),1,
+  'the earlier decision stays in history');
+
+-- Unknown evidence cannot be submitted or approved.
+UPDATE private.admin_console_settings SET campaign_revision=NULL;
+SELECT throws_ok($$SELECT pg_temp.collection_cmd(3,'admin_collection_submit',pg_temp.collection_submit_command())$$,
+  '42501','ADM_BLOCKED','unknown campaign evidence blocks submission');
+UPDATE private.admin_console_settings SET campaign_revision='synthetic-deploy';
+
+-- The workspace sees review state.
+SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000002','aal2');
+SET LOCAL ROLE authenticated;
+CREATE TEMP TABLE d2 AS SELECT public.admin_collection_detail('93000000-0000-0000-0000-000000000001') d;
+RESET ROLE;
+SELECT is((SELECT d#>>'{review,decisions,0,decidedBy}' FROM d2),'owner@synthetic.test','decisions name the human');
+SELECT is((SELECT d#>>'{review,decisions,0,decision}' FROM d2),'approve','and the verdict');
 
 SELECT * FROM finish();
 ROLLBACK;

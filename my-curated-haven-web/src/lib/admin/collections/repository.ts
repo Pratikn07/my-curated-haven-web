@@ -4,13 +4,13 @@ import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
   CatalogPage, CollectionCommand, CollectionDetail, CollectionHistoryPage, CollectionLibrary, CollectionQuery, CollectionSnapshot,
-  DraftControl, DraftResult, SaveCollectionCommand,
+  DraftControl, DraftResult, IssueCollectionCommand, ReviewCollectionCommand, SaveCollectionCommand, SubmitCollectionCommand,
 } from "./contracts";
 import {
   decodeCatalogPage, decodeCollectionDetail, decodeCollectionHistory, decodeCollectionLibrary, decodeDraftResult,
   decodeImpactResult,
 } from "./decode";
-import { controlWire, createWire, saveWire, startWire } from "./wire";
+import { controlWire, createWire, issueWire, reviewWire, saveWire, startWire, submitWire } from "./wire";
 import { collectionReadiness } from "./readiness";
 import covers from "@/config/collection-covers.json";
 import type { CollectionImpact, CoverAsset } from "./contracts";
@@ -81,4 +81,19 @@ export async function saveCollectionDraft(input: SaveCollectionCommand): Promise
 export async function controlCollectionDraft(input: DraftControl): Promise<Result<DraftResult>> {
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_collection_draft_control", { p_command: controlWire(input) }), strict(decodeDraftResult), true);
+}
+
+export async function submitCollection(input: SubmitCollectionCommand): Promise<Result<DraftResult>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_submit", { p_command: submitWire(input) }), strict(decodeDraftResult), true);
+}
+
+export async function raiseCollectionIssue(input: IssueCollectionCommand): Promise<Result<DraftResult>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_issue", { p_command: issueWire(input) }), strict(decodeDraftResult), true);
+}
+
+export async function reviewCollection(input: ReviewCollectionCommand): Promise<Result<DraftResult>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_review", { p_command: reviewWire(input) }), strict(decodeDraftResult), true);
 }

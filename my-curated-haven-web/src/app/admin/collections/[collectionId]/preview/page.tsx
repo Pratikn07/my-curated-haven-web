@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { safeCollectionReturn } from "@/lib/admin/collections/query";
 import { loadCollectionDetail } from "@/lib/admin/collections/repository";
+import { getAdminContext } from "@/lib/admin/context";
 import CollectionPreview from "@/components/admin/collections/CollectionPreview";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +20,14 @@ export default async function CollectionPreviewPage({
   const query = await searchParams;
   const returnTo = safeCollectionReturn(typeof query.returnTo === "string" ? query.returnTo : null);
   if (!UUID.test(collectionId)) redirect("/admin/collections");
-  const detail = await loadCollectionDetail(collectionId);
+  const [detail, context] = await Promise.all([loadCollectionDetail(collectionId), getAdminContext()]);
+  const writable = context.ok && (context.value.collectionStage === "editing" || context.value.collectionStage === "publication");
+  const can = (permission: "collection.edit" | "collection.review") =>
+    writable && context.ok && context.value.operator.permissions.includes(permission);
   if (!detail.ok) {
     return <p role="status">This collection is unavailable ({detail.code}, reference {detail.reference}). <Link href={returnTo}>Back to collections</Link></p>;
   }
   if (!detail.value.working) redirect(`/admin/collections/${collectionId}`);
-  return <CollectionPreview detail={detail.value} working={detail.value.working} returnTo={returnTo} />;
+  return <CollectionPreview detail={detail.value} working={detail.value.working} returnTo={returnTo}
+    canEdit={can("collection.edit")} canReview={can("collection.review")} />;
 }

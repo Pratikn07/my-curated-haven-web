@@ -13,6 +13,10 @@ const LABELS: Record<string, string> = {
   "collection.review": "Review decision recorded",
   "collection.publish": "Published",
   "collection.discard": "Private draft discarded",
+  "collection.create": "Private collection created",
+  "collection.copy": "Draft copied from an earlier publication",
+  "collection.rebase": "Draft moved onto the current publication",
+  "collection.issue": "Review issue raised",
 };
 
 function label(event: CollectionEvent): string {

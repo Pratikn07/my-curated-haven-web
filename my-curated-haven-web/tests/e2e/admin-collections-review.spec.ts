@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { createCollectionsFixture, type CollectionsFixture } from "./collections-admin-fixtures";
 
 test.describe.configure({ mode: "serial" });
@@ -99,4 +99,119 @@ test("a collection without a draft has no preview", async ({ page }) => {
   await f.login(page, "viewer", "aal2");
   await page.goto(`/admin/collections/00000000-0000-4000-8000-000000000000/preview`);
   await expect(page.getByText("This collection is unavailable (NOT_FOUND")).toBeVisible();
+});
+
+// ---- Review (Task 9) ----
+
+async function recordCampaigns() {
+  await f.query(`INSERT INTO private.admin_campaign_snapshots(deployment_revision,configuration,configuration_hash)
+    VALUES('synthetic-collections-review','{"campaigns":[]}','synthetic') ON CONFLICT (deployment_revision) DO NOTHING`);
+  await f.query("UPDATE private.admin_console_settings SET campaign_revision='synthetic-collections-review' WHERE singleton");
+}
+
+/** Make the open draft fully checkable: current recipe references and every recipe confirmed as fitting. */
+async function makeReady(page: Page, note: string) {
+  await page.goto(`/admin/collections/${f.collectionId}/edit`);
+  await expect(page.getByRole("status", { name: "Save status" })).not.toHaveText("Preparing editor");
+  const refresh = page.getByRole("button", { name: "Use current recipe versions" });
+  if (await refresh.isVisible()) {
+    await refresh.click();
+    await expect(page.getByText("Recipe references updated.")).toBeVisible();
+  }
+  for (const select of await page.getByLabel("Belongs here?").all()) await select.selectOption("accepted");
+  await page.getByLabel("Tagline").fill(note);
+  await page.getByLabel("Reason for this change").fill(note);
+  const reopen = page.getByRole("checkbox", { name: /Reopen this/ });
+  if (await reopen.isVisible()) await reopen.check();
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("status", { name: "Save status" })).toContainText("Draft saved");
+  await page.getByRole("link", { name: "Preview & changes" }).click();
+  await expect(page.getByRole("region", { name: "Readiness" })).toContainText("Ready for review.");
+}
+
+async function submit(page: Page, note: string) {
+  const review = page.getByRole("region", { name: "Review" });
+  await review.getByLabel("Note for the reviewer").fill(note);
+  await review.getByRole("button", { name: "Submit for review" }).click();
+  await expect(review.getByRole("status", { name: "Review status" })).toHaveText("Submitted for review.");
+  await expect(review).toContainText("Submitted by");
+}
+
+test("separated roles: an editor submits, a publisher cannot decide, a reviewer resolves an issue and approves", async ({ page }) => {
+  await recordCampaigns();
+  await f.login(page, "editor", "aal2");
+  await makeReady(page, "Editor update");
+  await submit(page, "Ready for a look");
+
+  await page.context().clearCookies();
+  await f.login(page, "publisher", "aal2");
+  await page.goto(`/admin/collections/${f.collectionId}/preview`);
+  const review = page.getByRole("region", { name: "Review" });
+  await expect(review).toContainText("Waiting for a reviewer.");
+  await expect(review.getByRole("button", { name: "Approve this revision" })).toHaveCount(0);
+
+  await page.context().clearCookies();
+  await f.login(page, "reviewer", "aal2");
+  await page.goto(`/admin/collections/${f.collectionId}/preview`);
+  await review.getByLabel("What needs to change").fill("The tagline repeats the title.");
+  await review.getByRole("button", { name: "Record issue" }).click();
+  await expect(review.getByRole("status", { name: "Review status" })).toHaveText("Issue recorded.");
+  await expect(review.getByRole("heading", { name: "Open issues" })).toBeVisible();
+  await review.getByLabel("Reason for your decision").fill("Looks right once the tagline is fine");
+  await expect(review.getByRole("button", { name: "Approve this revision" })).toBeDisabled();
+  await expect(review).toContainText("Resolve the blocking issues above to approve.");
+  await review.getByRole("checkbox", { name: /Resolved: The tagline repeats the title/ }).check();
+  await review.getByRole("button", { name: "Approve this revision" }).click();
+  await expect(review.getByRole("status", { name: "Review status" })).toHaveText("Approved. This exact revision can now be published.");
+  await expect(review).toContainText(/Approved revision \d+ by syn-coll-reviewe-/);
+  const head = await f.query("SELECT state FROM private.collection_draft_heads WHERE collection_id=$1", [f.collectionId]);
+  expect(head.rows[0].state).toBe("approved");
+  const projection = await f.query("SELECT count(*)::int n FROM public.collection_publication_projection WHERE collection_id=$1", [f.collectionId]);
+  expect(projection.rows[0].n).toBe(0);
+});
+
+test("editing approved content needs a reopen and sends it back for review, keeping the old decision", async ({ page }) => {
+  await f.login(page, "owner", "aal2");
+  await page.goto(`/admin/collections/${f.collectionId}/edit`);
+  await expect(page.getByRole("status", { name: "Save status" })).not.toHaveText("Preparing editor");
+  await page.getByLabel("Tagline").fill("A change after approval");
+  await page.getByLabel("Reason for this change").fill("Late change");
+  await expect(page.getByRole("button", { name: "Save draft", exact: true })).toBeDisabled();
+  await page.getByRole("checkbox", { name: /Reopen this approved draft/ }).check();
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("status", { name: "Save status" })).toContainText("Draft saved");
+  await page.getByRole("link", { name: "Preview & changes" }).click();
+  const review = page.getByRole("region", { name: "Review" });
+  await expect(review.getByRole("button", { name: "Submit for review" })).toBeVisible();
+  await expect(review.getByRole("heading", { name: "Decisions" })).toBeVisible();
+  await expect(review).toContainText("Approved revision");
+});
+
+test("the owner may review their own submission", async ({ page }) => {
+  await recordCampaigns();
+  await f.login(page, "owner", "aal2");
+  await makeReady(page, "Owner update");
+  await submit(page, "Self review");
+  const review = page.getByRole("region", { name: "Review" });
+  await review.getByLabel("Reason for your decision").fill("Checked the preview");
+  await review.getByRole("button", { name: "Approve this revision" }).click();
+  await expect(review.getByRole("status", { name: "Review status" })).toHaveText("Approved. This exact revision can now be published.");
+});
+
+test("unknown campaign evidence keeps submission disabled", async ({ page }) => {
+  await f.login(page, "owner", "aal2");
+  await f.query("UPDATE private.admin_console_settings SET campaign_revision=NULL WHERE singleton");
+  await page.goto(`/admin/collections/${f.collectionId}/edit`);
+  await expect(page.getByRole("status", { name: "Save status" })).not.toHaveText("Preparing editor");
+  await page.getByLabel("Tagline").fill("Unknown evidence");
+  await page.getByLabel("Reason for this change").fill("Edit");
+  const reopen = page.getByRole("checkbox", { name: /Reopen this/ });
+  if (await reopen.isVisible()) await reopen.check();
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("status", { name: "Save status" })).toContainText("Draft saved");
+  await page.getByRole("link", { name: "Preview & changes" }).click();
+  const review = page.getByRole("region", { name: "Review" });
+  await review.getByLabel("Note for the reviewer").fill("Try");
+  await expect(review.getByRole("button", { name: "Submit for review" })).toBeDisabled();
+  await expect(review).toContainText("Fix the items under Readiness before submitting.");
 });

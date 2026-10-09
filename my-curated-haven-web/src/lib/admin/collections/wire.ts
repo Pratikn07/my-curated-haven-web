@@ -1,4 +1,7 @@
-import type { CollectionCommand, CollectionSnapshot, DraftControl, SaveCollectionCommand } from "./contracts";
+import type {
+  CollectionCommand, CollectionSnapshot, DraftControl, IssueCollectionCommand, ReviewCollectionCommand, SaveCollectionCommand,
+  SubmitCollectionCommand,
+} from "./contracts";
 
 /**
  * The single adapter from camelCase commands to the snake_case JSON the collection RPCs read.
@@ -25,4 +28,22 @@ export function saveWire(input: SaveCollectionCommand) {
 
 export function controlWire(input: DraftControl) {
   return { ...base(input), action: input.action, expected_digest: input.expectedDigest, reference_id: input.referenceId };
+}
+
+function exact(input: CollectionCommand & { revisionId: string; expectedVersion: number; expectedDigest: string }) {
+  return { ...base(input), revision_id: input.revisionId, expected_version: input.expectedVersion,
+    expected_digest: input.expectedDigest };
+}
+
+export function submitWire(input: SubmitCollectionCommand) {
+  return { ...exact(input), impact_token: input.impactToken };
+}
+
+export function issueWire(input: IssueCollectionCommand) {
+  return { ...exact(input), code: input.code, field: input.field, severity: input.severity, explanation: input.explanation };
+}
+
+export function reviewWire(input: ReviewCollectionCommand) {
+  return { ...submitWire(input), submission_id: input.submissionId, decision: input.decision,
+    resolved_issue_ids: input.resolvedIssueIds };
 }

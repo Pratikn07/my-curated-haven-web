@@ -133,3 +133,18 @@ CREATE FUNCTION pg_temp.collection_current_members(p_collection uuid, p_fit text
  FROM jsonb_array_elements(pg_temp.collection_head_snapshot(p_collection)->'members') WITH ORDINALITY x(m,o)
  JOIN public.recipe_catalog c ON c.id=(m->>'recipeId')::uuid JOIN public.recipe_bodies b ON b.recipe_id=c.id
 $$;
+
+-- Task 9: submit and review commands for the collection's current head, with a freshly evaluated token.
+CREATE FUNCTION pg_temp.collection_submit_command(p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001') RETURNS jsonb
+LANGUAGE sql AS $$
+ SELECT jsonb_build_object('collection_id',p_collection,'operation_id',gen_random_uuid(),'reason','Synthetic submit',
+  'revision_id',h.revision_id,'expected_version',h.version,'expected_digest',r.digest,
+  'impact_token',private.collection_evaluate(p_collection,h.revision_id)#>>'{value,token}')
+ FROM private.collection_draft_heads h JOIN private.collection_revisions r ON r.id=h.revision_id WHERE h.collection_id=p_collection
+$$;
+CREATE FUNCTION pg_temp.collection_review_command(p_decision text DEFAULT 'approve',
+  p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001') RETURNS jsonb LANGUAGE sql AS $$
+ SELECT pg_temp.collection_submit_command(p_collection) || jsonb_build_object('reason','Synthetic review',
+  'submission_id',(SELECT submission_id FROM private.collection_draft_heads WHERE collection_id=p_collection),
+  'decision',p_decision,'resolved_issue_ids','[]'::jsonb)
+$$;
