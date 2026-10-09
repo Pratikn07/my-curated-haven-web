@@ -1531,10 +1531,17 @@ export type Database = {
     }
     Functions: {
       admin_collection_catalog: { Args: { p_query: Json }; Returns: Json }
+      admin_collection_create: { Args: { p_command: Json }; Returns: Json }
       admin_collection_detail: {
         Args: { p_collection_id: string }
         Returns: Json
       }
+      admin_collection_draft_control: {
+        Args: { p_command: Json }
+        Returns: Json
+      }
+      admin_collection_draft_save: { Args: { p_command: Json }; Returns: Json }
+      admin_collection_draft_start: { Args: { p_command: Json }; Returns: Json }
       admin_collection_history: {
         Args: { p_collection_id: string; p_cursor?: string }
         Returns: Json

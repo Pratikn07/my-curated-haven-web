@@ -82,3 +82,32 @@ BEGIN
   '93000000-0000-0000-0000-000000000301','93000000-0000-0000-0000-000000000402',owner,owner::text,'human',
   'Synthetic event '||n,'success' FROM generate_series(1,27) n;
 END $$;
+
+-- Command helpers (Task 6+). Synthetic staff n maps to 92000000-0000-0000-0000-00000000000n.
+CREATE FUNCTION pg_temp.collection_head_snapshot(p_collection uuid) RETURNS jsonb LANGUAGE sql AS $$
+ SELECT r.snapshot FROM private.collection_draft_heads h JOIN private.collection_revisions r ON r.id=h.revision_id
+ WHERE h.collection_id=p_collection
+$$;
+
+-- A save command for the collection's current head with p_patch merged into its snapshot.
+CREATE FUNCTION pg_temp.collection_save_command(
+  p_collection uuid DEFAULT '93000000-0000-0000-0000-000000000001', p_patch jsonb DEFAULT '{"title":"Private title"}')
+RETURNS jsonb LANGUAGE sql AS $$
+ SELECT jsonb_build_object('collection_id',p_collection,'operation_id',gen_random_uuid(),'reason','Synthetic save',
+  'expected_version',h.version,'expected_digest',r.digest,
+  'base',jsonb_build_object('publication_id',r.base_publication_id,'digest',r.base_digest),
+  'snapshot',r.snapshot || p_patch,'reopen_reviewed',false)
+ FROM private.collection_draft_heads h JOIN private.collection_revisions r ON r.id=h.revision_id
+ WHERE h.collection_id=p_collection
+$$;
+
+-- Run a collection command as synthetic staff member p_user with aal2.
+CREATE FUNCTION pg_temp.collection_cmd(p_user int, p_function text, p_command jsonb) RETURNS jsonb LANGUAGE plpgsql AS $$
+DECLARE result jsonb;
+BEGIN
+ PERFORM pg_temp.admin_claims(('92000000-0000-0000-0000-'||lpad(p_user::text,12,'0'))::uuid,'aal2');
+ SET LOCAL ROLE authenticated;
+ EXECUTE format('SELECT public.%I($1)', p_function) USING p_command INTO result;
+ RESET ROLE;
+ RETURN result;
+END $$;

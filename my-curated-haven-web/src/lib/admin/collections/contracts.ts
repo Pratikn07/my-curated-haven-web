@@ -63,3 +63,6 @@ export type CollectionRow = { collectionId: string; slug: string; title: string;
 export type CollectionLibrary = { rows: CollectionRow[]; filteredTotal: number;
   page: number; pageSize: 25; checkedAt: string };
 export type SnapshotChange = { field: string; before: unknown; after: unknown };
+export type DraftControl = CollectionCommand & { action: "rebase" | "copy_publication" | "discard";
+  expectedDigest: string; referenceId: string | null };
+export type DraftResult = { operationId: string; noChange: boolean; revision: CollectionRevision | null; committedAt: string };

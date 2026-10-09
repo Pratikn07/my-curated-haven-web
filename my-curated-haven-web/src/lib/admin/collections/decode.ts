@@ -9,6 +9,7 @@ import type {
   CollectionRevision,
   CollectionRow,
   CollectionSnapshot,
+  DraftResult,
   Member,
   RecipeSummary,
 } from "./contracts";
@@ -164,6 +165,13 @@ function run<T>(decode: Decoder<T>, value: unknown): Result<T> {
 
 export function decodeCollectionDetail(data: unknown): Result<CollectionDetail> {
   return run(detail, data);
+}
+
+const draftResult = object<DraftResult>({ operationId: uuid, noChange: boolean, revision: nullable(revision),
+  committedAt: timestamp });
+
+export function decodeDraftResult(data: unknown): Result<DraftResult> {
+  return run(draftResult, data);
 }
 
 export function decodeCollectionHistory(data: unknown): Result<CollectionHistoryPage> {
