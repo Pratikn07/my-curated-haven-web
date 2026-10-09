@@ -166,7 +166,7 @@ Cross-domain references are read-only until the responsible phase enables its ow
 
 ## 12. Delivery and review boundary
 
-This design is a visual and interaction crosswalk for the four [Phase 1](../plans/2026-10-04-admin-recipe-workspace.md), [Phase 2](../plans/2026-10-07-admin-collections-phase-two.md), [Phase 3](../plans/2026-10-07-admin-customer-support-phase-three.md), and [Phase 4](../plans/2026-10-07-admin-campaigns-phase-four.md) implementation plans. Those plans remain responsible for backend authority, data invariants, tests, and release gates. The newer Phase 5 operations/governance planning is outside this requested visual scope.
+This design is a visual and interaction crosswalk for the four [Phase 1](../plans/2026-10-04-admin-recipe-workspace.md), [Phase 2](../plans/2026-10-07-admin-collections-phase-two.md), [Phase 3](../plans/2026-10-07-admin-customer-support-phase-three.md), and [Phase 4](../plans/2026-10-07-admin-campaigns-phase-four.md) implementation plans. Those plans remain responsible for backend authority, data invariants, tests, and release gates. The newer Phase 5 operations/governance planning is outside this requested visual scope. Its UI work is planned separately in the [Phase 5 operations UI plan](../plans/2026-10-08-admin-console-phase-five-ui.md), which adds gates UX9–UX12.
 
 The current branch contains functional Phase 1 admin routes and components, including a minimal shell, recipe library, editor, review, publication, and Team. Its existing preview/usage presentation does not yet match this visual design. Phases 2–4 are planned workflows; their presence in this document and the illustrative concept does not mean their screens or backend contracts are implemented or active.
 
