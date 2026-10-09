@@ -141,9 +141,10 @@ export type OrderSupportDto = {
   access: AccessExplanation | null;
   history: SupportHistoryPage;
 };
+/** `email` is null for a closed account, which support finds only through the orders it owned. */
 export type CustomerSupportDto = {
   userId: string;
-  email: string;
+  email: string | null;
   confirmed: boolean;
   available: boolean;
   orders: { orderId: string; supportReference: string; mode: Mode; collectionId: string; historicalTitle: string | null }[];

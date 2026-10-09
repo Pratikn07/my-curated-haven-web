@@ -1620,6 +1620,12 @@ export type Database = {
         Args: { p_operation_id: string; p_reason: string; p_user_id: string }
         Returns: Json
       }
+      admin_support_customer: {
+        Args: { p_cursor: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
+      admin_support_order: { Args: { p_order_id: string }; Returns: Json }
       collection_effective_access: {
         Args: { p_collection_id: string }
         Returns: Json
