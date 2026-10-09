@@ -166,6 +166,26 @@ Evidence:
 - Browser, registry build: storefront and collections specs 22/22, including the new retired-collection 404 case.
 - Browser, full chromium-desktop suite on the default build (every spec except privacy): 255 passed, 7 skipped (registry-only and single-project specs), 0 failed.
 
+Owner decisions (2026-10-09, in chat):
+- Existing buyer groups get **Give additions** (`additions-v1`). The publish page records it per group at each collection's first database publication.
+- **`COMMERCE_DATABASE_URL`: approved for production.** The owner enters the value in Vercel; it is a database credential, so no agent handles it. Set it only after the commerce, Phase 1 audit and Phase 2 migrations are applied in production: the pages that read it query those tables.
+- **Operator channel: approved.** An agent will prepare and publish with the owner's recorded approval. Registration needs the Phase 2 migrations in production and a new database login that the owner creates (the password stays with the owner), then `collection_operator_register` (runbook, Task 16 section).
+- **Push, pull request and merge to `main`: approved.** A merge deploys the code to production on Vercel; it applies no migration.
+
+Production found before merging (read-only, 2026-10-09): migrations are applied through `20261005002200_admin_lock_timeout`. Not applied: the commerce schema, measurement and Phase 8 guard migrations from September, the Phase 1 audit migrations (`20261007*`, already on `main`) and every Phase 2 migration (`20261008*`). Two code paths would have broken on that schema, and both now fall back:
+- The recipe access check calls `recipe_effective_access`. When the database answers `PGRST202` (function not found), it reads purchases the way it did before: an active, in-date entitlement to a release that contains the recipe. Without this, a signed-in visitor opening a paid recipe would see an error instead of the paywall.
+- The display refresh straight after a recipe publish, correction or withdrawal used the retry path, which reads `admin_recipe_operations` (a Phase 1 audit function). It now checks aal2 and recipe publish or withdraw permission and reads the slug from `recipe_catalog`, so it works on the older schema too. Retry refresh keeps its operation check.
+Everything else is already safe on the older schema: collection pages read no database in legacy mode without `COMMERCE_DATABASE_URL`, the console treats a missing collection stage as collections off, and the recipe editor and publish page show tag and correction reads as unavailable without blocking an ordinary publish.
+
+Also found: `tests/data/backend-errors.test.mjs` "a regular signed-in user without a purchase remains denied" failed on this branch, because its fake database answered every function call with the admin-role answer. CI runs that suite, so the pull request would have failed. The fake now answers per function, with new cases for the resolver failing and for the pre-resolver fallback (entitled, other recipe, expired).
+
+Bug reports raised during this work:
+- Admin conflicts retrying forever through PostgREST (`40001`): fixed on this branch by `20261008000310_admin_conflict_not_retryable.sql`, so it ships with this merge. It still needs applying in production with the other migrations.
+- Mobile bookcase navigation hang (chromium-mobile, `collections.spec.ts`): not reproduced. `collections.spec.ts` on chromium-mobile passed 18/18, then 72/72 with `--repeat-each=4`; the original probe navigates in about 3 s on Pixel 7 and desktop, also with an unreachable commerce database; the full chromium-mobile project passed 223 with 39 skipped; and GitHub CI on `main` (`2df211a`) passed the same tests. The earlier failures came from a heavily loaded local machine (several servers and database stacks running at once). No code change.
+
+Evidence for these fixes:
+- Unit: data 25/25, admin 83/83, collections 54/54, homepage 13/13, phase10 16/16. Lint and typecheck pass.
+
 Ruling: The plan's `20261007` migration timestamps precede the applied Phase 1 audit migrations through `20261007233000`. Allocate every Phase 2 migration after that timestamp in dependency order; update all references and verification commands before implementation. Cost if wrong: migration replay or production upgrade could execute in the wrong order.
 
 - [ ] A1: Existing collection experience is reconciled against source mappings; inspection and public browser paths preserve intended behavior.

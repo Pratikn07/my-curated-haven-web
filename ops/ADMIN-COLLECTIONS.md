@@ -93,6 +93,7 @@ Nothing here authorises a production migration, deploy or stage change; each ste
 
 Before any production step:
 
+- Production had migrations through `20261005002200_admin_lock_timeout` on 2026-10-09. Still to apply, in filename order: the September commerce, measurement and Phase 8 guard migrations, the Phase 1 audit migrations (`20261007*`), then Phase 2 through `20261008001300_collection_review_fixes.sql`. Merging to `main` deploys code only; the code runs on the older schema (collections off, purchases read the pre-resolver way) until they are applied.
 - Migrations apply in filename order through `20261008001300_collection_review_fixes.sql`. `20261008000310_admin_conflict_not_retryable.sql` also fixes a live Phase 1 problem (PostgREST retrying `40001` conflicts in a loop) and can ship on its own first.
 - Take a point-in-time backup and confirm a restore works in a non-production project. Never restore production over live payments: recover forward.
 - Confirm `src/lib/types/database.ts` equals `supabase gen types typescript` for the target.
@@ -103,13 +104,13 @@ Release sequence, one confirmed step at a time:
 1. Deploy schema and code with the collection stage `disabled` and `COLLECTIONS_SOURCE_BACKEND=legacy`. Check the public collection pages, a buyer's library and checkout as before.
 2. Recipe tag import: dry run, owner review of the report, then apply (Task 15 section).
 3. Collection catalog import: dry run, owner review (blockers, `MEMBERSHIP_MISMATCH`, `ACCESS_POLICY_UNKNOWN`, `ORDER_SNAPSHOT_INCOMPLETE`), then private apply (Task 4 section).
-4. Owner decisions before any offer moves: reconcile legacy orders without provider context, and decide which existing buyer groups get `additions-v1` or `original-only` (recorded at the first publication of each collection, or beforehand).
+4. Owner decisions before any offer moves: reconcile legacy orders without provider context. Existing buyer groups get `additions-v1` (owner decision 2026-10-09), chosen on the publish page at each collection's first publication.
 5. Set the collection stage to `inspection`; the owner checks every collection against the live site. Then `editing` for the owner only; no new staff permissions in the same step.
 6. Set `COMMERCE_DATABASE_URL` for production (a remote, non-loopback database URL), then deploy with `COLLECTIONS_SOURCE_BACKEND=registry` while every collection is still `legacy`; confirm the public pages are unchanged (registry-compatible builds are the rollback floor from the first database publication onward).
 7. Rehearse publication, buyer access and checkout in a non-production project with test-mode offers.
 8. Set the stage to `publication` for the owner. Publish one collection at a time through the publish page. After each one, check the public page, an existing buyer's library and recipe, a checkout reservation, and that the receipt shows the refresh as updated (or use Retry refresh).
 9. Record the deployed SHA and the fresh authenticated owner, customer, recipe body, file and checkout evidence in `GATES.md`.
-10. Register an operator login only if the owner asks for the operator channel (Task 16 section).
+10. Register the operator login (the owner approved the operator channel on 2026-10-09; Task 16 section). The owner creates the database login and keeps its password.
 
 Recovery:
 
