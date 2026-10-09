@@ -136,7 +136,7 @@ BEGIN
   RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_BLOCKED';
  END IF;
  IF EXISTS(SELECT 1 FROM public.recipe_collections WHERE slug=p_slug AND id<>p_collection_id) THEN
-  RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+  RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
  END IF;
  UPDATE public.recipe_collections SET slug=p_slug, updated_at=now() WHERE id=p_collection_id;
 END $$;
@@ -200,11 +200,11 @@ BEGIN
    jsonb_build_object('collection_id',ids.collection_id,'reason',ids.reason,'snapshot',snap));
  IF result IS NOT NULL THEN RETURN result; END IF;
  IF EXISTS(SELECT 1 FROM public.recipe_collections WHERE id=ids.collection_id) THEN
-  RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+  RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
  END IF;
  PERFORM private.collection_validate_snapshot(snap, ids.collection_id);
  IF EXISTS(SELECT 1 FROM public.recipe_collections WHERE slug=snap->>'slug') THEN
-  RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+  RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
  END IF;
  INSERT INTO public.recipe_collections(id,slug,title,public_summary,listing_state)
  VALUES(ids.collection_id,snap->>'slug',snap->>'title',snap->>'tagline','unlisted');
@@ -231,7 +231,7 @@ BEGIN
    jsonb_build_object('reason',ids.reason));
  IF result IS NOT NULL THEN RETURN result; END IF;
  IF EXISTS(SELECT 1 FROM private.collection_draft_heads WHERE collection_id=ids.collection_id) THEN
-  RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+  RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
  END IF;
  base := private.collection_active_base(ids.collection_id);
  SELECT p.snapshot INTO snap FROM private.collection_publications p WHERE p.id=(base->>'publicationId')::uuid;
@@ -267,7 +267,7 @@ BEGIN
   OR (p_command#>>'{base,publication_id}') IS DISTINCT FROM current.base_publication_id::text
   OR (p_command#>>'{base,digest}') IS DISTINCT FROM current.base_digest
   OR (private.collection_active_base(ids.collection_id)->>'publicationId') IS DISTINCT FROM current.base_publication_id::text THEN
-  RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+  RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
  END IF;
  PERFORM private.collection_validate_snapshot(snap, ids.collection_id);
  IF private.collection_digest(snap) = current.digest THEN
@@ -316,10 +316,10 @@ BEGIN
  base := private.collection_active_base(ids.collection_id);
 
  IF action = 'copy_publication' THEN
-  IF head.collection_id IS NOT NULL THEN RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT'; END IF;
+  IF head.collection_id IS NOT NULL THEN RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT'; END IF;
   SELECT snapshot INTO snap FROM private.collection_publications WHERE id=ref AND collection_id=ids.collection_id;
   IF snap IS NULL OR (p_command->>'expected_digest') IS DISTINCT FROM (base->>'digest') THEN
-   RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+   RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
   END IF;
   -- Keep today's protected recipes, taking their references from the current publication.
   SELECT p.snapshot->'members' INTO current_members FROM private.collection_publications p WHERE p.id=(base->>'publicationId')::uuid;
@@ -337,7 +337,7 @@ BEGIN
   IF head.collection_id IS NULL THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
   SELECT * INTO current FROM private.collection_revisions WHERE id=head.revision_id;
   IF (p_command->>'expected_digest') IS DISTINCT FROM current.digest THEN
-   RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+   RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
   END IF;
   IF action = 'discard' THEN
    DELETE FROM private.collection_draft_heads WHERE collection_id=ids.collection_id;
@@ -347,7 +347,7 @@ BEGIN
   ELSE
    -- rebase: the caller names the publication it reviewed as the new base.
    IF ref IS DISTINCT FROM (base->>'publicationId')::uuid OR current.base_publication_id IS NOT DISTINCT FROM ref THEN
-    RAISE EXCEPTION USING ERRCODE='40001', MESSAGE='ADM_CONFLICT';
+    RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
    END IF;
    PERFORM private.collection_assert_protected(ids.collection_id, current.snapshot);
    rev := private.collection_append_revision(ids.collection_id, current.snapshot, base, actor, ids.operation_id, ids.reason, 'draft');

@@ -153,7 +153,7 @@ SELECT lives_ok($q$SELECT public.admin_draft_start('91000000-0000-0000-0000-0000
 SELECT throws_ok($q$SELECT public.admin_revision_submit(jsonb_set(pg_temp.submit_cmd(
   '91000000-0000-0000-0000-000000000051', '93000000-0000-0000-0000-000000000120'),
   '{expected_version}', '0'))$q$,
-  '40001', 'ADM_CONFLICT', 'stale version cannot submit');
+  'PT409', 'ADM_CONFLICT', 'stale version cannot submit');
 SELECT lives_ok($q$SELECT public.admin_revision_submit(pg_temp.submit_cmd(
   '91000000-0000-0000-0000-000000000051', '93000000-0000-0000-0000-000000000121'))$q$, 'valid submit');
 SELECT is(
@@ -218,10 +218,10 @@ RESET ROLE;
 SELECT pg_temp.admin_claims('92000000-0000-0000-0000-000000000004', 'aal2');
 SET LOCAL ROLE authenticated;
 SELECT throws_ok($$SELECT public.admin_revision_review(pg_temp.stale_review_command())$$,
-  '40001', 'ADM_CONFLICT', 'decision is bound to current submitted snapshot');
+  'PT409', 'ADM_CONFLICT', 'decision is bound to current submitted snapshot');
 SELECT throws_ok($q$SELECT public.admin_revision_review(
   pg_temp.approve_cmd('91000000-0000-0000-0000-000000000051', '93000000-0000-0000-0000-000000000127'))$q$,
-  '40001', 'ADM_CONFLICT', 'one decision per submission');
+  'PT409', 'ADM_CONFLICT', 'one decision per submission');
 RESET ROLE;
 
 -- Editor cannot review; reviewer cannot edit.

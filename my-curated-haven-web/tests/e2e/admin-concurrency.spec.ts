@@ -177,7 +177,7 @@ test("simultaneous saves admit one winner and one conflict", async () => {
         await clientB.query("ROLLBACK").catch(() => {});
       }
       expect(receiptA.rows[0].receipt.version).toBe(2);
-      expect(conflict?.code ?? "").toBe("40001");
+      expect(conflict?.code ?? "").toBe("PT409");
       expect(conflict?.message ?? "").toContain("ADM_CONFLICT");
     } finally {
       await clientA.end().catch(() => {});

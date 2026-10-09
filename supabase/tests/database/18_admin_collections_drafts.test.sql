@@ -8,7 +8,7 @@ UPDATE private.collection_workspace_settings SET stage='editing';
 -- Authority, stage and conflicts.
 SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_draft_save',
   pg_temp.collection_save_command() || '{"expected_version":999}'::jsonb)$$,
-  '40001','ADM_CONFLICT','stale save cannot overwrite another admin');
+  'PT409','ADM_CONFLICT','stale save cannot overwrite another admin');
 SELECT throws_ok($$SELECT pg_temp.collection_cmd(2,'admin_collection_draft_save',pg_temp.collection_save_command())$$,
   '42501','ADM_DENIED','a viewer cannot save drafts');
 SELECT throws_ok($$SELECT pg_temp.collection_cmd(4,'admin_collection_draft_save',pg_temp.collection_save_command())$$,
@@ -81,7 +81,7 @@ SELECT is(pg_temp.collection_cmd(1,'admin_collection_draft_save',
 -- Starting a second draft is a conflict.
 SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_draft_start',jsonb_build_object(
   'collection_id','93000000-0000-0000-0000-000000000001','operation_id',gen_random_uuid(),'reason','Second draft'))$$,
-  '40001','ADM_CONFLICT','one open draft per collection');
+  'PT409','ADM_CONFLICT','one open draft per collection');
 
 -- Discard keeps history; a new draft starts from the publication.
 SELECT is(pg_temp.collection_cmd(1,'admin_collection_draft_control',jsonb_build_object(
@@ -107,7 +107,7 @@ FROM private.collection_publications p WHERE p.id='93000000-0000-0000-0000-00000
 SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_draft_control',jsonb_build_object(
   'collection_id','93000000-0000-0000-0000-000000000001','operation_id',gen_random_uuid(),'reason','Copy',
   'action','copy_publication','expected_digest',(SELECT digest FROM private.collection_publications WHERE id='93000000-0000-0000-0000-000000000201'),
-  'reference_id','93000000-0000-0000-0000-000000000203'))$$,'40001','ADM_CONFLICT','copy needs the collection to have no open draft');
+  'reference_id','93000000-0000-0000-0000-000000000203'))$$,'PT409','ADM_CONFLICT','copy needs the collection to have no open draft');
 DELETE FROM private.collection_draft_heads WHERE collection_id='93000000-0000-0000-0000-000000000001';
 CREATE TEMP TABLE copied AS SELECT pg_temp.collection_cmd(1,'admin_collection_draft_control',jsonb_build_object(
   'collection_id','93000000-0000-0000-0000-000000000001','operation_id',gen_random_uuid(),'reason','Copy',
@@ -127,7 +127,7 @@ UPDATE private.collection_active_publications SET publication_id='93000000-0000-
  WHERE collection_id='93000000-0000-0000-0000-000000000001';
 SELECT throws_ok($$SELECT pg_temp.collection_cmd(1,'admin_collection_draft_save',
   pg_temp.collection_save_command('93000000-0000-0000-0000-000000000001','{"tagline":"After publish"}'))$$,
-  '40001','ADM_CONFLICT','a draft based on an older publication cannot save');
+  'PT409','ADM_CONFLICT','a draft based on an older publication cannot save');
 SELECT is(pg_temp.collection_cmd(1,'admin_collection_draft_control',jsonb_build_object(
   'collection_id','93000000-0000-0000-0000-000000000001','operation_id',gen_random_uuid(),'reason','Rebase',
   'action','rebase','expected_digest',(SELECT digest FROM private.collection_revisions WHERE id=
@@ -156,7 +156,7 @@ SELECT throws_ok($$SELECT pg_temp.collection_cmd(3,'admin_collection_create',jso
   'collection_id','93000000-0000-0000-0000-000000000004','operation_id',gen_random_uuid(),'reason','Duplicate',
   'snapshot',pg_temp.collection_head_snapshot('93000000-0000-0000-0000-000000000003')
     || '{"collectionId":"93000000-0000-0000-0000-000000000004"}'::jsonb))$$,
-  '40001','ADM_CONFLICT','a slug already in use is refused');
+  'PT409','ADM_CONFLICT','a slug already in use is refused');
 SELECT is(pg_temp.collection_cmd(3,'admin_collection_draft_save',pg_temp.collection_save_command(
   '93000000-0000-0000-0000-000000000003','{"slug":"synthetic-renamed-shelf"}'))#>>'{revision,snapshot,slug}',
   'synthetic-renamed-shelf','an unpublished collection can change its slug');
