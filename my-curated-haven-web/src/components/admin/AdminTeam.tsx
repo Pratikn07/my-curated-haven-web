@@ -9,7 +9,11 @@ const ROLE_DESCRIPTIONS = [
   { role: "editor", label: "Editor", description: "Prepare and save private recipe revisions." },
   { role: "reviewer", label: "Reviewer", description: "Review an exact saved revision." },
   { role: "publisher", label: "Publisher", description: "Publish an approved revision and withdraw a recipe." },
+  { role: "support_viewer", label: "Support (view only)", description: "Look up a customer's purchases and read why they have access. No changes." },
+  { role: "support_operator", label: "Support", description: "Look up purchases, keep case notes, check Stripe and prepare repairs; apply only repairs the owner approved." },
 ];
+const ROLE_LABELS: Record<string, string> = Object.fromEntries([["owner", "Owner"],
+  ...ROLE_DESCRIPTIONS.map(({ role, label }) => [role, label])]);
 const subscribeHydration = () => () => {};
 const clientHydrated = () => true;
 const serverHydrated = () => false;
@@ -134,7 +138,7 @@ export default function AdminTeam({ initialStaff }: { initialStaff: StaffRow[] }
           <thead><tr><th scope="col">Account</th><th scope="col">Roles</th><th scope="col">State</th><th scope="col">Change record</th><th scope="col">Action</th></tr></thead>
           <tbody>{staff.map((row) => <tr key={row.userId}>
             <th scope="row">{row.email}</th>
-            <td>{row.roles.length ? row.roles.map((role) => role[0].toUpperCase() + role.slice(1)).join(", ") : "None"}</td>
+            <td>{row.roles.length ? row.roles.map((role) => ROLE_LABELS[role] ?? role).join(", ") : "None"}</td>
             <td>{row.active ? "Active" : "Revoked"}</td>
             <td>{row.active ? `Granted ${row.grantedAt} by ${row.grantedBy}` : `Revoked ${row.revokedAt ?? "unknown"} by ${row.revokedBy ?? "unknown"}`}</td>
             <td>{row.active && !row.roles.includes("owner") ? <button type="button" disabled={pending || !hydrated} onClick={() => { setRevokeTarget(row); setRevokeReason(""); }}>Revoke access</button> : null}</td>
@@ -143,7 +147,7 @@ export default function AdminTeam({ initialStaff }: { initialStaff: StaffRow[] }
       </section>
       {revokeTarget ? <section className="admin-team__revoke" aria-label="Confirm access revocation">
         <h2>Revoke {revokeTarget.email}</h2>
-        <p>This removes their current recipe workspace roles. The owner role cannot be revoked here.</p>
+        <p>This removes all their current admin roles, including support. The owner role cannot be revoked here.</p>
         <label htmlFor="team-revoke-reason">Reason for revocation</label>
         <input id="team-revoke-reason" value={revokeReason} onChange={(event) => setRevokeReason(event.target.value)} disabled={!hydrated} />
         <button type="button" onClick={confirmRevoke} disabled={pending || !hydrated || !revokeReason.trim()}>Confirm revocation</button>

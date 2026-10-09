@@ -42,6 +42,10 @@ test("golden vector: the digest is SHA-256 of the canonical facts", () => {
     '{"accountId":"acct_support_test","capturedMinor":1500,"chargeId":"ch_support","currency":"usd","disputes":[],'
     + '"mode":"test","paidAt":"2026-10-01T10:00:00Z","paymentIntentId":"pi_support","paymentState":"paid",'
     + '"refunds":[],"sessionId":"cs_test_support"}');
-  assert.match(materialFactsDigest(paidFacts()), /^[0-9a-f]{64}$/);
+  // The same vectors are pinned in SQL suite 70 against private.support_digest.
+  assert.equal(materialFactsDigest(paidFacts()), "47c7edb642e7f1b4a6edf427b5e48ad0590c42cb93a2e8ca1c9072b5cd4c2850");
+  assert.equal(materialFactsDigest({ ...paidFacts(), refunds: [refund("re_b", 200), refund("re_a", 100)] }),
+    "e87045b490c8aec5658546aaf719bd30fff787bf0f49035b5e7e3643a4ff9e3d");
+  assert.equal(canonicalSupport({ "é": 1, e: 2, q: "a\"b\n\u0001/ü" }), '{"e":2,"q":"a\\"b\\n\\u0001/ü","é":1}');
   assert.equal(materialFactsDigest(paidFacts()), materialFactsDigest(JSON.parse(JSON.stringify(paidFacts()))));
 });

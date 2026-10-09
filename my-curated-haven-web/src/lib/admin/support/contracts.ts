@@ -27,7 +27,7 @@ export type {
  * own verification time. Refund and dispute-notice contracts live beside these in their own modules.
  */
 
-export type SupportStage = "disabled" | "inspection" | "diagnosis" | "repair";
+export type { SupportStage } from "../contracts";
 export type SupportPermission = "support.read" | "support.case.write"
   | "support.provider.inspect" | "support.repair.prepare"
   | "support.repair.approve" | "support.repair.execute"
