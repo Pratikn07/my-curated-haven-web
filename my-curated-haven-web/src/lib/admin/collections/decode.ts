@@ -10,6 +10,7 @@ import type {
   CollectionLibrary,
   CollectionReadiness,
   CollectionReceipt,
+  CollectionReceiptLog,
   CollectionRevision,
   CollectionRow,
   CollectionSnapshot,
@@ -221,6 +222,12 @@ const undecided = object<UndecidedAccess>({ releaseId: uuid, version: positive, 
 
 export function decodeReceipt(data: unknown): Result<CollectionReceipt> {
   return run(receipt, data);
+}
+
+const receiptLog = object<CollectionReceiptLog>({ base: object({ publicationId: nullable(uuid), digest }), receipts: array(receipt) });
+
+export function decodeReceiptLog(data: unknown): Result<CollectionReceiptLog> {
+  return run(receiptLog, data);
 }
 
 export function decodeUndecidedAccess(data: unknown): Result<UndecidedAccess[]> {

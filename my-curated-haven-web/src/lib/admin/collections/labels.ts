@@ -72,3 +72,23 @@ export function shelfLabel(shelf: string): string {
 export function formatUtc(value: string): string {
   return new Date(value).toLocaleString("en-US", { timeZone: "UTC", timeZoneName: "short" });
 }
+
+const FIELD_LABELS: Record<string, string> = {
+  title: "Title", tagline: "Tagline", story: "Story", forWhen: "Who it helps", refresh: "Refresh promise",
+  shelf: "Shelf", sortOrder: "Shelf position", stage: "Ages", series: "Series", listingState: "Listing",
+  availability: "Browsing", cloth: "Cloth", cover: "Cover", slug: "Address",
+};
+
+export function fieldLabel(field: string): string {
+  return FIELD_LABELS[field] ?? field;
+}
+
+/** How a buyer group got its access, for the additions decision at publication. */
+export function accessSourceLabel(kind: string): string {
+  return ({
+    stripe_purchase: "Card purchases",
+    native_legacy: "Purchases from before this console",
+    support_grant: "Access given by support",
+    promotional: "Promotional access",
+  } as Record<string, string>)[kind] ?? kind.replaceAll("_", " ");
+}

@@ -3,18 +3,12 @@ import type { Check } from "@/lib/admin/contracts";
 import type { CollectionDetail, CollectionRevision, CollectionSnapshot } from "@/lib/admin/collections/contracts";
 import { diffCollection } from "@/lib/admin/collections/snapshot";
 import {
-  availabilityLabel, formatUtc, listingLabel, seriesLabel, shelfLabel, stageLabel,
+  availabilityLabel, fieldLabel, formatUtc, listingLabel, seriesLabel, shelfLabel, stageLabel,
 } from "@/lib/admin/collections/labels";
 import { Contents, DetailHero, type DetailModel } from "@/components/collections/CollectionDetail";
 import type { ClothName, CollectionRecipe } from "@/lib/collections/types";
 import { usableImageSrc } from "@/lib/recipes/format";
 import CollectionReview from "./CollectionReview";
-
-const FIELD_LABELS: Record<string, string> = {
-  title: "Title", tagline: "Tagline", story: "Story", forWhen: "Who it helps", refresh: "Refresh promise",
-  shelf: "Shelf", sortOrder: "Shelf position", stage: "Ages", series: "Series", listingState: "Listing",
-  availability: "Browsing", cloth: "Cloth", cover: "Cover", slug: "Address",
-};
 
 function show(field: string, value: unknown): string {
   if (value === null || value === undefined || value === "") return "None";
@@ -44,12 +38,13 @@ function CheckList({ title, checks }: { title: string; checks: Check[] }) {
   </div>;
 }
 
-export default function CollectionPreview({ detail, working, returnTo, canEdit, canReview }: {
+export default function CollectionPreview({ detail, working, returnTo, canEdit, canReview, canPublish }: {
   detail: CollectionDetail;
   working: CollectionRevision;
   returnTo: string;
   canEdit: boolean;
   canReview: boolean;
+  canPublish: boolean;
 }) {
   const proposed = working.snapshot;
   const published = detail.published?.snapshot ?? null;
@@ -90,6 +85,7 @@ export default function CollectionPreview({ detail, working, returnTo, canEdit, 
         <nav className="admin-collection__preview-nav" aria-label="Draft">
           <Link href={`/admin/collections/${detail.collectionId}?returnTo=${encodeURIComponent(returnTo)}`}>Back to collection</Link>
           <Link href={`/admin/collections/${detail.collectionId}/edit?returnTo=${encodeURIComponent(returnTo)}`}>Edit private draft</Link>
+          {canPublish ? <Link href={`/admin/collections/${detail.collectionId}/publish?returnTo=${encodeURIComponent(returnTo)}`}>Review and publish</Link> : null}
         </nav>
       </header>
 
@@ -105,7 +101,7 @@ export default function CollectionPreview({ detail, working, returnTo, canEdit, 
         {!published ? <p>This collection has never been published; everything here is new.</p> : null}
         {fieldChanges.length > 0 ? <dl className="admin-collection__changes">
           {fieldChanges.map((c) => <div key={c.field}>
-            <dt>{FIELD_LABELS[c.field] ?? c.field}</dt>
+            <dt>{fieldLabel(c.field)}</dt>
             <dd><span className="admin-collection__before">Published: {show(c.field, c.before)}</span>
               <span className="admin-collection__after">Draft: {show(c.field, c.after)}</span></dd>
           </div>)}

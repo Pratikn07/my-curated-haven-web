@@ -79,6 +79,7 @@ async function deleteCollections(pg: Client, slugPattern: string): Promise<void>
     await pg.query("DELETE FROM public.collection_publication_projection WHERE collection_id = ANY($1)", [ids]);
     await pg.query("UPDATE private.collection_draft_heads SET submission_id=NULL WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_draft_heads WHERE collection_id = ANY($1)", [ids]);
+    await pg.query("DELETE FROM private.collection_refresh_jobs WHERE collection_id = ANY($1)", [ids]);
     await pg.query("DELETE FROM private.collection_publications WHERE collection_id = ANY($1)", [ids]);
     await pg.query(`DELETE FROM private.collection_issue_resolutions WHERE issue_id IN
       (SELECT id FROM private.collection_issues WHERE collection_id = ANY($1))`, [ids]);

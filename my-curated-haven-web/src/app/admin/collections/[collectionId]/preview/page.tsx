@@ -22,12 +22,13 @@ export default async function CollectionPreviewPage({
   if (!UUID.test(collectionId)) redirect("/admin/collections");
   const [detail, context] = await Promise.all([loadCollectionDetail(collectionId), getAdminContext()]);
   const writable = context.ok && (context.value.collectionStage === "editing" || context.value.collectionStage === "publication");
-  const can = (permission: "collection.edit" | "collection.review") =>
+  const can = (permission: "collection.edit" | "collection.review" | "collection.publish") =>
     writable && context.ok && context.value.operator.permissions.includes(permission);
   if (!detail.ok) {
     return <p role="status">This collection is unavailable ({detail.code}, reference {detail.reference}). <Link href={returnTo}>Back to collections</Link></p>;
   }
   if (!detail.value.working) redirect(`/admin/collections/${collectionId}`);
   return <CollectionPreview detail={detail.value} working={detail.value.working} returnTo={returnTo}
-    canEdit={can("collection.edit")} canReview={can("collection.review")} />;
+    canEdit={can("collection.edit")} canReview={can("collection.review")}
+    canPublish={can("collection.publish") && context.ok && context.value.collectionStage === "publication"} />;
 }

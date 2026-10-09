@@ -4,12 +4,12 @@ import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
   CatalogPage, CollectionCommand, CollectionDetail, CollectionHistoryPage, CollectionLibrary, CollectionQuery, CollectionSnapshot,
-  CollectionReceipt, DraftControl, DraftResult, IssueCollectionCommand, PublishCollectionCommand, ReviewCollectionCommand,
-  SaveCollectionCommand, SubmitCollectionCommand, UndecidedAccess,
+  CollectionReceipt, CollectionReceiptLog, DraftControl, DraftResult, IssueCollectionCommand, PublishCollectionCommand,
+  ReviewCollectionCommand, SaveCollectionCommand, SubmitCollectionCommand, UndecidedAccess,
 } from "./contracts";
 import {
   decodeCatalogPage, decodeCollectionDetail, decodeCollectionHistory, decodeCollectionLibrary, decodeDraftResult,
-  decodeImpactResult, decodeReceipt, decodeUndecidedAccess,
+  decodeImpactResult, decodeReceipt, decodeReceiptLog, decodeUndecidedAccess,
 } from "./decode";
 import { controlWire, createWire, issueWire, publishWire, reviewWire, saveWire, startWire, submitWire } from "./wire";
 import { collectionReadiness } from "./readiness";
@@ -109,4 +109,11 @@ export async function loadUndecidedAccess(collectionId: string): Promise<Result<
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_collection_access_decisions", { p_collection_id: collectionId }),
     strict(decodeUndecidedAccess), true);
+}
+
+/** Recent publication receipts with their current public refresh state (newest first) and the active base. */
+export async function loadCollectionReceipts(collectionId: string): Promise<Result<CollectionReceiptLog>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_collection_receipts", { p_collection_id: collectionId }),
+    strict(decodeReceiptLog), true);
 }

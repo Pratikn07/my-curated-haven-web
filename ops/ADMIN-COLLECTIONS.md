@@ -4,7 +4,7 @@ Phase 2 adds private collection drafts, human review and publication to the admi
 
 Publication stays disabled until every coupled gate in `docs/implementation/admin-collections/GATES.md` passes: buyer access (A5–A7), checkout reservation (A8), atomic publication (A11), public reader cutover and the owner walkthrough (A12). Enabling it with the old release-only reader or slug-only checkout is unsafe.
 
-Sections below are filled in by the tasks that own them: catalog import (Task 4), source cutover (Task 13), refresh recovery (Task 14), operator SQL (Task 16) and the gated release steps (Task 18).
+Sections below are filled in by the tasks that own them: catalog import (Task 4), source cutover (Task 13), publication and refresh recovery (Task 14), operator SQL (Task 16) and the gated release steps (Task 18).
 
 ## Catalog import (Task 4)
 
@@ -29,6 +29,23 @@ The collection pages, bookcase, series, showroom chapters, sitemap and the recip
 Registry mode never falls back to config when the database read fails; the read throws so a cached page keeps serving its last committed version. Once any collection has a database publication in production, registry-compatible builds are the rollback floor: switching back to `legacy` would show stale configured content for that collection. A commerce lookup failure on a collection page reads "Purchase unavailable right now", never "Opening soon" or a guessed price.
 
 Cutover order: deploy with `registry` while every collection is still `legacy` (pages unchanged), confirm parity, then publish collections one at a time through the admin (each first publication switches that collection to `database` in the same transaction).
+
+## Publication and refresh recovery (Task 14)
+
+Publishing happens on `/admin/collections/<id>/publish` ("Review collection effect"). The page shows the exact revision and digest, the recipe and page changes, buyers today, any buyer group without an additions decision (Give additions or Original only, recorded with the reason), sales and checkout effect, and who is recorded. An owner (publish and review permission) uses "Approve and publish", which records the approval of that exact revision in the same transaction. A publisher without review permission can only use "Publish approved revision" after a reviewer approved it. A stale page returns `ADM_CONFLICT` and publishes nothing.
+
+Each non-imported publication writes a row in `private.collection_refresh_jobs` in its own transaction, with the page paths taken from the publication (`/collections`, the collection page, both series pages, `/collections/test`, `/recipes`, `/sitemap.xml` and the two admin pages). Straight after the commit the server action claims that job (`private.collection_refresh_claim`, 2-minute lease, at most 10 attempts), calls `revalidatePath` for each stored path and finishes it (`private.collection_refresh_finish`). The worker procedures are not granted to `anon` or `authenticated`; only the server's database pool can call them.
+
+If the refresh fails or the server stops after the commit, the publication stays committed and its receipt shows "Refresh pending". Receipts appear under Publications on the workspace and the publish page (`admin_collection_receipts`). "Retry refresh" needs the caller to still hold `collection.publish` in the publication stage (`admin_collection_refresh_allowed`), reuses the stored paths and never calls the publication RPC again. Customer access reads are not cached, so a pending refresh only delays public page content, never what a buyer can open.
+
+To inspect jobs as an operator:
+
+```sql
+SELECT operation_id, state, attempts, error_ref, created_at, completed_at
+FROM private.collection_refresh_jobs WHERE state <> 'complete' ORDER BY created_at;
+```
+
+A job with 10 attempts is no longer claimed; check the cause (`error_ref`) first, then reset `attempts` deliberately before retrying from the workspace. History offers "Copy into new draft" for earlier publications; the copy keeps every recipe buyers own today and goes through review again.
 
 ## Local verification stack
 

@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { startCollectionDraftAction } from "@/lib/admin/collections/actions";
 
 /** The workspace's next step for an editor: open the existing draft, or prepare one from what is live. */
-export default function CollectionDraftActions({ collectionId, hasDraft, hasPublication, returnTo }: {
+export default function CollectionDraftActions({ collectionId, hasDraft, hasPublication, canPublish, returnTo }: {
   collectionId: string;
   hasDraft: boolean;
   hasPublication: boolean;
+  canPublish: boolean;
   returnTo: string;
 }) {
   const [pending, setPending] = useState(false);
@@ -33,6 +34,7 @@ export default function CollectionDraftActions({ collectionId, hasDraft, hasPubl
   if (hasDraft) return <div className="admin-workspace-action">
     <Link href={editHref}>Edit private draft</Link>
     <Link href={`/admin/collections/${collectionId}/preview?returnTo=${encodeURIComponent(returnTo)}`}>Preview &amp; changes</Link>
+    {canPublish ? <Link href={`/admin/collections/${collectionId}/publish?returnTo=${encodeURIComponent(returnTo)}`}>Review and publish</Link> : null}
   </div>;
   if (!hasPublication) return <p>This collection has nothing published to start from.</p>;
   return <div className="admin-workspace-action">

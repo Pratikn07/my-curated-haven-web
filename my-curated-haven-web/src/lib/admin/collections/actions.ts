@@ -8,6 +8,7 @@ import {
   controlCollectionDraft, createCollection, listCollectionRecipes, loadCollectionDetail, loadCollectionHistory,
   publishCollection, raiseCollectionIssue, reviewCollection, saveCollectionDraft, startCollectionDraft, submitCollection,
 } from "./repository";
+import { refreshCollectionPublication, retryCollectionRefresh } from "./refresh";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Cursor issued by admin_collection_history: "<timestamptz>|<audit uuid>".
@@ -97,7 +98,11 @@ export async function reviewCollectionAction(input: ReviewCollectionCommand) {
   return reviewCollection(input);
 }
 
-export async function publishCollectionAction(input: PublishCollectionCommand) {
+/**
+ * Owner one-step (approveNow) or separated publisher (an existing approval). The public refresh runs straight
+ * after the commit; if it fails the receipt still reports the committed publication, with refresh pending.
+ */
+export async function approveAndPublishCollection(input: PublishCollectionCommand) {
   if (!validExact(input) || typeof input.impactToken !== "string" || typeof input.approveNow !== "boolean"
     || !input.base || !(input.base.publicationId === null || UUID.test(input.base.publicationId))
     || !Array.isArray(input.accessDecisions) || !input.accessDecisions.every((d) => UUID.test(d.releaseId)
@@ -106,5 +111,13 @@ export async function publishCollectionAction(input: PublishCollectionCommand) {
   }
   const ready = await readyForApproval(input.collectionId, input.revisionId);
   if (!ready.ok) return ready;
-  return publishCollection(input);
+  const published = await publishCollection(input);
+  if (!published.ok) return published;
+  const refresh = await refreshCollectionPublication(published.value);
+  return { ok: true as const, value: { ...published.value, refreshState: refresh.state } };
+}
+
+export async function retryCollectionRefreshAction(collectionId: string, operationId: string) {
+  if (!UUID.test(collectionId) || !UUID.test(operationId)) return invalid("collection-refresh");
+  return retryCollectionRefresh(collectionId, operationId);
 }

@@ -1557,6 +1557,14 @@ export type Database = {
       admin_collection_issue: { Args: { p_command: Json }; Returns: Json }
       admin_collection_library: { Args: { p_query: Json }; Returns: Json }
       admin_collection_publish: { Args: { p_command: Json }; Returns: Json }
+      admin_collection_receipts: {
+        Args: { p_collection_id: string }
+        Returns: Json
+      }
+      admin_collection_refresh_allowed: {
+        Args: { p_collection_id: string; p_operation_id: string }
+        Returns: boolean
+      }
       admin_collection_review: { Args: { p_command: Json }; Returns: Json }
       admin_collection_submit: { Args: { p_command: Json }; Returns: Json }
       admin_console_context: { Args: never; Returns: Json }

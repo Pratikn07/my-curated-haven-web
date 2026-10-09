@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AdminContext } from "@/lib/admin/contracts";
-import type { CollectionDetail, CollectionSnapshot, Member } from "@/lib/admin/collections/contracts";
+import type { Result } from "@/lib/admin/contracts";
+import type { CollectionDetail, CollectionReceiptLog, CollectionSnapshot, Member } from "@/lib/admin/collections/contracts";
 import {
   availabilityLabel, commerceLabel, formatUtc, listingLabel, publicationLabel, seriesLabel, shelfLabel,
   sourceLabel, stageLabel, workingLabel,
@@ -8,16 +9,27 @@ import {
 import AdminRecordFrame from "../AdminRecordFrame";
 import CollectionHistory from "./CollectionHistory";
 import CollectionDraftActions from "./CollectionDraftActions";
+import CollectionReceipts from "./CollectionReceipts";
+
+function canPublishIn(context: AdminContext): boolean {
+  return context.collectionStage === "publication" && context.operator.permissions.includes("collection.publish");
+}
 
 function NextAction({ context, detail, returnTo }: { context: AdminContext; detail: CollectionDetail; returnTo: string }) {
   if (context.collectionStage === "inspection") {
     return <p>Collections are in inspection stage. You can review what is live; private drafts are not switched on yet.</p>;
   }
+  const canPublish = canPublishIn(context);
   if (!context.operator.permissions.includes("collection.edit")) {
-    return <p>You can inspect this collection. Preparing changes needs collection edit permission.</p>;
+    return <>
+      {canPublish && detail.working ? <div className="admin-workspace-action">
+        <Link href={`/admin/collections/${detail.collectionId}/publish?returnTo=${encodeURIComponent(returnTo)}`}>Review and publish</Link>
+      </div> : null}
+      <p>You can inspect this collection. Preparing changes needs collection edit permission.</p>
+    </>;
   }
   return <CollectionDraftActions collectionId={detail.collectionId} hasDraft={detail.working !== null}
-    hasPublication={detail.published !== null} returnTo={returnTo} />;
+    hasPublication={detail.published !== null} canPublish={canPublish} returnTo={returnTo} />;
 }
 
 function MemberList({ members, titles, protectedIds, addedIds, label }: {
@@ -76,9 +88,10 @@ function BuyerImpact({ detail }: { detail: CollectionDetail }) {
   </section>;
 }
 
-export default function CollectionWorkspace({ detail, context, returnTo }: {
+export default function CollectionWorkspace({ detail, context, receipts, returnTo }: {
   detail: CollectionDetail;
   context: AdminContext;
+  receipts: Result<CollectionReceiptLog>;
   returnTo: string;
 }) {
   const snapshot = detail.working?.snapshot ?? detail.published?.snapshot ?? null;
@@ -91,6 +104,8 @@ export default function CollectionWorkspace({ detail, context, returnTo }: {
   const added = new Set((draftMembers ?? []).filter((m) => !publishedIds.has(m.recipeId)).map((m) => m.recipeId));
   const removed = publishedMembers.filter((m) => draftMembers !== null && !draftMembers.some((d) => d.recipeId === m.recipeId));
   const failing = detail.readiness.checks.filter((check) => check.state !== "pass");
+  const canCopy = (context.collectionStage === "editing" || context.collectionStage === "publication")
+    && context.operator.permissions.includes("collection.edit") && detail.working === null && receipts.ok;
   return (
     <AdminRecordFrame
       eyebrow="Collection workspace"
@@ -130,8 +145,12 @@ export default function CollectionWorkspace({ detail, context, returnTo }: {
             </li>)}</ul>}
         {failing.length > 0 ? <p role="status">{failing.length} {failing.length === 1 ? "check needs" : "checks need"} attention before publication.</p> : null}
       </section>
+      {receipts.ok ? <CollectionReceipts collectionId={detail.collectionId} receipts={receipts.value.receipts}
+        canRetry={canPublishIn(context)} />
+        : <p role="status">Publication receipts are unavailable ({receipts.code}, reference {receipts.reference}).</p>}
       <CollectionHistory key={detail.history[0]?.id ?? "empty"} collectionId={detail.collectionId}
-        initial={detail.history} initialCursor={detail.historyCursor} />
+        initial={detail.history} initialCursor={detail.historyCursor}
+        copy={canCopy && receipts.ok ? { base: receipts.value.base, returnTo } : null} />
     </AdminRecordFrame>
   );
 }

@@ -1212,3 +1212,61 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Publication decision page and receipts. */
+.admin-collection-publication .admin-library__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  font-weight: 400;
+}
+
+.admin-collection-publication .admin-library__check input {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.admin-collection-publication [role="status"]:focus {
+  outline: 2px solid var(--action);
+  outline-offset: 2px;
+}
+
+.admin-collection-receipts ol {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-collection-receipts li {
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+}
+
+.admin-collection-receipts li > p {
+  margin: 0 0 var(--space-2);
+}
+
+.admin-collection-receipts code {
+  overflow-wrap: anywhere;
+}
+
+.admin-collection-receipts button {
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-collection-receipts button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

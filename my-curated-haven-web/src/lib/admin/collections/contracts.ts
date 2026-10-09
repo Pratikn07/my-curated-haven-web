@@ -30,6 +30,7 @@ export type CollectionReceipt = { operationId: string; collectionId: string;
   revisionId: string; publicationId: string | null; releaseId: string | null;
   version: number; digest: string; noChange: boolean; committedAt: string;
   refreshState: "complete" | "pending" };
+export type CollectionReceiptLog = { base: CollectionBase; receipts: CollectionReceipt[] };
 export type CollectionCommand = { collectionId: string; operationId: string; reason: string };
 export type SaveCollectionCommand = CollectionCommand & { expectedVersion: number;
   expectedDigest: string; base: CollectionBase; snapshot: CollectionSnapshot;
