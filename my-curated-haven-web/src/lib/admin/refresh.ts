@@ -5,13 +5,14 @@ import { getAdminContext } from "./context";
 import { loadAdminRecipe, loadAdminRecipeOperations } from "./context";
 import { recipeCollectionPaths } from "./recipe-corrections";
 import { settleCommittedRefresh } from "./refresh-result";
+import { createClient } from "../supabase/server";
 
 function reference(): string {
   return `admin-refresh-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export async function refreshAdminRecipe(
-  receipt: MutationReceipt,
+  receipt: Pick<MutationReceipt, "operationId" | "recipeId">,
   options?: { slug?: string; campaignSlugs?: string[] }
 ): Promise<RefreshReceipt> {
   return settleCommittedRefresh(receipt.operationId, async () => {
@@ -28,6 +29,22 @@ export async function refreshAdminRecipe(
     if (collectionPaths === null) revalidatePath("/collections", "layout");
     else for (const path of collectionPaths) revalidatePath(path);
   });
+}
+
+/**
+ * Display refresh straight after a committed publish, correction or withdrawal: aal2 staff who may publish or
+ * withdraw recipes, and the recipe's own slug read from the catalog, never paths sent by the browser. It reads
+ * nothing newer than the Phase 1 core schema, so it also works before later migrations are applied.
+ */
+export async function refreshCommittedRecipe(operationId: string, recipeId: string): Promise<RefreshReceipt> {
+  const pending = { operationId, state: "pending" as const };
+  const context = await getAdminContext();
+  if (!context.ok || context.value.assurance !== "aal2") return pending;
+  if (!context.value.operator.permissions.some((p) => p === "recipe.publish" || p === "recipe.withdraw")) return pending;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("recipe_catalog").select("slug").eq("id", recipeId).maybeSingle();
+  if (error || !data) return pending;
+  return refreshAdminRecipe({ operationId, recipeId }, { slug: data.slug });
 }
 
 export async function retryAdminRefresh(
@@ -49,18 +66,6 @@ export async function retryAdminRefresh(
   // Retry revalidates displays only; it never calls a mutation RPC again.
   return {
     ok: true,
-    value: await refreshAdminRecipe(
-      {
-        operationId,
-        recipeId,
-        revisionId: null,
-        version: 0,
-        digest: "",
-        noChange: false,
-        committedAt: "",
-        publication: detail.value.publication,
-      },
-      { slug: detail.value.active.slug }
-    ),
+    value: await refreshAdminRecipe({ operationId, recipeId }, { slug: detail.value.active.slug }),
   };
 }

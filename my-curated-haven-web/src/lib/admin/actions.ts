@@ -19,7 +19,7 @@ import {
   withdrawAdminRecipe,
 } from "@/lib/admin/recipes";
 import { publishRecipeCorrection } from "@/lib/admin/recipe-corrections";
-import { retryAdminRefresh } from "@/lib/admin/refresh";
+import { refreshCommittedRecipe, retryAdminRefresh } from "@/lib/admin/refresh";
 import { loadAdminHistory, loadAdminRecipe, loadAdminRecipeOperations } from "@/lib/admin/context";
 import { adminRpc } from "@/lib/admin/rpc";
 import type {
@@ -224,15 +224,12 @@ export async function withdrawRecipeAction(input: WithdrawCommand) {
   return withdrawAdminRecipe(input);
 }
 
-/**
- * Display refresh straight after a committed command. It runs the same checks as a retry: aal2 staff, an
- * operation of this recipe, and paths read from the database rather than sent by the browser.
- */
+/** Display refresh straight after a committed command; staff and paths are checked on the server. */
 export async function refreshRecipeAction(receipt: { operationId: string; recipeId: string }): Promise<RefreshReceipt> {
-  const pending = { operationId: String(receipt.operationId), state: "pending" as const };
-  if (!isUuid(receipt.operationId) || !isUuid(receipt.recipeId)) return pending;
-  const refreshed = await retryAdminRefresh(receipt.operationId, receipt.recipeId);
-  return refreshed.ok ? refreshed.value : pending;
+  if (!isUuid(receipt.operationId) || !isUuid(receipt.recipeId)) {
+    return { operationId: String(receipt.operationId), state: "pending" };
+  }
+  return refreshCommittedRecipe(receipt.operationId, receipt.recipeId);
 }
 
 export async function retryRefreshAction(operationId: string, recipeId: string) {

@@ -105,6 +105,12 @@ async function resolveRecipeAccess(
     p_recipe_id: recipeId,
   });
 
+  // PGRST202: the database predates the resolver (migrations are applied by hand after a deploy). Until
+  // then, purchases are read the way they were before it existed: the held release's own recipes.
+  if (effectiveError?.code === "PGRST202") {
+    return heldReleaseAccess(client, user.id, recipeId);
+  }
+
   if (effectiveError) {
     return { type: "error", message: effectiveError.message };
   }
@@ -117,4 +123,43 @@ async function resolveRecipeAccess(
     return { type: "denied" };
   }
   return { type: "error", message: "Unexpected recipe access response" };
+}
+
+/** Pre-resolver access: an active, in-date entitlement to a release that contains the recipe. */
+async function heldReleaseAccess(
+  client: SupabaseClient<Database>,
+  userId: string,
+  recipeId: string
+): Promise<AccessStatus> {
+  const { data: entitlements, error: entitlementError } = await client
+    .from("access_entitlements")
+    .select("release_id, valid_from, expires_at")
+    .eq("user_id", userId)
+    .eq("state", "active")
+    .is("revoked_at", null);
+
+  if (entitlementError) {
+    return { type: "error", message: entitlementError.message };
+  }
+
+  const now = new Date();
+  const releaseIds = (entitlements ?? [])
+    .filter((e) => new Date(e.valid_from) <= now && (!e.expires_at || new Date(e.expires_at) > now))
+    .map((e) => e.release_id);
+  if (releaseIds.length === 0) {
+    return { type: "denied" };
+  }
+
+  const { data: matched, error: membershipError } = await client
+    .from("collection_recipes")
+    .select("release_id")
+    .eq("recipe_id", recipeId)
+    .in("release_id", releaseIds)
+    .limit(1);
+
+  if (membershipError) {
+    return { type: "error", message: membershipError.message };
+  }
+
+  return matched && matched.length > 0 ? { type: "entitled", releaseId: matched[0].release_id } : { type: "denied" };
 }
