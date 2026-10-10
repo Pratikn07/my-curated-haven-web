@@ -16,6 +16,8 @@ CREATE TABLE private.support_operations (
  case_id uuid REFERENCES private.support_cases(id) ON DELETE RESTRICT,
  command jsonb NOT NULL,
  job_id uuid NOT NULL REFERENCES private.commerce_verification_jobs(id) ON DELETE RESTRICT,
+ -- The registered operator login that ran it for the human (agent runs), or NULL when the human ran it in the browser.
+ executor_principal text CHECK (executor_principal IS NULL OR executor_principal ~ '^[a-z_][a-z0-9_]{0,62}$'),
  state text NOT NULL DEFAULT 'checking' CHECK (state IN ('checking','committed')),
  receipt jsonb,
  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
@@ -29,7 +31,7 @@ LANGUAGE plpgsql SET search_path='' AS $$
 BEGIN
  IF TG_OP = 'DELETE' OR OLD.state = 'committed' OR NEW.operation_id <> OLD.operation_id OR NEW.actor <> OLD.actor
    OR NEW.proposal_id <> OLD.proposal_id OR NEW.approval_id <> OLD.approval_id OR NEW.case_id IS DISTINCT FROM OLD.case_id
-   OR NEW.command <> OLD.command OR NEW.job_id <> OLD.job_id THEN
+   OR NEW.command <> OLD.command OR NEW.job_id <> OLD.job_id OR NEW.executor_principal IS DISTINCT FROM OLD.executor_principal THEN
   RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_IMMUTABLE';
  END IF;
  RETURN NEW;
@@ -65,13 +67,13 @@ BEGIN
  RETURN jsonb_build_object('operationId', o.operation_id, 'state', 'checking', 'reasonCode', NULL);
 END $$;
 
--- Command: {operationId, proposalId, expectedDigest, caseId}. Returns {status, jobId}.
-CREATE FUNCTION public.admin_support_execute_begin(p_command jsonb) RETURNS jsonb
+-- Command: {operationId, proposalId, expectedDigest, caseId}. Returns {status, jobId}. Shared by the browser (actor is
+-- the signed-in executor, no principal) and the operator channel (actor is the approving human, principal the login).
+CREATE FUNCTION private.support_execute_begin_core(p_actor uuid, p_principal text, p_command jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE actor uuid; v_op uuid; v_existing private.support_operations; p private.support_proposals; a private.support_approvals;
+DECLARE actor uuid := p_actor; v_op uuid; v_existing private.support_operations; p private.support_proposals; a private.support_approvals;
  v_order private.purchase_orders; v_job uuid; o private.support_operations;
 BEGIN
- actor := private.support_assert('support.repair.execute', 'repair');
  IF p_command IS NULL OR jsonb_typeof(p_command) <> 'object'
    OR (SELECT array_agg(k ORDER BY k) FROM jsonb_object_keys(p_command) k) <> ARRAY['caseId','expectedDigest','operationId','proposalId']
    OR (p_command->>'operationId') !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
@@ -83,8 +85,8 @@ BEGIN
  v_op := (p_command->>'operationId')::uuid;
  SELECT * INTO v_existing FROM private.support_operations WHERE operation_id = v_op FOR UPDATE;
  IF FOUND THEN
-  -- The same person repeating the same command gets the same operation; anything else under this id is refused.
-  IF v_existing.actor <> actor OR v_existing.command <> p_command THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
+  -- The same executor repeating the same command gets the same operation; anything else under this id is refused.
+  IF v_existing.actor <> actor OR v_existing.executor_principal IS DISTINCT FROM p_principal OR v_existing.command <> p_command THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
   RETURN jsonb_build_object('status', private.support_operation_status(v_existing), 'jobId', v_existing.job_id);
  END IF;
  SELECT * INTO p FROM private.support_proposals WHERE id = (p_command->>'proposalId')::uuid FOR UPDATE;
@@ -112,21 +114,28 @@ BEGIN
  END IF;
  INSERT INTO private.commerce_verification_jobs(order_id, purpose, requested_by, operation_id, expected_order_version)
  VALUES (p.order_id, 'execution', actor, v_op, v_order.version) RETURNING id INTO v_job;
- INSERT INTO private.support_operations(operation_id, actor, proposal_id, approval_id, case_id, command, job_id)
- VALUES (v_op, actor, p.id, a.id, (p_command->>'caseId')::uuid, p_command, v_job) RETURNING * INTO o;
+ INSERT INTO private.support_operations(operation_id, actor, proposal_id, approval_id, case_id, command, job_id, executor_principal)
+ VALUES (v_op, actor, p.id, a.id, (p_command->>'caseId')::uuid, p_command, v_job, p_principal) RETURNING * INTO o;
  RETURN jsonb_build_object('status', private.support_operation_status(o), 'jobId', v_job);
 END $$;
 
-CREATE FUNCTION public.admin_support_execute(p_operation_id uuid, p_observation_id uuid) RETURNS jsonb
+CREATE FUNCTION public.admin_support_execute_begin(p_command jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE actor uuid; o private.support_operations; p private.support_proposals; a private.support_approvals;
+BEGIN
+ RETURN private.support_execute_begin_core(private.support_assert('support.repair.execute', 'repair'), NULL, p_command);
+END $$;
+
+CREATE FUNCTION private.support_execute_core(p_actor uuid, p_principal text, p_operation_id uuid, p_observation_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor uuid := p_actor; o private.support_operations; p private.support_proposals; a private.support_approvals;
  v_obs private.commerce_provider_observations; v_order private.purchase_orders; v_collection uuid; v_now jsonb; v_after jsonb;
  v_core jsonb; v_state text; v_effects jsonb; v_audit uuid; v_receipt jsonb; v_lock uuid;
 BEGIN
- actor := private.support_assert('support.repair.execute', 'repair');
  IF p_operation_id IS NULL OR p_observation_id IS NULL THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
  SELECT * INTO o FROM private.support_operations WHERE operation_id = p_operation_id FOR UPDATE;
- IF NOT FOUND OR o.actor <> actor THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
+ IF NOT FOUND OR o.actor <> actor OR o.executor_principal IS DISTINCT FROM p_principal THEN
+  RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND';
+ END IF;
  IF o.state = 'committed' THEN RETURN private.support_operation_status(o); END IF;
  SELECT * INTO p FROM private.support_proposals WHERE id = o.proposal_id;
  SELECT * INTO a FROM private.support_approvals WHERE id = o.approval_id;
@@ -179,7 +188,8 @@ BEGIN
  IF v_audit IS NULL THEN
   INSERT INTO private.access_events(actor_type, actor_id, event_type, metadata)
   VALUES ('human', actor, 'support_repair', jsonb_build_object('operationId', p_operation_id, 'proposalId', p.id, 'approvalId', a.id,
-   'observationId', v_obs.id, 'orderId', v_order.id, 'kind', p.kind, 'state', v_state, 'effects', v_effects))
+   'observationId', v_obs.id, 'orderId', v_order.id, 'kind', p.kind, 'state', v_state, 'effects', v_effects,
+   'executor', coalesce('operator:' || p_principal, 'web')))
   RETURNING id INTO v_audit;
  END IF;
  v_receipt := jsonb_build_object('operationId', p_operation_id, 'orderId', v_order.id, 'state', v_state, 'effects', v_effects,
@@ -187,6 +197,13 @@ BEGIN
  UPDATE private.support_operations SET state = 'committed', receipt = v_receipt, committed_at = clock_timestamp()
  WHERE operation_id = p_operation_id;
  RETURN v_receipt;
+END $$;
+
+CREATE FUNCTION public.admin_support_execute(p_operation_id uuid, p_observation_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+BEGIN
+ RETURN private.support_execute_core(private.support_assert('support.repair.execute', 'repair'), NULL, p_operation_id,
+  p_observation_id);
 END $$;
 
 -- An operation's status for its executor or anyone who may approve repairs; revoked staff read nothing.
@@ -203,6 +220,7 @@ BEGIN
 END $$;
 
 REVOKE ALL ON FUNCTION private.support_operation_guard(), private.support_effect_now(private.purchase_orders),
+ private.support_execute_begin_core(uuid,text,jsonb), private.support_execute_core(uuid,text,uuid,uuid),
  private.support_operation_status(private.support_operations) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_support_execute_begin(jsonb), public.admin_support_execute(uuid,uuid),
  public.admin_support_operation(uuid) FROM PUBLIC, anon;

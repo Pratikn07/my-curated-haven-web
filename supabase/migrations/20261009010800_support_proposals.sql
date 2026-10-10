@@ -5,7 +5,7 @@
 -- evidence and rolls it back, so the preview is exactly what the writer would do now; for `rebuild_projection` it
 -- reprojects access the same way and rolls back, leaving payment facts and purchase sources alone. Nothing submitted
 -- by the caller becomes a before or after fact. The proposal, its blockers and its digest are stored and cannot be
--- changed; a different repair is a new proposal. Proposals expire five minutes after preparation.
+-- changed; a different repair is a new proposal. Web proposals expire five minutes after preparation.
 
 CREATE TABLE private.support_proposals (
  id uuid PRIMARY KEY,
@@ -35,29 +35,20 @@ LANGUAGE sql IMMUTABLE SET search_path='' AS $$
  SELECT p_proposal - 'id' - 'observationId' - 'digest' - 'expiresAt'
 $$;
 
-CREATE FUNCTION public.admin_support_prepare(p_order_id uuid, p_observation_id uuid, p_kind text, p_reason text,
-  p_operation_id uuid) RETURNS jsonb
+-- The shared preparation rules for one actor (the browser wrapper and the operator channel both use it). Inputs are
+-- already validated; it does no session checks and no operation ledger. Web proposals last five minutes; operator
+-- proposals last 30 minutes, the owner's window for agent-run repairs.
+CREATE FUNCTION private.support_prepare_core(p_actor uuid, p_order_id uuid, p_observation_id uuid, p_kind text, p_reason text,
+  p_operation_id uuid, p_channel text) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE
- actor uuid; v_receipt jsonb; v_order private.purchase_orders; v_obs private.commerce_provider_observations;
+ actor uuid := p_actor; v_order private.purchase_orders; v_obs private.commerce_provider_observations;
  v_job private.commerce_verification_jobs; v_source private.access_sources; v_binding jsonb; v_policy jsonb; v_sim jsonb;
  v_effects jsonb; v_blockers text[] := '{}'; v_collection uuid; v_dependency text; v_proposal jsonb; v_digest text;
  v_id uuid := gen_random_uuid(); v_now timestamptz := clock_timestamp(); v_reason text := btrim(p_reason);
  v_before boolean; v_after boolean;
+ v_ttl interval := CASE p_channel WHEN 'operator' THEN interval '30 minutes' ELSE interval '300 seconds' END;
 BEGIN
- actor := private.support_assert('support.repair.prepare', 'repair');
- -- Preparing from provider evidence also needs the right to see it.
- IF NOT private.support_has(actor, 'support.provider.inspect') THEN RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_DENIED'; END IF;
- IF p_order_id IS NULL OR p_observation_id IS NULL OR p_operation_id IS NULL OR p_kind IS NULL
-   OR p_kind NOT IN ('reconcile_order','rebuild_projection') OR v_reason IS NULL OR length(v_reason) NOT BETWEEN 1 AND 500 THEN
-  RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
- END IF;
- v_receipt := private.admin_begin_operation(actor, p_operation_id, 'support.prepare', p_order_id,
-  jsonb_build_object('observationId', p_observation_id, 'kind', p_kind, 'reason', v_reason));
- IF v_receipt IS NOT NULL THEN
-  RETURN (SELECT proposal FROM private.support_proposals WHERE id = (v_receipt->>'proposalId')::uuid);
- END IF;
-
  SELECT * INTO v_order FROM private.purchase_orders WHERE id = p_order_id;
  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
  -- A closed account is not repaired here: its purchases stay with the closed principal.
@@ -127,17 +118,39 @@ BEGIN
   'ownerPrincipal', v_order.owner_principal, 'binding', v_binding, 'kind', p_kind, 'observationId', v_obs.id,
   'materialDigest', v_obs.material_digest, 'expectedOrderVersion', v_order.version, 'dependencyToken', v_dependency,
   'policyVersion', coalesce(v_policy->>'version', 'none'), 'effects', coalesce(v_effects, '[]'), 'blockers', to_jsonb(v_blockers),
-  'expiresAt', private.commerce_utc(v_now + interval '300 seconds'), 'reason', v_reason);
+  'expiresAt', private.commerce_utc(v_now + v_ttl), 'reason', v_reason);
  v_digest := private.support_digest(private.support_proposal_material(v_proposal));
  v_proposal := v_proposal || jsonb_build_object('digest', v_digest);
- INSERT INTO private.support_proposals(id, actor, operation_id, order_id, observation_id, kind, proposal, digest, blocked, prepared_at,
-  expires_at)
- VALUES (v_id, actor, p_operation_id, v_order.id, v_obs.id, p_kind, v_proposal, v_digest, cardinality(v_blockers) > 0, v_now,
-  v_now + interval '300 seconds');
- PERFORM private.admin_finish_operation(actor, p_operation_id, jsonb_build_object('proposalId', v_id));
+ INSERT INTO private.support_proposals(id, actor, operation_id, order_id, observation_id, kind, channel, proposal, digest, blocked,
+  prepared_at, expires_at)
+ VALUES (v_id, actor, p_operation_id, v_order.id, v_obs.id, p_kind, p_channel, v_proposal, v_digest, cardinality(v_blockers) > 0, v_now,
+  v_now + v_ttl);
  RETURN v_proposal;
 END $$;
 
-REVOKE ALL ON FUNCTION private.support_proposal_material(jsonb) FROM PUBLIC, anon, authenticated;
+CREATE FUNCTION public.admin_support_prepare(p_order_id uuid, p_observation_id uuid, p_kind text, p_reason text,
+  p_operation_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor uuid; v_receipt jsonb; v_reason text := btrim(p_reason); v_proposal jsonb;
+BEGIN
+ actor := private.support_assert('support.repair.prepare', 'repair');
+ -- Preparing from provider evidence also needs the right to see it.
+ IF NOT private.support_has(actor, 'support.provider.inspect') THEN RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_DENIED'; END IF;
+ IF p_order_id IS NULL OR p_observation_id IS NULL OR p_operation_id IS NULL OR p_kind IS NULL
+   OR p_kind NOT IN ('reconcile_order','rebuild_projection') OR v_reason IS NULL OR length(v_reason) NOT BETWEEN 1 AND 500 THEN
+  RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
+ END IF;
+ v_receipt := private.admin_begin_operation(actor, p_operation_id, 'support.prepare', p_order_id,
+  jsonb_build_object('observationId', p_observation_id, 'kind', p_kind, 'reason', v_reason));
+ IF v_receipt IS NOT NULL THEN
+  RETURN (SELECT proposal FROM private.support_proposals WHERE id = (v_receipt->>'proposalId')::uuid);
+ END IF;
+ v_proposal := private.support_prepare_core(actor, p_order_id, p_observation_id, p_kind, v_reason, p_operation_id, 'web');
+ PERFORM private.admin_finish_operation(actor, p_operation_id, jsonb_build_object('proposalId', v_proposal->>'id'));
+ RETURN v_proposal;
+END $$;
+
+REVOKE ALL ON FUNCTION private.support_proposal_material(jsonb), private.support_prepare_core(uuid,uuid,uuid,text,text,uuid,text)
+ FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_support_prepare(uuid,uuid,text,text,uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_support_prepare(uuid,uuid,text,text,uuid) TO authenticated;

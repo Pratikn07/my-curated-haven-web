@@ -67,6 +67,37 @@ node scripts/commerce-reconcile.mjs --mode test --limit 10
 
 `--apply` re-checks due events and orders left open for 15 minutes, under each order's approved policy; at most 100 per run. It never scans Stripe or creates checkouts, and orders without an approved policy are counted as `policy_missing`. It needs `SUPPORT_VERIFIER_DATABASE_URL` and, to apply, the Stripe key for that mode.
 
+## Agent-run repairs (operator channel)
+
+An agent may apply an approved access repair, never a refund or a dispute notice. It works through its own database login, registered by the database owner with separate rights to record approvals (attest) and to apply them (execute); neither is the verifier login. Operator proposals and approvals last 30 minutes.
+
+Database-owner steps, once per environment:
+
+1. `CREATE ROLE mch_support_agent LOGIN PASSWORD '<generated>' IN ROLE mch_support_operator;`
+2. `SELECT private.support_operator_register('mch_support_agent', 'Support agent', '<owner user id>', true, true);` (attest, execute)
+3. Give the agent `SUPPORT_OPERATOR_DATABASE_URL` for that login, and `SUPPORT_VERIFIER_DATABASE_URL` for the verifier login, in its own runtime environment only.
+4. To stop it at once: `SELECT private.support_operator_revoke('mch_support_agent');`
+
+The agent's sequence (from `my-curated-haven-web/`):
+
+```bash
+node scripts/admin-support-operator.mjs --preview --order <order id> --observation <observation id> --kind reconcile_order --reason "<why>" --human <support user id> --operation <new uuid>
+```
+
+It shows the order reference, the Stripe mode and account, the digest, expiry and every effect. The agent asks the owner about exactly that preview. When the owner says yes, the agent writes a private approval file (owner-writable only, at most 4 KB) with exactly `proposalId`, `digest`, `humanId` (the owner) and `evidenceReference` (where the answer was given, up to 200 characters, never the transcript), then:
+
+```bash
+node scripts/admin-support-operator.mjs --attest-file ./approval.json
+```
+
+```bash
+node scripts/admin-support-operator.mjs --execute --proposal <proposal id> --operation <new uuid> --mode test --account acct_…
+```
+
+`--mode` and `--account` have no default and must match the proposal's order. Execution gets fresh evidence from the verifier; if it differs from what was approved, nothing is applied and a new preview is needed. Repeating the same `--execute` returns the stored receipt.
+
+Trust limitation: the database checks the login, the owner's current authority and the exact proposal, but cannot prove the owner said yes. Each operator approval therefore stores the login that recorded it and the evidence reference, and the operation stores the human and the executing login separately.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

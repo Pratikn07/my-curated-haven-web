@@ -12,8 +12,13 @@ CREATE TABLE private.support_approvals (
  digest text NOT NULL CHECK (digest ~ '^[0-9a-f]{64}$'),
  authoriser uuid NOT NULL REFERENCES auth.users(id) ON DELETE RESTRICT,
  channel text NOT NULL CHECK (channel IN ('web','operator')),
+ -- Operator approvals name the registered login that recorded the human's answer and a short reference to where the
+ -- answer was given (never a transcript). Web approvals have neither.
+ attested_by text CHECK (attested_by IS NULL OR attested_by ~ '^[a-z_][a-z0-9_]{0,62}$'),
+ evidence_reference text CHECK (evidence_reference IS NULL OR length(btrim(evidence_reference)) BETWEEN 1 AND 200),
  approved_at timestamptz NOT NULL DEFAULT clock_timestamp(),
- expires_at timestamptz NOT NULL
+ expires_at timestamptz NOT NULL,
+ CHECK ((channel = 'operator') = (attested_by IS NOT NULL AND evidence_reference IS NOT NULL))
 );
 CREATE TRIGGER support_approvals_immutable BEFORE UPDATE OR DELETE ON private.support_approvals
  FOR EACH ROW EXECUTE FUNCTION private.admin_immutable();
