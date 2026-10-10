@@ -106,6 +106,18 @@ Run retention regularly with `admin_support_retention_run(operation)` (owner, an
 
 `admin_support_metrics(mode)` gives support readers counts for one mode: waiting provider checks and the oldest one's age, the webhook backlog, orders whose newest check disagrees with their purchase source, why repairs were blocked, repair outcomes and post-checks (last 30 days). It holds no ids, emails, notes or provider data. Support log lines keep only an operation id, a code, a reference and a state.
 
+## Owner refunds
+
+Only the owner, signed in with MFA, can check, prepare, approve, reserve and submit a refund. Submission also needs `support_workspace_settings.refund_submission_enabled` (off by default), the repair stage, a live approval (five minutes at most) and a fresh owner check of the order that says exactly what the approved check said.
+
+Before turning submission on in an environment:
+
+1. Create a Stripe restricted key with only the refund write permission and the reads the account requires, and store it as `STRIPE_REFUND_SECRET_KEY` in the server's runtime settings (never in the browser, never in a database). A `test` key only works for test-mode orders and a `live` key only for live ones.
+2. Confirm the registered verifier login (`SUPPORT_VERIFIER_DATABASE_URL`) is in place; it reads the frozen refund request and records Stripe's answer.
+3. Turn the switch on only for the time refunds are needed: `UPDATE private.support_workspace_settings SET refund_submission_enabled = true WHERE singleton;` and off again afterwards.
+
+Each refund is sent once, with the idempotency key `mch-support-refund-<operation>`, no automatic retries and a ten-second timeout. If the answer is lost, the refund shows "Refund outcome unknown" and the amount stays reserved: never issue another refund for it. Use **Check operation result**, which only reads Stripe, listing the charge's refunds and matching the one tagged with this operation. A refund that turns up later is recorded even with the switch off. Unresolved cases after 23 hours are escalated with the support reference.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

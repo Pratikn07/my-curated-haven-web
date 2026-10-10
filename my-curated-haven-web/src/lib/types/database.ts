@@ -1695,6 +1695,14 @@ export type Database = {
         Args: { p_operation_id: string; p_order_id: string }
         Returns: Json
       }
+      admin_support_refund_dispatch_check: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_dispatch_claim: {
+        Args: { p_command: Json; p_observation_id: string }
+        Returns: Json
+      }
       admin_support_refund_operation: {
         Args: { p_operation_id: string }
         Returns: Json

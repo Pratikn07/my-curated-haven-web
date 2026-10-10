@@ -1,5 +1,6 @@
 import { Pool } from "pg";
-import type { Binding, FinancialFacts, Mode } from "./contracts";
+import type { Binding, FinancialFacts, Mode, RefundFact } from "./contracts";
+import type { RefundIntent, RefundSubmissionResult } from "../../admin/support/refunds/contracts";
 import type { EventClaim, EventOutcome } from "./events";
 import { classifyDispute, type ProviderReader } from "./provider-read";
 import type { SystemPurpose } from "./ledger";
@@ -99,6 +100,59 @@ export async function recoveryCandidates(mode: Mode, limit: number): Promise<Rec
     throw new Error("Unexpected recovery candidates");
   }
   return { events: c.events as string[], unboundEvents: Number(c.unboundEvents), orders: c.orders as string[] };
+}
+
+// ---- Owner refunds: the verifier login reads the frozen request and records the provider's answer -----------------
+
+export async function refundDispatchPayload(operationId: string, fence: number): Promise<RefundIntent> {
+  const { rows } = await verifierPool().query("SELECT private.support_refund_dispatch_payload($1, $2) AS p", [operationId, fence]);
+  return rows[0].p as RefundIntent;
+}
+
+export async function refundResultRecord(operationId: string, fence: number, result: RefundSubmissionResult): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.support_refund_result_record($1, $2, $3::jsonb) AS r",
+    [operationId, fence, JSON.stringify(result)]);
+  return rows[0].r;
+}
+
+export type RefundRecoveryTarget = { operationId: string; state: string; accountId: string; mode: Mode; paymentIntentId: string;
+  chargeId: string; amountMinor: number; currency: string; providerRefundId: string | null; fence: number; orderId: string;
+  claimExpired: boolean };
+
+export async function refundRecoveryTarget(operationId: string): Promise<RefundRecoveryTarget> {
+  const { rows } = await verifierPool().query("SELECT private.support_refund_recovery_target($1) AS t", [operationId]);
+  return rows[0].t as RefundRecoveryTarget;
+}
+
+export async function refundExpireClaim(operationId: string): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.support_refund_expire_claim($1) AS r", [operationId]);
+  return rows[0].r;
+}
+
+export async function refundReconciled(operationId: string, applied: boolean): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.support_refund_reconciled($1, $2) AS r", [operationId, applied]);
+  return rows[0].r;
+}
+
+/** Local test fixture only: the "provider" makes the refund by adding it to the order's own payment records. */
+export async function recordLocalLedgerRefund(intent: Pick<RefundIntent, "accountId" | "mode" | "chargeId" | "paymentIntentId" | "amountMinor"
+  | "currency" | "command">): Promise<RefundFact> {
+  const id = `re_local_${intent.command.operationId.replace(/-/g, "")}`;
+  await verifierPool().query(`INSERT INTO private.payment_refunds(provider_refund_id, order_id, payment_id, amount, currency, status, reason, occurred_at)
+    SELECT $1, p.order_id, p.id, $2, $3, 'succeeded', 'requested_by_customer', now() FROM private.provider_payments p
+    WHERE p.provider_account_id = $4 AND p.provider_mode = $5 AND p.charge_id = $6
+    ON CONFLICT (provider_refund_id) DO NOTHING`, [id, intent.amountMinor, intent.currency, intent.accountId, intent.mode, intent.chargeId]);
+  const fact = await findLocalLedgerRefund(intent);
+  if (!fact) throw new Error("Local refund was not recorded");
+  return fact;
+}
+
+export async function findLocalLedgerRefund(intent: Pick<RefundIntent, "chargeId" | "paymentIntentId" | "command">): Promise<RefundFact | null> {
+  const id = `re_local_${intent.command.operationId.replace(/-/g, "")}`;
+  const { rows } = await verifierPool().query("SELECT amount, currency, status, occurred_at FROM private.payment_refunds WHERE provider_refund_id = $1", [id]);
+  const r = rows[0];
+  return r ? { id, paymentIntentId: intent.paymentIntentId, chargeId: intent.chargeId, amountMinor: r.amount, currency: r.currency,
+    status: r.status, occurredAt: new Date(r.occurred_at).toISOString() } : null;
 }
 
 /** Close the verifier connection (command-line runs only). */

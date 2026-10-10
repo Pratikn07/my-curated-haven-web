@@ -40,9 +40,11 @@ SELECT private.commerce_verifier_register(session_user::text, 'Test verifier', '
 -- Only the signed-in owner may refund; nothing private is reachable from a browser or an agent login.
 SELECT is((SELECT count(*)::int FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'private'
   AND c.relname LIKE 'support_refund%' AND has_table_privilege('authenticated', c.oid, 'SELECT')), 0, 'browsers cannot read refund records');
-SELECT is((SELECT count(*)::int FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname IN ('private','public')
-  AND p.proname LIKE '%refund%' AND (has_function_privilege('mch_support_operator', p.oid, 'EXECUTE')
-    OR has_function_privilege('mch_commerce_verifier', p.oid, 'EXECUTE'))), 0, 'agent and verifier logins cannot touch refunds');
+SELECT is((SELECT array_agg(p.proname::text ORDER BY p.proname) FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+  WHERE n.nspname IN ('private','public') AND p.proname LIKE '%refund%' AND (has_function_privilege('mch_support_operator', p.oid, 'EXECUTE')
+    OR has_function_privilege('mch_commerce_verifier', p.oid, 'EXECUTE'))),
+  ARRAY['support_refund_dispatch_payload', 'support_refund_expire_claim', 'support_refund_reconciled', 'support_refund_recovery_target',
+    'support_refund_result_record'], 'agent logins have no refund function; the verifier only reads requests and records answers');
 SELECT throws_ok($$SELECT pg_temp.owner('SELECT public.admin_support_refund_check_begin(''f3000000-0000-4000-8000-000000000001'', gen_random_uuid())')$$,
   '42501', 'ADM_DISABLED', 'refunds need at least the diagnosis stage');
 UPDATE private.support_workspace_settings SET stage = 'diagnosis';
