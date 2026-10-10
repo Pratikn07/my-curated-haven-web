@@ -43,6 +43,21 @@ Historical orders keep the terms frozen in their order snapshot. An order whose 
 
 ## Still open (activation, not development)
 
-- Retention periods for support notes, diagnostics and observations, approval and financial evidence, and notice content and recipients. Until recorded, the affected features stay disabled in production; development uses synthetic values.
+- Retention periods for support notes, diagnostics and observations, approval and financial evidence, and notice content and recipients. Until recorded, the affected features stay disabled in production; development uses synthetic values. The database enforces this: `admin_support_set_stage` refuses `diagnosis` without a registered verifier and an observation retention period, and refuses `repair` without a note retention period and an approved access policy as well (`admin_support_readiness` lists what is missing).
+- The approved access policy for the `v1` terms existing orders carry. Without it, automated reconciliation leaves those orders to the guarded older webhook path and repairs are blocked as `policy_missing`.
+- A verified sender for purchase confirmations (`commerce_settings.purchase_confirmation_delivery`). Until then no receipt or repair claims an email.
 - Market-specific customer wording for terms and the dispute notice.
 - Stripe live readiness (event subscriptions and API version, a restricted refund key, refund notification settings) and an email sender for notices.
+
+## Who may do what (operations)
+
+| Action | Who | Stage |
+| --- | --- | --- |
+| Read private support metrics (counts per mode only) | Support readers and the owner | inspection or later |
+| Run retention (clear expired note text, minimise expired provider checks) | Owner, signed in with MFA | any, including disabled |
+| See what each stage still needs; change the support stage | Owner, signed in with MFA | any; diagnosis and repair only when nothing is missing |
+| Prepare, record an approval for, or apply an access repair as an agent | A registered operator login, for a named human who holds the right now | repair |
+| Refund, or send a dispute notice, as an agent | Nobody | never |
+
+Limits per person per minute: 30 exact lookups, 5 provider checks, 5 new repair executions. Repeating an operation never counts again.
+

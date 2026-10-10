@@ -1656,6 +1656,7 @@ export type Database = {
         Returns: Json
       }
       admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
+      admin_support_metrics: { Args: { p_mode: string }; Returns: Json }
       admin_support_observation: { Args: { p_id: string }; Returns: Json }
       admin_support_operation: {
         Args: { p_operation_id: string }
@@ -1681,8 +1682,17 @@ export type Database = {
         Args: { p_cursor: string; p_mode: string }
         Returns: Json
       }
+      admin_support_readiness: { Args: never; Returns: Json }
       admin_support_redact_note: {
         Args: { p_event_id: string; p_operation_id: string; p_reason: string }
+        Returns: Json
+      }
+      admin_support_retention_run: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_set_stage: {
+        Args: { p_operation_id: string; p_reason: string; p_stage: string }
         Returns: Json
       }
       collection_effective_access: {

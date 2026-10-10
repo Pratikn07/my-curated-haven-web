@@ -131,7 +131,8 @@ END $$;
 -- actor themselves, so no browser role can call this or name someone else.
 CREATE FUNCTION private.support_consume_budget(p_actor uuid, p_kind text) RETURNS boolean
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE limit_per_minute integer := CASE p_kind WHEN 'lookup' THEN 30 WHEN 'provider_check' THEN 5 ELSE NULL END;
+DECLARE limit_per_minute integer := CASE p_kind WHEN 'lookup' THEN 30 WHEN 'provider_check' THEN 5 WHEN 'repair_execute' THEN 5
+  ELSE NULL END;
  spent integer;
 BEGIN
  IF p_actor IS NULL OR limit_per_minute IS NULL THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;

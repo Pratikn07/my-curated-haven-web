@@ -2,7 +2,7 @@ import type {
   Binding, DisputeFact, FinancialFacts, ProviderObservation, RefundFact, RepairEffect,
 } from "../../payments/reconciliation/contracts";
 import type {
-  AccessExplanation, Approval, CustomerSupportDto, ExecutionStart, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
+  AccessExplanation, Approval, CustomerSupportDto, ExecutionStart, SupportMetrics, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 
@@ -370,6 +370,29 @@ export function decodeExecutionStart(input: unknown): ExecutionStart {
   const record = (typeof input === "object" && input !== null ? input : {}) as { status?: unknown; jobId?: unknown };
   if (Object.keys(record).sort().join(",") !== "jobId,status") throw new Invalid("execution");
   return { status: decodeOperation(record.status), jobId: uuid(record.jobId, "execution.jobId") };
+}
+
+const metrics = object<SupportMetrics>({
+  mode: oneOf("test", "live"),
+  pendingChecks: count,
+  oldestPendingCheckSeconds: count,
+  webhookEvents: object({ pending: count, failed: count, setAside: count }),
+  unresolvedMismatches: count,
+  blockedRepairReasons: (v, p) => {
+    if (typeof v !== "object" || v === null || Array.isArray(v)) bad(p);
+    const out: Record<string, number> = {};
+    for (const [key, n] of Object.entries(v as Record<string, unknown>)) {
+      if (!/^[a-z][a-z0-9_]{1,63}$/.test(key)) bad(`${p}.${key}`);
+      out[key] = count(n, `${p}.${key}`);
+    }
+    return out;
+  },
+  repairs: object({ applied: count, alreadySatisfied: count, failedWithoutCommit: count }),
+  postchecks: object({ verified: count, pending: count }),
+});
+
+export function decodeSupportMetrics(input: unknown): SupportMetrics {
+  return metrics(input, "metrics");
 }
 
 export function decodeSupportCase(input: unknown): SupportCase {

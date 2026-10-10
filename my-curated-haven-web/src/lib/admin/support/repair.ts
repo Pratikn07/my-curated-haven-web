@@ -9,6 +9,7 @@ import type { OperationStatus, RepairCommand, RepairReceipt } from "./contracts"
 import { decodeExecutionStart, decodeOperation } from "./decode";
 import { coordinateSupportRepair, isReceipt } from "./execution";
 import { settleSupportPostcheck } from "./postcheck";
+import { safeSupportLog } from "./logging";
 import { consumeLocalFault } from "./test-faults";
 
 /**
@@ -23,6 +24,14 @@ export async function loadSupportOperation(operationId: string): Promise<Result<
 }
 
 export async function executeSupportRepair(command: RepairCommand): Promise<Result<OperationStatus>> {
+  const result = await runSupportRepair(command);
+  if (result.ok && result.value.state === "outcome_unknown") {
+    console.warn("[support] repair outcome unknown", safeSupportLog({ operationId: command.operationId, code: "OUTCOME_UNKNOWN" }));
+  }
+  return result;
+}
+
+async function runSupportRepair(command: RepairCommand): Promise<Result<OperationStatus>> {
   if (!verifierConfigured()) return { ok: false, code: "UNAVAILABLE", reference: "support-repair-verifier" };
   const supabase = await createClient();
   // Local browser tests can drop the commit's response and the read that follows it (see test-faults.ts).

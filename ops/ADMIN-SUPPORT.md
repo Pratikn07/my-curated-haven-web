@@ -98,6 +98,14 @@ node scripts/admin-support-operator.mjs --execute --proposal <proposal id> --ope
 
 Trust limitation: the database checks the login, the owner's current authority and the exact proposal, but cannot prove the owner said yes. Each operator approval therefore stores the login that recorded it and the evidence reference, and the operation stores the human and the executing login separately.
 
+## Stages, retention and metrics
+
+The support stage moves only through `admin_support_set_stage(stage, reason, operation)`, called by the owner signed in with MFA. Turning support down (`disabled`, `inspection`) always works. `diagnosis` needs a registered verifier and an observation retention period; `repair` also needs a note retention period and an approved access policy. `admin_support_readiness()` lists what each stage still needs. Retention periods live in `private.support_workspace_settings` (`note_retention_days` 1–3650, `observation_retention_days` 30–3650) and are set by the database owner once the owner has decided them.
+
+Run retention regularly with `admin_support_retention_run(operation)` (owner, any stage). It clears note text past its period (keeping who, when and why, plus a case event) and strips provider ids from provider checks past theirs, keeping amounts, statuses, dates and the evidence digest. Anything a pending proposal, approval or operation relies on is skipped; nothing is deleted. Repeating an operation id returns its first result.
+
+`admin_support_metrics(mode)` gives support readers counts for one mode: waiting provider checks and the oldest one's age, the webhook backlog, orders whose newest check disagrees with their purchase source, why repairs were blocked, repair outcomes and post-checks (last 30 days). It holds no ids, emails, notes or provider data. Support log lines keep only an operation id, a code, a reference and a state.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

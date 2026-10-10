@@ -100,6 +100,10 @@ BEGIN
  IF EXISTS (SELECT 1 FROM private.support_operations WHERE proposal_id = p.id) THEN
   RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT';
  END IF;
+ -- Five new repairs a minute per person; repeating an operation above never counts.
+ IF NOT private.support_consume_budget(actor, 'repair_execute') THEN
+  RAISE EXCEPTION USING ERRCODE='PT429', MESSAGE='ADM_RATE_LIMITED';
+ END IF;
  IF p_command->'caseId' <> 'null' AND NOT EXISTS (SELECT 1 FROM private.support_cases WHERE id = (p_command->>'caseId')::uuid
    AND order_id = p.order_id) THEN
   RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';

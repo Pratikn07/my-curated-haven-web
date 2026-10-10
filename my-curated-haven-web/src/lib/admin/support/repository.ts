@@ -4,10 +4,10 @@ import { adminRpc } from "../rpc";
 import { createClient } from "../../supabase/server";
 import type {
   AccessExplanation, Approval, CaseCommand, CustomerSupportDto, LookupQuery, LookupResult, Mode, OrderCasesPage, OrderSupportDto,
-  ProposalListItem, RepairKind, RepairProposal, SupportCase, SupportHistoryPage, SupportQueuePage, SupportRead,
+  ProposalListItem, RepairKind, RepairProposal, SupportCase, SupportHistoryPage, SupportMetrics, SupportQueuePage, SupportRead,
 } from "./contracts";
 import {
-  decodeAccessRead, decodeApproval, decodeProposal, decodeProposalList, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderCases, decodeOrderRead, decodeQueuePage,
+  decodeAccessRead, decodeApproval, decodeProposal, decodeProposalList, decodeSupportMetrics, decodeCustomerRead, decodeHistoryPage, decodeLookupRead, decodeOrderCases, decodeOrderRead, decodeQueuePage,
   decodeRedaction,
   decodeSupportCase,
 } from "./decode";
@@ -91,4 +91,10 @@ export async function approveSupportRepair(proposalId: string, digest: string, o
 export async function loadSupportProposals(orderId: string): Promise<Result<ProposalListItem[]>> {
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_support_proposals", { p_order_id: orderId }), decodeProposalList);
+}
+
+/** Private counts for one mode (waiting checks, webhook backlog, repair outcomes); no customer or provider details. */
+export async function loadSupportMetrics(mode: Mode): Promise<Result<SupportMetrics>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_metrics", { p_mode: mode }), decodeSupportMetrics);
 }

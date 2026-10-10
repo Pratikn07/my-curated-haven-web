@@ -91,6 +91,18 @@ export type Approval = { id: string; proposalId: string; digest: string; humanAu
 export type ProposalListItem = { proposal: RepairProposal; state: "awaiting_approval" | "approved" | "blocked" | "expired";
   approval: Approval | null; operation: OperationStatus | null; preparedAt: string };
 
+/** Private support metrics for one mode: counts only, never customer, note or provider details. */
+export type SupportMetrics = {
+  mode: Mode;
+  pendingChecks: number;
+  oldestPendingCheckSeconds: number;
+  webhookEvents: { pending: number; failed: number; setAside: number };
+  unresolvedMismatches: number;
+  blockedRepairReasons: Record<string, number>;
+  repairs: { applied: number; alreadySatisfied: number; failedWithoutCommit: number };
+  postchecks: { verified: number; pending: number };
+};
+
 export type RepairReceipt = CommerceReceipt & { proposalId: string; verification: "pending" | "verified" | "unavailable" };
 export type OperationPending = { operationId: string;
   state: "checking" | "blocked" | "failed_no_commit" | "outcome_unknown"; reasonCode: string | null };
