@@ -1687,6 +1687,23 @@ export type Database = {
         Args: { p_event_id: string; p_operation_id: string; p_reason: string }
         Returns: Json
       }
+      admin_support_refund_approve: {
+        Args: { p_digest: string; p_proposal_id: string }
+        Returns: Json
+      }
+      admin_support_refund_check_begin: {
+        Args: { p_operation_id: string; p_order_id: string }
+        Returns: Json
+      }
+      admin_support_refund_operation: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_prepare: {
+        Args: { p_input: Json; p_observation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_reserve: { Args: { p_command: Json }; Returns: Json }
       admin_support_retention_run: {
         Args: { p_operation_id: string }
         Returns: Json

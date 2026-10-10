@@ -61,3 +61,19 @@ Historical orders keep the terms frozen in their order snapshot. An order whose 
 
 Limits per person per minute: 30 exact lookups, 5 provider checks, 5 new repair executions. Repeating an operation never counts again.
 
+## Refunds (owner-approved exceptions)
+
+Refunds stay exceptions the owner approves one exact amount at a time; nothing here is a customer-facing refund promise.
+
+| Rule | Value |
+| --- | --- |
+| Who may check, prepare, approve, reserve and submit | The owner, signed in with MFA. Support staff and agent logins never can. |
+| Exception categories | `duplicate_charge`, `billing_error`, `unresolved_delivery`, `required_remedy` (a category never bypasses approval) |
+| Reason sent to Stripe | `requested_by_customer` or `duplicate` only; never `fraudulent`, no other destination or fee fields |
+| Amount | Full remaining (fixed when prepared) or a whole number of minor units up to what is still refundable |
+| Still refundable | Captured, minus successful and pending refunds, minus local reservations not yet visible at Stripe (each refund counted once) |
+| Blocked when | No approved access policy, incomplete or mismatched evidence, a refund already in flight, an open formal dispute, nothing left |
+| Approval lasts | Five minutes, or until the proposal expires if sooner |
+| Email | None; a refund never sends a purchase confirmation |
+| Submission switch | `refund_submission_enabled`, off by default; reading earlier results always works |
+

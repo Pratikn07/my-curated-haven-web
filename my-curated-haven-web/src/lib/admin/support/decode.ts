@@ -5,6 +5,7 @@ import type {
   AccessExplanation, Approval, CustomerSupportDto, ExecutionStart, SupportMetrics, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
+import type { RefundApproval, RefundCapacity, RefundProposal, RefundReceipt } from "./refunds/contracts";
 
 /**
  * Runtime decoding of support RPC responses. Every nested identifier, enum and amount is checked and unknown keys
@@ -393,6 +394,77 @@ const metrics = object<SupportMetrics>({
 
 export function decodeSupportMetrics(input: unknown): SupportMetrics {
   return metrics(input, "metrics");
+}
+
+const LOWER_CODE = /^[a-z][a-z0-9_]{1,63}$/;
+const refundCapacityDecoder = object<RefundCapacity>({
+  capturedMinor: minor,
+  successfulMinor: minor,
+  pendingMinor: minor,
+  reservedMinor: minor,
+  availableMinor: minor,
+  blockers: array(pattern(LOWER_CODE), 20),
+});
+
+const refundProposal = object<RefundProposal>({
+  id: uuid,
+  orderId: uuid,
+  ownerPrincipal: uuid,
+  binding,
+  paymentIntentId: (v, p) => (typeof v === "string" && v.length <= 255 ? v : bad(p)),
+  chargeId: (v, p) => (typeof v === "string" && v.length <= 255 ? v : bad(p)),
+  observationId: uuid,
+  expectedOrderVersion: count,
+  amountMinor: minor,
+  currency: pattern(CURRENCY),
+  providerReason: oneOf("requested_by_customer", "duplicate"),
+  exceptionCategory: oneOf("duplicate_charge", "billing_error", "unresolved_delivery", "required_remedy"),
+  internalReason: text(500),
+  capacity: refundCapacityDecoder,
+  policyVersion: text(100),
+  dependencyToken: text(200),
+  effects: array(effect, 5),
+  blockers: array(pattern(LOWER_CODE), 50),
+  digest,
+  expiresAt: timestamp,
+});
+
+const refundApproval = object<RefundApproval>({
+  id: uuid,
+  proposalId: uuid,
+  digest,
+  humanAuthoriser: uuid,
+  approvedAt: timestamp,
+  expiresAt: timestamp,
+  channel: oneOf("web"),
+});
+
+const refundReceipt = object<RefundReceipt>({
+  operationId: uuid,
+  proposalId: uuid,
+  orderId: uuid,
+  amountMinor: minor,
+  currency: pattern(CURRENCY),
+  state: oneOf("reserved", "dispatching", "outcome_unknown", "submitted", "rejected"),
+  providerRefundId: nullable(text(255)),
+  providerStatus: nullable(oneOf("pending", "requires_action", "succeeded", "failed", "canceled")),
+  reconciliation: oneOf("not_started", "pending", "applied", "unavailable"),
+  auditId: uuid,
+  reasonCode: nullable(code),
+  firstDispatchedAt: nullable(timestamp),
+  checkedAt: timestamp,
+});
+
+export function decodeRefundProposal(input: unknown): RefundProposal {
+  return refundProposal(input, "refundProposal");
+}
+
+export function decodeRefundApproval(input: unknown): RefundApproval {
+  return refundApproval(input, "refundApproval");
+}
+
+export function decodeRefundReceipt(input: unknown): RefundReceipt {
+  return refundReceipt(input, "refundReceipt");
 }
 
 export function decodeSupportCase(input: unknown): SupportCase {

@@ -46,3 +46,11 @@ export function receipt() {
   return { operationId: OPERATION, orderId: ORDER, state: "applied", effects: [effect()], auditId: AUDIT,
     committedAt: AT, proposalId: PROPOSAL, verification: "pending" };
 }
+
+export function refundCommand(){return {operationId:"f3000000-0000-4000-8000-000000000060",
+  proposalId:"f3000000-0000-4000-8000-000000000061",expectedDigest:"fixture-refund-digest",caseId:null};}
+export function refundReceipt(overrides={}){const command=refundCommand();return {
+  operationId:command.operationId,proposalId:command.proposalId,orderId:ORDER,
+  amountMinor:400,currency:"usd",state:"reserved",providerRefundId:null,providerStatus:null,
+  reconciliation:"not_started",auditId:"f3000000-0000-4000-8000-000000000062",
+  reasonCode:null,firstDispatchedAt:null,checkedAt:"2026-10-07T10:00:00Z",...overrides};}

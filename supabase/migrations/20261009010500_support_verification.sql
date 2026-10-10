@@ -19,7 +19,7 @@ CREATE SEQUENCE private.commerce_verification_fence;
 CREATE TABLE private.commerce_verification_jobs (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  order_id uuid NOT NULL REFERENCES private.purchase_orders(id) ON DELETE RESTRICT,
- purpose text NOT NULL CHECK (purpose IN ('diagnosis','execution','webhook','recovery')),
+ purpose text NOT NULL CHECK (purpose IN ('diagnosis','execution','webhook','recovery','refund_prepare','refund_dispatch')),
  requested_by uuid REFERENCES auth.users(id) ON DELETE RESTRICT,
  operation_id uuid,
  expected_order_version integer NOT NULL,
@@ -181,8 +181,10 @@ BEGIN
   WHERE id = job.id;
   RETURN jsonb_build_object('state', 'failed', 'code', 'ORDER_CHANGED');
  END IF;
- -- A diagnosis is recorded only while the person who asked for it may still inspect provider details.
- IF job.purpose = 'diagnosis' AND NOT private.support_has(job.requested_by, 'support.provider.inspect') THEN
+ -- A staff check is recorded only while the person who asked for it still holds the right it was asked under.
+ IF (job.purpose = 'diagnosis' AND NOT private.support_has(job.requested_by, 'support.provider.inspect'))
+   OR (job.purpose = 'refund_prepare' AND NOT private.support_has(job.requested_by, 'support.refund.prepare'))
+   OR (job.purpose = 'refund_dispatch' AND NOT private.support_has(job.requested_by, 'support.refund.execute')) THEN
   UPDATE private.commerce_verification_jobs SET state = 'failed', failure_code = 'REQUESTER_REVOKED', completed_at = clock_timestamp()
   WHERE id = job.id;
   RETURN jsonb_build_object('state', 'failed', 'code', 'REQUESTER_REVOKED');
