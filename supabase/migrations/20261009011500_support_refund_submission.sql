@@ -202,3 +202,46 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION public.admin_support_refunds(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_support_refunds(uuid) TO authenticated;
+
+-- Support metrics gain refunds whose outcome is not settled (sending, or unknown), with the age of the oldest: the
+-- alert for an unresolved refund. Counts only, as before.
+CREATE OR REPLACE FUNCTION public.admin_support_metrics(p_mode text) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor uuid; v_since timestamptz := now() - interval '30 days';
+BEGIN
+ actor := private.support_assert('support.read', 'inspection');
+ IF p_mode IS NULL OR p_mode NOT IN ('test','live') THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
+ RETURN (
+  WITH orders AS (SELECT id, user_id, release_id FROM private.purchase_orders WHERE snapshot->>'provider_mode' = p_mode),
+  latest AS (SELECT DISTINCT ON (p.order_id) p.order_id, p.id FROM private.commerce_provider_observations p
+    JOIN orders o ON o.id = p.order_id WHERE p.complete ORDER BY p.order_id, p.fence DESC),
+  judged AS (SELECT l.order_id, private.commerce_evaluate_purchase(l.order_id, l.id)->>'state' AS state,
+     (SELECT s.is_eligible FROM private.access_sources s WHERE s.source_kind = 'stripe_purchase' AND s.source_id = l.order_id::text) AS eligible
+    FROM latest l),
+  ops AS (SELECT so.* FROM private.support_operations so JOIN private.support_proposals sp ON sp.id = so.proposal_id
+    JOIN orders o ON o.id = sp.order_id WHERE so.created_at >= v_since),
+  checks AS (SELECT DISTINCT ON (pc.operation_id) pc.matched FROM private.support_postchecks pc JOIN ops ON ops.operation_id = pc.operation_id
+    ORDER BY pc.operation_id, pc.checked_at DESC)
+  SELECT jsonb_build_object('mode', p_mode,
+   'pendingChecks', (SELECT count(*) FROM private.commerce_verification_jobs j JOIN orders o ON o.id = j.order_id
+     WHERE j.state IN ('pending','claimed')),
+   'oldestPendingCheckSeconds', (SELECT coalesce(extract(epoch FROM now() - min(j.created_at))::int, 0)
+     FROM private.commerce_verification_jobs j JOIN orders o ON o.id = j.order_id WHERE j.state IN ('pending','claimed')),
+   'webhookEvents', (SELECT jsonb_build_object('pending', count(*) FILTER (WHERE processing_state IN ('pending','processing')),
+     'failed', count(*) FILTER (WHERE processing_state = 'failed'), 'setAside', count(*) FILTER (WHERE processing_state = 'dead_letter'))
+     FROM private.payment_events WHERE provider_mode = p_mode),
+   'unresolvedMismatches', (SELECT count(*) FROM judged WHERE state IN ('eligible','ineligible')
+     AND coalesce(eligible, false) <> (state = 'eligible')),
+   'blockedRepairReasons', (SELECT coalesce(jsonb_object_agg(reason, n), '{}') FROM (SELECT b AS reason, count(*) AS n
+     FROM private.support_proposals sp JOIN orders o ON o.id = sp.order_id, jsonb_array_elements_text(sp.proposal->'blockers') b
+     WHERE sp.prepared_at >= v_since GROUP BY b) r),
+   'repairs', (SELECT jsonb_build_object('applied', count(*) FILTER (WHERE ops.receipt->>'state' = 'applied'),
+     'alreadySatisfied', count(*) FILTER (WHERE ops.receipt->>'state' = 'already_satisfied'),
+     'failedWithoutCommit', count(*) FILTER (WHERE ops.state = 'checking' AND EXISTS (SELECT 1 FROM private.commerce_verification_jobs j
+       WHERE j.id = ops.job_id AND j.state = 'failed'))) FROM ops),
+   'postchecks', (SELECT jsonb_build_object('verified', count(*) FILTER (WHERE matched), 'pending', count(*) FILTER (WHERE NOT matched))
+     FROM checks),
+   'unresolvedRefunds', (SELECT jsonb_build_object('count', count(*),
+     'oldestSeconds', coalesce(extract(epoch FROM now() - min(i.first_dispatched_at))::int, 0))
+     FROM private.support_refund_intents i WHERE i.mode = p_mode AND i.state IN ('dispatching','outcome_unknown'))));
+END $$;

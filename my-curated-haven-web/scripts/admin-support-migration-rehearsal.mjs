@@ -136,6 +136,20 @@ try {
         return { ok: false, code: error.message.match(/ADM_[A-Z_]+/)?.[0] ?? error.message };
       }
     };
+    const sending = (await c.query("SELECT refund_submission_enabled FROM private.support_workspace_settings")).rows[0].refund_submission_enabled;
+    step("refund sending starts switched off", sending === false);
+    const grants = (await c.query(`SELECT r.rolname, array_agg(p.proname::text ORDER BY p.proname) fns FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace CROSS JOIN pg_roles r
+      WHERE p.proname LIKE '%refund%' AND r.rolname IN ('anon', 'authenticated', 'mch_support_operator', 'mch_commerce_verifier')
+        AND has_function_privilege(r.oid, p.oid, 'EXECUTE') AND (n.nspname = 'private' OR r.rolname <> 'authenticated')
+      GROUP BY r.rolname`)).rows;
+    const byRole = Object.fromEntries(grants.map((g) => [g.rolname, g.fns]));
+    step("only the verifier login runs private refund steps, and only reading requests and recording answers",
+      !byRole.anon && !byRole.authenticated && !byRole.mch_support_operator && JSON.stringify(byRole.mch_commerce_verifier) === JSON.stringify(
+        ["support_refund_dispatch_payload", "support_refund_expire_claim", "support_refund_reconciled", "support_refund_recovery_target",
+          "support_refund_result_record"]), byRole);
+    const refundOff = await asOwner(`SELECT public.admin_support_refund_check_begin('${ids.orderX}', gen_random_uuid()) AS r`);
+    step("an owner refund is refused while support is off", !refundOff.ok && refundOff.code === "ADM_DISABLED", refundOff.code ?? "allowed");
     const repair = await asOwner("SELECT public.admin_support_set_stage('repair', 'Rehearsal', gen_random_uuid()) AS r");
     const diagnosis = await asOwner("SELECT public.admin_support_set_stage('diagnosis', 'Rehearsal', gen_random_uuid()) AS r");
     step("diagnosis and repair cannot be switched on before their requirements", !repair.ok && repair.code === "ADM_BLOCKED"

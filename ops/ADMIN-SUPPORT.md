@@ -126,6 +126,17 @@ We send no refund email; Stripe may email the customer a receipt depending on th
 
 Each refund is sent once, with the idempotency key `mch-support-refund-<operation>`, no automatic retries and a ten-second timeout. If the answer is lost, the refund shows "Outcome unknown" and the amount stays reserved: never issue another refund for it, and the page offers none until it is settled. Use **Check refund status** (reads our record) and **Ask Stripe what happened** (only reads Stripe, listing the charge's refunds and matching the one tagged with this operation). A refund that turns up later is recorded even with the switch off. An approved refund that was never sent stops holding money back once its approval expires and reads "Not sent". Unresolved cases after 23 hours are escalated with the support reference.
 
+### Refund safety rules
+
+- The refund key is a Stripe restricted key (`rk_test_…` or `rk_live_…`) for the one Stripe account the orders were paid on. The code makes three calls: it reads the key's own account (to refuse a key for another account), creates a refund, and lists a charge's refunds for recovery. Grant write access to Refunds and the least access Stripe needs for the account read; confirm both with one test-mode refund in the owner rehearsal before creating the live key. A key for the other mode, or for another account, is refused before anything is sent.
+- The request uses the Stripe API version pinned in `src/lib/payments/stripe.ts` (`STRIPE_API_VERSION`) and sends only the charge, amount, reason and the operation tag; nothing else a caller supplies reaches Stripe.
+- Customer emails come from Stripe's own settings (Dashboard → Settings → Customer emails → "Refunds"). Decide whether that is on before turning sending on; we send none.
+- Refunds use the approved refund and access policy recorded with each order. An order without an approved policy cannot be refunded here; use the Stripe Dashboard and record a support case.
+- Watch `admin_support_metrics(mode)` → `unresolvedRefunds`: any count above zero for more than an hour needs **Ask Stripe what happened**; one older than 23 hours is escalated with the support reference and the operation id, and checked by hand in the Dashboard.
+- Switching sending off stops new refunds only. Answers, recovery and access updates for refunds already sent keep working.
+- No rollback or SQL repair undoes money. A refund made in error is not reversed by charging the customer again: never recharge a customer automatically.
+- Only the owner can refund. Support staff and agent logins have no refund function; the verifier login can only read a claimed request and record Stripe's answer.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

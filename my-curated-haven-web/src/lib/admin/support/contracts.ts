@@ -101,6 +101,8 @@ export type SupportMetrics = {
   blockedRepairReasons: Record<string, number>;
   repairs: { applied: number; alreadySatisfied: number; failedWithoutCommit: number };
   postchecks: { verified: number; pending: number };
+  /** Refunds still sending or with an unknown outcome; the oldest's age since it was sent. */
+  unresolvedRefunds: { count: number; oldestSeconds: number };
 };
 
 export type RepairReceipt = CommerceReceipt & { proposalId: string; verification: "pending" | "verified" | "unavailable" };

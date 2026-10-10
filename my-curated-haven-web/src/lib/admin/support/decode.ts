@@ -390,6 +390,7 @@ const metrics = object<SupportMetrics>({
   },
   repairs: object({ applied: count, alreadySatisfied: count, failedWithoutCommit: count }),
   postchecks: object({ verified: count, pending: count }),
+  unresolvedRefunds: object({ count, oldestSeconds: count }),
 });
 
 export function decodeSupportMetrics(input: unknown): SupportMetrics {

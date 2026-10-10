@@ -14,6 +14,13 @@ export const SCENARIOS = {
   "postcheck-write-failure": "a failed post-check leaves the committed receipt intact",
   "stale-fence": "an expired verifier claim cannot record facts after a newer claim",
   "old-success-after-refund": "an older answer cannot overwrite a newer refund",
+  "refund-same-command-twice": "the same refund command sent twice at once reserves once; the same id with another amount is refused",
+  "refund-two-operations-one-approval": "two operations for one approved refund: exactly one reserves",
+  "refund-two-approvals-one-payment": "two approved refunds of one payment never reserve more than was paid",
+  "refund-dispatch-twice": "two dispatch claims for one refund: exactly one is sent",
+  "refund-dashboard-during-review": "a refund made in the Stripe Dashboard after approval stops the reservation",
+  "refund-unknown-then-new-request": "while a refund's outcome is unknown, a new refund of the payment is blocked",
+  "refund-answer-vs-expiry": "Stripe's answer racing the claim's expiry always ends recorded as sent",
 };
 
 /** The scenarios to run: all when none are named; unknown names are refused. */

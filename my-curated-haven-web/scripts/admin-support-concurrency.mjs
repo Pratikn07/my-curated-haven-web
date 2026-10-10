@@ -98,8 +98,8 @@ async function race(work) {
 // ---- Synthetic world ---------------------------------------------------------------------------------------------
 let OWNER;
 async function setup() {
-  made.previousSettings = (await q("SELECT stage, note_retention_days, observation_retention_days FROM private.support_workspace_settings WHERE singleton"))[0];
-  await q("UPDATE private.support_workspace_settings SET stage = 'repair', note_retention_days = coalesce(note_retention_days, 90), observation_retention_days = coalesce(observation_retention_days, 90) WHERE singleton");
+  made.previousSettings = (await q("SELECT stage, note_retention_days, observation_retention_days, refund_submission_enabled FROM private.support_workspace_settings WHERE singleton"))[0];
+  await q("UPDATE private.support_workspace_settings SET stage = 'repair', refund_submission_enabled = true, note_retention_days = coalesce(note_retention_days, 90), observation_retention_days = coalesce(observation_retention_days, 90) WHERE singleton");
   const owner = (await q("SELECT user_id FROM private.admin_memberships WHERE role = 'owner' AND active LIMIT 1"))[0];
   if (owner) {
     OWNER = owner.user_id;
@@ -221,6 +221,39 @@ const purchaseSourceEligible = async (order) => (await q("SELECT is_eligible FRO
 const collectionAccess = async (user) => (await q("SELECT private.collection_has_access($1, $2) AS a", [user, made.collection]))[0].a;
 const transferredOrderCount = async (oldPrincipal, newUser) => Number((await q("SELECT count(*) n FROM private.purchase_orders WHERE owner_principal = $1 AND user_id = $2", [oldPrincipal, newUser]))[0].n);
 const outboxCount = async (key) => Number((await q("SELECT count(*) n FROM private.commerce_outbox WHERE idempotency_key = $1", [key]))[0].n);
+
+// Owner refunds: a fresh owner check, an exact proposal, an approval, a reservation and a dispatch claim.
+async function refundCheck(order, f) {
+  await resetBudget();
+  const op = randomUUID();
+  made.ops.push(op);
+  const job = (await asUser(admin, OWNER, "SELECT public.admin_support_refund_check_begin($1, $2) AS r", [order.id, op])).jobId;
+  return record(admin, job, f);
+}
+async function refundProposal(order, obs, amountMinor = null) {
+  const op = randomUUID();
+  made.ops.push(op);
+  const input = { orderId: order.id, caseId: null, amount: amountMinor === null ? { kind: "full_remaining" } : { kind: "partial", amountMinor },
+    providerReason: "requested_by_customer", exceptionCategory: "billing_error", internalReason: "Race harness", operationId: op };
+  return asUser(admin, OWNER, "SELECT public.admin_support_refund_prepare($1::jsonb, $2) AS r", [JSON.stringify(input), obs]);
+}
+async function approvedRefund(order, obs, amountMinor = null) {
+  const proposal = await refundProposal(order, obs, amountMinor);
+  if (proposal.blockers.length) throw new Error(`refund blocked: ${proposal.blockers.join(",")}`);
+  await asUser(admin, OWNER, "SELECT public.admin_support_refund_approve($1, $2) AS r", [proposal.id, proposal.digest]);
+  return proposal;
+}
+const reserveRefund = (client, c) => asUser(client, OWNER, "SELECT public.admin_support_refund_reserve($1::jsonb) AS r", [JSON.stringify(c)]);
+async function dispatchCheck(c, f) {
+  const job = (await asUser(admin, OWNER, "SELECT public.admin_support_refund_dispatch_check($1) AS r", [c.operationId])).jobId;
+  return record(admin, job, f);
+}
+const claimRefund = (client, c, obs) =>
+  asUser(client, OWNER, "SELECT public.admin_support_refund_dispatch_claim($1::jsonb, $2) AS r", [JSON.stringify(c), obs]);
+const refundIntents = (order) => q(`SELECT operation_id, state, reserved, amount_minor, attempts, provider_refund_id
+  FROM private.support_refund_intents WHERE order_id = $1`, [order.id]);
+const providerFact = (order, id, amount) => ({ id, paymentIntentId: order.pi, chargeId: order.ch, amountMinor: amount, currency: "usd",
+  status: "succeeded", occurredAt: "2026-10-03T10:00:00Z" });
 
 function check(results, name, condition, detail) {
   results.push({ check: name, passed: Boolean(condition), ...(condition ? {} : { detail }) });
@@ -433,6 +466,89 @@ const run = {
     check(checks, "the older success is refused as stale", !applyOld.ok && applyOld.code === "ADM_STALE", applyOld.code ?? "applied");
     check(checks, "the purchase ends ineligible", (await purchaseSourceEligible(order)) === false);
   },
+  async "refund-same-command-twice"(checks) {
+    const order = await newOrder(await newCustomer("rs"), { source: true });
+    const obs = await refundCheck(order, facts(order));
+    const [small, large] = [await approvedRefund(order, obs, 400), await approvedRefund(order, obs, 500)];
+    const c = command(small);
+    const twice = await race([(s) => reserveRefund(s, c), (s) => reserveRefund(s, c)]);
+    check(checks, "both sends of the same command succeed", twice.every((r) => r.ok), twice.map((r) => r.code ?? "ok"));
+    check(checks, "and return the same reservation", twice[0].value?.auditId === twice[1].value?.auditId);
+    const other = await reserveRefund(admin, { ...command(large), operationId: c.operationId }).then(() => "reserved", code);
+    check(checks, "the same id with another amount is refused", other === "ADM_INVALID", other);
+    const intents = await refundIntents(order);
+    check(checks, "one reservation of the first amount", intents.length === 1 && intents[0].amount_minor === 400, intents);
+  },
+  async "refund-two-operations-one-approval"(checks) {
+    const order = await newOrder(await newCustomer("ro"), { source: true });
+    const proposal = await approvedRefund(order, await refundCheck(order, facts(order)), 400);
+    const results = await race([(s) => reserveRefund(s, command(proposal)), (s) => reserveRefund(s, command(proposal))]);
+    check(checks, "exactly one reserves", results.filter((r) => r.ok).length === 1, results.map((r) => r.code ?? "ok"));
+    check(checks, "the other is a conflict", results.some((r) => !r.ok && r.code === "ADM_CONFLICT"), results.map((r) => r.code ?? "ok"));
+    check(checks, "one reservation for the payment", (await refundIntents(order)).length === 1);
+  },
+  async "refund-two-approvals-one-payment"(checks) {
+    const order = await newOrder(await newCustomer("rp"), { source: true });
+    const obs = await refundCheck(order, facts(order));
+    const [a, b] = [await approvedRefund(order, obs, 1000), await approvedRefund(order, obs, 1000)];
+    const results = await race([(s) => reserveRefund(s, command(a)), (s) => reserveRefund(s, command(b))]);
+    check(checks, "exactly one reserves", results.filter((r) => r.ok).length === 1, results.map((r) => r.code ?? "ok"));
+    check(checks, "the other is stale", results.some((r) => !r.ok && r.code === "ADM_STALE"), results.map((r) => r.code ?? "ok"));
+    const reserved = (await refundIntents(order)).filter((i) => i.reserved).reduce((sum, i) => sum + i.amount_minor, 0);
+    check(checks, "never more reserved than was paid", reserved === 1000, reserved);
+  },
+  async "refund-dispatch-twice"(checks) {
+    const order = await newOrder(await newCustomer("rd"), { source: true });
+    const proposal = await approvedRefund(order, await refundCheck(order, facts(order)), 400);
+    const c = command(proposal);
+    await reserveRefund(admin, c);
+    const obs = await dispatchCheck(c, facts(order));
+    const results = await race([(s) => claimRefund(s, c, obs), (s) => claimRefund(s, c, obs)]);
+    check(checks, "exactly one claim", results.filter((r) => r.ok).length === 1, results.map((r) => r.code ?? "ok"));
+    check(checks, "the other is a conflict", results.some((r) => !r.ok && r.code === "ADM_CONFLICT"), results.map((r) => r.code ?? "ok"));
+    const [intent] = await refundIntents(order);
+    check(checks, "dispatched once", intent.state === "dispatching" && intent.attempts === 1, intent);
+  },
+  async "refund-dashboard-during-review"(checks) {
+    const order = await newOrder(await newCustomer("rb"), { source: true });
+    const proposal = await approvedRefund(order, await refundCheck(order, facts(order)), 1000);
+    // The Dashboard refund arrives as a webhook while the owner reviews.
+    await webhook(admin, order, facts(order, { refunded: 600 }));
+    const result = await reserveRefund(admin, command(proposal)).then(() => "reserved", code);
+    check(checks, "the reservation is stale", result === "ADM_STALE", result);
+    check(checks, "nothing is reserved", (await refundIntents(order)).length === 0);
+    const fresh = await refundProposal(order, await refundCheck(order, facts(order, { refunded: 600 })));
+    check(checks, "a new proposal offers only what is left", fresh.amountMinor === 900 && fresh.capacity.successfulMinor === 600, fresh.capacity);
+  },
+  async "refund-unknown-then-new-request"(checks) {
+    const order = await newOrder(await newCustomer("ru"), { source: true });
+    const proposal = await approvedRefund(order, await refundCheck(order, facts(order)));
+    const c = command(proposal);
+    await reserveRefund(admin, c);
+    const claim = await claimRefund(admin, c, await dispatchCheck(c, facts(order)));
+    await asVerifier(admin, "SELECT private.support_refund_result_record($1, $2, $3::jsonb) AS r",
+      [c.operationId, claim.fence, JSON.stringify({ kind: "unknown", code: "PROVIDER_OUTCOME_UNKNOWN" })]);
+    const next = await refundProposal(order, await refundCheck(order, facts(order)));
+    check(checks, "the new refund is blocked while one is unknown", next.blockers.includes("refund_in_flight"), next.blockers);
+    check(checks, "and nothing is left to offer", next.capacity.availableMinor === 0 && next.capacity.reservedMinor === 1500, next.capacity);
+    const [intent] = await refundIntents(order);
+    check(checks, "the unknown refund stays reserved", intent.state === "outcome_unknown" && intent.reserved, intent);
+  },
+  async "refund-answer-vs-expiry"(checks) {
+    const order = await newOrder(await newCustomer("rx"), { source: true });
+    const proposal = await approvedRefund(order, await refundCheck(order, facts(order)), 400);
+    const c = command(proposal);
+    await reserveRefund(admin, c);
+    const claim = await claimRefund(admin, c, await dispatchCheck(c, facts(order)));
+    await q("UPDATE private.support_refund_intents SET claim_until = clock_timestamp() - interval '1 second' WHERE operation_id = $1", [c.operationId]);
+    const known = { kind: "known", fact: providerFact(order, `re_race_${RUN}_x`, 400) };
+    const [answer, expiry] = await race([
+      (s) => asVerifier(s, "SELECT private.support_refund_result_record($1, $2, $3::jsonb) AS r", [c.operationId, claim.fence, JSON.stringify(known)]),
+      (s) => asVerifier(s, "SELECT private.support_refund_expire_claim($1) AS r", [c.operationId])]);
+    check(checks, "both calls finish", answer.ok && expiry.ok, [answer.code, expiry.code]);
+    const [intent] = await refundIntents(order);
+    check(checks, "the refund ends recorded as sent", intent.state === "submitted" && intent.provider_refund_id === known.fact.id, intent);
+  },
 };
 
 // ---- Failpoints and cleanup --------------------------------------------------------------------------------------
@@ -468,6 +584,10 @@ async function cleanup() {
     await del(`DELETE FROM private.support_operations WHERE proposal_id IN (SELECT id FROM private.support_proposals WHERE order_id = ANY($1))`, [orders]);
     await del(`DELETE FROM private.support_approvals WHERE proposal_id IN (SELECT id FROM private.support_proposals WHERE order_id = ANY($1))`, [orders]);
     await del("DELETE FROM private.support_proposals WHERE order_id = ANY($1)", [orders]);
+    await del("DELETE FROM private.support_refund_intents WHERE order_id = ANY($1)", [orders]);
+    await del(`DELETE FROM private.support_refund_approvals WHERE proposal_id IN (SELECT id FROM private.support_refund_proposals
+      WHERE order_id = ANY($1))`, [orders]);
+    await del("DELETE FROM private.support_refund_proposals WHERE order_id = ANY($1)", [orders]);
     await del("DELETE FROM private.commerce_reconcile_receipts WHERE order_id = ANY($1)", [orders]);
     await del("DELETE FROM private.commerce_provider_observations WHERE order_id = ANY($1)", [orders]);
     await del("DELETE FROM private.commerce_verification_jobs WHERE order_id = ANY($1)", [orders]);
@@ -499,8 +619,9 @@ async function cleanup() {
     }
     await del("DELETE FROM auth.users WHERE id = ANY($1)", [users]);
     if (made.previousSettings) {
-      await del("UPDATE private.support_workspace_settings SET stage = $1, note_retention_days = $2, observation_retention_days = $3 WHERE singleton",
-        [made.previousSettings.stage, made.previousSettings.note_retention_days, made.previousSettings.observation_retention_days]);
+      await del("UPDATE private.support_workspace_settings SET stage = $1, note_retention_days = $2, observation_retention_days = $3, refund_submission_enabled = $4 WHERE singleton",
+        [made.previousSettings.stage, made.previousSettings.note_retention_days, made.previousSettings.observation_retention_days,
+          made.previousSettings.refund_submission_enabled]);
     }
     await admin.query("COMMIT");
   } catch (error) {

@@ -106,7 +106,7 @@ SELECT is((SELECT (m->>'pendingChecks')::int FROM m), 1, 'waiting provider check
 SELECT ok((SELECT (m->>'oldestPendingCheckSeconds')::int BETWEEN 590 AND 700 FROM m), 'with the age of the oldest');
 SELECT is((SELECT (m->>'unresolvedMismatches')::int FROM m), 1, 'a paid order whose source is off is counted as a mismatch');
 SELECT is((SELECT jsonb_object_keys_sorted FROM (SELECT array_to_string(ARRAY(SELECT jsonb_object_keys(m) ORDER BY 1), ',') jsonb_object_keys_sorted FROM m) x),
-  'blockedRepairReasons,mode,oldestPendingCheckSeconds,pendingChecks,postchecks,repairs,unresolvedMismatches,webhookEvents',
+  'blockedRepairReasons,mode,oldestPendingCheckSeconds,pendingChecks,postchecks,repairs,unresolvedMismatches,unresolvedRefunds,webhookEvents',
   'metrics hold only the approved counts');
 SELECT ok((SELECT m::text !~ '(@|pi_|ch_|re_|cs_|acct_|MCH-)' FROM m), 'and no email, provider id or order reference');
 SELECT is((SELECT (m->>'pendingChecks')::int FROM (SELECT pg_temp.viewer('SELECT public.admin_support_metrics(''live'')') m) x), 0,

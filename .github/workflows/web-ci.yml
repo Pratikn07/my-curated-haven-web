@@ -254,7 +254,7 @@ jobs:
           required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-9]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
           test "$required" -ge 14 || { echo "Expected 14 collection admin suites, found $required"; exit 1; }
           support="$(ls ../supabase/tests/database | grep -cE '^[78][0-9]_[a-z_]*admin_support[a-z_]*\.test\.sql$')"
-          test "$support" -ge 14 || { echo "Expected 14 support admin suites (70-83), found $support"; exit 1; }
+          test "$support" -ge 15 || { echo "Expected 15 support admin suites (70-84), found $support"; exit 1; }
           node scripts/test-admin-db.mjs --all
 
       - name: Support reconciliation races
