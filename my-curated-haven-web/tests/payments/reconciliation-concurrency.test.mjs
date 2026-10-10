@@ -18,3 +18,9 @@ test("the harness only targets an owned loopback test stack", () => {
   assert.throws(() => loopbackTarget(config("mch-admin-support-test", 54322)), /default local stack/);
   assert.throws(() => loopbackTarget('project_id = "x-test"\n'), /port/);
 });
+
+test("in CI the job's own stack is accepted, still on loopback", () => {
+  assert.deepEqual(loopbackTarget(config("my-curated-haven", 54322), { ci: true }),
+    { projectId: "my-curated-haven", url: "postgresql://postgres:postgres@127.0.0.1:54322/postgres" });
+  assert.throws(() => loopbackTarget('project_id = "x"\n', { ci: true }), /port/);
+});

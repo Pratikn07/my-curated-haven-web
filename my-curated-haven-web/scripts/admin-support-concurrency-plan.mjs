@@ -24,13 +24,17 @@ export function selectScenarios(names) {
   return [...new Set(names)];
 }
 
-/** The owned loopback test database from a workdir's supabase/config.toml, or an error for anything else. */
-export function loopbackTarget(configText) {
+/**
+ * The owned loopback test database from a workdir's supabase/config.toml, or an error for anything else. In CI
+ * (`ci: true`) the job's own throwaway stack is accepted whatever its project id and port; it is still loopback.
+ */
+export function loopbackTarget(configText, { ci = false } = {}) {
   const project = configText.match(/^project_id\s*=\s*"([^"]+)"/m)?.[1];
   const dbSection = configText.split(/^\[db\]\s*$/m)[1]?.split(/^\[/m)[0] ?? "";
   const port = Number(dbSection.match(/^port\s*=\s*(\d+)/m)?.[1]);
-  if (!project || !/-test$/.test(project)) throw new Error("The workdir must be an owned test project (project_id ending in -test)");
+  if (!project) throw new Error("The workdir has no project_id");
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error("The workdir's database port is missing or invalid");
-  if (port === 54322) throw new Error("Refusing the default local stack (54322)");
+  if (!ci && !/-test$/.test(project)) throw new Error("The workdir must be an owned test project (project_id ending in -test)");
+  if (!ci && port === 54322) throw new Error("Refusing the default local stack (54322)");
   return { projectId: project, url: `postgresql://postgres:postgres@127.0.0.1:${port}/postgres` };
 }

@@ -1396,7 +1396,8 @@
 .admin-support__timeline p { margin: 0.25rem 0 0; overflow-wrap: anywhere; }
 .admin-support__cases form { display: grid; gap: 0.35rem; margin-top: 0.5rem; max-width: 32rem; }
 .admin-support__axes dd { overflow-wrap: anywhere; }
-.admin-support__prepare { display: grid; gap: 0.35rem; max-width: 32rem; }
+.admin-support__prepare { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.35rem; max-width: 32rem; }
+.admin-support__prepare select, .admin-support__prepare textarea { width: 100%; min-width: 0; max-width: 100%; }
 .admin-support__repair { display: grid; gap: 0.5rem; padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-card); }
 .admin-support__repair dd { overflow-wrap: anywhere; }
 .admin-support__effect[data-change="remove"] { border-left: 4px solid var(--danger); padding-left: 0.5rem; }

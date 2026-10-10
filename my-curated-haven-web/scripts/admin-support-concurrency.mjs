@@ -27,7 +27,8 @@ function parseArgs(argv) {
 }
 
 const args = parseArgs(process.argv.slice(2));
-const target = loopbackTarget(readFileSync(resolve(process.cwd(), "..", args.workdir, "supabase/config.toml"), "utf8"));
+const target = loopbackTarget(readFileSync(resolve(process.cwd(), "..", args.workdir, "supabase/config.toml"), "utf8"),
+  { ci: process.env.CI === "true" });
 const RUN = randomUUID().slice(0, 8);
 const POLICY_VERSION = `race-${RUN}`;
 const made = { users: [], orders: [], ops: [], collection: null, releases: [], recipes: [], offer: null, ownerCreated: null,
