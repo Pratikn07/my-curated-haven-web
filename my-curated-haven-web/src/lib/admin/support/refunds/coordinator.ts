@@ -30,26 +30,3 @@ export async function coordinateRefund(command: RefundCommand, ports: RefundPort
   }
   return ports.record(claim, result);
 }
-
-/** One sentence per refund state; an unknown money outcome never invites another refund. */
-export function refundOutcomeMessage(receipt: RefundReceipt): string {
-  switch (receipt.state) {
-    case "reserved":
-      return "Refund approved and reserved. Nothing has been sent to Stripe yet.";
-    case "dispatching":
-      return "Refund is being sent to Stripe. Check this operation's status before taking further action.";
-    case "outcome_unknown":
-      return "Refund outcome unknown. Check this operation's status before taking further action.";
-    case "rejected":
-      return `Stripe did not make this refund (${receipt.reasonCode ?? "rejected"}). No money moved and the amount is no longer reserved.`;
-    case "submitted": {
-      const stripe = receipt.providerStatus === "succeeded" ? "Stripe reports the refund succeeded."
-        : receipt.providerStatus === "failed" || receipt.providerStatus === "canceled" ? `Stripe reports the refund ${receipt.providerStatus}.`
-        : "Stripe has the refund and reports it pending.";
-      const local = receipt.reconciliation === "applied" ? "Access has been updated."
-        : receipt.reconciliation === "unavailable" ? "Local access reconciliation could not run; support will follow up."
-        : "Local access reconciliation is pending.";
-      return `${stripe} ${local}`;
-    }
-  }
-}

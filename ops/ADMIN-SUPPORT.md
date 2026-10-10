@@ -116,7 +116,15 @@ Before turning submission on in an environment:
 2. Confirm the registered verifier login (`SUPPORT_VERIFIER_DATABASE_URL`) is in place; it reads the frozen refund request and records Stripe's answer.
 3. Turn the switch on only for the time refunds are needed: `UPDATE private.support_workspace_settings SET refund_submission_enabled = true WHERE singleton;` and off again afterwards.
 
-Each refund is sent once, with the idempotency key `mch-support-refund-<operation>`, no automatic retries and a ten-second timeout. If the answer is lost, the refund shows "Refund outcome unknown" and the amount stays reserved: never issue another refund for it. Use **Check operation result**, which only reads Stripe, listing the charge's refunds and matching the one tagged with this operation. A refund that turns up later is recorded even with the switch off. Unresolved cases after 23 hours are escalated with the support reference.
+On the order page the owner sees a **Refund** section (support staff never do):
+
+1. **Check Stripe before a refund** records a fresh owner check (five checks a minute).
+2. Choose **Everything still refundable** or **Part of it** with an amount such as `4.00`, the reason sent to Stripe, why this is an exception, and an internal reason; **Prepare refund** (five a minute). The preview shows the fixed amount and currency, what was paid, already refunded, pending at Stripe, reserved here and still refundable, the Stripe account, mode and payment, the access policy, and what the refund does to this purchase and to the customer's access. Blocked or expired proposals cannot be sent.
+3. **Approve and submit refund of $X** records the five-minute approval and sends that exact refund (three new refunds a minute). It stays disabled while sending is switched off or below the repair stage; preparing and reviewing still work, and earlier refunds stay readable.
+
+We send no refund email; Stripe may email the customer a receipt depending on the account's Stripe email settings. Check those settings before turning submission on.
+
+Each refund is sent once, with the idempotency key `mch-support-refund-<operation>`, no automatic retries and a ten-second timeout. If the answer is lost, the refund shows "Outcome unknown" and the amount stays reserved: never issue another refund for it, and the page offers none until it is settled. Use **Check refund status** (reads our record) and **Ask Stripe what happened** (only reads Stripe, listing the charge's refunds and matching the one tagged with this operation). A refund that turns up later is recorded even with the switch off. An approved refund that was never sent stops holding money back once its approval expires and reads "Not sent". Unresolved cases after 23 hours are escalated with the support reference.
 
 ## Local verification stack
 

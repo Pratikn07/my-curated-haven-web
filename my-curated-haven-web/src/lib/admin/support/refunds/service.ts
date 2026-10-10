@@ -9,10 +9,12 @@ import {
 } from "../../../payments/reconciliation/repository";
 import { sourcedProviderRead, verifyAndReconcileOrder } from "../../../payments/reconciliation/service";
 import { runVerification } from "../../../payments/reconciliation/verifier";
-import { decodeDiagnosisJob, decodeRefundReceipt } from "../decode";
+import type { ProviderObservation } from "../../../payments/reconciliation/contracts";
+import type { SupportRead } from "../contracts";
+import { decodeDiagnosisJob, decodeObservationRead, decodeRefundReceipt } from "../decode";
 import type { RefundCommand, RefundDispatchClaim, RefundIntent, RefundReceipt } from "./contracts";
 import { coordinateRefund } from "./coordinator";
-import { loadSupportRefund, reserveSupportRefund } from "./repository";
+import { loadSupportRefund, reserveSupportRefund, startRefundCheck } from "./repository";
 
 /**
  * Submitting and recovering an owner-approved refund. Reservation, the fresh check and the dispatch claim run under the
@@ -32,6 +34,17 @@ async function reconcile(receipt: RefundReceipt): Promise<RefundReceipt> {
   if (receipt.state !== "submitted" || receipt.reconciliation === "applied") return receipt;
   const applied = await verifyAndReconcileOrder({ orderId: receipt.orderId, purpose: "recovery", operationId: crypto.randomUUID(), eventId: null });
   return decodeRefundReceipt(await refundReconciled(receipt.operationId, applied.ok));
+}
+
+/** The owner's fresh Stripe check that a refund is prepared from. Repeating the operation joins the same check. */
+export async function checkSupportRefund(orderId: string, operationId: string): Promise<Result<SupportRead<ProviderObservation>>> {
+  if (!verifierConfigured()) return { ok: false, code: "UNAVAILABLE", reference: "support-refund-verifier" };
+  const begun = await startRefundCheck(orderId, operationId);
+  if (!begun.ok) return begun;
+  const run = await runVerification(begun.value.jobId, { claim: claimVerification, read: sourcedProviderRead, record: recordObservation });
+  if (!run.ok) return { ok: false, code: run.code === "ORDER_CHANGED" ? "STALE" : "UNAVAILABLE", reference: "support-refund-check" };
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_observation", { p_id: run.observationId }), decodeObservationRead);
 }
 
 export async function submitSupportRefund(command: RefundCommand): Promise<Result<RefundReceipt>> {

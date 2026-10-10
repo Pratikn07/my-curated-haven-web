@@ -48,6 +48,11 @@ export interface SupportFixture {
   /** Local test faults (see src/lib/admin/support/test-faults.ts): drop the next commit response, fail the next post-check. */
   loseNextCommitResponse(): void;
   failNextPostcheck(): void;
+  /** Local refund faults: the next refund is made but its answer is lost, or the next refund is refused before it is made. */
+  loseNextRefundAnswer(): void;
+  rejectNextRefund(): void;
+  /** Refunds the local ledger made for this order's payment (the fixture's earlier refund is not counted). */
+  providerRefundCount(): Promise<number>;
   /** Revoke the local verifier registration (only when the fixture registered one). */
   revokeVerifier(): Promise<void>;
   query(sql: string, args?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -94,15 +99,20 @@ export async function setSupportStage(stage: SupportStage): Promise<SupportStage
  * reconciliation may judge this order without approving `v1` on the shared stack.
  */
 export async function createSupportFixture(role: SupportRole, stage: SupportStage = "inspection",
-  options: { verifier?: boolean; policyVersion?: string } = {}): Promise<SupportFixture> {
+  options: { verifier?: boolean; policyVersion?: string; refundSending?: boolean } = {}): Promise<SupportFixture> {
   const policyVersion = options.policyVersion ?? "v1";
   let insertedPolicy = false;
   const rand = crypto.randomBytes(3).toString("hex").toUpperCase();
   const staff = await createAdminFixture(`support-${role}`.slice(0, 12), ROLES[role]);
   const customer = await createAdminFixture("support-cust", []);
   const originalStage = await setSupportStage(stage);
-  const originalRetention = (await withPg((pg) =>
-    pg.query("SELECT note_retention_days FROM private.support_workspace_settings WHERE singleton"))).rows[0].note_retention_days as number | null;
+  const original = (await withPg((pg) => pg.query(
+    "SELECT note_retention_days, refund_submission_enabled FROM private.support_workspace_settings WHERE singleton"))).rows[0];
+  const originalRetention = original.note_retention_days as number | null;
+  if (options.refundSending !== undefined) {
+    await withPg((pg) => pg.query("UPDATE private.support_workspace_settings SET refund_submission_enabled=$1 WHERE singleton",
+      [options.refundSending]));
+  }
   const collectionId = crypto.randomUUID();
   const releaseId = crypto.randomUUID();
   const offerId = crypto.randomUUID();
@@ -118,8 +128,8 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     disposed = true;
     rmSync(FAULT_DIR, { recursive: true, force: true });
     await withPg(async (pg) => {
-      await pg.query("UPDATE private.support_workspace_settings SET stage=$1, note_retention_days=$2 WHERE singleton",
-        [originalStage, originalRetention]);
+      await pg.query("UPDATE private.support_workspace_settings SET stage=$1, note_retention_days=$2, refund_submission_enabled=$3 WHERE singleton",
+        [originalStage, originalRetention, original.refund_submission_enabled]);
       if (options.verifier) {
         await pg.query("DELETE FROM private.commerce_verifier_principals WHERE principal = current_user AND registered_by = $1", [staff.userId]);
       }
@@ -237,6 +247,10 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
       "SELECT count(*) AS n FROM private.commerce_reconcile_receipts WHERE operation_id = $1", [operationId]))).rows[0].n),
     loseNextCommitResponse: () => setFault("lose-next-commit"),
     failNextPostcheck: () => setFault("fail-next-postcheck"),
+    loseNextRefundAnswer: () => setFault("refund-timeout-after-acceptance"),
+    rejectNextRefund: () => setFault("refund-rejected"),
+    providerRefundCount: async () => Number((await withPg((pg) => pg.query(
+      "SELECT count(*) AS n FROM private.payment_refunds WHERE order_id = $1 AND provider_refund_id LIKE 're_local_%'", [orderId]))).rows[0].n),
     revokeVerifier: async () => {
       await withPg((pg) => pg.query("UPDATE private.commerce_verifier_principals SET revoked_at=now() WHERE principal=current_user"));
     },

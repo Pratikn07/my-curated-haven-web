@@ -6,8 +6,13 @@ import { createSupportFixture, type SupportFixture } from "./support-admin-fixtu
 test.describe.configure({ mode: "serial" });
 const POLICY = "e2e-repair";
 
+// The page refreshes itself after each command; on WebKit that refresh can cut off the next page load, so it is retried.
+async function openOrder(page: Page, fixture: SupportFixture) {
+  await expect(async () => { await page.goto(`/admin/support/orders/${fixture.orderId}`); }).toPass();
+}
+
 async function checkAndPrepare(page: Page, fixture: SupportFixture, reason = "Paid but the collection is missing") {
-  await page.goto(`/admin/support/orders/${fixture.orderId}`);
+  await openOrder(page, fixture);
   await page.getByRole("button", { name: "Check provider status" }).click();
   await expect(page.getByRole("status", { name: "Check status" })).toContainText("Checked.");
   await page.reload();

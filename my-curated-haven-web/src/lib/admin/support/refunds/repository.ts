@@ -2,8 +2,8 @@ import "server-only";
 import type { Result } from "../../contracts";
 import { adminRpc } from "../../rpc";
 import { createClient } from "../../../supabase/server";
-import { decodeDiagnosisJob, decodeRefundApproval, decodeRefundProposal, decodeRefundReceipt } from "../decode";
-import type { RefundApproval, RefundCommand, RefundPrepareInput, RefundProposal, RefundReceipt } from "./contracts";
+import { decodeDiagnosisJob, decodeRefundApproval, decodeRefundList, decodeRefundProposal, decodeRefundReceipt } from "../decode";
+import type { RefundApproval, RefundCommand, RefundList, RefundPrepareInput, RefundProposal, RefundReceipt } from "./contracts";
 
 /**
  * Owner refund commands through the signed-in owner's own session. The database checks owner status, the exact
@@ -37,4 +37,9 @@ export async function reserveSupportRefund(command: RefundCommand): Promise<Resu
 export async function loadSupportRefund(operationId: string): Promise<Result<RefundReceipt>> {
   const supabase = await createClient();
   return adminRpc(() => supabase.rpc("admin_support_refund_operation", { p_operation_id: operationId }), decodeRefundReceipt);
+}
+
+export async function loadSupportRefunds(orderId: string): Promise<Result<RefundList>> {
+  const supabase = await createClient();
+  return adminRpc(() => supabase.rpc("admin_support_refunds", { p_order_id: orderId }), decodeRefundList);
 }

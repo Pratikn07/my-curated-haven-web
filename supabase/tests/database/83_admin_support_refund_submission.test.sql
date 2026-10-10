@@ -51,8 +51,9 @@ INSERT INTO private.commerce_access_policies(refund_policy_version, access_polic
 VALUES ('v1', 'v1', '{"id":"synthetic","approved":true,"version":"synthetic-v1","pendingRefund":"retain","partialRefund":"retain",
   "fullRefund":"ineligible","inquiry":"retain","formalOpen":"hold","formalLost":"ineligible","duration":"indefinite","fixedSeconds":null}',
   '92000000-0000-0000-0000-000000000001', 'Synthetic test mapping');
-UPDATE private.support_workspace_settings SET stage = 'repair';
+UPDATE private.support_workspace_settings SET stage = 'repair', refund_submission_enabled = true;
 CREATE TEMP TABLE a AS SELECT pg_temp.reserved(400, pg_temp.facts()) c;
+UPDATE private.support_workspace_settings SET refund_submission_enabled = false;
 
 -- Dispatch needs the refund switch, an owner dispatch check, and evidence identical to what was approved.
 SELECT throws_ok(format('SELECT pg_temp.claim(%L, %L)', (SELECT c FROM a), pg_temp.dispatch_check((SELECT c FROM a), pg_temp.facts())),

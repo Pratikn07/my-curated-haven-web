@@ -17,6 +17,10 @@ export type RefundPrepareInput = {
 };
 export type RefundCapacity = { capturedMinor: number; successfulMinor: number; pendingMinor: number; reservedMinor: number;
   availableMinor: number; blockers: string[] };
+/**
+ * `reserved` is whether the intent still holds money back: false once Stripe refused it, and false once an intent that
+ * was never sent has outlived its approval (SQL: private.support_refund_lapsed).
+ */
 export type RefundReservation = { operationId: string; providerRefundId: string | null; amountMinor: number; reserved: boolean };
 export type RefundProposal = {
   id: string;
@@ -43,13 +47,15 @@ export type RefundProposal = {
 export type RefundCommand = { operationId: string; proposalId: string; expectedDigest: string; caseId: string | null };
 export type RefundApproval = Omit<Approval, "channel"> & { channel: "web" };
 export type RefundIntentState = "reserved" | "dispatching" | "outcome_unknown" | "submitted" | "rejected";
+/** "expired": reserved, never sent, and its approval ran out, so it can never be sent and holds nothing back. */
+export type RefundReceiptState = RefundIntentState | "expired";
 export type RefundReceipt = {
   operationId: string;
   proposalId: string;
   orderId: string;
   amountMinor: number;
   currency: string;
-  state: RefundIntentState;
+  state: RefundReceiptState;
   providerRefundId: string | null;
   providerStatus: RefundFact["status"] | null;
   reconciliation: "not_started" | "pending" | "applied" | "unavailable";
@@ -82,3 +88,8 @@ export type RefundIntent = {
 };
 export type RefundSubmissionResult = { kind: "known"; fact: RefundFact } | { kind: "unknown"; code: string }
   | { kind: "not_executed"; code: string };
+export type RefundListState = "awaiting_approval" | "approved" | "blocked" | "expired" | "started";
+export type RefundListItem = { proposal: RefundProposal; state: RefundListState; approval: RefundApproval | null;
+  receipt: RefundReceipt | null; preparedAt: string };
+/** The owner's refunds for one order, newest first, and whether new refunds may be sent at all. */
+export type RefundList = { submissionEnabled: boolean; items: RefundListItem[] };

@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(36);
+SELECT plan(45);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -114,6 +114,9 @@ SELECT is(pg_temp.owner(format('SELECT public.admin_support_refund_approve(%L, %
 SELECT throws_ok(format('SELECT pg_temp.owner(%L)', format('SELECT public.admin_support_refund_reserve(%L)', pg_temp.command((SELECT p FROM p2)))),
   '42501', 'ADM_DISABLED', 'reserving needs the repair stage');
 UPDATE private.support_workspace_settings SET stage = 'repair';
+SELECT throws_ok(format('SELECT pg_temp.owner(%L)', format('SELECT public.admin_support_refund_reserve(%L)', pg_temp.command((SELECT p FROM p2)))),
+  '42501', 'ADM_DISABLED', 'reserving needs refund sending switched on');
+UPDATE private.support_workspace_settings SET refund_submission_enabled = true;
 CREATE TEMP TABLE cmd AS SELECT pg_temp.command((SELECT p FROM p2)) c;
 CREATE TEMP TABLE r2 AS SELECT pg_temp.owner(format('SELECT public.admin_support_refund_reserve(%L)', (SELECT c FROM cmd))) r;
 SELECT is((SELECT jsonb_build_array(r->>'state', (r->>'amountMinor')::int, r->>'reconciliation', r->>'providerRefundId') FROM r2),
@@ -140,6 +143,38 @@ SELECT is(pg_temp.owner(format('SELECT public.admin_support_refund_operation(%L)
   'the owner reads the refund receipt');
 SELECT throws_ok(format('SELECT pg_temp.operator(%L)', format('SELECT public.admin_support_refund_operation(%L)', (SELECT c->>'operationId' FROM cmd))),
   '42501', 'ADM_DENIED', 'support staff cannot read it');
+
+-- The owner's refund list shows each proposal with where its operation stands; staff cannot read it.
+SELECT is((SELECT e->>'state' FROM jsonb_array_elements(pg_temp.owner(format('SELECT public.admin_support_refunds(%L)',
+  'f3000000-0000-4000-8000-000000000001'))->'items') e WHERE e->'proposal'->>'id' = (SELECT p->>'id' FROM p2)), 'started',
+  'the list marks the reserved proposal as started');
+SELECT throws_ok($$SELECT pg_temp.operator('SELECT public.admin_support_refunds(''f3000000-0000-4000-8000-000000000001'')')$$,
+  '42501', 'ADM_DENIED', 'support staff cannot list refunds');
+
+-- A reservation that was never sent can never be sent once its approval expires, so it stops holding money back.
+SET LOCAL session_replication_role = replica;
+UPDATE private.support_refund_approvals SET expires_at = clock_timestamp() - interval '1 second' WHERE id = (SELECT (a->>'id')::uuid FROM a2);
+SET LOCAL session_replication_role = origin;
+SELECT is(pg_temp.owner(format('SELECT public.admin_support_refund_operation(%L)', (SELECT c->>'operationId' FROM cmd)))->>'state', 'expired',
+  'an unsent reservation whose approval expired reads as expired');
+CREATE TEMP TABLE p3 AS SELECT pg_temp.prepare(pg_temp.input(), pg_temp.check()) p;
+SELECT is((SELECT jsonb_build_array((p->'capacity'->>'reservedMinor')::int, (p->'capacity'->>'availableMinor')::int, p->'blockers') FROM p3),
+  '[0, 1400, []]'::jsonb, 'and no longer holds the amount back');
+
+-- Budgets: three new refund operations and five preparations a minute; repeating an operation spends nothing.
+SELECT lives_ok(format('SELECT pg_temp.owner(%L)', format('SELECT public.admin_support_refund_approve(%L, %L)', (SELECT p->>'id' FROM p3),
+  (SELECT p->>'digest' FROM p3))), 'the new proposal is approved');
+INSERT INTO private.support_rate_buckets(actor_id, kind, minute, used)
+SELECT '92000000-0000-0000-0000-000000000001', k, date_trunc('minute', clock_timestamp()) + m * interval '1 minute', n
+FROM (VALUES ('refund_submit', 3), ('refund_prepare', 5)) v(k, n), generate_series(0, 1) m
+ON CONFLICT (actor_id, kind, minute) DO UPDATE SET used = excluded.used;
+SELECT throws_ok(format('SELECT pg_temp.owner(%L)', format('SELECT public.admin_support_refund_reserve(%L)', pg_temp.command((SELECT p FROM p3)))),
+  'PT429', 'ADM_RATE_LIMITED', 'a fourth new refund operation in a minute is refused');
+SELECT is(pg_temp.owner(format('SELECT public.admin_support_refund_reserve(%L)', (SELECT c FROM cmd)))->>'auditId', (SELECT r->>'auditId' FROM r2),
+  'an existing refund operation is still returned');
+SELECT throws_ok(format('SELECT pg_temp.prepare(%L, %L)', pg_temp.input(), (SELECT p->>'observationId' FROM p3)), 'PT429', 'ADM_RATE_LIMITED',
+  'a sixth preparation in a minute is refused');
+DELETE FROM private.support_rate_buckets;
 
 -- An open formal dispute blocks a new refund.
 UPDATE private.support_workspace_settings SET stage = 'diagnosis';

@@ -1712,6 +1712,7 @@ export type Database = {
         Returns: Json
       }
       admin_support_refund_reserve: { Args: { p_command: Json }; Returns: Json }
+      admin_support_refunds: { Args: { p_order_id: string }; Returns: Json }
       admin_support_retention_run: {
         Args: { p_operation_id: string }
         Returns: Json

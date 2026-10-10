@@ -110,7 +110,15 @@ REVOKE ALL ON private.support_refund_proposals, private.support_refund_approvals
 
 -- What can still be refunded on one payment (TypeScript twin: refundCapacity). Reservations are this database's
 -- intents for the same account, mode and charge that are still reserved; one already visible at the provider (same
--- refund id) is counted once, from the provider's facts.
+-- refund id) is counted once, from the provider's facts. An intent that was never sent and whose approval has expired
+-- can never be sent (the dispatch claim needs a live approval), so it holds nothing back.
+CREATE FUNCTION private.support_refund_lapsed(r private.support_refund_intents) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+ SELECT r.state = 'reserved' AND EXISTS (SELECT 1 FROM private.support_refund_approvals a
+  WHERE a.id = r.approval_id AND a.expires_at <= clock_timestamp())
+$$;
+REVOKE ALL ON FUNCTION private.support_refund_lapsed(private.support_refund_intents) FROM PUBLIC, anon, authenticated;
+
 CREATE FUNCTION private.support_refund_capacity(p_facts jsonb) RETURNS jsonb
 LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_captured bigint; v_successful bigint; v_pending bigint; v_reserved bigint; v_available bigint; v_blockers text[] := '{}';
@@ -127,7 +135,8 @@ BEGIN
  INTO v_successful, v_pending FROM refunds;
  SELECT coalesce(sum(i.amount_minor), 0) INTO v_reserved FROM private.support_refund_intents i
  WHERE i.reserved AND i.account_id = p_facts->>'accountId' AND i.mode = p_facts->>'mode' AND i.charge_id = p_facts->>'chargeId'
-   AND (i.provider_refund_id IS NULL OR NOT EXISTS (SELECT 1 FROM jsonb_array_elements(p_facts->'refunds') x WHERE x->>'id' = i.provider_refund_id));
+   AND (i.provider_refund_id IS NULL OR NOT EXISTS (SELECT 1 FROM jsonb_array_elements(p_facts->'refunds') x WHERE x->>'id' = i.provider_refund_id))
+  AND NOT private.support_refund_lapsed(i);
  v_available := greatest(0, v_captured - v_successful - v_pending - v_reserved);
  IF v_pending > 0 OR v_reserved > 0 THEN v_blockers := v_blockers || 'refund_in_flight'::text; END IF;
  IF EXISTS (SELECT 1 FROM jsonb_array_elements(p_facts->'disputes') d WHERE d->>'classification' = 'formal'
@@ -199,6 +208,7 @@ BEGIN
  IF v_receipt IS NOT NULL THEN
   RETURN (SELECT proposal FROM private.support_refund_proposals WHERE id = (v_receipt->>'proposalId')::uuid);
  END IF;
+ IF NOT private.support_consume_budget(actor, 'refund_prepare') THEN RAISE EXCEPTION USING ERRCODE='PT429', MESSAGE='ADM_RATE_LIMITED'; END IF;
  SELECT * INTO o FROM private.purchase_orders WHERE id = v_order_id;
  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
  IF v_case IS NOT NULL AND NOT EXISTS (SELECT 1 FROM private.support_cases WHERE id = v_case AND order_id = o.id) THEN
@@ -319,7 +329,7 @@ END $$;
 CREATE FUNCTION private.support_refund_receipt(r private.support_refund_intents) RETURNS jsonb
 LANGUAGE sql STABLE SET search_path='' AS $$
  SELECT jsonb_build_object('operationId', r.operation_id, 'proposalId', r.proposal_id, 'orderId', r.order_id, 'amountMinor', r.amount_minor,
-  'currency', r.currency, 'state', r.state, 'providerRefundId', r.provider_refund_id, 'providerStatus', r.provider_status,
+  'currency', r.currency, 'state', CASE WHEN private.support_refund_lapsed(r) THEN 'expired' ELSE r.state END, 'providerRefundId', r.provider_refund_id, 'providerStatus', r.provider_status,
   'reconciliation', r.reconciliation, 'auditId', r.audit_id, 'reasonCode', r.reason_code,
   'firstDispatchedAt', CASE WHEN r.first_dispatched_at IS NULL THEN NULL ELSE private.commerce_utc(r.first_dispatched_at) END,
   'checkedAt', private.commerce_utc(clock_timestamp()))
@@ -350,6 +360,10 @@ BEGIN
   IF r.actor <> actor OR r.command <> c THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
   RETURN private.support_refund_receipt(r);
  END IF;
+ -- A new money operation needs refund sending switched on; with it off, existing ones can still be read and recovered.
+ IF NOT (SELECT refund_submission_enabled FROM private.support_workspace_settings WHERE singleton) THEN
+  RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_DISABLED';
+ END IF;
  SELECT * INTO p FROM private.support_refund_proposals WHERE id = (c->>'proposalId')::uuid;
  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
  SELECT * INTO a FROM private.support_refund_approvals WHERE proposal_id = p.id;
@@ -367,7 +381,15 @@ BEGIN
  WHERE po.id = p.order_id;
  PERFORM 1 FROM public.recipe_collections WHERE id = v_collection FOR UPDATE;
  SELECT * INTO o FROM private.purchase_orders WHERE id = p.order_id FOR UPDATE;
+ -- The same command sent twice at once: the second waits above, then returns the first one's reservation.
+ SELECT * INTO r FROM private.support_refund_intents WHERE operation_id = v_op;
+ IF FOUND THEN
+  IF r.actor <> actor OR r.command <> c THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
+  RETURN private.support_refund_receipt(r);
+ END IF;
  IF EXISTS (SELECT 1 FROM private.support_refund_intents WHERE proposal_id = p.id) THEN RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_CONFLICT'; END IF;
+ -- Only a new money operation spends the budget; repeating one returns its receipt.
+ IF NOT private.support_consume_budget(actor, 'refund_submit') THEN RAISE EXCEPTION USING ERRCODE='PT429', MESSAGE='ADM_RATE_LIMITED'; END IF;
  SELECT * INTO v_obs FROM private.commerce_provider_observations WHERE id = p.observation_id;
  IF NOT private.support_refund_proposal_current(p) THEN RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_STALE'; END IF;
  v_capacity := private.support_refund_capacity(v_obs.facts);

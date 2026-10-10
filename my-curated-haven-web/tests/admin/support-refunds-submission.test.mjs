@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { coordinateRefund, refundOutcomeMessage } from "../../src/lib/admin/support/refunds/coordinator.ts";
+import { coordinateRefund } from "../../src/lib/admin/support/refunds/coordinator.ts";
 import { ORDER, refundCommand, refundReceipt } from "../fixtures/support.mjs";
 
 test("lost provider response remains unknown and an ordinary retry only recovers status",async()=>{
@@ -44,17 +44,4 @@ test("refusals before dispatch send nothing", async () => {
     record: async () => refundReceipt(), read: async () => refundReceipt() };
   await assert.rejects(coordinateRefund(refundCommand(), ports), /ADM_DISABLED/);
   assert.equal(submitted, false);
-});
-
-test("unknown money outcome does not instruct the owner to issue another refund",()=>{
-  assert.equal(refundOutcomeMessage(refundReceipt({state:"outcome_unknown"})),
-    "Refund outcome unknown. Check this operation's status before taking further action.");
-});
-
-test("a successful provider refund and incomplete local reconciliation remain distinct",()=>{
-  assert.equal(refundOutcomeMessage(refundReceipt({state:"submitted",providerRefundId:"re_support",
-    providerStatus:"succeeded",reconciliation:"pending"})),
-    "Stripe reports the refund succeeded. Local access reconciliation is pending.");
-  assert.match(refundOutcomeMessage(refundReceipt({ state: "rejected", reasonCode: "AMOUNT_TOO_LARGE" })), /No money moved/);
-  assert.doesNotMatch(refundOutcomeMessage(refundReceipt({ state: "dispatching" })), /succeeded/);
 });

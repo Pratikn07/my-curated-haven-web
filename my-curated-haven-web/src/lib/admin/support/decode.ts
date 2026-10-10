@@ -5,7 +5,7 @@ import type {
   AccessExplanation, Approval, CustomerSupportDto, ExecutionStart, SupportMetrics, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
-import type { RefundApproval, RefundCapacity, RefundProposal, RefundReceipt } from "./refunds/contracts";
+import type { RefundApproval, RefundCapacity, RefundList, RefundListItem, RefundProposal, RefundReceipt } from "./refunds/contracts";
 
 /**
  * Runtime decoding of support RPC responses. Every nested identifier, enum and amount is checked and unknown keys
@@ -445,7 +445,7 @@ const refundReceipt = object<RefundReceipt>({
   orderId: uuid,
   amountMinor: minor,
   currency: pattern(CURRENCY),
-  state: oneOf("reserved", "dispatching", "outcome_unknown", "submitted", "rejected"),
+  state: oneOf("reserved", "dispatching", "outcome_unknown", "submitted", "rejected", "expired"),
   providerRefundId: nullable(text(255)),
   providerStatus: nullable(oneOf("pending", "requires_action", "succeeded", "failed", "canceled")),
   reconciliation: oneOf("not_started", "pending", "applied", "unavailable"),
@@ -465,6 +465,21 @@ export function decodeRefundApproval(input: unknown): RefundApproval {
 
 export function decodeRefundReceipt(input: unknown): RefundReceipt {
   return refundReceipt(input, "refundReceipt");
+}
+
+const refundList = object<RefundList>({
+  submissionEnabled: bool,
+  items: array(object<RefundListItem>({
+    proposal: refundProposal,
+    state: oneOf("awaiting_approval", "approved", "blocked", "expired", "started"),
+    approval: nullable(refundApproval),
+    receipt: nullable(refundReceipt),
+    preparedAt: timestamp,
+  }), 10),
+});
+
+export function decodeRefundList(input: unknown): RefundList {
+  return refundList(input, "refunds");
 }
 
 export function decodeSupportCase(input: unknown): SupportCase {

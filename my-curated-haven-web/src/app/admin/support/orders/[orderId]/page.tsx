@@ -1,5 +1,6 @@
 import { getAdminContext } from "@/lib/admin/context";
 import { loadSupportCases, loadSupportOrder, loadSupportProposals } from "@/lib/admin/support/repository";
+import { loadSupportRefunds } from "@/lib/admin/support/refunds/repository";
 import { loadLatestObservation } from "@/lib/admin/support/diagnosis";
 import OrderWorkspace from "@/components/admin/support/OrderWorkspace";
 
@@ -25,5 +26,10 @@ export default async function SupportOrderPage({ params }: { params: Promise<{ o
     execute: permissions.includes("support.repair.execute") };
   const repairOn = context.ok && context.value.supportStage === "repair" && (can.prepare || can.approve || can.execute);
   const repair = repairOn ? { proposals: await loadSupportProposals(orderId), can } : null;
-  return <OrderWorkspace read={read.value} cases={cases} canWriteCases={canWriteCases} diagnosis={diagnosis} repair={repair} />;
+  // Refunds are the owner's alone, prepared from a provider check and sent only at the repair stage.
+  const refundOn = canInspect && context.value.operator.roles.includes("owner") && permissions.includes("support.refund.prepare");
+  const refund = refundOn ? { list: await loadSupportRefunds(orderId), canSend: context.value.supportStage === "repair"
+    && permissions.includes("support.refund.approve") && permissions.includes("support.refund.execute") } : null;
+  return <OrderWorkspace read={read.value} cases={cases} canWriteCases={canWriteCases} diagnosis={diagnosis} repair={repair}
+    refund={refund} />;
 }

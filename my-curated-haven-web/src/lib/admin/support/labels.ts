@@ -94,7 +94,39 @@ export const REPAIR_BLOCKER_LABELS: Record<string, string> = {
   amount_invalid: "A refund or dispute amount is invalid",
 };
 
+/** Minor units in the currency's own decimals: 1400 USD is $14.00, 500 JPY is ¥500. */
 export function formatMoney(minor: number | null, currency: string | null): string {
   if (minor === null || currency === null) return "Unknown";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() }).format(minor / 100);
+  const format = new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() });
+  return format.format(minor / 10 ** (format.resolvedOptions().maximumFractionDigits ?? 2));
 }
+
+export const REFUND_REASON_LABELS = {
+  requested_by_customer: "Requested by the customer",
+  duplicate: "Duplicate charge",
+} as const;
+
+export const REFUND_EXCEPTION_LABELS = {
+  duplicate_charge: "Duplicate charge",
+  billing_error: "Billing error",
+  unresolved_delivery: "Purchase could not be delivered",
+  required_remedy: "Remedy required by law or by Stripe",
+} as const;
+
+export const REFUND_STATE_LABELS = {
+  awaiting_approval: "Waiting for the owner's approval",
+  approved: "Approved, not sent",
+  blocked: "Blocked",
+  expired: "Expired",
+  started: "Sent for refund",
+} as const;
+
+/** Why a refund cannot go ahead. Codes shared with repairs fall back to the repair wording. */
+export const REFUND_BLOCKER_LABELS: Record<string, string> = {
+  refund_in_flight: "Another refund of this payment is pending at Stripe or reserved here",
+  dispute_open: "A formal dispute is open on this payment",
+  nothing_to_refund: "Nothing is left to refund",
+  payment_not_refundable: "Stripe does not show a captured payment that can be refunded",
+  access_unknown: "The refund's effect on access could not be worked out",
+  binding_mismatch: "The Stripe check belongs to another payment",
+};

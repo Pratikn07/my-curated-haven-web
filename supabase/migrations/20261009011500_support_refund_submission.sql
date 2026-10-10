@@ -179,3 +179,26 @@ GRANT EXECUTE ON FUNCTION private.support_refund_dispatch_payload(uuid,bigint), 
  TO mch_commerce_verifier;
 REVOKE ALL ON FUNCTION public.admin_support_refund_dispatch_check(uuid), public.admin_support_refund_dispatch_claim(jsonb,uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_support_refund_dispatch_check(uuid), public.admin_support_refund_dispatch_claim(jsonb,uuid) TO authenticated;
+
+-- The owner's view of an order's latest refunds: whether sending is switched on, and each proposal with its approval
+-- and its receipt, newest first. Readable at the inspection stage and with sending off, so history stays recoverable.
+CREATE FUNCTION public.admin_support_refunds(p_order_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE actor uuid;
+BEGIN
+ actor := private.support_refund_actor('support.refund.prepare', 'inspection');
+ IF p_order_id IS NULL THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
+ RETURN jsonb_build_object('submissionEnabled', (SELECT refund_submission_enabled FROM private.support_workspace_settings WHERE singleton),
+  'items', (SELECT coalesce(jsonb_agg(jsonb_build_object('proposal', p.proposal,
+   'state', CASE WHEN r.operation_id IS NOT NULL THEN 'started' WHEN p.blocked THEN 'blocked'
+     WHEN a.id IS NOT NULL AND a.expires_at > clock_timestamp() THEN 'approved'
+     WHEN a.id IS NOT NULL OR p.expires_at <= clock_timestamp() THEN 'expired' ELSE 'awaiting_approval' END,
+   'approval', CASE WHEN a.id IS NULL THEN NULL ELSE private.support_refund_approval_json(a) END,
+   'receipt', CASE WHEN r.operation_id IS NULL THEN NULL ELSE private.support_refund_receipt(r) END,
+   'preparedAt', private.commerce_utc(p.prepared_at)) ORDER BY p.prepared_at DESC, p.id), '[]')
+  FROM (SELECT * FROM private.support_refund_proposals WHERE order_id = p_order_id ORDER BY prepared_at DESC, id LIMIT 10) p
+  LEFT JOIN private.support_refund_approvals a ON a.proposal_id = p.id
+  LEFT JOIN private.support_refund_intents r ON r.proposal_id = p.id));
+END $$;
+REVOKE ALL ON FUNCTION public.admin_support_refunds(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.admin_support_refunds(uuid) TO authenticated;
