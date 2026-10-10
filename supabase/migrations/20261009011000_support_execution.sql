@@ -24,7 +24,8 @@ CREATE TABLE private.support_operations (
  committed_at timestamptz,
  CHECK ((state = 'committed') = (receipt IS NOT NULL))
 );
-CREATE INDEX support_operations_proposal ON private.support_operations(proposal_id);
+-- One operation per proposal: concurrent starts serialise on the proposal row, and this makes it a rule of the table.
+CREATE UNIQUE INDEX support_operations_one_per_proposal ON private.support_operations(proposal_id);
 -- A committed operation never changes again.
 CREATE FUNCTION private.support_operation_guard() RETURNS trigger
 LANGUAGE plpgsql SET search_path='' AS $$
