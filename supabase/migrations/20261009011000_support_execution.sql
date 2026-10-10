@@ -39,12 +39,12 @@ CREATE TRIGGER support_operations_guard BEFORE UPDATE OR DELETE ON private.suppo
 ALTER TABLE private.support_operations ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON private.support_operations FROM PUBLIC, anon, authenticated;
 
--- The current rights an effect describes: whether the order's purchase source is eligible and whether the customer
--- has the collection.
+-- The current rights an effect describes: whether the order's purchase source is eligible (no source counts as not
+-- eligible) and whether the customer has the collection.
 CREATE FUNCTION private.support_effect_now(p_order private.purchase_orders) RETURNS jsonb
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
- SELECT jsonb_build_object('eligible', (SELECT is_eligible FROM private.access_sources WHERE source_kind = 'stripe_purchase'
-   AND source_id = p_order.id::text AND release_id = p_order.release_id),
+ SELECT jsonb_build_object('eligible', coalesce((SELECT is_eligible FROM private.access_sources WHERE source_kind = 'stripe_purchase'
+   AND source_id = p_order.id::text AND release_id = p_order.release_id), false),
   'effective', CASE WHEN private.collection_has_access(p_order.user_id, private.support_order_collection(p_order))
    THEN 'active' ELSE 'denied' END)
 $$;
@@ -127,7 +127,7 @@ BEGIN
  IF p_operation_id IS NULL OR p_observation_id IS NULL THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
  SELECT * INTO o FROM private.support_operations WHERE operation_id = p_operation_id FOR UPDATE;
  IF NOT FOUND OR o.actor <> actor THEN RAISE EXCEPTION USING ERRCODE='P0002', MESSAGE='ADM_NOT_FOUND'; END IF;
- IF o.state = 'committed' THEN RETURN o.receipt; END IF;
+ IF o.state = 'committed' THEN RETURN private.support_operation_status(o); END IF;
  SELECT * INTO p FROM private.support_proposals WHERE id = o.proposal_id;
  SELECT * INTO a FROM private.support_approvals WHERE id = o.approval_id;
  -- The approval must still be live and its approver must still hold approval authority now.

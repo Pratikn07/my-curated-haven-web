@@ -5,7 +5,7 @@ import type {
   Approval, CaseCommand, LookupResult, OperationStatus, ProviderObservation, RepairCommand, RepairProposal, SupportCase,
   SupportHistoryPage, SupportRead,
 } from "./contracts";
-import { executeSupportRepair, loadSupportOperation } from "./repair";
+import { executeSupportRepair, loadSupportOperation, postcheckSupportRepair } from "./repair";
 import { diagnoseSupportOrder } from "./diagnosis";
 import { InvalidLookup, parseLookup } from "./query";
 import {
@@ -93,4 +93,10 @@ export async function executeRepairAction(command: RepairCommand): Promise<Resul
 export async function operationStatusAction(operationId: string): Promise<Result<OperationStatus>> {
   if (!UUID.test(operationId)) return invalid("support-operation");
   return loadSupportOperation(operationId);
+}
+
+/** Confirm a committed repair against the customer's current access; never repairs again. */
+export async function postcheckAction(operationId: string): Promise<Result<OperationStatus>> {
+  if (!UUID.test(operationId)) return invalid("support-postcheck");
+  return postcheckSupportRepair(operationId);
 }

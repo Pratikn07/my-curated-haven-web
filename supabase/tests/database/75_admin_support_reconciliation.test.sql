@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(50);
+SELECT plan(52);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -215,10 +215,20 @@ SELECT is(pg_temp.apply(pg_temp.observe(pg_temp.order_of(16), pg_temp.facts(16),
 -- A payment first seen through reconciliation is recorded, granted and confirmed; a failed one grants nothing.
 SELECT pg_temp.new_order(14, 'processing', false);
 CREATE TEMP TABLE r14 AS SELECT pg_temp.apply(pg_temp.observe(pg_temp.order_of(14), pg_temp.facts(14))) r;
-SELECT is((SELECT r->'effects'->0->>'notification' FROM r14), 'purchase_confirmation', 'a newly seen payment confirms the purchase');
+SELECT is((SELECT r->'effects'->0->>'notification' FROM r14), 'none', 'no confirmation is claimed while delivery is off');
 SELECT ok(pg_temp.has_access(14) AND (SELECT attempt_state FROM private.purchase_orders WHERE id = pg_temp.order_of(14)) = 'closed'
   AND EXISTS (SELECT 1 FROM private.commerce_outbox WHERE idempotency_key = 'order-paid-' || pg_temp.order_of(14)),
   'grants access, closes the checkout and queues the confirmation');
+UPDATE private.commerce_settings SET purchase_confirmation_delivery = true;
+SELECT pg_temp.new_order(19, 'processing', false);
+SELECT is(pg_temp.apply(pg_temp.observe(pg_temp.order_of(19), pg_temp.facts(19)))->'effects'->0->>'notification', 'purchase_confirmation',
+  'with delivery approved, a newly seen payment confirms the purchase');
+SELECT pg_temp.new_order(20, 'processing', false);
+INSERT INTO private.commerce_outbox(idempotency_key, order_id, event_kind, payload)
+VALUES ('order-paid-' || pg_temp.order_of(20), pg_temp.order_of(20), 'purchase_confirmed', '{}');
+SELECT is(pg_temp.apply(pg_temp.observe(pg_temp.order_of(20), pg_temp.facts(20)))->'effects'->0->>'notification', 'none',
+  'a confirmation already queued is never sent again');
+UPDATE private.commerce_settings SET purchase_confirmation_delivery = false;
 SELECT pg_temp.new_order(15, 'processing', false);
 SELECT is(pg_temp.apply(pg_temp.observe(pg_temp.order_of(15), pg_temp.facts(15, '[]', '[]', 'failed')))->>'state', 'already_satisfied',
   'a failed payment changes nothing');

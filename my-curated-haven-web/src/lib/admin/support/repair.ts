@@ -5,9 +5,10 @@ import { createClient } from "../../supabase/server";
 import { claimVerification, recordObservation, verifierConfigured } from "../../payments/reconciliation/repository";
 import { sourcedProviderRead } from "../../payments/reconciliation/service";
 import { runVerification } from "../../payments/reconciliation/verifier";
-import type { OperationStatus, RepairCommand } from "./contracts";
+import type { OperationStatus, RepairCommand, RepairReceipt } from "./contracts";
 import { decodeExecutionStart, decodeOperation } from "./decode";
-import { coordinateSupportRepair } from "./execution";
+import { coordinateSupportRepair, isReceipt } from "./execution";
+import { settleSupportPostcheck } from "./postcheck";
 
 /**
  * Server wiring for applying an approved repair. Starting and committing run through the staff member's own session,
@@ -30,4 +31,22 @@ export async function executeSupportRepair(command: RepairCommand): Promise<Resu
       { p_operation_id: operationId, p_observation_id: observationId }), decodeOperation),
     read: loadSupportOperation,
   });
+}
+
+/**
+ * Confirm a committed repair against the customer's current access. The database does the comparison; a call that
+ * fails leaves the receipt applied with verification `unavailable`.
+ */
+export async function postcheckSupportRepair(operationId: string): Promise<Result<OperationStatus>> {
+  const current = await loadSupportOperation(operationId);
+  if (!current.ok || !isReceipt(current.value)) return current;
+  const supabase = await createClient();
+  let checked: RepairReceipt | null = null;
+  const settled = await settleSupportPostcheck(current.value, async () => {
+    const result = await adminRpc(() => supabase.rpc("admin_support_postcheck", { p_operation_id: operationId }), decodeOperation);
+    if (!result.ok || !isReceipt(result.value)) throw new Error("post-check unavailable");
+    checked = result.value;
+    return result.value.verification === "verified";
+  });
+  return { ok: true, value: checked ?? settled };
 }

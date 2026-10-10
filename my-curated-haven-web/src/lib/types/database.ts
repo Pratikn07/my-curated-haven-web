@@ -1662,6 +1662,10 @@ export type Database = {
         Returns: Json
       }
       admin_support_order: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_postcheck: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
       admin_support_prepare: {
         Args: {
           p_kind: string

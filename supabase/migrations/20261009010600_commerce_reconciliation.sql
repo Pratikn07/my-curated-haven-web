@@ -87,6 +87,24 @@ CREATE TRIGGER payment_refunds_status AFTER INSERT OR UPDATE OF status ON privat
 CREATE TRIGGER payment_disputes_status AFTER INSERT OR UPDATE OF status ON private.payment_disputes
  FOR EACH ROW EXECUTE FUNCTION private.commerce_record_status();
 
+-- Whether purchase confirmations are really delivered. Nothing sends the commerce outbox yet, so receipts and repair
+-- proposals report no email until the owner turns this on for a verified delivery integration. Outbox rows are still
+-- written with their dedupe keys either way.
+CREATE TABLE private.commerce_settings (
+ singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
+ purchase_confirmation_delivery boolean NOT NULL DEFAULT false
+);
+INSERT INTO private.commerce_settings DEFAULT VALUES;
+ALTER TABLE private.commerce_settings ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON private.commerce_settings FROM PUBLIC, anon, authenticated;
+
+-- The one notification a change may carry (TypeScript twin: notificationEffect). Diagnosis and projection changes
+-- never notify; a fulfilment notifies once, and only when delivery is approved.
+CREATE FUNCTION private.commerce_notification_effect(p_kind text, p_already_queued boolean, p_delivery_approved boolean) RETURNS text
+LANGUAGE sql IMMUTABLE SET search_path='' AS $$
+ SELECT CASE WHEN p_kind = 'fulfilment' AND NOT p_already_queued AND p_delivery_approved THEN 'purchase_confirmation' ELSE 'none' END
+$$;
+
 -- What the recorded payment facts already exclude for an order's purchase source, or NULL.
 CREATE FUNCTION private.commerce_recorded_exclusion(p_order_id uuid) RETURNS text
 LANGUAGE sql STABLE SET search_path='' AS $$
@@ -595,7 +613,9 @@ BEGIN
      'afterEffective', CASE WHEN v_after_access THEN 'active' ELSE 'denied' END,
      'recipeIds', (SELECT coalesce(jsonb_agg(cr.recipe_id ORDER BY cr.position), '[]') FROM public.collection_recipes cr
        WHERE cr.release_id = v_order.release_id),
-     'notification', CASE WHEN v_new_payment AND v_after_eligible THEN 'purchase_confirmation' ELSE 'none' END));
+     'notification', private.commerce_notification_effect(CASE WHEN v_new_payment AND v_after_eligible THEN 'fulfilment'
+       ELSE 'projection' END, EXISTS (SELECT 1 FROM private.commerce_outbox WHERE idempotency_key = 'order-paid-' || v_order.id::text),
+       (SELECT purchase_confirmation_delivery FROM private.commerce_settings))));
    END IF;
    IF v_new_payment AND v_after_eligible THEN
     UPDATE private.purchase_orders SET attempt_state = 'closed', updated_at = now() WHERE id = v_order.id AND attempt_state <> 'closed';
@@ -656,6 +676,7 @@ BEGIN
 END $$;
 
 REVOKE ALL ON FUNCTION private.commerce_identity_guard(), private.commerce_record_status(), private.commerce_recorded_exclusion(uuid),
+ private.commerce_notification_effect(text,boolean,boolean),
  private.commerce_reconcile_core(jsonb,uuid,uuid), private.commerce_verification_request(uuid,text),
  private.commerce_reconcile_system(uuid,uuid,text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION private.commerce_verification_request(uuid,text), private.commerce_reconcile_system(uuid,uuid,text)
