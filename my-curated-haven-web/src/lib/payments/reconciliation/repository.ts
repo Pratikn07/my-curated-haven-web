@@ -155,6 +155,23 @@ export async function findLocalLedgerRefund(intent: Pick<RefundIntent, "chargeId
     status: r.status, occurredAt: new Date(r.occurred_at).toISOString() } : null;
 }
 
+// Dispute notices: the verifier login reads a claimed email and records the transport's answer, nothing more.
+export async function noticePayload(operationId: string, fence: number): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.support_notice_payload($1, $2) AS p", [operationId, fence]);
+  return rows[0].p;
+}
+
+export async function noticeResultRecord(operationId: string, fence: number, result: unknown): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.support_notice_result_record($1, $2, $3::jsonb) AS r",
+    [operationId, fence, JSON.stringify(result)]);
+  return rows[0].r;
+}
+
+export async function noticeExpireClaim(operationId: string): Promise<unknown> {
+  const { rows } = await verifierPool().query("SELECT private.support_notice_expire_claim($1) AS r", [operationId]);
+  return rows[0].r;
+}
+
 /** Close the verifier connection (command-line runs only). */
 export async function closeVerifierPool(): Promise<void> {
   const current = pool;
@@ -190,10 +207,11 @@ export function createLocalLedgerReader(): ProviderReader {
     },
     async readDisputePage(binding) {
       const { rows } = await verifierPool().query(`SELECT d.provider_dispute_id, p.payment_intent_id, p.charge_id, d.amount, d.currency,
-          d.status
+          d.status, d.response_deadline
         FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.payment_id WHERE d.order_id = $1`, [binding.orderId]);
       return { items: rows.map((d) => ({ id: d.provider_dispute_id, paymentIntentId: d.payment_intent_id, chargeId: d.charge_id,
-        amountMinor: d.amount, currency: d.currency, status: d.status, classification: classifyDispute(d.status), deadline: null })),
+        amountMinor: d.amount, currency: d.currency, status: d.status, classification: classifyDispute(d.status),
+        deadline: d.response_deadline ? iso(d.response_deadline) : null })),
       next: null };
     },
   };

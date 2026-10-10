@@ -59,7 +59,7 @@ Historical orders keep the terms frozen in their order snapshot. An order whose 
 | Prepare, record an approval for, or apply an access repair as an agent | A registered operator login, for a named human who holds the right now | repair |
 | Refund, or send a dispute notice, as an agent | Nobody | never |
 
-Limits per person per minute: 30 exact lookups, 5 provider checks, 5 new repair executions. Repeating an operation never counts again.
+Limits per person per minute: 30 exact lookups, 5 provider checks, 5 new repair executions, 5 refund preparations, 3 new refunds, 5 notice preparations. Repeating an operation never counts again.
 
 ## Refunds (owner-approved exceptions)
 
@@ -76,4 +76,19 @@ Refunds stay exceptions the owner approves one exact amount at a time; nothing h
 | Approval lasts | Five minutes, or until the proposal expires if sooner |
 | Email | None; a refund never sends a purchase confirmation |
 | Submission switch | `refund_submission_enabled`, off by default; reading earlier results always works |
+
+## Dispute notices (owner-approved)
+
+| Rule | Value |
+| --- | --- |
+| Who may prepare, approve and send | The owner, signed in with MFA. Support staff and agent logins never can; nothing is sent from a webhook. |
+| When | Only for a formal dispute that is open (`needs_response`, `under_review`), from the newest complete Stripe check of the order, at most 15 minutes old |
+| Recipient | The customer's current verified sign-in email; a closed account, a missing or unconfirmed email blocks the notice |
+| Text | Template `dispute-opened-v1` only: plain text, no links, tracking, marketing or request to buy again; it states the customer's actual access (another source keeps the collection, or this purchase is paused) |
+| Approval lasts | Five minutes, bound to the exact recipient, subject, text, dispute version and access |
+| Sends per dispute | At most one that was or may have been sent; an unknown outcome is never resent |
+| Delivery | A provider message id means accepted, never delivered |
+| Retention | `notice_retention_days` (unset blocks preparing); after it, recipient and text are removed unless the dispute is open or the send is unresolved; digests and receipts stay |
+| Send switch | `dispute_notice_enabled`, off by default, and the repair stage; answers are recorded even when it is off |
+| Answering the bank | Always in the Stripe Dashboard; the email never responds to the dispute |
 

@@ -6,6 +6,9 @@ import type {
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 import type { RefundApproval, RefundCapacity, RefundList, RefundListItem, RefundProposal, RefundReceipt } from "./refunds/contracts";
+import type {
+  DisputeNoticeDraft, NoticeApproval, NoticeClaim, NoticeList, NoticeListItem, NoticeReceipt,
+} from "./notices/contracts";
 
 /**
  * Runtime decoding of support RPC responses. Every nested identifier, enum and amount is checked and unknown keys
@@ -523,4 +526,80 @@ export function decodeApproval(input: unknown): Approval {
 /** An order's proposals, newest first, each with its approval state. */
 export function decodeProposalList(input: unknown): ProposalListItem[] {
   return array(proposalItem, 25)(input, "proposals");
+}
+
+// Dispute notices. Retention may have emptied a draft's recipient and text, so those may be empty strings.
+const maybeEmpty = (max: number): Decoder<string> => (v, p) => (typeof v === "string" && v.length <= max ? v : bad(p));
+const emptyOr = (d: Decoder<string>): Decoder<string> => (v, p) => (v === "" ? "" : d(v, p));
+const noticeDraft = object<DisputeNoticeDraft>({
+  id: uuid,
+  noticeId: uuid,
+  orderId: uuid,
+  disputeId: pattern(/^du_[A-Za-z0-9_]{1,255}$/),
+  ownerPrincipal: uuid,
+  recipient: maybeEmpty(320),
+  recipientReference: emptyOr(uuid),
+  recipientVersion: emptyOr(digest),
+  subject: maybeEmpty(200),
+  text: maybeEmpty(4000),
+  templateVersion: oneOf("dispute-opened-v1"),
+  disputeVersion: digest,
+  disputeStatus: pattern(/^[a-z_]{1,40}$/),
+  respondBy: nullable(timestamp),
+  effectiveAccess: oneOf("active", "denied", "unavailable"),
+  dependencyToken: emptyOr(digest),
+  digest,
+  expiresAt: timestamp,
+  blockers: array(pattern(LOWER_CODE), 20),
+  redacted: bool,
+});
+const noticeApproval = object<NoticeApproval>({
+  id: uuid,
+  proposalId: uuid,
+  digest,
+  humanAuthoriser: uuid,
+  approvedAt: timestamp,
+  expiresAt: timestamp,
+  channel: oneOf("web"),
+});
+const noticeReceipt = object<NoticeReceipt>({
+  operationId: uuid,
+  draftId: uuid,
+  state: oneOf("not_sent", "dispatching", "accepted", "failed_before_acceptance", "outcome_unknown"),
+  providerMessageId: nullable(text(255)),
+  delivery: oneOf("unconfirmed", "delivered", "bounced", "complained"),
+  auditId: uuid,
+  reasonCode: nullable(code),
+  checkedAt: timestamp,
+});
+const noticeList = object<NoticeList>({
+  sendingEnabled: bool,
+  items: array(object<NoticeListItem>({
+    draft: noticeDraft,
+    state: oneOf("awaiting_approval", "approved", "blocked", "expired", "started"),
+    approval: nullable(noticeApproval),
+    receipt: nullable(noticeReceipt),
+    preparedAt: timestamp,
+  }), 10),
+});
+const noticeClaim = object<NoticeClaim>({ operationId: uuid, fence: count, expiresAt: timestamp });
+
+export function decodeNoticeDraft(input: unknown): DisputeNoticeDraft {
+  return noticeDraft(input, "noticeDraft");
+}
+
+export function decodeNoticeApproval(input: unknown): NoticeApproval {
+  return noticeApproval(input, "noticeApproval");
+}
+
+export function decodeNoticeReceipt(input: unknown): NoticeReceipt {
+  return noticeReceipt(input, "noticeReceipt");
+}
+
+export function decodeNoticeList(input: unknown): NoticeList {
+  return noticeList(input, "notices");
+}
+
+export function decodeNoticeClaim(input: unknown): NoticeClaim {
+  return noticeClaim(input, "noticeClaim");
 }

@@ -137,6 +137,21 @@ Each refund is sent once, with the idempotency key `mch-support-refund-<operatio
 - No rollback or SQL repair undoes money. A refund made in error is not reversed by charging the customer again: never recharge a customer automatically.
 - Only the owner can refund. Support staff and agent logins have no refund function; the verifier login can only read a claimed request and record Stripe's answer.
 
+## Dispute notices
+
+The owner can send one neutral email to a customer who formally disputed a payment. Answer the bank in the Stripe Dashboard first; the email does not respond to the dispute and never closes it.
+
+Before turning sending on in an environment:
+
+1. Set the support address customers write to and how long notice content is kept: `UPDATE private.support_workspace_settings SET notice_support_email = '<address>', notice_retention_days = <30–3650> WHERE singleton;`
+2. Verify the sending domain in Amazon SES in the same region, move the account out of the SES sandbox, and use a configuration without open or click tracking. Give the server an IAM identity allowed only `ses:SendEmail` for that identity, and set `SUPPORT_NOTICE_FROM`, `SUPPORT_NOTICE_REPLY_TO` and `SUPPORT_NOTICE_SES_REGION` in the server's runtime settings. Without all three, a send is refused before anything leaves (`TRANSPORT_UNCONFIGURED`).
+3. Send one notice to a controlled recipient (an order you own in test mode) and confirm it arrives in the inbox with the right sender and reply-to. An SES success alone is not proof of delivery.
+4. Turn sending on only while needed: `UPDATE private.support_workspace_settings SET dispute_notice_enabled = true WHERE singleton;` and off afterwards.
+
+On the order page the owner clicks **Check provider status**, then **Prepare notice for dispute du_…**. The preview shows the recipient, subject and exact text, the dispute and its response deadline, and the customer's access. **Approve and send notice** approves that exact email and sends it once.
+
+"Accepted" means SES took the email; delivery is not confirmed. "Outcome unknown" means the email may have gone: never send another for that dispute. Look the message up in SES (CloudWatch or the account's sending logs, tag `support_notice_operation`) and record what you find in a support case. **Settle a stalled send** only turns a send stuck in "sending" past its ten-second claim into "unknown"; it never sends. A late acceptance is still recorded, even with sending switched off.
+
 ## Local verification stack
 
 Run Phase 3 database work against the owned local project `mch-admin-support-test`, never the default stack (54321/54322) or an earlier phase's stack.

@@ -138,6 +138,9 @@ try {
     };
     const sending = (await c.query("SELECT refund_submission_enabled FROM private.support_workspace_settings")).rows[0].refund_submission_enabled;
     step("refund sending starts switched off", sending === false);
+    const notices = (await c.query("SELECT dispute_notice_enabled, notice_retention_days, notice_support_email FROM private.support_workspace_settings")).rows[0];
+    step("dispute notices start switched off, with no retention period or support address", notices.dispute_notice_enabled === false
+      && notices.notice_retention_days === null && notices.notice_support_email === null, notices);
     const grants = (await c.query(`SELECT r.rolname, array_agg(p.proname::text ORDER BY p.proname) fns FROM pg_proc p
       JOIN pg_namespace n ON n.oid = p.pronamespace CROSS JOIN pg_roles r
       WHERE p.proname LIKE '%refund%' AND r.rolname IN ('anon', 'authenticated', 'mch_support_operator', 'mch_commerce_verifier')

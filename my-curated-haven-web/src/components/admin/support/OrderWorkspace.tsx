@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Result } from "@/lib/admin/contracts";
 import type { OrderCasesPage, OrderSupportDto, ProposalListItem, ProviderObservation, SupportRead } from "@/lib/admin/support/contracts";
 import type { RefundList } from "@/lib/admin/support/refunds/contracts";
+import type { NoticeList } from "@/lib/admin/support/notices/contracts";
 import AdminRecordFrame from "@/components/admin/AdminRecordFrame";
 import { formatUtc } from "@/lib/admin/collections/labels";
 import { ACCESS_LABELS, ACCOUNT_LABELS, ATTEMPT_LABELS, PAYMENT_LABELS, formatMoney } from "@/lib/admin/support/labels";
 import AccessExplanation from "./AccessExplanation";
+import DisputeNotice from "./DisputeNotice";
 import ProviderDiagnosis from "./ProviderDiagnosis";
 import RefundWorkflow from "./RefundWorkflow";
 import RepairWorkflow from "./RepairWorkflow";
@@ -16,7 +18,7 @@ import SupportTimeline from "./SupportTimeline";
  * One order as support sees it. The seven states are separate on purpose: a paid order can still lack access, and
  * an unavailable fact is shown as unavailable, never as "none" or "no".
  */
-export default function OrderWorkspace({ read, cases, canWriteCases, diagnosis = null, repair = null, refund = null }: {
+export default function OrderWorkspace({ read, cases, canWriteCases, diagnosis = null, repair = null, refund = null, notice = null }: {
   read: SupportRead<OrderSupportDto>; cases: Result<OrderCasesPage>; canWriteCases: boolean;
   /** Present only for staff who may inspect provider details while diagnosis is switched on. */
   diagnosis?: Result<SupportRead<ProviderObservation | null>> | null;
@@ -24,12 +26,14 @@ export default function OrderWorkspace({ read, cases, canWriteCases, diagnosis =
   repair?: { proposals: Result<ProposalListItem[]>; can: { prepare: boolean; approve: boolean; execute: boolean } } | null;
   /** Present only for the owner while provider checks are switched on. */
   refund?: { list: Result<RefundList>; canSend: boolean } | null;
+  /** Present only for the owner while provider checks are switched on. */
+  notice?: { list: Result<NoticeList>; canSend: boolean } | null;
 }) {
   const order = read.value;
   const refunds = order.refunds.length === 0 ? "None recorded"
     : order.refunds.map((r) => `${formatMoney(r.amountMinor, r.currency)} ${r.status.replace("_", " ")}`).join(", ");
   const disputes = order.disputes.length === 0 ? "None recorded"
-    : order.disputes.map((d) => `${d.classification === "inquiry" ? "Inquiry" : d.classification === "formal" ? "Dispute" : "Unclassified"} (${d.status.replaceAll("_", " ")})`).join(", ");
+    : order.disputes.map((d) => `${d.classification === "inquiry" ? "Inquiry" : d.classification === "formal" ? "Dispute" : "Unclassified"} (${d.status.replaceAll("_", " ")}${d.deadline ? `; respond in Stripe by ${formatUtc(d.deadline)}` : ""})`).join(", ");
   const sources = order.access === null ? "Unavailable" : order.access.sources.length === 0 ? "None recorded"
     : order.access.sources.map((s) => (s.eligible ? "Eligible" : "Not eligible")).join(", ");
   const axes = [
@@ -78,6 +82,8 @@ export default function OrderWorkspace({ read, cases, canWriteCases, diagnosis =
         can={repair.can} observationId={diagnosis?.ok && diagnosis.value.value?.complete ? diagnosis.value.value.id : null} /> : null}
       {refund ? <RefundWorkflow orderId={order.orderId} supportReference={order.supportReference} currency={order.currency}
         refunds={refund.list} canSend={refund.canSend} /> : null}
+      {notice ? <DisputeNotice orderId={order.orderId} notices={notice.list} canSend={notice.canSend}
+        observation={diagnosis?.ok ? diagnosis.value.value : null} /> : null}
       <AccessExplanation access={order.access} />
       <SupportCases orderId={order.orderId} cases={cases} canWrite={canWriteCases} />
       {/* Keyed by the newest event, so a refresh after a case change shows the new activity. */}

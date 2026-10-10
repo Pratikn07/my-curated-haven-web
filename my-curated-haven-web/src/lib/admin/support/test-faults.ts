@@ -6,7 +6,8 @@ import { join } from "node:path";
  * Faults for local browser tests only: a spec writes a marker file and the next matching step consumes it. Active
  * only with the local-ledger provider fixture on a server that is not deployed; anywhere else this always says no.
  */
-export type LocalFault = "lose-next-commit" | "fail-next-postcheck" | "refund-timeout-after-acceptance" | "refund-rejected";
+export type LocalFault = "lose-next-commit" | "fail-next-postcheck" | "refund-timeout-after-acceptance" | "refund-rejected"
+  | "notice-timeout-after-acceptance" | "notice-rejected";
 export const LOCAL_FAULT_DIR = join(tmpdir(), "mch-support-test-faults");
 
 export function consumeLocalFault(name: LocalFault): boolean {

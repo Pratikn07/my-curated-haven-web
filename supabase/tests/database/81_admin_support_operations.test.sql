@@ -50,7 +50,7 @@ INSERT INTO private.support_proposals(id, actor, operation_id, order_id, observa
 VALUES ('f3000000-0000-4000-8000-000000000963', 'f3000000-0000-4000-8000-0000000000a2', gen_random_uuid(), 'f3000000-0000-4000-8000-000000000001',
   (SELECT held FROM obs), 'reconcile_order', '{}', repeat('e', 64), false, now() + interval '4 minutes');
 CREATE TEMP TABLE run AS SELECT pg_temp.owner(format('SELECT public.admin_support_retention_run(%L)', (SELECT op FROM obs))) r;
-SELECT is((SELECT r FROM run), '{"notesRedacted": 1, "observationsMinimised": 1}'::jsonb, 'one expired note and one expired check are cleared');
+SELECT is((SELECT r FROM run), '{"notesRedacted": 1, "noticesRedacted": 0, "observationsMinimised": 1}'::jsonb, 'one expired note and one expired check are cleared');
 SELECT is((SELECT jsonb_build_array(text, redaction_reason) FROM private.support_note_texts WHERE event_id = 'f3000000-0000-4000-8000-000000000961'),
   '[null, "Retention period ended"]'::jsonb, 'the expired note text is gone, with the reason kept');
 SELECT is((SELECT text FROM private.support_note_texts WHERE event_id = 'f3000000-0000-4000-8000-000000000962'), 'Recent private note',

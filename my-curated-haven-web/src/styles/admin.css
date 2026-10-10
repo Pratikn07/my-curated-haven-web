@@ -1404,3 +1404,4 @@
 .admin-support__effect[data-change="remove"] { border-left: 4px solid var(--danger); padding-left: 0.5rem; }
 .admin-support__effect[data-change="restore"] { border-left: 4px solid var(--success); padding-left: 0.5rem; }
 .admin-support__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.admin-support__notice-text { white-space: pre-wrap; overflow-wrap: anywhere; }

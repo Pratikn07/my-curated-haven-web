@@ -130,3 +130,21 @@ export const REFUND_BLOCKER_LABELS: Record<string, string> = {
   access_unknown: "The refund's effect on access could not be worked out",
   binding_mismatch: "The Stripe check belongs to another payment",
 };
+
+/** Why a dispute notice cannot be sent. */
+export const NOTICE_BLOCKER_LABELS: Record<string, string> = {
+  dispute_not_open: "The dispute is not a formal dispute that is still open",
+  account_closed: "The customer's account is closed",
+  recipient_unverified: "The customer's email address is not verified",
+  access_unavailable: "The customer's access could not be worked out",
+  retention_unset: "No retention period is set for notice content",
+  support_email_unset: "No support address is set for customers to write to",
+  already_sent: "A notice for this dispute was already sent, or may have been",
+};
+
+export const NOTICE_ACCESS_LABELS = {
+  active: "Still has the collection through another purchase or grant",
+  denied: "This purchase is paused while the dispute is open",
+  unavailable: "Unavailable",
+} as const;
+

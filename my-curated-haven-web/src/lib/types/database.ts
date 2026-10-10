@@ -1657,6 +1657,31 @@ export type Database = {
       }
       admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
       admin_support_metrics: { Args: { p_mode: string }; Returns: Json }
+      admin_support_notice_approve: {
+        Args: { p_digest: string; p_draft_id: string }
+        Returns: Json
+      }
+      admin_support_notice_operation: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_notice_prepare: {
+        Args: {
+          p_dispute_id: string
+          p_observation_id: string
+          p_order_id: string
+        }
+        Returns: Json
+      }
+      admin_support_notice_send_check: {
+        Args: { p_draft_id: string }
+        Returns: Json
+      }
+      admin_support_notice_send_claim: {
+        Args: { p_command: Json; p_observation_id: string }
+        Returns: Json
+      }
+      admin_support_notices: { Args: { p_order_id: string }; Returns: Json }
       admin_support_observation: { Args: { p_id: string }; Returns: Json }
       admin_support_operation: {
         Args: { p_operation_id: string }

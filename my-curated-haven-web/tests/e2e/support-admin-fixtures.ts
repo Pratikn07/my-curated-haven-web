@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "pg";
@@ -53,6 +53,13 @@ export interface SupportFixture {
   rejectNextRefund(): void;
   /** Refunds the local ledger made for this order's payment (the fixture's earlier refund is not counted). */
   providerRefundCount(): Promise<number>;
+  /** Open a dispute on the paid order, as Stripe would report it, with a response deadline a week away. Returns its id. */
+  openDispute(status?: "needs_response" | "warning_needs_response"): Promise<string>;
+  /** Local notice faults: the next email is sent but its answer is lost, or the next email is refused before sending. */
+  loseNextNoticeAnswer(): void;
+  rejectNextNotice(): void;
+  /** Emails the local notice transport "sent" to this fixture's customer. */
+  sentNotices(): { operationId: string; recipient: string; subject: string; text: string }[];
   /** Revoke the local verifier registration (only when the fixture registered one). */
   revokeVerifier(): Promise<void>;
   query(sql: string, args?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -78,6 +85,8 @@ async function withPg<T>(fn: (pg: Client) => Promise<T>): Promise<T> {
 }
 
 const FAULT_DIR = join(tmpdir(), "mch-support-test-faults");
+// Where the local notice transport writes (src/lib/email/ses-transport.ts).
+const MAIL_DIR = join(tmpdir(), "mch-support-test-mail");
 
 function setFault(name: string): void {
   mkdirSync(FAULT_DIR, { recursive: true });
@@ -99,16 +108,20 @@ export async function setSupportStage(stage: SupportStage): Promise<SupportStage
  * reconciliation may judge this order without approving `v1` on the shared stack.
  */
 export async function createSupportFixture(role: SupportRole, stage: SupportStage = "inspection",
-  options: { verifier?: boolean; policyVersion?: string; refundSending?: boolean } = {}): Promise<SupportFixture> {
+  options: { verifier?: boolean; policyVersion?: string; refundSending?: boolean; noticeSending?: boolean } = {}): Promise<SupportFixture> {
   const policyVersion = options.policyVersion ?? "v1";
   let insertedPolicy = false;
   const rand = crypto.randomBytes(3).toString("hex").toUpperCase();
   const staff = await createAdminFixture(`support-${role}`.slice(0, 12), ROLES[role]);
   const customer = await createAdminFixture("support-cust", []);
   const originalStage = await setSupportStage(stage);
-  const original = (await withPg((pg) => pg.query(
-    "SELECT note_retention_days, refund_submission_enabled FROM private.support_workspace_settings WHERE singleton"))).rows[0];
+  const original = (await withPg((pg) => pg.query(`SELECT note_retention_days, refund_submission_enabled, dispute_notice_enabled,
+    notice_retention_days, notice_support_email FROM private.support_workspace_settings WHERE singleton`))).rows[0];
   const originalRetention = original.note_retention_days as number | null;
+  if (options.noticeSending !== undefined) {
+    await withPg((pg) => pg.query(`UPDATE private.support_workspace_settings SET dispute_notice_enabled=$1, notice_retention_days=90,
+      notice_support_email='support@synthetic.test' WHERE singleton`, [options.noticeSending]));
+  }
   if (options.refundSending !== undefined) {
     await withPg((pg) => pg.query("UPDATE private.support_workspace_settings SET refund_submission_enabled=$1 WHERE singleton",
       [options.refundSending]));
@@ -128,8 +141,10 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     disposed = true;
     rmSync(FAULT_DIR, { recursive: true, force: true });
     await withPg(async (pg) => {
-      await pg.query("UPDATE private.support_workspace_settings SET stage=$1, note_retention_days=$2, refund_submission_enabled=$3 WHERE singleton",
-        [originalStage, originalRetention, original.refund_submission_enabled]);
+      await pg.query(`UPDATE private.support_workspace_settings SET stage=$1, note_retention_days=$2, refund_submission_enabled=$3,
+        dispute_notice_enabled=$4, notice_retention_days=$5, notice_support_email=$6 WHERE singleton`,
+        [originalStage, originalRetention, original.refund_submission_enabled, original.dispute_notice_enabled, original.notice_retention_days,
+          original.notice_support_email]);
       if (options.verifier) {
         await pg.query("DELETE FROM private.commerce_verifier_principals WHERE principal = current_user AND registered_by = $1", [staff.userId]);
       }
@@ -145,9 +160,11 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
       }
       // Orders that a support case or provider check refers to stay (that history cannot be deleted); the rest is removed.
       const referenced = (await pg.query(`SELECT 1 FROM private.support_cases WHERE order_id = ANY($1)
-        UNION ALL SELECT 1 FROM private.commerce_verification_jobs WHERE order_id = ANY($1)`, [[orderId, legacyOrderId]])).rowCount;
+        UNION ALL SELECT 1 FROM private.commerce_verification_jobs WHERE order_id = ANY($1)
+        UNION ALL SELECT 1 FROM private.support_notices WHERE order_id = ANY($1)`, [[orderId, legacyOrderId]])).rowCount;
       if (!referenced) {
         await pg.query("DELETE FROM private.payment_refunds WHERE order_id = ANY($1)", [[orderId, legacyOrderId]]);
+        await pg.query("DELETE FROM private.payment_disputes WHERE order_id = ANY($1)", [[orderId, legacyOrderId]]);
         await pg.query("DELETE FROM private.provider_payments WHERE order_id = ANY($1)", [[orderId, legacyOrderId]]);
         await pg.query("DELETE FROM private.access_sources WHERE release_id=$1", [releaseId]);
         await pg.query("DELETE FROM public.access_entitlements WHERE release_id=$1", [releaseId]);
@@ -249,6 +266,18 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     failNextPostcheck: () => setFault("fail-next-postcheck"),
     loseNextRefundAnswer: () => setFault("refund-timeout-after-acceptance"),
     rejectNextRefund: () => setFault("refund-rejected"),
+    openDispute: async (status = "needs_response") => {
+      const id = `du_support_${rand.toLowerCase()}`;
+      await withPg((pg) => pg.query(`INSERT INTO private.payment_disputes(provider_dispute_id, order_id, payment_id, amount, currency, status,
+        access_effect, response_deadline) VALUES ($1, $2, $3, 1500, 'usd', $4, $5, date_trunc('second', now()) + interval '7 days')`,
+        [id, orderId, paymentId, status, status === "needs_response" ? "held" : "none"]));
+      return id;
+    },
+    loseNextNoticeAnswer: () => setFault("notice-timeout-after-acceptance"),
+    rejectNextNotice: () => setFault("notice-rejected"),
+    sentNotices: () => existsSync(MAIL_DIR) ? readdirSync(MAIL_DIR).filter((f) => f.endsWith(".json"))
+      .map((f) => JSON.parse(readFileSync(join(MAIL_DIR, f), "utf8")))
+      .filter((m) => m.recipient === customer.email.toLowerCase()) : [],
     providerRefundCount: async () => Number((await withPg((pg) => pg.query(
       "SELECT count(*) AS n FROM private.payment_refunds WHERE order_id = $1 AND provider_refund_id LIKE 're_local_%'", [orderId]))).rows[0].n),
     revokeVerifier: async () => {

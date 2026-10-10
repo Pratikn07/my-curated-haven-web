@@ -1,6 +1,7 @@
 import { getAdminContext } from "@/lib/admin/context";
 import { loadSupportCases, loadSupportOrder, loadSupportProposals } from "@/lib/admin/support/repository";
 import { loadSupportRefunds } from "@/lib/admin/support/refunds/repository";
+import { loadDisputeNotices } from "@/lib/admin/support/notices/repository";
 import { loadLatestObservation } from "@/lib/admin/support/diagnosis";
 import OrderWorkspace from "@/components/admin/support/OrderWorkspace";
 
@@ -30,6 +31,10 @@ export default async function SupportOrderPage({ params }: { params: Promise<{ o
   const refundOn = canInspect && context.value.operator.roles.includes("owner") && permissions.includes("support.refund.prepare");
   const refund = refundOn ? { list: await loadSupportRefunds(orderId), canSend: context.value.supportStage === "repair"
     && permissions.includes("support.refund.approve") && permissions.includes("support.refund.execute") } : null;
+  // Dispute notices are the owner's alone too, prepared from the latest provider check and sent only at the repair stage.
+  const noticeOn = canInspect && context.value.operator.roles.includes("owner") && permissions.includes("support.notice.prepare");
+  const notice = noticeOn ? { list: await loadDisputeNotices(orderId), canSend: context.value.supportStage === "repair"
+    && permissions.includes("support.notice.approve") && permissions.includes("support.notice.send") } : null;
   return <OrderWorkspace read={read.value} cases={cases} canWriteCases={canWriteCases} diagnosis={diagnosis} repair={repair}
-    refund={refund} />;
+    refund={refund} notice={notice} />;
 }

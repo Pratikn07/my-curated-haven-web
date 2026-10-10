@@ -575,9 +575,11 @@ BEGIN
    v_effect := CASE WHEN v_x->>'classification' <> 'formal' THEN 'none' WHEN v_x->>'status' = 'lost' THEN 'revoked'
     WHEN v_x->>'status' IN ('needs_response','under_review') THEN 'held' ELSE 'none' END;
    SELECT status INTO v_old_status FROM private.payment_disputes WHERE provider_dispute_id = v_x->>'id';
-   INSERT INTO private.payment_disputes(provider_dispute_id, order_id, payment_id, amount, currency, status, access_effect)
-   VALUES (v_x->>'id', v_order.id, v_payment.id, (v_x->>'amountMinor')::int, v_x->>'currency', v_x->>'status', v_effect)
-   ON CONFLICT (provider_dispute_id) DO UPDATE SET status = EXCLUDED.status, access_effect = EXCLUDED.access_effect, updated_at = now();
+   INSERT INTO private.payment_disputes(provider_dispute_id, order_id, payment_id, amount, currency, status, access_effect, response_deadline)
+   VALUES (v_x->>'id', v_order.id, v_payment.id, (v_x->>'amountMinor')::int, v_x->>'currency', v_x->>'status', v_effect,
+    (v_x->>'deadline')::timestamptz)
+   ON CONFLICT (provider_dispute_id) DO UPDATE SET status = EXCLUDED.status, access_effect = EXCLUDED.access_effect,
+    response_deadline = coalesce(EXCLUDED.response_deadline, payment_disputes.response_deadline), updated_at = now();
    IF v_old_status IS DISTINCT FROM v_x->>'status' THEN v_changed := true; END IF;
   END LOOP;
 

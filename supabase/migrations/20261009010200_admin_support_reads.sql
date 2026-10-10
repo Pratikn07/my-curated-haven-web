@@ -6,6 +6,9 @@
 -- missing older fields unknown instead of borrowing today's offer or title. Nothing here reads children, chats or
 -- preferences, and nothing writes.
 
+-- The response deadline Stripe gives a dispute (evidence due by), recorded by reconciliation (20261009010600).
+ALTER TABLE private.payment_disputes ADD COLUMN response_deadline timestamptz;
+
 -- Accounts whose sign-in email or any linked identity email equals p_email after trim and lower-case.
 CREATE FUNCTION private.support_email_matches(p_email text) RETURNS uuid[]
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
@@ -252,7 +255,7 @@ BEGIN
     'occurredAt', r.occurred_at, 'providerRefundId', CASE WHEN inspect THEN r.provider_refund_id END)
     ORDER BY r.occurred_at, r.id) FROM private.payment_refunds r WHERE r.order_id = o.id), '[]'::jsonb),
   'disputes', coalesce((SELECT jsonb_agg(jsonb_build_object('amountMinor', d.amount, 'currency', d.currency, 'status', d.status,
-    'classification', private.support_dispute_classification(d.status), 'deadline', NULL,
+    'classification', private.support_dispute_classification(d.status), 'deadline', d.response_deadline,
     'providerDisputeId', CASE WHEN inspect THEN d.provider_dispute_id END)
     ORDER BY d.created_at, d.id) FROM private.payment_disputes d WHERE d.order_id = o.id), '[]'::jsonb),
   'providerVerifiedAt', (SELECT max(verified_at) FROM private.provider_payments WHERE order_id = o.id),
