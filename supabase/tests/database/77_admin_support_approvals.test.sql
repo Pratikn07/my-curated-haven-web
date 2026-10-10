@@ -80,8 +80,9 @@ SELECT is((SELECT (p->'effects'->0) - 'recipeIds' FROM p1), jsonb_build_object('
 SELECT is((SELECT p->>'digest' FROM p1), (SELECT private.support_digest(private.support_proposal_material(p - 'digest')) FROM p1),
   'its digest covers its material');
 SELECT ok(NOT EXISTS (SELECT 1 FROM private.access_sources WHERE source_id = 'f3000000-0000-4000-8000-000000000001')
-  AND NOT EXISTS (SELECT 1 FROM private.commerce_reconcile_receipts) AND NOT EXISTS (SELECT 1 FROM private.access_events
-  WHERE event_type = 'commerce_reconciled'), 'preparing a repair changes nothing');
+  AND NOT EXISTS (SELECT 1 FROM private.commerce_reconcile_receipts WHERE order_id = 'f3000000-0000-4000-8000-000000000001')
+  AND NOT EXISTS (SELECT 1 FROM private.access_events WHERE event_type = 'commerce_reconciled'
+    AND metadata->>'orderId' = 'f3000000-0000-4000-8000-000000000001'), 'preparing a repair changes nothing');
 SELECT ok((SELECT (p->>'expiresAt')::timestamptz - now() BETWEEN interval '290 seconds' AND interval '301 seconds' FROM p1),
   'a proposal lasts five minutes');
 SELECT is(pg_temp.prepare((SELECT id FROM obs), 'reconcile_order', (SELECT prep FROM ops)), (SELECT p FROM p1),

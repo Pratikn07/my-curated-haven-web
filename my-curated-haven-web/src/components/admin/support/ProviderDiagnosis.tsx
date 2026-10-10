@@ -51,7 +51,7 @@ export default function ProviderDiagnosis({ orderId, latest, canCheck }: {
         : shown === null ? <p>No check recorded yet.</p>
         : <Observation observation={shown} />}
       {canCheck ? <button type="button" onClick={() => void check()} disabled={!hydrated || pending}>
-        {pending ? "Checking…" : "Check with Stripe"}</button> : null}
+        {pending ? "Checking…" : "Check provider status"}</button> : null}
       <p role="status" aria-label="Check status">{status ?? ""}</p>
     </section>
   );

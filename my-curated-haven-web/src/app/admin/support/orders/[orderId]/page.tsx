@@ -1,5 +1,5 @@
 import { getAdminContext } from "@/lib/admin/context";
-import { loadSupportCases, loadSupportOrder } from "@/lib/admin/support/repository";
+import { loadSupportCases, loadSupportOrder, loadSupportProposals } from "@/lib/admin/support/repository";
 import { loadLatestObservation } from "@/lib/admin/support/diagnosis";
 import OrderWorkspace from "@/components/admin/support/OrderWorkspace";
 
@@ -19,5 +19,11 @@ export default async function SupportOrderPage({ params }: { params: Promise<{ o
   const canInspect = context.ok && context.value.operator.permissions.includes("support.provider.inspect")
     && (context.value.supportStage === "diagnosis" || context.value.supportStage === "repair");
   const diagnosis = canInspect ? await loadLatestObservation(orderId) : null;
-  return <OrderWorkspace read={read.value} cases={cases} canWriteCases={canWriteCases} diagnosis={diagnosis} />;
+  // Repairs need the repair stage and a repair permission; each command checks both again.
+  const permissions = context.ok ? context.value.operator.permissions : [];
+  const can = { prepare: permissions.includes("support.repair.prepare"), approve: permissions.includes("support.repair.approve"),
+    execute: permissions.includes("support.repair.execute") };
+  const repairOn = context.ok && context.value.supportStage === "repair" && (can.prepare || can.approve || can.execute);
+  const repair = repairOn ? { proposals: await loadSupportProposals(orderId), can } : null;
+  return <OrderWorkspace read={read.value} cases={cases} canWriteCases={canWriteCases} diagnosis={diagnosis} repair={repair} />;
 }

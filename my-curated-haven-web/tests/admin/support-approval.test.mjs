@@ -20,8 +20,8 @@ test("an approval names no extra approver detail, no other channel and a real di
 });
 
 test("an approved proposal in the list carries its approval", () => {
-  const [item] = decodeProposalList([{ proposal: proposal(), state: "approved", approval: approval(), preparedAt: "2026-10-01T10:00:00.000Z" }]);
+  const [item] = decodeProposalList([{ proposal: proposal(), state: "approved", approval: approval(), operation: null, preparedAt: "2026-10-01T10:00:00.000Z" }]);
   assert.equal(item.approval?.proposalId, item.proposal.id);
-  assert.throws(() => decodeProposalList([{ proposal: proposal(), state: "approved", approval: approval({ id: "x" }),
+  assert.throws(() => decodeProposalList([{ proposal: proposal(), state: "approved", approval: approval({ id: "x" }), operation: null,
     preparedAt: "2026-10-01T10:00:00.000Z" }]));
 });

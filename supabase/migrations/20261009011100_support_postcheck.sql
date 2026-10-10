@@ -80,3 +80,23 @@ END $$;
 
 REVOKE ALL ON FUNCTION public.admin_support_postcheck(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.admin_support_postcheck(uuid) TO authenticated;
+
+-- An order's proposals now include each one's operation status, for the person who ran it or anyone who may approve;
+-- other support readers see the proposal without the receipt.
+CREATE OR REPLACE FUNCTION public.admin_support_proposals(p_order_id uuid) RETURNS jsonb
+LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
+DECLARE v_actor uuid; v_approver boolean;
+BEGIN
+ v_actor := private.support_assert('support.read', 'inspection');
+ IF p_order_id IS NULL THEN RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID'; END IF;
+ v_approver := private.support_has(v_actor, 'support.repair.approve');
+ RETURN (SELECT coalesce(jsonb_agg(jsonb_build_object('proposal', p.proposal,
+   'state', CASE WHEN a.id IS NOT NULL THEN 'approved' WHEN p.blocked THEN 'blocked'
+     WHEN p.expires_at <= clock_timestamp() THEN 'expired' ELSE 'awaiting_approval' END,
+   'approval', CASE WHEN a.id IS NULL THEN NULL ELSE private.support_approval_json(a) END,
+   'operation', CASE WHEN o.operation_id IS NOT NULL AND (o.actor = v_actor OR v_approver) THEN private.support_operation_status(o) END,
+   'preparedAt', private.commerce_utc(p.prepared_at)) ORDER BY p.prepared_at DESC, p.id), '[]')
+  FROM (SELECT * FROM private.support_proposals WHERE order_id = p_order_id ORDER BY prepared_at DESC, id LIMIT 25) p
+  LEFT JOIN private.support_approvals a ON a.proposal_id = p.id
+  LEFT JOIN private.support_operations o ON o.proposal_id = p.id);
+END $$;

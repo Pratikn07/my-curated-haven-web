@@ -134,7 +134,7 @@ jobs:
           for spec in admin-collections-inspection admin-collections-editing admin-collections-review \
             admin-collections-publication admin-collections-access admin-collections-checkout \
             admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home \
-            admin-support-inspection admin-support-diagnosis commerce-events; do
+            admin-support-inspection admin-support-diagnosis admin-support-repair commerce-events; do
             printf '%s\n' "$list" | grep -q "${spec}.spec.ts" || { echo "Required spec ${spec} was not discovered"; exit 1; }
           done
           npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')

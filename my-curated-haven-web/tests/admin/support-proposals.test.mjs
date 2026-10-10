@@ -38,8 +38,8 @@ test("proposals decode with lowercase blockers and refuse anything else", () => 
 
 test("an order's proposal list keeps expired and blocked proposals readable", () => {
   const items = [
-    { proposal: fixtureProposal(), state: "expired", approval: null, preparedAt: "2026-10-01T10:00:00.000Z" },
-    { proposal: { ...fixtureProposal(), blockers: ["policy_missing"] }, state: "blocked", approval: null, preparedAt: "2026-10-01T09:00:00.000Z" },
+    { proposal: fixtureProposal(), state: "expired", approval: null, operation: null, preparedAt: "2026-10-01T10:00:00.000Z" },
+    { proposal: { ...fixtureProposal(), blockers: ["policy_missing"] }, state: "blocked", approval: null, operation: null, preparedAt: "2026-10-01T09:00:00.000Z" },
   ];
   assert.deepEqual(decodeProposalList(items).map((item) => item.state), ["expired", "blocked"]);
   assert.equal(decodeProposalList(items)[0].proposal.id, PROPOSAL);

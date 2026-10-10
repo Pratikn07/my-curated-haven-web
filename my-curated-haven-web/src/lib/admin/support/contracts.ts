@@ -89,7 +89,7 @@ export type Approval = { id: string; proposalId: string; digest: string; humanAu
 
 /** One of an order's proposals as staff see it; expired, blocked and unapproved proposals stay listed. */
 export type ProposalListItem = { proposal: RepairProposal; state: "awaiting_approval" | "approved" | "blocked" | "expired";
-  approval: Approval | null; preparedAt: string };
+  approval: Approval | null; operation: OperationStatus | null; preparedAt: string };
 
 export type RepairReceipt = CommerceReceipt & { proposalId: string; verification: "pending" | "verified" | "unavailable" };
 export type OperationPending = { operationId: string;

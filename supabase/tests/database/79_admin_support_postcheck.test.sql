@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(23);
+SELECT plan(25);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -105,6 +105,10 @@ SELECT is((SELECT count(DISTINCT follow_up_case_id)::int FROM private.support_po
 SELECT ok((SELECT proposals = (SELECT count(*) FROM private.support_proposals) AND ops = (SELECT count(*) FROM private.support_operations) FROM counts),
   'no new repair is prepared or started by a post-check');
 SELECT throws_ok($$UPDATE private.support_postchecks SET matched = true$$, '42501', 'ADM_IMMUTABLE', 'post-check results cannot be edited');
+SELECT is(pg_temp.call((SELECT op FROM staff), format('SELECT public.admin_support_proposals(%L)', 'f3000000-0000-4000-8000-000000000001'))
+  ->0->'operation'->>'operationId', (SELECT op::text FROM r), 'the order''s repair list shows the operation to the person who ran it');
+SELECT is(pg_temp.call((SELECT viewer FROM staff), format('SELECT public.admin_support_proposals(%L)', 'f3000000-0000-4000-8000-000000000001'))
+  ->0->'operation', 'null'::jsonb, 'other support readers see the proposal without its receipt');
 
 -- Notifications: diagnosis and projection never notify; a fulfilment notifies once, only with delivery approved.
 SELECT is(ARRAY[private.commerce_notification_effect('diagnosis', false, true), private.commerce_notification_effect('projection', false, true),

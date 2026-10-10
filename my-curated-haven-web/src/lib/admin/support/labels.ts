@@ -60,6 +60,40 @@ export const BLOCKER_LABELS: Record<string, string> = {
   dispute_status_unknown: "A dispute has an unrecognised status",
 };
 
+export const REPAIR_KIND_LABELS = {
+  reconcile_order: "Reconcile the purchase with Stripe",
+  rebuild_projection: "Rebuild the customer's access",
+} as const;
+
+export const PROPOSAL_STATE_LABELS = {
+  awaiting_approval: "Waiting for the owner's approval",
+  approved: "Approved",
+  blocked: "Blocked",
+  expired: "Expired",
+} as const;
+
+/** Why a repair cannot go ahead, in plain words. An unlisted code is shown as-is. */
+export const REPAIR_BLOCKER_LABELS: Record<string, string> = {
+  no_change: "Nothing to repair: access is already what the evidence supports",
+  policy_missing: "No approved access policy covers this order's terms",
+  dispute_open: "A formal dispute is open; access cannot be restored until it is resolved",
+  evidence_incomplete: "The Stripe check was incomplete",
+  observation_incomplete: "The Stripe check was incomplete",
+  payment_conflict: "Stripe's payment is recorded against something else",
+  refund_conflict: "A refund is recorded against something else",
+  dispute_conflict: "A dispute is recorded against something else",
+  payment_incomplete: "Stripe reported refunds or disputes without a payment",
+  account_mismatch: "The Stripe account differs from the order's",
+  mode_mismatch: "Test or live mode differs from the order's",
+  session_mismatch: "The checkout session differs from the order's",
+  amount_mismatch: "The amount paid differs from the order's price",
+  currency_mismatch: "The currency differs from the order's",
+  binding_incomplete: "The order did not record its price",
+  payment_unknown: "Stripe's payment state is unknown",
+  dispute_unknown: "A dispute has an unrecognised status",
+  amount_invalid: "A refund or dispute amount is invalid",
+};
+
 export function formatMoney(minor: number | null, currency: string | null): string {
   if (minor === null || currency === null) return "Unknown";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: currency.toUpperCase() }).format(minor / 100);

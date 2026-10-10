@@ -116,6 +116,7 @@ const proposalItem = object<ProposalListItem>({
   proposal,
   state: oneOf("awaiting_approval", "approved", "blocked", "expired"),
   approval: nullable(approval),
+  operation: (v) => (v === null ? null : decodeOperation(v)),
   preparedAt: timestamp,
 });
 

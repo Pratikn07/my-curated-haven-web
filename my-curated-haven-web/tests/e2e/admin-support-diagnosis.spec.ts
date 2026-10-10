@@ -11,7 +11,7 @@ test("a support operator checks an order with Stripe and the answer is recorded"
     await page.goto(`/admin/support/orders/${fixture.orderId}`);
     const check = page.getByRole("region", { name: "Stripe check" });
     await expect(check).toContainText("No check recorded yet.");
-    await check.getByRole("button", { name: "Check with Stripe" }).click();
+    await check.getByRole("button", { name: "Check provider status" }).click();
     await expect(check.getByRole("status", { name: "Check status" })).toContainText("Checked. Stripe's answer is recorded below.");
     await expect(check).toContainText("Complete answer, checked");
     await expect(check).toContainText("Stripe paymentPaid: $15.00");
@@ -37,7 +37,7 @@ test("a check without a registered verifier records nothing", async ({ page }) =
     await fixture.login(page);
     await page.goto(`/admin/support/orders/${fixture.orderId}`);
     const check = page.getByRole("region", { name: "Stripe check" });
-    await check.getByRole("button", { name: "Check with Stripe" }).click();
+    await check.getByRole("button", { name: "Check provider status" }).click();
     await expect(check.getByRole("status", { name: "Check status" })).toContainText("The check did not finish (UNAVAILABLE");
     await expect(check).toContainText("No check recorded yet.");
     const recorded = await fixture.query("SELECT 1 FROM private.commerce_provider_observations WHERE order_id = $1", [fixture.orderId]);

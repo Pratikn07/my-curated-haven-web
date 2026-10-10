@@ -1,4 +1,7 @@
 import crypto from "node:crypto";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Client } from "pg";
 import { createAdminFixture, type AdminFixture, type Assurance } from "./admin-fixtures";
 
@@ -35,6 +38,16 @@ export interface SupportFixture {
   collectionId: string;
   paymentIntentId: string;
   paymentId: string;
+  /** Remove the order's purchase source and projected access: paid, but the customer cannot open the collection. */
+  breakAccess(): Promise<void>;
+  /** The newest repair operation on the order, or null. */
+  lastOperationId(): Promise<string | null>;
+  /** How many repair operations exist for the order, and how many reconciliation receipts one operation produced. */
+  operationCount(): Promise<number>;
+  receiptCount(operationId: string): Promise<number>;
+  /** Local test faults (see src/lib/admin/support/test-faults.ts): drop the next commit response, fail the next post-check. */
+  loseNextCommitResponse(): void;
+  failNextPostcheck(): void;
   /** Revoke the local verifier registration (only when the fixture registered one). */
   revokeVerifier(): Promise<void>;
   query(sql: string, args?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
@@ -57,6 +70,13 @@ async function withPg<T>(fn: (pg: Client) => Promise<T>): Promise<T> {
   } finally {
     await pg.end();
   }
+}
+
+const FAULT_DIR = join(tmpdir(), "mch-support-test-faults");
+
+function setFault(name: string): void {
+  mkdirSync(FAULT_DIR, { recursive: true });
+  writeFileSync(join(FAULT_DIR, name), "");
 }
 
 export async function setSupportStage(stage: SupportStage): Promise<SupportStage> {
@@ -96,6 +116,7 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
   async function dispose(): Promise<void> {
     if (disposed) return;
     disposed = true;
+    rmSync(FAULT_DIR, { recursive: true, force: true });
     await withPg(async (pg) => {
       await pg.query("UPDATE private.support_workspace_settings SET stage=$1, note_retention_days=$2 WHERE singleton",
         [originalStage, originalRetention]);
@@ -201,6 +222,21 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     setNoteRetention: async (days) => {
       await withPg((pg) => pg.query("UPDATE private.support_workspace_settings SET note_retention_days=$1 WHERE singleton", [days]));
     },
+    breakAccess: async () => {
+      await withPg(async (pg) => {
+        await pg.query("DELETE FROM private.access_sources WHERE source_kind = 'stripe_purchase' AND source_id = $1", [orderId]);
+        await pg.query("DELETE FROM public.access_entitlements WHERE user_id = $1 AND release_id = $2", [customer.userId, releaseId]);
+      });
+    },
+    lastOperationId: async () => (await withPg((pg) => pg.query(`SELECT o.operation_id FROM private.support_operations o
+      JOIN private.support_proposals p ON p.id = o.proposal_id WHERE p.order_id = $1 ORDER BY o.created_at DESC LIMIT 1`, [orderId])))
+      .rows[0]?.operation_id ?? null,
+    operationCount: async () => Number((await withPg((pg) => pg.query(`SELECT count(*) AS n FROM private.support_operations o
+      JOIN private.support_proposals p ON p.id = o.proposal_id WHERE p.order_id = $1`, [orderId]))).rows[0].n),
+    receiptCount: async (operationId) => Number((await withPg((pg) => pg.query(
+      "SELECT count(*) AS n FROM private.commerce_reconcile_receipts WHERE operation_id = $1", [operationId]))).rows[0].n),
+    loseNextCommitResponse: () => setFault("lose-next-commit"),
+    failNextPostcheck: () => setFault("fail-next-postcheck"),
     revokeVerifier: async () => {
       await withPg((pg) => pg.query("UPDATE private.commerce_verifier_principals SET revoked_at=now() WHERE principal=current_user"));
     },
