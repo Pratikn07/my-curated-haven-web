@@ -1642,6 +1642,11 @@ export type Database = {
         Args: { p_operation_id: string; p_order_id: string }
         Returns: Json
       }
+      admin_support_execute: {
+        Args: { p_observation_id: string; p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_execute_begin: { Args: { p_command: Json }; Returns: Json }
       admin_support_history: {
         Args: { p_cursor: string; p_order_id: string }
         Returns: Json
@@ -1652,6 +1657,10 @@ export type Database = {
       }
       admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
       admin_support_observation: { Args: { p_id: string }; Returns: Json }
+      admin_support_operation: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
       admin_support_order: { Args: { p_order_id: string }; Returns: Json }
       admin_support_prepare: {
         Args: {

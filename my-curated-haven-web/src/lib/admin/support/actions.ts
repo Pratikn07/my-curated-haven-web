@@ -2,8 +2,10 @@
 
 import type { Result } from "../contracts";
 import type {
-  Approval, CaseCommand, LookupResult, ProviderObservation, RepairProposal, SupportCase, SupportHistoryPage, SupportRead,
+  Approval, CaseCommand, LookupResult, OperationStatus, ProviderObservation, RepairCommand, RepairProposal, SupportCase,
+  SupportHistoryPage, SupportRead,
 } from "./contracts";
+import { executeSupportRepair, loadSupportOperation } from "./repair";
 import { diagnoseSupportOrder } from "./diagnosis";
 import { InvalidLookup, parseLookup } from "./query";
 import {
@@ -75,4 +77,20 @@ export async function prepareRepairAction(input: { orderId: string; observationI
 export async function approveRepairAction(proposalId: string, digest: string, operationId: string): Promise<Result<Approval>> {
   if (!UUID.test(proposalId) || !DIGEST.test(digest) || !UUID.test(operationId)) return invalid("support-approve");
   return approveSupportRepair(proposalId, digest, operationId);
+}
+
+/** Apply an approved repair. Repeating the same command returns the same operation and, once committed, its receipt. */
+export async function executeRepairAction(command: RepairCommand): Promise<Result<OperationStatus>> {
+  if (typeof command !== "object" || command === null || Object.keys(command).sort().join(",") !== "caseId,expectedDigest,operationId,proposalId"
+    || !UUID.test(command.operationId) || !UUID.test(command.proposalId) || !DIGEST.test(command.expectedDigest)
+    || (command.caseId !== null && !UUID.test(command.caseId))) {
+    return invalid("support-execute");
+  }
+  return executeSupportRepair(command);
+}
+
+/** The stored status or receipt of an operation; read this after a lost response instead of repairing again. */
+export async function operationStatusAction(operationId: string): Promise<Result<OperationStatus>> {
+  if (!UUID.test(operationId)) return invalid("support-operation");
+  return loadSupportOperation(operationId);
 }

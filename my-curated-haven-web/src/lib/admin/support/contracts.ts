@@ -95,6 +95,8 @@ export type RepairReceipt = CommerceReceipt & { proposalId: string; verification
 export type OperationPending = { operationId: string;
   state: "checking" | "blocked" | "failed_no_commit" | "outcome_unknown"; reasonCode: string | null };
 export type OperationStatus = OperationPending | RepairReceipt;
+/** Starting an approved repair: where the operation stands and the provider check it is waiting on. */
+export type ExecutionStart = { status: OperationStatus; jobId: string };
 
 export type CaseState = "open" | "investigating" | "waiting_on_customer" | "waiting_on_provider" | "resolved";
 export type CaseCategory = "missing_access" | "unresolved_payment" | "account_mismatch" | "refund_followup"

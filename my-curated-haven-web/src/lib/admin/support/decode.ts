@@ -2,7 +2,7 @@ import type {
   Binding, DisputeFact, FinancialFacts, ProviderObservation, RefundFact, RepairEffect,
 } from "../../payments/reconciliation/contracts";
 import type {
-  AccessExplanation, Approval, CustomerSupportDto, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
+  AccessExplanation, Approval, CustomerSupportDto, ExecutionStart, ProposalListItem, OrderCase, OrderCasesPage, LookupResult, OperationPending, OperationStatus, OrderSupportDto, RepairProposal, RepairReceipt,
   SupportCase, SupportDisputeDto, SupportHistoryPage, SupportQueuePage, SupportRead, SupportRefundDto, TimelineEvent,
 } from "./contracts";
 
@@ -363,6 +363,12 @@ export function decodeProposal(input: unknown): RepairProposal {
 export function decodeOperation(input: unknown): OperationStatus {
   const state = (input as { state?: unknown } | null)?.state;
   return state === "applied" || state === "already_satisfied" ? receipt(input, "operation") : pending(input, "operation");
+}
+
+export function decodeExecutionStart(input: unknown): ExecutionStart {
+  const record = (typeof input === "object" && input !== null ? input : {}) as { status?: unknown; jobId?: unknown };
+  if (Object.keys(record).sort().join(",") !== "jobId,status") throw new Invalid("execution");
+  return { status: decodeOperation(record.status), jobId: uuid(record.jobId, "execution.jobId") };
 }
 
 export function decodeSupportCase(input: unknown): SupportCase {

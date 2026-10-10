@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(35);
+SELECT plan(36);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -63,6 +63,8 @@ SELECT throws_ok(format($$SELECT private.commerce_observation_record(%L, %s, pg_
   (SELECT r->>'jobId' FROM job1), (SELECT (c->>'fence')::bigint + 1 FROM claim1)), 'PT409', 'ADM_STALE', 'a wrong fence is refused');
 SELECT throws_ok(format($$SELECT private.commerce_observation_record(%L, %s, '{"accountId":"acct_support_test"}', true, '[]', '2025-02-24.acacia')$$,
   (SELECT r->>'jobId' FROM job1), (SELECT c->>'fence' FROM claim1)), '22023', 'ADM_INVALID', 'facts in the wrong shape are refused');
+SELECT throws_ok(format($$SELECT private.commerce_observation_record(%L, %s, NULL, true, '[]', '2025-02-24.acacia')$$,
+  (SELECT r->>'jobId' FROM job1), (SELECT c->>'fence' FROM claim1)), '22023', 'ADM_INVALID', 'missing facts are refused');
 SELECT throws_ok(format($$SELECT private.commerce_observation_record(%L, %s, pg_temp.facts(), true, '["refunds_incomplete"]', '2025-02-24.acacia')$$,
   (SELECT r->>'jobId' FROM job1), (SELECT c->>'fence' FROM claim1)), '22023', 'ADM_INVALID', 'a complete read cannot carry blockers');
 CREATE TEMP TABLE rec1 AS SELECT private.commerce_observation_record((SELECT (r->>'jobId')::uuid FROM job1),

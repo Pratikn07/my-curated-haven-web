@@ -187,7 +187,7 @@ BEGIN
   WHERE id = job.id;
   RETURN jsonb_build_object('state', 'failed', 'code', 'REQUESTER_REVOKED');
  END IF;
- IF NOT private.commerce_facts_valid(p_facts) OR p_complete IS NULL OR jsonb_typeof(p_blockers) IS DISTINCT FROM 'array'
+ IF NOT coalesce(private.commerce_facts_valid(p_facts), false) OR p_complete IS NULL OR jsonb_typeof(p_blockers) IS DISTINCT FROM 'array'
    OR EXISTS (SELECT 1 FROM jsonb_array_elements_text(p_blockers) b WHERE b !~ '^[a-z][a-z0-9_]{1,63}$')
    OR (p_complete AND jsonb_array_length(p_blockers) > 0) OR p_api_version IS NULL OR length(p_api_version) NOT BETWEEN 1 AND 40 THEN
   RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
