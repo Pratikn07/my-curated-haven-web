@@ -266,3 +266,18 @@ test("the publish page names the checks that still block publication", async ({ 
     await f.query("UPDATE private.admin_console_settings SET campaign_revision=$1 WHERE singleton", [revision]);
   }
 });
+
+test("an open collection with an unpublished recipe names it and cannot be published", async ({ page }) => {
+  // Buyers read only published recipes, so selling one in draft would deliver nothing.
+  await f.query("UPDATE public.recipe_catalog SET publication_state='draft' WHERE id=$1", [f.extraRecipes.reviewed.id]);
+  try {
+    await prepareDraft({ tagline: "Blocked by a draft recipe" });
+    await f.login(page, "owner", "aal2");
+    await page.goto(`/admin/collections/${f.collectionId}/publish`);
+    const checks = page.getByRole("note", { name: "Checks to resolve" });
+    await expect(checks).toContainText(`${f.extraRecipes.reviewed.title} is not published yet. Publish it in Recipes before this collection goes on sale.`);
+    await expect(page.getByRole("button", { name: "Approve and publish" })).toBeDisabled();
+  } finally {
+    await f.query("UPDATE public.recipe_catalog SET publication_state='published' WHERE id=$1", [f.extraRecipes.reviewed.id]);
+  }
+});

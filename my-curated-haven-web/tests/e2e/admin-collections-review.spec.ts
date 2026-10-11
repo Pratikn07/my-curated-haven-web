@@ -8,6 +8,9 @@ let campaignRevision: string | null = null;
 test.beforeAll(async () => {
   f = await createCollectionsFixture();
   await f.setCollectionStage("editing");
+  // Buyers read only published recipes; an open collection is sold and published only when every member is.
+  await f.query("UPDATE public.recipe_catalog SET publication_state='published' WHERE id = ANY($1)",
+    [[f.recipeIds[0], f.extraRecipes.reviewed.id]]);
   campaignRevision = (await f.query("SELECT campaign_revision FROM private.admin_console_settings WHERE singleton")).rows[0]
     .campaign_revision as string | null;
   await f.query("UPDATE private.admin_console_settings SET campaign_revision=NULL WHERE singleton");
