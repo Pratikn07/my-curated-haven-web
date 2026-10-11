@@ -70,6 +70,13 @@ Withdrawal recomputes the displayed impact under database locks and requires the
 
 - Source: Phase 1 recipe workspace plus the UI/audit implementation PR. Record the final merged SHA at sign-off.
 - Forward migrations after the original Phase 1 set: `20261007215500_admin_recipe_receipt_read`, `20261007220500_admin_recipe_history_page`, `20261007231000_admin_campaign_withdraw_guard`, `20261007232000_admin_asset_identity_guard`, `20261007233000_admin_first_body_publish`. Apply all migrations before enabling writes; existing image checks need a fresh verification because older rows do not contain the saved object name.
-- Configuration: server flag `ADMIN_CONSOLE_ENABLED` plus database stage (`disabled` → `inspection` → `editing` → `publication`); bootstrap one confirmed owner per the procedure above; record the deployed campaign revision/hash through the restricted operator procedure.
+- Configuration: server flag `ADMIN_CONSOLE_ENABLED` plus database stage (`disabled` → `inspection` → `editing` → `publication`); bootstrap one confirmed owner per the procedure above; record the deployed campaign revision/hash with `scripts/admin-record-campaigns.mjs` (below).
+
+## Campaign snapshot
+
+Recipe and collection publication need the campaign promises of the deployed revision; without them the console reports campaign effect as unknown and blocks writes. Run from `my-curated-haven-web/` after every deploy that changes `src/config/campaigns.ts`, with the database URL in a named environment variable:
+
+1. Dry run: `node scripts/admin-record-campaigns.mjs --db-url-env PROD_DB_URL --revision <deployed sha>`. It prints each campaign, its promised recipe slugs (any missing from the catalog fail the run), the snapshot hash and the revision the console records now.
+2. Apply: add `--apply --authoriser <owner uuid> --reason "<why>"`. In one transaction it stores the snapshot for that revision (an existing one must be identical), points `admin_console_settings.campaign_revision` at it and writes a `campaign.snapshot` audit row. Re-running the same revision is harmless.
 - Rollback: disable the database stage and the server flag, confirm direct RPCs stop, and verify public/customer access still works. Drafts, revisions, archives and audit rows are retained; published content stays as-is until a new reviewed revision corrects it.
 - Production execution and the deployed journey check require separate release authorisation and are out of implementation scope.
