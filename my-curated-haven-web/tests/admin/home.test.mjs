@@ -82,4 +82,3 @@ test("support results decode only safe facts", () => {
   assert.throws(() => decodeSupportResults([{ ...result, supportReference: "buyer@example.com" }]));
   assert.throws(() => decodeSupportResults(Array.from({ length: 11 }, () => result)));
 });
-

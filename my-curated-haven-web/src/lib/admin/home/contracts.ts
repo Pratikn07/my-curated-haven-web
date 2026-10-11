@@ -161,4 +161,3 @@ export function decodeSupportResults(data: unknown): SupportResult[] {
     return item as SupportResult;
   });
 }
-

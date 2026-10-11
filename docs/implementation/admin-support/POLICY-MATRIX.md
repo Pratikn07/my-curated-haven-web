@@ -91,4 +91,3 @@ Refunds stay exceptions the owner approves one exact amount at a time; nothing h
 | Retention | `notice_retention_days` (unset blocks preparing); after it, recipient and text are removed unless the dispute is open or the send is unresolved; digests and receipts stay |
 | Send switch | `dispute_notice_enabled`, off by default, and the repair stage; answers are recorded even when it is off |
 | Answering the bank | Always in the Stripe Dashboard; the email never responds to the dispute |
-

@@ -29,7 +29,7 @@ The plans were written before Phase 1's audit fixes and Phase 2 existed in code.
 | Task 5 additive follow-up, if needed | `20261009010250` |
 | UI `20261007220000_admin_home_support_results` | `20261009220000` |
 
-**SQL suites.** Plan suites 26–39 collide with Phase 2 (26–28). Domain suites move to a contiguous block: 26→70, 27→71, 28→72, 29→73, 30→74, 31→75, 32→76, 33→77, 34→78, 35→79, 36→80, 37→81, 38→82, 39→83. The UI keeps 57.
+**SQL suites.** Plan suites 26–39 collide with Phase 2 (26–28). Domain suites move to a contiguous block: 26→70, 27→71, 28→72, 29→73, 30→74, 31→75, 32→76, 33→77, 34→78, 35→79, 36→80, 37→81, 38→82, 39→83. The UI keeps 57. (As built, the refund and notice suites landed at 82–85: refunds 82, submission 83, recovery 84, notices 85.)
 
 **Conventions carried over from Phase 1 and 2.**
 - Conflicts use SQLSTATE `PT409`, never `40001`: PostgREST retries `40001` in a loop (`20261008000310_admin_conflict_not_retryable.sql`). Plan Tasks 13–15 tests change accordingly, and new codes such as `ADM_STALE` join `AdminCode` and `KNOWN_CODES`.
@@ -44,28 +44,32 @@ The plans were written before Phase 1's audit fixes and Phase 2 existed in code.
 
 ## Acceptance (A1–A20)
 
-Each gate needs the evidence named in the design, section 13. Unchecked means not yet evidenced.
+Reconciled 2026-10-10 against the branch at `fda65d1` (Task 22). "Development" means the design's evidence exists on the owned local stack; release still needs the owner items in the last column. Suite numbers: the domain suites ended as 70–85 (refunds 82–84, notices 85, after the Task 23 renumbering), the Home suite is 57.
 
-- [ ] A1 — Scope and integration. Progress: baseline integrated (`aafab9b`), runner and ledger established (Task 1).
-- [ ] A2 — Authority and privacy.
-- [ ] A3 — Exact identity.
-- [ ] A4 — Historical truth.
-- [ ] A5 — Access explanation.
-- [ ] A6 — Financial binding.
-- [ ] A7 — Verified missing fulfilment.
-- [ ] A8 — Projection repair.
-- [ ] A9 — Refund and dispute lifecycle.
-- [ ] A10 — Multiple sources.
-- [ ] A11 — Approval integrity.
-- [ ] A12 — Concurrency and replay.
-- [ ] A13 — Atomicity and recovery.
-- [ ] A14 — Agent parity.
-- [ ] A15 — Workflow and rollout.
-- [ ] A16 — Refund authority and exact amount.
-- [ ] A17 — Refund concurrency and replay.
-- [ ] A18 — Refund uncertainty and durable recovery.
-- [ ] A19 — Refund outcome and release.
-- [ ] A20 — Dispute notices and accepted policy.
+| Gate | Status | Evidence | Still needed |
+| --- | --- | --- | --- |
+| A1 Scope and integration | Development | Base `aafab9b`; `main` has since gained only a docs commit (`53fc974`). Owner decisions recorded above. Refunds and notices are owner-only server actions; there is no charge, transfer or grant command | Rebase onto `main` before the pull request |
+| A2 Authority and privacy | Partial | Suites 70, 72, 81, 82, 85, 57 (roles, MFA, revocation, stage, default grants, browser and agent isolation); no-store order page; support privacy tests on the instrumented build 2/2 | One clean `admin-privacy.spec.ts` run across all three projects (the last attempt timed out at load 111–144) |
+| A3 Exact identity | Development | Suite 71; inspection spec (exact email, ambiguous, unconfirmed, closed account, no email in URLs) | |
+| A4 Historical truth | Development | Suites 71, 73 (frozen terms, missing legacy fields stay unknown, mode isolation) | |
+| A5 Access explanation | Development | Suites 72, 79 (Phase 2 resolver, additions, holds; post-check) | |
+| A6 Financial binding | Development | Suites 74, 75 (account, mode, session, amount, currency, payment and forged-evidence refusals) | Read-only binding check in production before `010600` |
+| A7 Verified missing fulfilment | Development | Suites 75, 78; repair spec (paid-but-locked restored from a complete check) | |
+| A8 Projection repair | Development | Suites 75, 78 (no eligibility override; holds and adjustments kept) | |
+| A9 Refund and dispute lifecycle | Development | Suites 73, 75, 76; dispute deadlines stored | Approve the `v1` policy mapping |
+| A10 Multiple sources | Development | Suite 75; race `refund-a-vs-purchase-b`; refund spec with another valid way in | |
+| A11 Approval integrity | Development | Suites 77, 78, 80 (exact digest, expiry, current authoriser, stale evidence, revocation) | |
+| A12 Concurrency and replay | Development | Race harness 19/19 twice; suite 76 (inbox dedupe, fences) | |
+| A13 Atomicity and recovery | Development | Failpoint scenarios; suites 79, 84; lost-response repair spec | |
+| A14 Agent parity | Development | Suite 80; operator command tests | Register real operator logins |
+| A15 Workflow and rollout | Unmet | Rehearsal 18/18; owner walkthrough script and seed (`REHEARSAL.md`); independent review in progress | Owner walkthrough; independent review findings resolved |
+| A16 Refund authority and exact amount | Development | Suite 82; refund spec (owner-only, fixed amount, reasons, operator denial) | |
+| A17 Refund concurrency and replay | Development | Suite 84; seven refund race scenarios; double click in the browser | |
+| A18 Refund uncertainty and recovery | Development | Suites 83, 84; `support-refunds-recovery` crash model | (Ruling: no resend path; unknown is only read back) |
+| A19 Refund outcome and release | Partial | Full, partial, refused, unknown and lapsed outcomes; switch; retention; metrics alert | Stripe test-mode refunds with a restricted test key; Stripe refund email setting; owner rehearsal |
+| A20 Dispute notices and accepted policy | Partial | Suite 85; notice spec; accepted policy (hold, inquiry kept, no expiry) | Approve the notice wording; set notice retention and support address; verified SES sender; controlled-recipient email |
+
+Full `npm run verify` (every spec on three projects): unmet on this machine. The last complete run (build `1699b55`) had 730 passed and 9 environmental failures (see Task 25).
 
 ## Progress
 
