@@ -186,6 +186,14 @@ Bug reports raised during this work:
 Evidence for these fixes:
 - Unit: data 25/25, admin 83/83, collections 54/54, homepage 13/13, phase10 16/16. Lint and typecheck pass.
 
+Progress (Task 18, 2026-10-11): production rehearsal and the recipes-published guard.
+
+The rehearsal ran on the owned stack with production's 70 recipes (recipe tables only, from the 2026-10-09 backup) and a registry build. The tag and collection imports reproduced production's results exactly (tag report `bc88daa…`). The owner published First Tastes from the database (release 1, 8 recipes), a customer bought it through the local test checkout, the owner added a recipe (release 1 sealed, release 2 with 9, the offer moved at the same price), the buyer received it and a new customer was offered release 2. It found one release blocker: every First Tastes recipe was a draft, so the buyer paid and their library listed 0 recipes (buyers read only published recipes). Nothing refused a sale in that state.
+
+Fix: migration `20261011000100_collection_recipes_published_guard.sql`. Readiness adds `RECIPE_PUBLISHED` per member that is not published: a blocker for an open collection (submission, approval and publication refuse) and a suggestion for a coming-soon one; the publication state is part of the impact evidence. `collection_sellable` refuses a release with a member that is not published, including one withdrawn after the sale opened. The SQL fixture and two browser fixtures now publish their recipes, as production must.
+
+Evidence: suite `29_admin_collections_recipes_published.test.sql` 11/11; every database suite on a clean replay 780/780 (33 files); generated types unchanged; collection admin browser specs 53 passed on chromium-desktop after the fixture updates, including the new publish-page case; registry storefront and collections specs 22/22; lint and typecheck pass. CI expects 14 collection admin suites.
+
 Ruling: The plan's `20261007` migration timestamps precede the applied Phase 1 audit migrations through `20261007233000`. Allocate every Phase 2 migration after that timestamp in dependency order; update all references and verification commands before implementation. Cost if wrong: migration replay or production upgrade could execute in the wrong order.
 
 - [ ] A1: Existing collection experience is reconciled against source mappings; inspection and public browser paths preserve intended behavior.

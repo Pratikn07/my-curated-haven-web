@@ -244,8 +244,8 @@ jobs:
         # selects no files. The required collection suites must all be present.
         working-directory: my-curated-haven-web
         run: |
-          required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-8]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
-          test "$required" -ge 13 || { echo "Expected 13 collection admin suites, found $required"; exit 1; }
+          required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-9]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
+          test "$required" -ge 14 || { echo "Expected 14 collection admin suites, found $required"; exit 1; }
           node scripts/test-admin-db.mjs --all
 
       - name: Verify generated TypeScript types drift

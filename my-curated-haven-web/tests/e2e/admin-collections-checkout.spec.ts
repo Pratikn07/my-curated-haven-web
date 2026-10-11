@@ -8,6 +8,9 @@ test.describe.configure({ mode: "serial" });
 let f: CollectionsFixture;
 test.beforeAll(async () => {
   f = await createCollectionsFixture();
+  // Buyers read only published recipes; an open collection is sold and published only when every member is.
+  await f.query("UPDATE public.recipe_catalog SET publication_state='published' WHERE id = ANY($1)",
+    [[f.recipeIds[0], f.extraRecipes.reviewed.id]]);
   await f.query(`UPDATE private.commercial_offers SET sale_enabled=true WHERE release_id IN
     (SELECT id FROM public.collection_releases WHERE collection_id=$1)`, [f.collectionId]);
 });

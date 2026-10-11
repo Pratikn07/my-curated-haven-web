@@ -9,6 +9,9 @@ FROM generate_series(1,3) n;
 INSERT INTO public.recipe_bodies(recipe_id,yield,allergen_review_state,allergens)
 SELECT ('93000000-0000-0000-0000-0000000001'||lpad(n::text,2,'0'))::uuid,'2 portions','reviewed_no_allergens','{}'
 FROM generate_series(1,3) n;
+-- Buyers read only published recipes, and an open collection is sold only when every member is published.
+UPDATE public.recipe_catalog SET publication_state='published', published_at=now()
+WHERE id IN (SELECT ('93000000-0000-0000-0000-0000000001'||lpad(n::text,2,'0'))::uuid FROM generate_series(1,3) n);
 
 INSERT INTO public.recipe_collections(id,slug,title,public_summary,listing_state) VALUES
  ('93000000-0000-0000-0000-000000000001','synthetic-published-shelf','Synthetic published shelf','Synthetic','listed'),
