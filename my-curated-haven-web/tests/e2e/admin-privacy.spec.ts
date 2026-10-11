@@ -146,7 +146,8 @@ test("refund and dispute notice reviews send nothing and keep people and money o
     await page.goto(`/admin/support/orders/${fixture.orderId}`);
     await page.getByRole("button", { name: "Check provider status" }).click();
     await expect(page.getByRole("status", { name: "Check status" })).toContainText("Checked.");
-    await page.goto(`/admin/support/orders/${fixture.orderId}`);
+    // WebKit can cut this load off with the page's own refresh after the check; retry it.
+    await expect(async () => { await page.goto(`/admin/support/orders/${fixture.orderId}`); }).toPass();
     const notice = page.getByRole("region", { name: "Dispute notice" });
     await notice.getByRole("button", { name: `Prepare notice for dispute ${disputeId}` }).click();
     await expect(notice.getByRole("group", { name: "Notice preview" })).toContainText(fixture.customerEmail.toLowerCase());
