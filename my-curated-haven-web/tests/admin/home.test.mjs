@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { collectionFeed, decodeHomeResults, recipeFeed } from "../../src/lib/admin/home/contracts.ts";
+import { collectionFeed, decodeHomeResults, decodeSupportResults, recipeFeed, supportFeed } from "../../src/lib/admin/home/contracts.ts";
+import { ACCESS_CONSEQUENCE_LABELS, QUEUE_REASONS } from "../../src/lib/admin/support/labels.ts";
 
 const checkedAt = "2026-10-08T10:00:00.000Z";
 const summary = { all: 40, attention: 2, awaiting_review: 1, ready: 3, published: 30, withdrawn: 1 };
@@ -46,3 +47,39 @@ test("results must name an action that belongs to their domain", () => {
   assert.throws(() => decodeHomeResults([{ ...valid, refreshState: "failed" }]));
   assert.throws(() => decodeHomeResults(Array(11).fill(valid)));
 });
+
+const ORDER_A = "f3000000-0000-4000-8000-000000000001";
+const ORDER_B = "f3000000-0000-4000-8000-000000000002";
+const ORDER_C = "f3000000-0000-4000-8000-000000000003";
+const queueItem = (over) => ({ orderId: ORDER_A, caseId: null, supportReference: "MCH-1A2B3C", mode: "live", reasonCode: "CASE_OPEN",
+  observedAt: "2026-10-08T09:00:00.000Z", deadlineAt: null, accessConsequence: "none", ...over });
+const labels = { reasons: QUEUE_REASONS, access: ACCESS_CONSEQUENCE_LABELS };
+
+test("support attention puts verified dispute deadlines first, then blocked and at-risk access, then the longest waiting", () => {
+  const live = { items: [
+    queueItem({ orderId: ORDER_A, supportReference: "MCH-AAAA", observedAt: "2026-10-08T08:00:00.000Z" }),
+    queueItem({ orderId: ORDER_B, supportReference: "MCH-BBBB", reasonCode: "DISPUTE_OPEN", deadlineAt: "2026-10-20T23:59:59.000Z",
+      accessConsequence: "at_risk" }),
+  ], nextCursor: null };
+  const test_ = { items: [queueItem({ orderId: ORDER_C, supportReference: "MCH-CCCC", mode: "test", accessConsequence: "blocked" })],
+    nextCursor: null };
+  const feed = supportFeed(live, test_, checkedAt, labels);
+  assert.equal(feed.state, "ready");
+  assert.deepEqual(feed.rows.map((r) => r.title), ["MCH-BBBB", "MCH-CCCC", "MCH-AAAA"]);
+  assert.equal(feed.rows[0].reason, "Dispute open; respond in Stripe by 2026-10-20");
+  assert.equal(feed.rows[1].state, "Test · Paid, without access");
+  assert.deepEqual(feed.counts, [{ label: "Live items shown", count: 2 }, { label: "Test items shown", count: 1 }]);
+  assert.equal(feed.rows[0].href, `/admin/support/orders/${ORDER_B}`);
+  assert.ok(!JSON.stringify(feed).includes("@"), "no email reaches Home");
+});
+
+test("support results decode only safe facts", () => {
+  const result = { operationId: ORDER_A, kind: "refund", orderId: ORDER_B, supportReference: "MCH-1A2B3C", state: "outcome_unknown",
+    at: "2026-10-08T10:00:00Z" };
+  assert.deepEqual(decodeSupportResults([result]), [result]);
+  assert.throws(() => decodeSupportResults([{ ...result, amountMinor: 400 }]));
+  assert.throws(() => decodeSupportResults([{ ...result, kind: "payout" }]));
+  assert.throws(() => decodeSupportResults([{ ...result, supportReference: "buyer@example.com" }]));
+  assert.throws(() => decodeSupportResults(Array.from({ length: 11 }, () => result)));
+});
+

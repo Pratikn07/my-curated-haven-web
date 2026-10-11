@@ -323,6 +323,28 @@ END $$;
 
 -- Items needing attention, from local records only (Stripe is never scanned here). An ordinary open checkout is not
 -- a failure. Cases without an order appear in both modes. Newest first, 25 a page; the cursor is "<at>|<key>".
+-- What an attention item means for the customer's access, from verified local facts only: 'at_risk' while a formal
+-- dispute or a refund is pending, 'blocked' when a verified, not fully refunded payment has no access behind it,
+-- 'none' otherwise, and 'unknown' without a verified payment or an account.
+CREATE FUNCTION private.support_access_consequence(p_order_id uuid, p_reason text) RETURNS text
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
+DECLARE o private.purchase_orders; pay private.provider_payments; v_refunded bigint;
+BEGIN
+ SELECT * INTO o FROM private.purchase_orders WHERE id = p_order_id;
+ IF o.id IS NULL OR o.user_id IS NULL THEN RETURN 'unknown'; END IF;
+ IF p_reason IN ('DISPUTE_OPEN','REFUND_PENDING') THEN RETURN 'at_risk'; END IF;
+ SELECT * INTO pay FROM private.provider_payments WHERE order_id = o.id AND status = 'succeeded' AND verified_at IS NOT NULL
+ ORDER BY paid_at DESC NULLS LAST LIMIT 1;
+ IF pay.id IS NULL THEN RETURN 'unknown'; END IF;
+ SELECT coalesce(sum(amount), 0) INTO v_refunded FROM private.payment_refunds WHERE payment_id = pay.id AND status = 'succeeded';
+ IF v_refunded >= pay.captured_amount THEN RETURN 'none'; END IF;
+ IF EXISTS (SELECT 1 FROM private.payment_disputes WHERE order_id = o.id AND status IN ('needs_response','under_review','lost')) THEN
+  RETURN 'at_risk';
+ END IF;
+ RETURN CASE WHEN private.collection_has_access(o.user_id, private.support_order_collection(o)) THEN 'none' ELSE 'blocked' END;
+END $$;
+REVOKE ALL ON FUNCTION private.support_access_consequence(uuid,text) FROM PUBLIC, anon, authenticated;
+
 CREATE FUNCTION public.admin_support_queue(p_mode text, p_cursor text) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE actor uuid; after_at timestamptz; after_key text; items jsonb; more boolean; last_at timestamptz; last_key text;
@@ -336,24 +358,26 @@ BEGIN
   after_at := split_part(p_cursor, '|', 1)::timestamptz;
   after_key := split_part(p_cursor, '|', 2);
  END IF;
- WITH signals(order_id, case_id, support_reference, mode, reason_code, observed_at, key) AS (
-  SELECT o.id, NULL::uuid, o.support_reference, o.snapshot->>'provider_mode', 'ORDER_REVIEW', o.updated_at, 'ORDER_REVIEW:' || o.id
+ WITH signals(order_id, case_id, support_reference, mode, reason_code, observed_at, key, deadline_at) AS (
+  SELECT o.id, NULL::uuid, o.support_reference, o.snapshot->>'provider_mode', 'ORDER_REVIEW', o.updated_at, 'ORDER_REVIEW:' || o.id, NULL::timestamptz
    FROM private.purchase_orders o WHERE o.attempt_state = 'review' AND o.snapshot->>'provider_mode' = p_mode
   UNION ALL
   SELECT c.order_id, c.id, o.support_reference, coalesce(o.snapshot->>'provider_mode', p_mode), 'CASE_' || upper(c.state),
-   c.updated_at, 'CASE:' || c.id
+   c.updated_at, 'CASE:' || c.id, NULL
    FROM private.support_cases c LEFT JOIN private.purchase_orders o ON o.id = c.order_id
    WHERE c.state <> 'resolved' AND (o.id IS NULL OR o.snapshot->>'provider_mode' = p_mode)
   UNION ALL
   SELECT r.order_id, NULL, o.support_reference, p.provider_mode,
-   CASE WHEN r.status IN ('pending','requires_action') THEN 'REFUND_PENDING' ELSE 'REFUND_FAILED' END, r.verified_at, 'REFUND:' || r.id
+   CASE WHEN r.status IN ('pending','requires_action') THEN 'REFUND_PENDING' ELSE 'REFUND_FAILED' END, r.verified_at, 'REFUND:' || r.id, NULL
    FROM private.payment_refunds r JOIN private.provider_payments p ON p.id = r.payment_id
    JOIN private.purchase_orders o ON o.id = r.order_id
    WHERE r.status IN ('pending','requires_action','failed','canceled') AND p.provider_mode = p_mode
   UNION ALL
   SELECT d.order_id, NULL, o.support_reference, p.provider_mode,
    CASE WHEN private.support_dispute_classification(d.status) = 'inquiry' THEN 'DISPUTE_INQUIRY' ELSE 'DISPUTE_OPEN' END,
-   d.updated_at, 'DISPUTE:' || d.id
+   d.updated_at, 'DISPUTE:' || d.id,
+   -- Only a formal dispute's deadline, as Stripe gave it; an inquiry or a missing deadline shows none.
+   CASE WHEN private.support_dispute_classification(d.status) = 'formal' THEN d.response_deadline END
    FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.payment_id
    JOIN private.purchase_orders o ON o.id = d.order_id
    WHERE d.status IN ('warning_needs_response','warning_under_review','needs_response','under_review') AND p.provider_mode = p_mode),
@@ -361,7 +385,8 @@ BEGIN
   SELECT s.*, row_number() OVER (ORDER BY observed_at DESC, key DESC) rn FROM signals s
   WHERE after_at IS NULL OR (s.observed_at, s.key) < (after_at, after_key))
  SELECT coalesce(jsonb_agg(jsonb_build_object('orderId', order_id, 'caseId', case_id, 'supportReference', support_reference,
-   'mode', mode, 'reasonCode', reason_code, 'observedAt', observed_at) ORDER BY rn) FILTER (WHERE rn <= 25), '[]'::jsonb),
+   'mode', mode, 'reasonCode', reason_code, 'observedAt', observed_at, 'deadlineAt', deadline_at,
+   'accessConsequence', private.support_access_consequence(order_id, reason_code)) ORDER BY rn) FILTER (WHERE rn <= 25), '[]'::jsonb),
    count(*) > 25, max(observed_at) FILTER (WHERE rn = 25), max(key) FILTER (WHERE rn = 25)
  INTO items, more, last_at, last_key FROM numbered;
  PERFORM private.support_audit_read(actor, 'queue', NULL, 'found');

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Result } from "@/lib/admin/contracts";
 import type { Mode, SupportQueuePage } from "@/lib/admin/support/contracts";
 import { formatUtc } from "@/lib/admin/collections/labels";
-import { QUEUE_REASONS } from "@/lib/admin/support/labels";
+import { ACCESS_CONSEQUENCE_LABELS, QUEUE_REASONS } from "@/lib/admin/support/labels";
 
 /** Items needing attention, from local records. A failed read is unavailable, never "nothing needs attention". */
 export default function SupportQueue({ mode, queue }: { mode: Mode; queue: Result<SupportQueuePage> }) {
@@ -22,6 +22,8 @@ export default function SupportQueue({ mode, queue }: { mode: Mode; queue: Resul
             return <li key={`${item.reasonCode}-${item.caseId ?? item.orderId}-${item.observedAt}`}>
               {href ? <Link href={href}>{label}</Link> : <span>{label}</span>}
               {item.supportReference ? <span> · {item.supportReference}</span> : <span> · Account case</span>}
+              {item.deadlineAt ? <span> · respond in Stripe by {formatUtc(item.deadlineAt)}</span> : null}
+              <span> · {ACCESS_CONSEQUENCE_LABELS[item.accessConsequence]}</span>
               <span> · observed {formatUtc(item.observedAt)}</span>
             </li>;
           })}

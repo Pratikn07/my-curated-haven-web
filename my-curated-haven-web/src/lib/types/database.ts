@@ -1579,6 +1579,7 @@ export type Database = {
         Args: { p_limit: number }
         Returns: Json
       }
+      admin_home_support_results: { Args: { p_limit: number }; Returns: Json }
       admin_recipe_assets: { Args: never; Returns: Json }
       admin_recipe_correct: { Args: { p_command: Json }; Returns: Json }
       admin_recipe_correction_impact: {

@@ -14,11 +14,16 @@ test("a case decodes with its five states and positive versions only", () => {
 });
 
 test("queue items need a reason code, a mode and a time, and a page holds at most 25", () => {
-  const item = { orderId: ORDER, caseId: null, supportReference: "MCH-1A2B3C", mode: "live", reasonCode: "DISPUTE_INQUIRY", observedAt: AT };
+  const item = { orderId: ORDER, caseId: null, supportReference: "MCH-1A2B3C", mode: "live", reasonCode: "DISPUTE_INQUIRY", observedAt: AT,
+    deadlineAt: null, accessConsequence: "none" };
   assert.equal(decodeQueuePage({ items: [item], nextCursor: null }).items[0].reasonCode, "DISPUTE_INQUIRY");
   assert.throws(() => decodeQueuePage({ items: [{ ...item, reasonCode: "dispute" }], nextCursor: null }));
   assert.throws(() => decodeQueuePage({ items: [{ ...item, mode: "both" }], nextCursor: null }));
   assert.throws(() => decodeQueuePage({ items: Array.from({ length: 26 }, () => item), nextCursor: null }));
+  assert.equal(decodeQueuePage({ items: [{ ...item, reasonCode: "DISPUTE_OPEN", deadlineAt: AT, accessConsequence: "at_risk" }],
+    nextCursor: null }).items[0].deadlineAt, AT);
+  assert.throws(() => decodeQueuePage({ items: [{ ...item, accessConsequence: "fine" }], nextCursor: null }));
+  assert.throws(() => decodeQueuePage({ items: [{ ...item, deadlineAt: "next week" }], nextCursor: null }));
 });
 
 test("timeline events keep a redacted note as null rather than inventing text", () => {

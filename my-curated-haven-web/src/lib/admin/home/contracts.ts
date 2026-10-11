@@ -1,5 +1,6 @@
 import type { AdminCode, LibraryResult, Result } from "../contracts";
 import type { CollectionLibrary, CollectionState } from "../collections/contracts";
+import type { AccessConsequence, SupportQueuePage } from "../support/contracts";
 
 /**
  * Publishing Home: what needs a decision, what can be continued, and what recently completed.
@@ -18,9 +19,16 @@ export type HomeResult = { operationId: string; domain: "recipe" | "collection";
   refreshState: "complete" | "pending" | null; committedAt: string };
 export type ContinueItem = { domain: "recipe" | "collection"; objectId: string; title: string; state: CollectionState;
   version: number; savedAt: string; savedByYou: boolean };
-/** `continueWork` is null when the operator cannot edit in the current stage. */
+/** A support outcome the caller ran, approved or (as owner) sent; safe facts only. */
+export type SupportResult = { operationId: string; kind: "repair" | "refund" | "notice"; orderId: string; supportReference: string;
+  state: string; at: string };
+/**
+ * `continueWork` is null when the operator cannot edit in the current stage; `support` is unauthorised and
+ * `supportResults` null unless the operator holds support.read while support is switched on.
+ */
 export type AdminHome = { recipes: AttentionFeed; collections: AttentionFeed;
-  results: Result<HomeResult[]>; continueWork: Result<ContinueItem[]> | null };
+  results: Result<HomeResult[]>; continueWork: Result<ContinueItem[]> | null;
+  support: AttentionFeed; supportResults: Result<SupportResult[]> | null };
 
 /** Rows shown per lane; the counts always cover the whole authorised inventory. */
 export const HOME_ROWS = 5;
@@ -75,6 +83,35 @@ export function collectionFeed(library: CollectionLibrary): AttentionFeed {
     total: library.filteredTotal, checkedAt: library.checkedAt, inventoryHref: "/admin/collections" };
 }
 
+const CONSEQUENCE_ORDER = { blocked: 0, at_risk: 1, unknown: 2, none: 3 } as const;
+
+/**
+ * Customer support attention from the first page of each mode's protected queue. Verified dispute deadlines come
+ * first (soonest first), then blocked and at-risk access, then the longest waiting. The counts are the items read,
+ * not the whole queue, which Home does not know. Labels are passed in, so this stays free of runtime imports.
+ */
+export function supportFeed(live: SupportQueuePage, test: SupportQueuePage, checkedAt: string,
+  labels: { reasons: Record<string, string>; access: Record<AccessConsequence, string> }): AttentionFeed {
+  const items = [...live.items, ...test.items];
+  const rows = items
+    .map((item) => ({ item, deadline: item.deadlineAt ? Date.parse(item.deadlineAt) : Infinity }))
+    .sort((a, b) => a.deadline - b.deadline || CONSEQUENCE_ORDER[a.item.accessConsequence] - CONSEQUENCE_ORDER[b.item.accessConsequence]
+      || Date.parse(a.item.observedAt) - Date.parse(b.item.observedAt))
+    .slice(0, HOME_ROWS)
+    .map(({ item }) => ({
+      key: `support:${item.mode}:${item.reasonCode}:${item.caseId ?? item.orderId}`,
+      title: item.supportReference ?? "Account case",
+      reason: `${labels.reasons[item.reasonCode] ?? item.reasonCode}${item.deadlineAt ? `; respond in Stripe by ${item.deadlineAt.slice(0, 10)}` : ""}`,
+      state: `${item.mode === "live" ? "Live" : "Test"} · ${labels.access[item.accessConsequence]}`,
+      changedAt: item.observedAt,
+      href: item.orderId ? `/admin/support/orders/${item.orderId}` : `/admin/support?mode=${item.mode}`,
+    }));
+  const more = live.nextCursor !== null || test.nextCursor !== null;
+  return { state: "ready", rows, counts: [{ label: "Live items shown", count: live.items.length },
+    { label: "Test items shown", count: test.items.length }],
+    total: items.length + (more ? 1 : 0), checkedAt, inventoryHref: "/admin/support" };
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const isTime = (value: unknown): value is string => typeof value === "string" && Number.isFinite(Date.parse(value));
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -107,3 +144,21 @@ export function decodeContinueWork(data: unknown): ContinueItem[] {
     return item as ContinueItem;
   });
 }
+
+const SUPPORT_KINDS = new Set(["repair", "refund", "notice"]);
+const SUPPORT_REFERENCE = /^MCH-[A-Z0-9]{2,12}$/;
+
+export function decodeSupportResults(data: unknown): SupportResult[] {
+  if (!Array.isArray(data) || data.length > 10) throw new Error("Invalid support results");
+  return data.map((item) => {
+    if (!isRecord(item) || Object.keys(item).sort().join(",") !== "at,kind,operationId,orderId,state,supportReference"
+      || typeof item.operationId !== "string" || !UUID.test(item.operationId) || !SUPPORT_KINDS.has(item.kind as string)
+      || typeof item.orderId !== "string" || !UUID.test(item.orderId) || typeof item.supportReference !== "string"
+      || !SUPPORT_REFERENCE.test(item.supportReference) || typeof item.state !== "string" || !/^[a-z_]{1,40}$/.test(item.state)
+      || !isTime(item.at)) {
+      throw new Error("Invalid support result");
+    }
+    return item as SupportResult;
+  });
+}
+

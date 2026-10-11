@@ -240,6 +240,8 @@ const queuePage = object<SupportQueuePage>({
     mode: oneOf("test", "live"),
     reasonCode: code,
     observedAt: timestamp,
+    deadlineAt: nullable(timestamp),
+    accessConsequence: oneOf("blocked", "at_risk", "none", "unknown"),
   }), 25),
   nextCursor: nullable(text(200)),
 });

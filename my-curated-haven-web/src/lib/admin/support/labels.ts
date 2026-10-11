@@ -148,3 +148,19 @@ export const NOTICE_ACCESS_LABELS = {
   unavailable: "Unavailable",
 } as const;
 
+export const ACCESS_CONSEQUENCE_LABELS = {
+  blocked: "Paid, without access",
+  at_risk: "Access at risk",
+  none: "Access in place",
+  unknown: "Access not confirmed",
+} as const;
+
+/** Support outcomes on Home, by kind and stored state. An unlisted state is shown as-is. */
+export const SUPPORT_RESULT_LABELS: Record<"repair" | "refund" | "notice", { kind: string; states: Record<string, string> }> = {
+  repair: { kind: "Repair", states: { applied: "Applied", already_satisfied: "Already in place", checking: "Checking",
+    failed_no_commit: "Not applied", blocked: "Not applied; approval expired" } },
+  refund: { kind: "Refund", states: { reserved: "Approved, not sent", expired: "Not sent", dispatching: "Sending",
+    outcome_unknown: "Outcome unknown", submitted: "Sent to Stripe", rejected: "Refused by Stripe" } },
+  notice: { kind: "Dispute notice", states: { dispatching: "Sending", accepted: "Accepted, delivery not confirmed",
+    failed_before_acceptance: "Not sent", outcome_unknown: "Outcome unknown" } },
+};

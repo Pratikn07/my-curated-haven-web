@@ -174,5 +174,9 @@ export type CustomerSupportDto = {
   cases: SupportCase[];
   nextCursor: string | null;
 };
+/** What an attention item means for access, from verified local facts only. */
+export type AccessConsequence = "blocked" | "at_risk" | "none" | "unknown";
 export type SupportQueuePage = { items: { orderId: string | null; caseId: string | null; supportReference: string | null;
-  mode: Mode; reasonCode: string; observedAt: string }[]; nextCursor: string | null };
+  mode: Mode; reasonCode: string; observedAt: string;
+  /** A formal dispute's response deadline as Stripe gave it; never inferred from a note or receipt. */
+  deadlineAt: string | null; accessConsequence: AccessConsequence }[]; nextCursor: string | null };

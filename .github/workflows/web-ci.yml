@@ -134,7 +134,7 @@ jobs:
           for spec in admin-collections-inspection admin-collections-editing admin-collections-review \
             admin-collections-publication admin-collections-access admin-collections-checkout \
             admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home \
-            admin-support-inspection admin-support-diagnosis admin-support-repair admin-support-refunds admin-support-dispute-notices commerce-events; do
+            admin-support-inspection admin-support-diagnosis admin-support-repair admin-support-refunds admin-support-dispute-notices admin-home-support commerce-events; do
             printf '%s\n' "$list" | grep -q "${spec}.spec.ts" || { echo "Required spec ${spec} was not discovered"; exit 1; }
           done
           npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
@@ -255,6 +255,7 @@ jobs:
           test "$required" -ge 14 || { echo "Expected 14 collection admin suites, found $required"; exit 1; }
           support="$(ls ../supabase/tests/database | grep -cE '^[78][0-9]_[a-z_]*admin_support[a-z_]*\.test\.sql$')"
           test "$support" -ge 16 || { echo "Expected 16 support admin suites (70-85), found $support"; exit 1; }
+          test -f ../supabase/tests/database/57_admin_home_support.test.sql || { echo "Home support suite 57 is missing"; exit 1; }
           node scripts/test-admin-db.mjs --all
 
       - name: Support reconciliation races
