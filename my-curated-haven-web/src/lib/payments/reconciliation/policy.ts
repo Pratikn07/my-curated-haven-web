@@ -30,7 +30,8 @@ export function validateBinding(binding: Binding, facts: FinancialFacts): string
 }
 
 const OPEN_FORMAL = new Set(["needs_response", "under_review"]);
-const WON = new Set(["won"]);
+// Formal disputes closed without a loss: won, closed because the charge was refunded (the refund decides), or prevented.
+const WON = new Set(["won", "charge_refunded", "prevented"]);
 const LOST = new Set(["lost"]);
 
 function validAmount(value: number): boolean {

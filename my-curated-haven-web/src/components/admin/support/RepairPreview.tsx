@@ -25,7 +25,7 @@ export default function RepairPreview({ item, supportReference }: { item: Propos
         <div><dt>Order</dt><dd>{supportReference}</dd></div>
         <div><dt>Stripe evidence</dt><dd>{p.binding.mode === "live" ? "Live" : "Test"} · {p.binding.accountId} · fingerprint {p.materialDigest.slice(0, 12)}</dd></div>
         <div><dt>Access policy</dt><dd>{p.policyVersion === "none" ? "None approved" : p.policyVersion}</dd></div>
-        <div><dt>Reason</dt><dd>{p.reason}</dd></div>
+        <div><dt>Reason</dt><dd>{p.reason || "Removed after the retention period"}</dd></div>
         <div><dt>Prepared</dt><dd>{formatUtc(item.preparedAt)}; expires {formatUtc(p.expiresAt)}</dd></div>
       </dl>
       {p.effects.map((effect) => (

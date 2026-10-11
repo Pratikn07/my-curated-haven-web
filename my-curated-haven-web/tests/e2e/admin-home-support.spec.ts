@@ -20,7 +20,8 @@ test("the owner's Home puts a dispute deadline first and lists their own support
   const fixture = await createSupportFixture("owner", "repair", { verifier: true, policyVersion: POLICY, refundSending: true });
   try {
     await withHome(fixture, async () => {
-      await fixture.openDispute();
+      // Due within the hour, so it is the soonest deadline even beside disputes other specs left on the shared stack.
+      await fixture.openDispute("needs_response", 1);
       await fixture.login(page);
       await page.goto("/admin");
       const support = page.getByRole("region", { name: "Customer support" });

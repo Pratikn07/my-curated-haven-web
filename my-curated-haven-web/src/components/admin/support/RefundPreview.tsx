@@ -30,7 +30,7 @@ export default function RefundPreview({ item, supportReference }: { item: Refund
         <div><dt>Still refundable</dt><dd>{money(p.capacity.availableMinor)}</dd></div>
         <div><dt>Reason sent to Stripe</dt><dd>{REFUND_REASON_LABELS[p.providerReason]}</dd></div>
         <div><dt>Why this is an exception</dt><dd>{REFUND_EXCEPTION_LABELS[p.exceptionCategory]}</dd></div>
-        <div><dt>Internal reason</dt><dd>{p.internalReason}</dd></div>
+        <div><dt>Internal reason</dt><dd>{p.internalReason || "Removed after the retention period"}</dd></div>
         <div><dt>Access policy</dt><dd>{p.policyVersion === "none" ? "None approved" : p.policyVersion}</dd></div>
         <div><dt>Prepared</dt><dd>{formatUtc(item.preparedAt)}; expires {formatUtc(p.expiresAt)}</dd></div>
       </dl>

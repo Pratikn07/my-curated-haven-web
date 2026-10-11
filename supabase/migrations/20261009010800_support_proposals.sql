@@ -23,8 +23,20 @@ CREATE TABLE private.support_proposals (
  UNIQUE (actor, operation_id)
 );
 CREATE INDEX support_proposals_order ON private.support_proposals(order_id, prepared_at DESC);
+-- Proposals never change, except the one retention change: blanking the free-text reason (the key named by the trigger)
+-- once, inside a retention run. The digest still proves what was approved.
+CREATE FUNCTION private.support_reason_guard() RETURNS trigger
+LANGUAGE plpgsql SET search_path='' AS $$
+BEGIN
+ IF TG_OP = 'UPDATE' AND current_setting('mch.support_retention', true) = 'on' AND coalesce(OLD.proposal->>TG_ARGV[0], '') <> ''
+   AND NEW.proposal = jsonb_set(OLD.proposal, ARRAY[TG_ARGV[0]], '""') AND to_jsonb(NEW) - 'proposal' = to_jsonb(OLD) - 'proposal' THEN
+  RETURN NEW;
+ END IF;
+ RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='ADM_IMMUTABLE';
+END $$;
+REVOKE ALL ON FUNCTION private.support_reason_guard() FROM PUBLIC, anon, authenticated;
 CREATE TRIGGER support_proposals_immutable BEFORE UPDATE OR DELETE ON private.support_proposals
- FOR EACH ROW EXECUTE FUNCTION private.admin_immutable();
+ FOR EACH ROW EXECUTE FUNCTION private.support_reason_guard('reason');
 ALTER TABLE private.support_proposals ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON private.support_proposals FROM PUBLIC, anon, authenticated;
 

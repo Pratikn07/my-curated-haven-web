@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(31);
+SELECT plan(34);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -49,8 +49,16 @@ CREATE TEMP TABLE obs AS SELECT pg_temp.old_observation(40) expired, pg_temp.old
 INSERT INTO private.support_proposals(id, actor, operation_id, order_id, observation_id, kind, proposal, digest, blocked, expires_at)
 VALUES ('f3000000-0000-4000-8000-000000000963', 'f3000000-0000-4000-8000-0000000000a2', gen_random_uuid(), 'f3000000-0000-4000-8000-000000000001',
   (SELECT held FROM obs), 'reconcile_order', '{}', repeat('e', 64), false, now() + interval '4 minutes');
+-- A finished repair proposal from 40 days ago, with the reason a member of staff typed.
+INSERT INTO private.support_proposals(id, actor, operation_id, order_id, observation_id, kind, proposal, digest, blocked, prepared_at, expires_at)
+VALUES ('f3000000-0000-4000-8000-000000000964', 'f3000000-0000-4000-8000-0000000000a2', gen_random_uuid(), 'f3000000-0000-4000-8000-000000000001',
+  (SELECT fresh FROM obs), 'reconcile_order', '{"reason":"Customer phoned about access","kind":"reconcile_order"}', repeat('f', 64), false,
+  now() - interval '40 days', now() - interval '40 days' + interval '5 minutes');
 CREATE TEMP TABLE run AS SELECT pg_temp.owner(format('SELECT public.admin_support_retention_run(%L)', (SELECT op FROM obs))) r;
-SELECT is((SELECT r FROM run), '{"notesRedacted": 1, "noticesRedacted": 0, "observationsMinimised": 1}'::jsonb, 'one expired note and one expired check are cleared');
+SELECT is((SELECT r FROM run), '{"notesRedacted": 1, "noticesRedacted": 0, "reasonsRedacted": 1, "observationsMinimised": 1}'::jsonb,
+  'one expired note, one expired check and one finished repair reason are cleared');
+SELECT is((SELECT proposal FROM private.support_proposals WHERE id = 'f3000000-0000-4000-8000-000000000964'),
+  '{"reason":"","kind":"reconcile_order"}'::jsonb, 'the old repair reason is blanked and nothing else in the proposal changes');
 SELECT is((SELECT jsonb_build_array(text, redaction_reason) FROM private.support_note_texts WHERE event_id = 'f3000000-0000-4000-8000-000000000961'),
   '[null, "Retention period ended"]'::jsonb, 'the expired note text is gone, with the reason kept');
 SELECT is((SELECT text FROM private.support_note_texts WHERE event_id = 'f3000000-0000-4000-8000-000000000962'), 'Recent private note',
@@ -89,6 +97,13 @@ INSERT INTO private.commerce_access_policies(refund_policy_version, access_polic
 VALUES ('v1', 'v1', '{"id":"synthetic","approved":true,"version":"synthetic-v1","pendingRefund":"retain","partialRefund":"retain",
   "fullRefund":"ineligible","inquiry":"retain","formalOpen":"hold","formalLost":"ineligible","duration":"indefinite","fixedSeconds":null}',
   '92000000-0000-0000-0000-000000000001', 'Synthetic test mapping');
+-- The same login registered as verifier and as an agent operator blocks diagnosis and repair until one is revoked.
+SELECT private.support_operator_register(session_user::text, 'Test agent', '92000000-0000-0000-0000-000000000001', true, true);
+SELECT is(pg_temp.owner('SELECT public.admin_support_readiness()')->'repair', '["verifier_is_operator"]'::jsonb,
+  'one login cannot be both the verifier and an agent operator');
+SELECT throws_ok($$SELECT pg_temp.owner('SELECT public.admin_support_set_stage(''diagnosis'', ''Go'', gen_random_uuid())')$$, '42501',
+  'ADM_BLOCKED', 'so diagnosis stays off');
+UPDATE private.support_operator_principals SET revoked_at = now() WHERE principal = session_user::text;
 SELECT is(pg_temp.owner('SELECT public.admin_support_set_stage(''repair'', ''Ready'', gen_random_uuid())'), '{"stage": "repair"}'::jsonb,
   'with everything in place repair can be switched on');
 SELECT is(pg_temp.owner('SELECT public.admin_support_set_stage(''disabled'', ''Pause'', gen_random_uuid())'), '{"stage": "disabled"}'::jsonb,

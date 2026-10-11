@@ -95,9 +95,9 @@ export async function processVerifiedCommerceEvent(inboxId: string, deps: EventD
   try {
     claim = await deps.claim(inboxId);
   } catch (error) {
-    const reason = code(error);
-    // Another delivery holds the claim: Stripe retries later. No registered verifier: use the older path.
-    return { state: reason === "ADM_CONFLICT" ? "retry" : "unavailable" };
+    // No registered verifier: use the older path. Anything else (another delivery holds the claim, a database error)
+    // is retried by Stripe, so a passing fault never sends an order down the path that skips the policy.
+    return { state: code(error) === "ADM_DENIED" ? "unavailable" : "retry" };
   }
   if (claim.state === "done") return { state: claim.processingState === "completed" ? "completed" : "ignored" };
   const outcome = await decide(claim, deps);

@@ -14,7 +14,8 @@ import { STRIPE_API_VERSION } from "./stripe";
  */
 
 export type RefundWriter = {
-  submit(intent: RefundIntent): Promise<RefundSubmissionResult>;
+  /** `notAfterMs` is the end of the dispatch claim: once it has passed, nothing is sent. */
+  submit(intent: RefundIntent, notAfterMs: number): Promise<RefundSubmissionResult>;
   recover(intent: RefundIntent): Promise<RefundSubmissionResult>;
 };
 
@@ -26,7 +27,8 @@ function keyFor(mode: "test" | "live"): string | null {
 
 function localWriter(): RefundWriter {
   return {
-    async submit(intent) {
+    async submit(intent, notAfterMs) {
+      if (Date.now() >= notAfterMs) return { kind: "not_executed", code: "CLAIM_EXPIRED" };
       if (consumeLocalFault("refund-rejected")) return { kind: "not_executed", code: "AMOUNT_TOO_LARGE" };
       const fact = await recordLocalLedgerRefund(intent);
       // A refund the provider made whose answer never came back.
@@ -44,7 +46,8 @@ function stripeWriter(mode: "test" | "live"): RefundWriter {
   const key = keyFor(mode);
   const client = key ? new Stripe(key, { apiVersion: STRIPE_API_VERSION, maxNetworkRetries: 0, timeout: 10_000 }) : null;
   return {
-    async submit(intent) {
+    async submit(intent, notAfterMs) {
+      if (Date.now() >= notAfterMs) return { kind: "not_executed", code: "CLAIM_EXPIRED" };
       if (!client) return { kind: "not_executed", code: "REFUND_KEY_MISSING" };
       let accountId: string;
       try {
@@ -53,6 +56,8 @@ function stripeWriter(mode: "test" | "live"): RefundWriter {
         return { kind: "not_executed", code: "ACCOUNT_CHECK_FAILED" };
       }
       if (accountId !== intent.accountId) return { kind: "not_executed", code: "ACCOUNT_MISMATCH" };
+      // The account check can take seconds: never start the request after the claim has ended.
+      if (Date.now() >= notAfterMs) return { kind: "not_executed", code: "CLAIM_EXPIRED" };
       let refund: Stripe.Refund;
       try {
         refund = await client.refunds.create({ charge: intent.chargeId, amount: intent.amountMinor, reason: intent.providerReason,

@@ -62,10 +62,8 @@ export async function submitSupportRefund(command: RefundCommand): Promise<Resul
       },
       claim: async (c, observationId) => unwrap(await adminRpc(() => supabase.rpc("admin_support_refund_dispatch_claim",
         { p_command: c, p_observation_id: observationId }), (v) => v as RefundDispatchClaim)),
-      submit: async (claim) => {
-        const intent: RefundIntent = await refundDispatchPayload(claim.operationId, claim.fence);
-        return createRefundWriter({ mode: intent.mode }).submit(intent);
-      },
+      payload: (claim): Promise<RefundIntent> => refundDispatchPayload(claim.operationId, claim.fence),
+      submit: (claim, intent) => createRefundWriter({ mode: intent.mode }).submit(intent, Date.parse(claim.expiresAt)),
       record: async (claim, result) => reconcile(decodeRefundReceipt(await refundResultRecord(claim.operationId, claim.fence, result))),
       read: async (operationId) => unwrap(await loadSupportRefund(operationId)),
     });

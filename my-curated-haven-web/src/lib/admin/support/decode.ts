@@ -45,6 +45,8 @@ function object<T>(fields: { [K in keyof T]: Decoder<T[K]> }): Decoder<T> {
 
 const text = (max: number): Decoder<string> => (v, p) =>
   (typeof v === "string" && v.length > 0 && v.length <= max ? v : bad(p));
+// Free text that retention may have blanked: an empty string means "removed", never "not given".
+const retainedText = (max: number): Decoder<string> => (v, p) => (typeof v === "string" && v.length <= max ? v : bad(p));
 const pattern = (re: RegExp): Decoder<string> => (v, p) => (typeof v === "string" && re.test(v) ? v : bad(p));
 const uuid = pattern(UUID);
 const digest = pattern(DIGEST);
@@ -103,7 +105,7 @@ const proposal = object<RepairProposal>({
   blockers: array(pattern(/^[a-z][a-z0-9_]{1,63}$/), 50),
   digest,
   expiresAt: timestamp,
-  reason: text(1000),
+  reason: retainedText(1000),
 });
 
 const approval = object<Approval>({
@@ -425,7 +427,7 @@ const refundProposal = object<RefundProposal>({
   currency: pattern(CURRENCY),
   providerReason: oneOf("requested_by_customer", "duplicate"),
   exceptionCategory: oneOf("duplicate_charge", "billing_error", "unresolved_delivery", "required_remedy"),
-  internalReason: text(500),
+  internalReason: retainedText(500),
   capacity: refundCapacityDecoder,
   policyVersion: text(100),
   dependencyToken: text(200),

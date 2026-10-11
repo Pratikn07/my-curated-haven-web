@@ -45,6 +45,7 @@ function world() {
       crash("after-dispatching");
       return { operationId: command.operationId, fence: intent.fence, expiresAt: new Date(intent.claimUntil).toISOString() };
     },
+    payload: async () => ({ command }),
     submit: async () => {
       const key = `mch-support-refund-${command.operationId}`;
       const kept = provider.keys.get(key);

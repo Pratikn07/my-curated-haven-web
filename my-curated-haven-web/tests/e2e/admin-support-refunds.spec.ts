@@ -21,7 +21,13 @@ async function prepare(page: Page, fixture: SupportFixture, amount: string | nul
     await refund.getByLabel("Amount in USD").fill(amount);
   }
   await refund.getByLabel("Internal reason").fill(reason);
-  await refund.getByRole("button", { name: "Prepare refund" }).click();
+  // WebKit occasionally drops this click; retrying can only prepare another unsent proposal.
+  const answered = refund.getByRole("group", { name: "Refund preview" })
+    .or(refund.getByRole("status", { name: "Refund status" }).filter({ hasText: /\S/ }));
+  await expect(async () => {
+    await refund.getByRole("button", { name: "Prepare refund" }).click();
+    await expect(answered).toBeVisible({ timeout: 5_000 });
+  }).toPass();
   return refund;
 }
 

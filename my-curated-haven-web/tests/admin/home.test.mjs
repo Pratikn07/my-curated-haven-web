@@ -82,3 +82,13 @@ test("support results decode only safe facts", () => {
   assert.throws(() => decodeSupportResults([{ ...result, supportReference: "buyer@example.com" }]));
   assert.throws(() => decodeSupportResults(Array.from({ length: 11 }, () => result)));
 });
+
+test("a case about an account, listed in both payment modes, appears once", () => {
+  const account = queueItem({ orderId: null, caseId: ORDER_C, supportReference: null, reasonCode: "CASE_OPEN", accessConsequence: "unknown" });
+  const feed = supportFeed({ items: [account], nextCursor: null }, { items: [{ ...account, mode: "test" }], nextCursor: null }, checkedAt, labels);
+  assert.equal(feed.rows.length, 1);
+  assert.equal(feed.rows[0].title, "Account case");
+  assert.equal(feed.rows[0].state, "Account · Access not confirmed");
+  assert.deepEqual(feed.counts, [{ label: "Live items shown", count: 1 }, { label: "Test items shown", count: 0 }]);
+});
+

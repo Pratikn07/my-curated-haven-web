@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(17);
+SELECT plan(19);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 
@@ -93,10 +93,21 @@ SELECT is(pg_temp.owner('SELECT public.admin_support_metrics(''test'')')->'unres
 SELECT is((SELECT pg_temp.answer(s, pg_temp.fence(s), jsonb_build_object('kind', 'known', 'fact', pg_temp.fact('re_c', 100)))->>'providerRefundId' FROM c),
   're_c', 'but the refund it made is captured');
 
+-- A definitive refusal that arrives after the claim's time ran out, but before anyone settled it as unknown, still
+-- proves nothing was refunded: it is recorded and releases the money.
+CREATE TEMP TABLE d AS SELECT pg_temp.sent(50, pg_temp.facts(jsonb_build_array(pg_temp.fact('re_a', 400), pg_temp.fact('re_b', 200),
+  pg_temp.fact('re_c', 100)))) s;
+UPDATE private.support_refund_intents SET claim_until = clock_timestamp() - interval '1 second' WHERE operation_id = (SELECT pg_temp.op(s) FROM d);
+CREATE TEMP TABLE d_answer AS SELECT pg_temp.answer(s, pg_temp.fence(s), '{"kind":"not_executed","code":"AMOUNT_TOO_LARGE"}') r FROM d;
+SELECT is((SELECT jsonb_build_array(state, reserved) FROM private.support_refund_intents WHERE operation_id = (SELECT pg_temp.op(s) FROM d)),
+  '["rejected", false]'::jsonb, 'a refusal for the latest claim is recorded even after its time ran out');
+
 -- Retention minimises old evidence without touching what a refund needs to be read or recovered.
 UPDATE private.support_workspace_settings SET note_retention_days = 365, observation_retention_days = 30;
 SET LOCAL session_replication_role = replica;
 UPDATE private.commerce_provider_observations SET verified_at = verified_at - interval '31 days' WHERE order_id = 'f3000000-0000-4000-8000-000000000001';
+UPDATE private.support_refund_proposals SET prepared_at = prepared_at - interval '366 days', expires_at = expires_at - interval '366 days'
+WHERE order_id = 'f3000000-0000-4000-8000-000000000001';
 SET LOCAL session_replication_role = origin;
 SELECT ok((pg_temp.owner('SELECT public.admin_support_retention_run(gen_random_uuid())')->>'observationsMinimised')::int > 0,
   'retention minimises the old refund checks');
@@ -104,6 +115,8 @@ SELECT is((SELECT jsonb_build_array(t->>'chargeId', (t->>'amountMinor')::int) FR
   '["ch_support", 200]'::jsonb, 'a refund can still be recovered from its frozen request');
 SELECT is((SELECT pg_temp.owner(format('SELECT public.admin_support_refund_operation(%L)', pg_temp.op(s)))->>'providerRefundId' FROM b),
   're_b', 'and its receipt is still readable');
+SELECT is((SELECT proposal->>'internalReason' FROM private.support_refund_proposals WHERE id = (SELECT (s->'c'->>'proposalId')::uuid FROM b)), '',
+  'a settled refund''s internal reason is removed after the note retention period');
 
 SELECT * FROM finish();
 ROLLBACK;

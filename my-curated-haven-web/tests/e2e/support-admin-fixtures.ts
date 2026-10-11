@@ -55,8 +55,8 @@ export interface SupportFixture {
   providerRefundCount(): Promise<number>;
   /** Give the customer a second, valid way into the collection (a support grant), as another purchase would. */
   grantOtherAccess(): Promise<void>;
-  /** Open a dispute on the paid order, as Stripe would report it, with a response deadline a week away. Returns its id. */
-  openDispute(status?: "needs_response" | "warning_needs_response"): Promise<string>;
+  /** Open a dispute on the paid order, as Stripe would report it, with a response deadline (a week away unless given). */
+  openDispute(status?: "needs_response" | "warning_needs_response", deadlineHours?: number): Promise<string>;
   /** Local notice faults: the next email is sent but its answer is lost, or the next email is refused before sending. */
   loseNextNoticeAnswer(): void;
   rejectNextNotice(): void;
@@ -276,11 +276,11 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
           [customer.userId, releaseId, `grant-${rand}`]);
       });
     },
-    openDispute: async (status = "needs_response") => {
+    openDispute: async (status = "needs_response", deadlineHours = 168) => {
       const id = `du_support_${rand.toLowerCase()}`;
       await withPg((pg) => pg.query(`INSERT INTO private.payment_disputes(provider_dispute_id, order_id, payment_id, amount, currency, status,
-        access_effect, response_deadline) VALUES ($1, $2, $3, 1500, 'usd', $4, $5, date_trunc('second', now()) + interval '7 days')`,
-        [id, orderId, paymentId, status, status === "needs_response" ? "held" : "none"]));
+        access_effect, response_deadline) VALUES ($1, $2, $3, 1500, 'usd', $4, $5, date_trunc('second', now()) + make_interval(hours => $6))`,
+        [id, orderId, paymentId, status, status === "needs_response" ? "held" : "none", deadlineHours]));
       return id;
     },
     loseNextNoticeAnswer: () => setFault("notice-timeout-after-acceptance"),

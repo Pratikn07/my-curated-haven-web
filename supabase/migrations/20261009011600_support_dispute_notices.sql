@@ -317,7 +317,7 @@ CREATE FUNCTION public.admin_support_notice_send_claim(p_command jsonb, p_observ
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE actor uuid; c jsonb := p_command; v_op uuid; d private.support_notice_drafts; a private.support_notice_approvals;
  v_obs private.commerce_provider_observations; v_job private.commerce_verification_jobs; v_dispute jsonb; s private.support_notice_sends;
- v_audit uuid; v_fence bigint;
+ v_audit uuid; v_fence bigint; o private.purchase_orders;
 BEGIN
  actor := private.support_notice_actor('support.notice.send', 'repair');
  IF NOT (SELECT dispute_notice_enabled FROM private.support_workspace_settings WHERE singleton) THEN
@@ -349,7 +349,11 @@ BEGIN
  IF v_obs.id IS NULL OR v_obs.purpose <> 'notice_send' OR v_job.notice_draft_id IS DISTINCT FROM d.id THEN
   RAISE EXCEPTION USING ERRCODE='22023', MESSAGE='ADM_INVALID';
  END IF;
- -- One notice identity at a time: concurrent sends for the same dispute wait here.
+ -- Collection, then order (the shared lock order), so access cannot change between this check and the claim; then one
+ -- notice identity at a time: concurrent sends for the same dispute wait here.
+ SELECT * INTO o FROM private.purchase_orders WHERE id = d.order_id;
+ PERFORM 1 FROM public.recipe_collections WHERE id = private.support_order_collection(o) FOR UPDATE;
+ PERFORM 1 FROM private.purchase_orders WHERE id = d.order_id FOR UPDATE;
  PERFORM 1 FROM private.support_notices WHERE id = d.notice_id FOR UPDATE;
  SELECT x INTO v_dispute FROM jsonb_array_elements(v_obs.facts->'disputes') x WHERE x->>'id' = d.draft->>'disputeId';
  IF NOT v_obs.complete
@@ -393,7 +397,7 @@ BEGIN
 END $$;
 
 -- Record the transport's answer. Acceptance is recorded whenever it arrives (even after the claim, a revocation or
--- the switch going off); "not sent" and "unknown" only count under the current claim, so a late or stale failure
+-- the switch going off); "not sent" and "unknown" count only for the latest claim while the email is still marked as sending, so a stale failure
 -- can never free a dispute for a second email that may duplicate the first.
 CREATE FUNCTION private.support_notice_result_record(p_operation_id uuid, p_fence bigint, p_result jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
@@ -473,10 +477,11 @@ BEGIN
 END $$;
 
 -- Retention also removes notice recipients and text after notice_retention_days, except while the dispute is open or
--- a send of that notice is unresolved. Approvals, sends and digests stay.
+-- a send of that notice is unresolved, and, after note_retention_days, the free-text reasons staff typed into repair
+-- and refund proposals once they are finished. Approvals, sends, intents and digests stay.
 CREATE OR REPLACE FUNCTION public.admin_support_retention_run(p_operation_id uuid) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
-DECLARE actor uuid; v_receipt jsonb; v_notes integer; v_observations integer; v_notices integer; v_note_days integer;
+DECLARE actor uuid; v_receipt jsonb; v_notes integer; v_observations integer; v_notices integer; v_reasons integer; v_note_days integer;
  v_observation_days integer; v_notice_days integer;
 BEGIN
  actor := private.support_owner_session();
@@ -520,9 +525,23 @@ BEGIN
    RETURNING 1)
   SELECT count(*) INTO v_notices FROM redacted;
  END IF;
+
+ WITH repairs AS (
+  UPDATE private.support_proposals p SET proposal = jsonb_set(p.proposal, '{reason}', '""')
+  WHERE coalesce(p.proposal->>'reason', '') <> '' AND p.prepared_at < now() - make_interval(days => v_note_days) AND p.expires_at < now()
+   AND NOT EXISTS (SELECT 1 FROM private.support_operations so WHERE so.proposal_id = p.id AND so.state = 'checking')
+  RETURNING 1),
+ refunds AS (
+  UPDATE private.support_refund_proposals p SET proposal = jsonb_set(p.proposal, '{internalReason}', '""')
+  WHERE coalesce(p.proposal->>'internalReason', '') <> '' AND p.prepared_at < now() - make_interval(days => v_note_days)
+   AND p.expires_at < now()
+   AND NOT EXISTS (SELECT 1 FROM private.support_refund_intents i WHERE i.proposal_id = p.id AND i.state IN ('dispatching','outcome_unknown'))
+  RETURNING 1)
+ SELECT (SELECT count(*) FROM repairs) + (SELECT count(*) FROM refunds) INTO v_reasons;
  PERFORM set_config('mch.support_retention', 'off', true);
 
- v_receipt := jsonb_build_object('notesRedacted', v_notes, 'observationsMinimised', v_observations, 'noticesRedacted', v_notices);
+ v_receipt := jsonb_build_object('notesRedacted', v_notes, 'observationsMinimised', v_observations, 'noticesRedacted', v_notices,
+  'reasonsRedacted', v_reasons);
  PERFORM private.admin_finish_operation(actor, p_operation_id, v_receipt);
  RETURN v_receipt;
 END $$;

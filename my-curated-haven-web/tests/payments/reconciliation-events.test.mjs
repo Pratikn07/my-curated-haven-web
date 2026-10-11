@@ -104,6 +104,8 @@ test("a claim held elsewhere retries; no registered verifier falls back; a lost 
   const unregistered = deps({ claim: async () => { throw new Error("permission denied: ADM_DENIED"); } });
   assert.deepEqual(await processVerifiedCommerceEvent(INBOX, unregistered.deps), { state: "unavailable" });
   assert.deepEqual(unregistered.calls, []);
+  const flaky = deps({ claim: async () => { throw new Error("connection terminated unexpectedly"); } });
+  assert.deepEqual(await processVerifiedCommerceEvent(INBOX, flaky.deps), { state: "retry" }, "a database fault is retried, not sent to the older path");
   const lost = deps({ finish: async () => { throw new Error("ADM_STALE"); } });
   assert.deepEqual(await processVerifiedCommerceEvent(INBOX, lost.deps), { state: "retry" });
 });

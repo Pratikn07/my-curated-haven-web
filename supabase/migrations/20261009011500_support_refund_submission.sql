@@ -71,6 +71,8 @@ BEGIN
    OR EXISTS (SELECT 1 FROM private.commerce_provider_observations n WHERE n.order_id = o.id AND n.complete AND n.fence > v_obs.fence) THEN
   RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_STALE';
  END IF;
+ -- Checked again after the lock waits: a claim must start with at least a second of live approval left.
+ IF a.expires_at <= clock_timestamp() + interval '1 second' THEN RAISE EXCEPTION USING ERRCODE='PT409', MESSAGE='ADM_STALE'; END IF;
  UPDATE private.support_refund_intents SET state = 'dispatching', fence = nextval('private.commerce_verification_fence'),
   attempts = attempts + 1, first_dispatched_at = coalesce(first_dispatched_at, clock_timestamp()),
   retry_until = coalesce(retry_until, coalesce(first_dispatched_at, clock_timestamp()) + interval '23 hours'),
@@ -101,7 +103,8 @@ END $$;
 
 -- Record what the provider answered. Result: {kind 'known', fact} | {kind 'unknown', code} | {kind 'not_executed', code}.
 -- A known refund strongly bound to this operation (charge, payment, amount, currency) is kept even after its claim
--- ended; unknown and not-executed answers only count under the current claim.
+-- ended; unknown and not-executed answers count only for the latest claim while the refund is still marked as sending, so once
+-- a run-out claim has been settled as unknown no later "not executed" can release the money.
 CREATE FUNCTION private.support_refund_result_record(p_operation_id uuid, p_fence bigint, p_result jsonb) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE v_verifier text := private.commerce_verifier(); r private.support_refund_intents; f jsonb := p_result->'fact'; v_current boolean;

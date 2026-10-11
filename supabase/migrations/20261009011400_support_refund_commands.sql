@@ -43,7 +43,7 @@ CREATE TABLE private.support_refund_approvals (
  expires_at timestamptz NOT NULL
 );
 CREATE TRIGGER support_refund_proposals_immutable BEFORE UPDATE OR DELETE ON private.support_refund_proposals
- FOR EACH ROW EXECUTE FUNCTION private.admin_immutable();
+ FOR EACH ROW EXECUTE FUNCTION private.support_reason_guard('internalReason');
 CREATE TRIGGER support_refund_approvals_immutable BEFORE UPDATE OR DELETE ON private.support_refund_approvals
  FOR EACH ROW EXECUTE FUNCTION private.admin_immutable();
 

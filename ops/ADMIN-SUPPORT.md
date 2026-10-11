@@ -69,7 +69,7 @@ node scripts/commerce-reconcile.mjs --mode test --limit 10
 
 ## Agent-run repairs (operator channel)
 
-An agent may apply an approved access repair, never a refund or a dispute notice. It works through its own database login, registered by the database owner with separate rights to record approvals (attest) and to apply them (execute); neither is the verifier login. Operator proposals and approvals last 30 minutes.
+An agent may apply an approved access repair, never a refund or a dispute notice. It works through its own database login, registered by the database owner with separate rights to record approvals (attest) and to apply them (execute); neither is the verifier login (while one login is registered as both, diagnosis and repair refuse to switch on and readiness lists `verifier_is_operator`). Operator proposals and approvals last 30 minutes.
 
 Database-owner steps, once per environment:
 

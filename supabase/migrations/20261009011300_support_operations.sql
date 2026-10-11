@@ -104,7 +104,11 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
   UNION ALL SELECT 'note_retention_unset' WHERE p_stage = 'repair'
     AND (SELECT note_retention_days FROM private.support_workspace_settings WHERE singleton) IS NULL
   UNION ALL SELECT 'access_policy_missing' WHERE p_stage = 'repair'
-    AND NOT EXISTS (SELECT 1 FROM private.commerce_access_policies)) x
+    AND NOT EXISTS (SELECT 1 FROM private.commerce_access_policies)
+  -- The verifier records provider facts and an agent login applies repairs: one login must never be both.
+  UNION ALL SELECT 'verifier_is_operator' WHERE p_stage IN ('diagnosis','repair')
+    AND EXISTS (SELECT 1 FROM private.commerce_verifier_principals v JOIN private.support_operator_principals o ON o.principal = v.principal
+      WHERE v.revoked_at IS NULL AND o.revoked_at IS NULL)) x
 $$;
 
 -- Owner only: what each stage still needs, without any customer data.

@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(37);
+SELECT plan(39);
 \ir ../../test-fixtures/admin-console.sql
 \ir ../../test-fixtures/admin-support.sql
 \ir ../../test-fixtures/support-eligibility-matrix.sql

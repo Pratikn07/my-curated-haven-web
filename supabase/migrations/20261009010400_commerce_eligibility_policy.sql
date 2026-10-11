@@ -101,7 +101,8 @@ BEGIN
   IF d->>'status' = 'lost' THEN exclusions := exclusions || 'dispute_lost'::text;
   ELSIF d->>'status' IN ('needs_response','under_review') THEN
    IF pol->>'formalOpen' = 'hold' THEN exclusions := exclusions || 'dispute_hold'::text; ELSE notes := notes || 'dispute_open'::text; END IF;
-  ELSIF d->>'status' <> 'won' THEN blockers := blockers || 'dispute_unknown'::text;
+  -- Closed without a loss: won, closed because the charge was refunded (the refund decides), or prevented.
+  ELSIF d->>'status' NOT IN ('won','charge_refunded','prevented') THEN blockers := blockers || 'dispute_unknown'::text;
   END IF;
  END LOOP;
  IF NOT coalesce((p_input->>'accountActive')::boolean, false) THEN exclusions := exclusions || 'account_inactive'::text; END IF;

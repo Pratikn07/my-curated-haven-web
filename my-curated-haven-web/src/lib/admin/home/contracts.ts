@@ -92,7 +92,10 @@ const CONSEQUENCE_ORDER = { blocked: 0, at_risk: 1, unknown: 2, none: 3 } as con
  */
 export function supportFeed(live: SupportQueuePage, test: SupportQueuePage, checkedAt: string,
   labels: { reasons: Record<string, string>; access: Record<AccessConsequence, string> }): AttentionFeed {
-  const items = [...live.items, ...test.items];
+  // A case about an account (no order) belongs to neither mode, so both queues list it: keep it once.
+  const accountCases = new Set(live.items.filter((i) => i.orderId === null && i.caseId !== null).map((i) => i.caseId));
+  const testItems = test.items.filter((i) => !(i.orderId === null && i.caseId !== null && accountCases.has(i.caseId)));
+  const items = [...live.items, ...testItems];
   const rows = items
     .map((item) => ({ item, deadline: item.deadlineAt ? Date.parse(item.deadlineAt) : Infinity }))
     .sort((a, b) => a.deadline - b.deadline || CONSEQUENCE_ORDER[a.item.accessConsequence] - CONSEQUENCE_ORDER[b.item.accessConsequence]
@@ -102,13 +105,13 @@ export function supportFeed(live: SupportQueuePage, test: SupportQueuePage, chec
       key: `support:${item.mode}:${item.reasonCode}:${item.caseId ?? item.orderId}`,
       title: item.supportReference ?? "Account case",
       reason: `${labels.reasons[item.reasonCode] ?? item.reasonCode}${item.deadlineAt ? `; respond in Stripe by ${item.deadlineAt.slice(0, 10)}` : ""}`,
-      state: `${item.mode === "live" ? "Live" : "Test"} · ${labels.access[item.accessConsequence]}`,
+      state: `${item.orderId === null ? "Account" : item.mode === "live" ? "Live" : "Test"} · ${labels.access[item.accessConsequence]}`,
       changedAt: item.observedAt,
       href: item.orderId ? `/admin/support/orders/${item.orderId}` : `/admin/support?mode=${item.mode}`,
     }));
   const more = live.nextCursor !== null || test.nextCursor !== null;
   return { state: "ready", rows, counts: [{ label: "Live items shown", count: live.items.length },
-    { label: "Test items shown", count: test.items.length }],
+    { label: "Test items shown", count: testItems.length }],
     total: items.length + (more ? 1 : 0), checkedAt, inventoryHref: "/admin/support" };
 }
 

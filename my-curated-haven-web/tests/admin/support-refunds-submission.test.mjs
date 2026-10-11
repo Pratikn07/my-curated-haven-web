@@ -8,6 +8,7 @@ test("lost provider response remains unknown and an ordinary retry only recovers
   const ports={reserve:async()=>stored,
     verify:async()=>({observationId:ORDER}),
     claim:async()=>({operationId:stored.operationId,fence:1,expiresAt:"2026-10-07T10:00:10Z"}),
+    payload:async()=>({command:refundCommand()}),
     submit:async()=>{calls++;throw new Error("timeout after acceptance");},
     record:async(_claim,result)=>{assert.equal(result.kind,"unknown");
       stored=refundReceipt({state:"outcome_unknown",reasonCode:"PROVIDER_OUTCOME_UNKNOWN",
@@ -27,6 +28,7 @@ test("a known provider refund is recorded once; a repeat returns the stored rece
     reserve: async () => { steps.push("reserve"); return stored; },
     verify: async () => { steps.push("verify"); return { observationId: ORDER }; },
     claim: async () => { steps.push("claim"); return { operationId: stored.operationId, fence: 2, expiresAt: "2026-10-07T10:00:10Z" }; },
+    payload: async () => { steps.push("payload"); return { command: refundCommand() }; },
     submit: async () => { steps.push("submit"); return { kind: "known", fact }; },
     record: async (_claim, result) => { steps.push(`record:${result.kind}`); stored = refundReceipt({ state: "submitted", providerRefundId: "re_x",
       providerStatus: "succeeded", reconciliation: "applied" }); return stored; },
@@ -34,14 +36,29 @@ test("a known provider refund is recorded once; a repeat returns the stored rece
   };
   assert.equal((await coordinateRefund(refundCommand(), ports)).providerRefundId, "re_x");
   assert.equal((await coordinateRefund(refundCommand(), ports)).state, "submitted");
-  assert.deepEqual(steps, ["reserve", "verify", "claim", "submit", "record:known", "reserve"]);
+  assert.deepEqual(steps, ["reserve", "verify", "claim", "payload", "submit", "record:known", "reserve"]);
 });
 
 test("refusals before dispatch send nothing", async () => {
   let submitted = false;
   const ports = { reserve: async () => refundReceipt(), verify: async () => ({ observationId: ORDER }),
-    claim: async () => { throw new Error("ADM_DISABLED"); }, submit: async () => { submitted = true; return { kind: "unknown", code: "X" }; },
+    claim: async () => { throw new Error("ADM_DISABLED"); }, payload: async () => ({ command: refundCommand() }),
+    submit: async () => { submitted = true; return { kind: "unknown", code: "X" }; },
     record: async () => refundReceipt(), read: async () => refundReceipt() };
   await assert.rejects(coordinateRefund(refundCommand(), ports), /ADM_DISABLED/);
   assert.equal(submitted, false);
 });
+
+test("a request that could not be read never left: it is recorded as not sent, so it holds nothing back", async () => {
+  const steps = [];
+  const ports = { reserve: async () => refundReceipt(), verify: async () => ({ observationId: ORDER }),
+    claim: async () => ({ operationId: refundReceipt().operationId, fence: 3, expiresAt: "2026-10-07T10:00:10Z" }),
+    payload: async () => { steps.push("payload"); throw new Error("ADM_STALE"); },
+    submit: async () => { steps.push("submit"); return { kind: "known" }; },
+    record: async (_claim, result) => { steps.push(`record:${result.kind}:${result.code}`); return refundReceipt({ state: "rejected",
+      reasonCode: result.code }); },
+    read: async () => refundReceipt() };
+  assert.equal((await coordinateRefund(refundCommand(), ports)).state, "rejected");
+  assert.deepEqual(steps, ["payload", "record:not_executed:PAYLOAD_UNAVAILABLE"]);
+});
+
