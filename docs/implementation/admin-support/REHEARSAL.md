@@ -2,7 +2,9 @@
 
 The owner walks through every support decision on the owned local stack with synthetic data before anything is switched on in production. Nothing here touches a real customer, a live Stripe account or production email. Results go in the "Outcome" column; a blank row is not a pass.
 
-Candidate: branch `codex/admin-support-phase-three`, commit recorded at the start of the session: `__________`.
+Candidate: branch `codex/admin-support-phase-three` at `5de34b8` plus the authenticator-page fixes.
+
+Run 2026-10-11 by Claude in the in-app browser at the owner's request, as the synthetic owner `rehearsal-owner@synthetic.test` (the owner's own local sign-in was blocked by the two authenticator-page bugs fixed in this run). Orders: 1 `MCH-R44E51`, 2 `MCH-R44E52`, 3 `MCH-R44E53`, 4 `MCH-R44E54`.
 
 ## Before you start
 
@@ -37,23 +39,23 @@ Candidate: branch `codex/admin-support-phase-three`, commit recorded at the star
 
 | # | Do | You should see | Outcome |
 | --- | --- | --- | --- |
-| 1 | Support → search by the customer email of order 1 (`rehearsal-…-locked@synthetic.test`), typed with capitals and spaces; then by reference `MCH-R…1` | One customer, one order; the email never appears in the address bar | |
-| 2 | Open order 1 | Seven separate states: checkout, payment (paid $15.00), refunds, disputes, purchase sources, access ("No access"), account. Terms at purchase, policy `rehearsal-v1` | |
-| 3 | Check provider status, then Repair → "Reconcile the purchase with Stripe" with a reason → Prepare | Preview: this purchase "No purchase source → Eligible", access "No access → Has access", email "None" | |
-| 4 | Touch `lose-next-commit`, then Approve and apply repair | "Result not known yet"; no second apply button. Check operation result → "Applied"; access now "Has access" | |
-| 5 | Order 2: Check Stripe before a refund → Part of it `4.00` → reasons → Prepare | Fixed $4.00 USD; paid $15.00, already refunded $0.00, still refundable $15.00; access stays | |
-| 6 | Approve and submit refund of $4.00 (try a double click) | "Sent to Stripe: $4.00. Stripe reports the refund succeeded. Access has been updated." One refund only | |
-| 7 | Order 2 again: everything still refundable, touch `refund-timeout-after-acceptance`, Approve and submit | "Outcome unknown", no way to prepare another; "Ask Stripe what happened" → "Sent to Stripe: $11.00" and access removed | |
-| 8 | Order 3: full refund | Preview says this purchase becomes not eligible but access stays "through another purchase or grant"; after sending, access is still "Has access" | |
-| 9 | Prepare a refund on order 3 or 4 and wait six minutes before approving | The proposal expires; nothing can be approved or sent | |
-| 10 | Switch sending off: `UPDATE private.support_workspace_settings SET refund_submission_enabled = false WHERE singleton;` | Approve and submit is disabled with a reason; earlier refunds still show; Check refund status still works. Switch it back on after | |
-| 11 | Order 4: check provider status | Disputes: "Dispute (needs response; respond in Stripe by …)"; Home → Customer support lists it first with the deadline | |
-| 12 | Order 4: Repair → reconcile → prepare and apply | Preview "Removes access" (this purchase Eligible → Not eligible); after applying, access is paused while the dispute is open. A repair can never restore access during an open dispute | |
-| 13 | Order 4: Dispute notice → Prepare notice → read the preview | Exact recipient, subject and text; "Respond in Stripe by"; customer access wording matches the order | |
-| 14 | Approve and send notice | "Accepted. Email accepted by the provider. Delivery is not confirmed." The file in `$TMPDIR/mch-support-test-mail` has exactly the previewed text. Preparing another for the same dispute is blocked | |
-| 15 | Team: give a test account the Support role, sign in as it in a private window, then revoke the role | The member reads support; after revocation the next page load is refused. They never see Refund or Dispute notice | |
-| 16 | Home | Customer support lane and "Your recent support outcomes" (repair, refunds, notice) with support references only, no amounts or emails | |
-| 17 | Explain back | Which facts come from Stripe ("Stripe last confirmed …") and which from our records; which buttons change access (apply repair, a sent refund) and which never do (checks, previews, notices) | |
+| 1 | Support → search by the customer email of order 1 (`rehearsal-…-locked@synthetic.test`), typed with capitals and spaces; then by reference `MCH-R…1` | One customer, one order; the email never appears in the address bar | Pass. One customer, one order (MCH-R44E51); the URL holds an internal id, never the email |
+| 2 | Open order 1 | Seven separate states: checkout, payment (paid $15.00), refunds, disputes, purchase sources, access ("No access"), account. Terms at purchase, policy `rehearsal-v1` | Pass. Seven states shown; paid $15.00, no access; terms rehearsal-v1 |
+| 3 | Check provider status, then Repair → "Reconcile the purchase with Stripe" with a reason → Prepare | Preview: this purchase "No purchase source → Eligible", access "No access → Has access", email "None" | Pass. Restores access; source No purchase source → Eligible; email None |
+| 4 | Touch `lose-next-commit`, then Approve and apply repair | "Result not known yet"; no second apply button. Check operation result → "Applied"; access now "Has access" | Pass. "Result not known yet", no apply button; Check operation result → Applied; access restored; 1 operation |
+| 5 | Order 2: Check Stripe before a refund → Part of it `4.00` → reasons → Prepare | Fixed $4.00 USD; paid $15.00, already refunded $0.00, still refundable $15.00; access stays | Pass. $4.00 USD; paid $15.00, refunded $0.00, refundable $15.00; access kept |
+| 6 | Approve and submit refund of $4.00 (try a double click) | "Sent to Stripe: $4.00. Stripe reports the refund succeeded. Access has been updated." One refund only | Pass. Double click: "Sent to Stripe: $4.00 … Access has been updated"; one refund recorded |
+| 7 | Order 2 again: everything still refundable, touch `refund-timeout-after-acceptance`, Approve and submit | "Outcome unknown", no way to prepare another; "Ask Stripe what happened" → "Sent to Stripe: $11.00" and access removed | Pass. "Outcome unknown", only status buttons; Ask Stripe → $11.00 succeeded; total $15.00; access removed |
+| 8 | Order 3: full refund | Preview says this purchase becomes not eligible but access stays "through another purchase or grant"; after sending, access is still "Has access" | Pass. Preview "Has access → Has access (through another purchase or grant)"; after $15.00 refund access stays |
+| 9 | Prepare a refund on order 3 or 4 and wait six minutes before approving | The proposal expires; nothing can be approved or sent | Pass. Unapproved $1.00 proposal read "Expired" after five minutes, no approve button |
+| 10 | Switch sending off: `UPDATE private.support_workspace_settings SET refund_submission_enabled = false WHERE singleton;` | Approve and submit is disabled with a reason; earlier refunds still show; Check refund status still works. Switch it back on after | Pass. Switch off: approve disabled with the reason; earlier refund status still readable |
+| 11 | Order 4: check provider status | Disputes: "Dispute (needs response; respond in Stripe by …)"; Home → Customer support lists it first with the deadline | Pass. "Dispute (needs response; respond in Stripe by 10/18/2026 …)"; Home lists it first |
+| 12 | Order 4: Repair → reconcile → prepare and apply | Preview "Removes access" (this purchase Eligible → Not eligible); after applying, access is paused while the dispute is open. A repair can never restore access during an open dispute | Pass. Preview "Removes access"; applied and confirmed; access paused |
+| 13 | Order 4: Dispute notice → Prepare notice → read the preview | Exact recipient, subject and text; "Respond in Stripe by"; customer access wording matches the order | Pass. Exact recipient, subject and text; access wording "this purchase is paused" |
+| 14 | Approve and send notice | "Accepted. Email accepted by the provider. Delivery is not confirmed." The file in `$TMPDIR/mch-support-test-mail` has exactly the previewed text. Preparing another for the same dispute is blocked | Pass. "Accepted … Delivery is not confirmed"; one local email with the previewed text; a second notice is blocked |
+| 15 | Team: give a test account the Support role, sign in as it in a private window, then revoke the role | The member reads support; after revocation the next page load is refused. They never see Refund or Dispute notice | Not run by hand (needs a second signed-in person); covered by the inspection, refund and notice browser specs |
+| 16 | Home | Customer support lane and "Your recent support outcomes" (repair, refunds, notice) with support references only, no amounts or emails | Pass. Lane and five outcomes by support reference, no amounts or emails |
+| 17 | Explain back | Which facts come from Stripe ("Stripe last confirmed …") and which from our records; which buttons change access (apply repair, a sent refund) and which never do (checks, previews, notices) | Owner to confirm |
 
 Owner sign-off: ______________________ Date: __________
 
