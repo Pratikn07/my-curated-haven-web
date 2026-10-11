@@ -43,6 +43,9 @@ test("the owner refunds part of a payment, and the receipt survives a reload", a
     await refund.getByRole("button", { name: "Approve and submit refund of $4.00" }).click();
     const outcome = refund.getByRole("status", { name: "Refund outcome" });
     await expect(outcome).toContainText("Sent to Stripe: $4.00. Stripe reports the refund succeeded. Access has been updated.");
+    const result = refund.getByRole("group", { name: "Refund result" });
+    await expect(result).toContainText("StripeSucceeded");
+    await expect(result).toContainText("Access updateApplied");
     expect(await fixture.providerRefundCount()).toBe(1);
 
     await page.reload();
@@ -136,6 +139,26 @@ test("support staff see no refund controls", async ({ page }) => {
     await openOrder(page, fixture);
     await expect(page.getByRole("region", { name: "Repair" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Refund", exact: true })).toHaveCount(0);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test("a full refund with another valid way in removes only this purchase, and a double click refunds once", async ({ page }) => {
+  const fixture = await createSupportFixture("owner", "repair", { verifier: true, policyVersion: POLICY, refundSending: true });
+  try {
+    await fixture.grantOtherAccess();
+    await fixture.login(page);
+    const refund = await prepare(page, fixture, null);
+    const preview = refund.getByRole("group", { name: "Refund preview" });
+    await expect(preview).toContainText("This purchaseEligible → Not eligible");
+    await expect(preview).toContainText("Customer access to the collectionHas access → Has access (through another purchase or grant)");
+    await refund.getByRole("button", { name: "Approve and submit refund of $14.00" }).dblclick();
+    await expect(refund.getByRole("status", { name: "Refund outcome" })).toContainText("Sent to Stripe: $14.00.");
+    expect(await fixture.providerRefundCount()).toBe(1);
+    expect(Number((await fixture.query("SELECT count(*) AS n FROM private.support_refund_intents WHERE order_id = $1", [fixture.orderId])).rows[0].n)).toBe(1);
+    await openOrder(page, fixture);
+    await expect(page.getByRole("region", { name: "Where this order stands" })).toContainText("Access to the collectionHas access");
   } finally {
     await fixture.dispose();
   }

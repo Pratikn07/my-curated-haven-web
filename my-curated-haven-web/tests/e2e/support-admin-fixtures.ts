@@ -53,6 +53,8 @@ export interface SupportFixture {
   rejectNextRefund(): void;
   /** Refunds the local ledger made for this order's payment (the fixture's earlier refund is not counted). */
   providerRefundCount(): Promise<number>;
+  /** Give the customer a second, valid way into the collection (a support grant), as another purchase would. */
+  grantOtherAccess(): Promise<void>;
   /** Open a dispute on the paid order, as Stripe would report it, with a response deadline a week away. Returns its id. */
   openDispute(status?: "needs_response" | "warning_needs_response"): Promise<string>;
   /** Local notice faults: the next email is sent but its answer is lost, or the next email is refused before sending. */
@@ -266,6 +268,14 @@ export async function createSupportFixture(role: SupportRole, stage: SupportStag
     failNextPostcheck: () => setFault("fail-next-postcheck"),
     loseNextRefundAnswer: () => setFault("refund-timeout-after-acceptance"),
     rejectNextRefund: () => setFault("refund-rejected"),
+    grantOtherAccess: async () => {
+      await withPg(async (pg) => {
+        await pg.query(`INSERT INTO private.collection_access_policies(release_id,source_kind,policy,approved_by,approval_reason)
+          VALUES($1,'support_grant','additions-v1',$2,'Synthetic support fixture') ON CONFLICT DO NOTHING`, [releaseId, staff.userId]);
+        await pg.query("INSERT INTO private.access_sources(user_id,release_id,source_kind,source_id) VALUES($1,$2,'support_grant',$3)",
+          [customer.userId, releaseId, `grant-${rand}`]);
+      });
+    },
     openDispute: async (status = "needs_response") => {
       const id = `du_support_${rand.toLowerCase()}`;
       await withPg((pg) => pg.query(`INSERT INTO private.payment_disputes(provider_dispute_id, order_id, payment_id, amount, currency, status,
