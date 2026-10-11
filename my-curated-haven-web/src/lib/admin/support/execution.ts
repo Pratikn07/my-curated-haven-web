@@ -51,7 +51,10 @@ export async function coordinateSupportRepair(command: RepairCommand, ports: Exe
 export function repairMessage(status: OperationStatus): { tone: "success" | "pending" | "error"; text: string } {
   switch (status.state) {
     case "applied":
-      return { tone: "success", text: status.verification === "verified" ? "Applied and confirmed." : "Applied. Confirming the customer's access…" };
+      // The result title already says "Applied"; the message says what the access check found.
+      return { tone: "success", text: status.verification === "verified" ? "The customer's access matches what was approved."
+        : status.verification === "unavailable" ? "The access check could not run; confirm the customer's access below."
+        : "Confirming the customer's access…" };
     case "already_satisfied":
       return { tone: "success", text: "Already in place. Nothing needed changing." };
     case "checking":

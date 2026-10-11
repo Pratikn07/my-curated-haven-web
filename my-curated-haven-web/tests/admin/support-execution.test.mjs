@@ -67,7 +67,8 @@ test("a check that fails reports the stored state; refusals to start are returne
 
 test("messages never present an unknown or blocked outcome as applied", () => {
   assert.equal(repairMessage(receipt()).tone, "success");
-  assert.match(repairMessage({ ...receipt(), verification: "verified" }).text, /confirmed/);
+  assert.match(repairMessage({ ...receipt(), verification: "verified" }).text, /access matches what was approved/);
+  assert.doesNotMatch(repairMessage({ ...receipt(), verification: "verified" }).text, /Applied/, "the title already says Applied");
   assert.equal(repairMessage({ operationId: OPERATION, state: "outcome_unknown", reasonCode: null }).tone, "pending");
   assert.doesNotMatch(repairMessage({ operationId: OPERATION, state: "outcome_unknown", reasonCode: null }).text, /Applied/);
   assert.equal(repairMessage({ operationId: OPERATION, state: "blocked", reasonCode: "STALE" }).tone, "error");
