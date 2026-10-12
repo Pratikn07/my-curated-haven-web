@@ -73,15 +73,91 @@ export function PumpkinCarve() {
   );
 }
 
-/** Tap to swap a Halloween photo for the everyday recipe it starts from. */
-export function EverydayToggle({ children }: { children: ReactNode }) {
-  const [everyday, setEveryday] = useState(false);
+const REST = 78;
+const clamp = (value: number) => Math.min(100, Math.max(0, value));
+
+/**
+ * Before and after: the everyday recipe on the left of the line, the Halloween
+ * one on the right. Drag the handle, tap anywhere on the photo, or use the arrow
+ * keys. The line moves once when the photo first arrives, so people see it can.
+ * A sideways drag moves it; an up or down drag still scrolls the page.
+ */
+export function BeforeAfter({ before, after }: { before: ReactNode; after: ReactNode }) {
+  const [position, setPosition] = useState(REST);
+  const [settling, setSettling] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+
+  useEffect(() => {
+    const element = box.current;
+    if (!element || typeof IntersectionObserver === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        setSettling(true);
+        timers.push(setTimeout(() => setPosition(40), 300));
+        timers.push(setTimeout(() => setPosition(REST), 1200));
+        timers.push(setTimeout(() => setSettling(false), 2000));
+      },
+      { threshold: 0.6 }
+    );
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  const fromPointer = (x: number) => {
+    const rect = box.current?.getBoundingClientRect();
+    if (rect && rect.width > 0) setPosition(clamp(((x - rect.left) / rect.width) * 100));
+  };
+
   return (
-    <div className="hw-shot" data-everyday={everyday ? "" : undefined}>
-      {children}
-      <button className="hw-swap" type="button" aria-pressed={everyday} onClick={() => setEveryday((value) => !value)}>
-        {everyday ? "See the Halloween version" : "See the everyday version"}
-      </button>
+    <div
+      ref={box}
+      className="hw-compare"
+      data-settling={settling ? "" : undefined}
+      style={{ "--pos": `${position}%` } as CSSProperties}
+      onPointerDown={(event) => {
+        dragging.current = true;
+        setSettling(false);
+        event.currentTarget.setPointerCapture(event.pointerId);
+        fromPointer(event.clientX);
+      }}
+      onPointerMove={(event) => {
+        if (dragging.current) fromPointer(event.clientX);
+      }}
+      onPointerUp={() => (dragging.current = false)}
+      onPointerCancel={() => (dragging.current = false)}
+    >
+      <div className="hw-compare-after">{after}</div>
+      <div className="hw-compare-before">{before}</div>
+      <span className="hw-compare-label hw-compare-left" aria-hidden="true">Everyday</span>
+      <span className="hw-compare-label hw-compare-right" aria-hidden="true">Halloween</span>
+      <span className="hw-compare-bar" aria-hidden="true" />
+      <span
+        className="hw-compare-knob"
+        role="slider"
+        tabIndex={0}
+        aria-label="Compare the everyday and Halloween versions"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(position)}
+        aria-valuetext={`${Math.round(position)}% everyday`}
+        onKeyDown={(event) => {
+          const step = event.key === "ArrowLeft" ? -5 : event.key === "ArrowRight" ? 5 : 0;
+          if (!step) return;
+          event.preventDefault();
+          setSettling(false);
+          setPosition((value) => clamp(value + step));
+        }}
+      >
+        ⇆
+      </span>
     </div>
   );
 }

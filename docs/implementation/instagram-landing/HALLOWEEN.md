@@ -9,7 +9,7 @@ Mock the owner approved (private): https://claude.ai/artifact/T58b3YQzcSAeh4Krfc
 | # | Section | What it does |
 | --- | --- | --- |
 | 1 | Menu (first screen) | The pumpkin (tap three times to carve it), "Halloween, the not-scary way", and the Halloween menu: Ghost pops, Mummy scrolls, Pumpkin pillows. Each row opens the recipe's own page when it is free, otherwise the Halloween collection |
-| 2 | Make them Halloween | The two dressed-up recipes, each with a tap to see the everyday version, and the one small step that makes it Halloween |
+| 2 | Make them Halloween | The two dressed-up recipes, each a before-and-after slider (everyday on the left of the line, Halloween on the right; drag, tap or arrow keys; it nudges once on arrival), and the one small step that makes it Halloween |
 | 3 | Our plan for Saturday | Bhagyashree's plan, told before Halloween: the skeleton scare (last week), making ghosts (10:30), the walk (6:15, the rendered street), goodnight to the skeleton (7:30) |
 | 4 | Why we cook for Halloween | Three reasons. Hard candy, whole nuts and popcorn are choking risks under 4 (AAP) |
 | 5 | The Halloween collection | The cover opens to the contents (free recipes marked), the price and "See the Halloween collection" |
@@ -51,7 +51,8 @@ The street (`HALLOWEEN_STREET` in `src/config/halloween.ts`) is five image layer
 | --- | --- |
 | Street layers (`street/`) | Higgsfield (Nano Banana Pro) on 2026-10-11, walkers from the Anaika and Bhagyashree reference elements; cut out and aligned locally |
 | Ghost pops, mummy scrolls, skeleton next door, making ghosts, goodnight window | Made by the owner in ChatGPT from the prompts in `~/Downloads/halloween-2026/PROMPTS.md`, cropped to 5:4 (window 4:4.4) and compressed to WebP |
-| Everyday pops and scrolls | The recipes' own catalog photos |
+| Ghost pops before (`ghost-pops-before.webp`) | Higgsfield edit of the owner's ghost pops photo with only the eyes removed (2026-10-12), so the slider lines up |
+| Everyday scrolls (`everyday-pizza-scrolls.webp`) | The recipe's own catalog photo, a different shot, so the slider halves do not line up yet; the owner is making a matching before photo |
 
 ## Analytics
 

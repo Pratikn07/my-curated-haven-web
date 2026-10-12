@@ -99,7 +99,7 @@ export const HALLOWEEN_TRICKS: readonly HalloweenTrick[] = [
       height: 640,
     },
     everyday: {
-      src: `${IMG}/everyday-yogurt-pops.webp`,
+      src: `${IMG}/ghost-pops-before.webp`,
       alt: "The same berry yogurt pops without eyes",
       width: 800,
       height: 640,

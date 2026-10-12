@@ -154,16 +154,28 @@
 .hw-sec-head h2, .hw-story-head h2 { margin: 0; font: 650 2rem/1.03 var(--font-display); letter-spacing: -0.015em; text-wrap: balance; color: var(--hw-ink); }
 .hw-sec-head p, .hw-story-head p { margin: 0; color: var(--hw-ink-soft); }
 .hw-trick { background: var(--hw-paper); border-radius: var(--hw-radius); box-shadow: var(--hw-shadow); overflow: hidden; display: grid; }
-.hw-shot { position: relative; }
-.hw-shot img { width: 100%; height: auto; aspect-ratio: 5 / 4; object-fit: cover; }
-.hw-shot .hw-everyday { position: absolute; inset: 0; height: 100%; opacity: 0; transition: opacity 0.45s var(--hw-ease); }
-.hw-shot[data-everyday] .hw-everyday { opacity: 1; }
-.hw-swap {
-  position: absolute; right: 0.8rem; bottom: 0.8rem; min-height: 2.75rem; padding: 0 1rem; border-radius: 999px; border: 0; cursor: pointer;
-  background: var(--hw-ink); color: var(--hw-paper); font: 600 0.85rem var(--font-body); box-shadow: 0 10px 20px -10px rgb(0 0 0 / 0.6);
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+/* Before and after: everyday on the left of the line, Halloween on the right. */
+.hw-compare {
+  --pos: 78%; position: relative; aspect-ratio: 5 / 4; overflow: hidden; cursor: ew-resize; touch-action: pan-y;
+  user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
 }
-.hw-swap:active { transform: scale(0.96); }
+.hw-compare-after, .hw-compare-before { position: absolute; inset: 0; }
+.hw-compare-before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.hw-compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.hw-compare-bar { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 3px; translate: -50% 0; z-index: 2; background: var(--hw-paper); box-shadow: 0 0 10px rgb(0 0 0 / 0.35); }
+.hw-compare-knob {
+  position: absolute; top: 50%; left: var(--pos); translate: -50% -50%; z-index: 3; width: 2.9rem; height: 2.9rem; border-radius: 50%;
+  display: grid; place-items: center; background: var(--hw-paper); color: var(--hw-pumpkin-deep); font: 700 0.95rem var(--font-body);
+  box-shadow: 0 8px 18px -6px rgb(0 0 0 / 0.55); cursor: grab;
+}
+.hw-compare-label {
+  position: absolute; top: 0.75rem; z-index: 2; padding: 0.2rem 0.6rem; border-radius: 999px; background: rgb(43 26 18 / 0.72); color: #f6ead6;
+  font: 600 0.68rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; pointer-events: none;
+}
+.hw-compare-left { left: 0.75rem; }
+.hw-compare-right { right: 0.75rem; }
+.hw-compare[data-settling] .hw-compare-bar, .hw-compare[data-settling] .hw-compare-knob { transition: left 0.7s var(--hw-ease); }
+.hw-compare[data-settling] .hw-compare-before { transition: clip-path 0.7s var(--hw-ease); }
 .hw-trick-body { padding: 1rem 1.15rem 1.15rem; display: grid; gap: 0.5rem; }
 .hw-trick-body h3 { margin: 0; font: italic 600 1.25rem/1.1 var(--font-display); color: var(--hw-pumpkin-deep); }
 .hw-trick-body p { margin: 0; color: var(--hw-ink-soft); font-size: 0.95rem; }
