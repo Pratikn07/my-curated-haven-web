@@ -68,8 +68,11 @@ test("a completed event is not processed again", async () => {
   assert.deepEqual([calls, finished], [[], []]);
 });
 
-test("unsupported events are ignored and an unknown order is retried", async () => {
-  const unsupported = deps({ claim: async () => claimed({ type: "customer.created" }) });
+test("events the shared writer does not judge go to the older path, or are ignored without one; an unknown order is retried", async () => {
+  const expired = deps({ claim: async () => claimed({ type: "checkout.session.expired" }) });
+  assert.deepEqual(await processVerifiedCommerceEvent(INBOX, expired.deps), { state: "completed" });
+  assert.deepEqual([expired.calls, expired.finished[0].outcome.code], [[["legacy"]], "LEGACY"]);
+  const unsupported = deps({ claim: async () => claimed({ type: "customer.created" }), legacy: null });
   assert.deepEqual(await processVerifiedCommerceEvent(INBOX, unsupported.deps), { state: "ignored" });
   assert.equal(unsupported.finished[0].outcome.code, "UNSUPPORTED_EVENT");
   const unknown = deps({ claim: async () => claimed({ orderId: null }) });

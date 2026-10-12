@@ -16,6 +16,7 @@ const ENV_KEYS = [
   "CHECKOUT_ENABLED",
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
+  "STRIPE_EXPECTED_ACCOUNT_ID",
 ] as const;
 
 async function withEnvironment(
@@ -239,6 +240,7 @@ test.describe("Payment remediation guardrails", () => {
       {
         STRIPE_SECRET_KEY: "sk_test_signature_fixture",
         STRIPE_WEBHOOK_SECRET: "whsec_valid_signature_fixture",
+        STRIPE_EXPECTED_ACCOUNT_ID: "acct_test_synthetic",
       },
       () => {
         const payload = JSON.stringify({
@@ -260,6 +262,26 @@ test.describe("Payment remediation guardrails", () => {
     );
   });
 
+  test("a signed direct-account event is refused with 503 while STRIPE_EXPECTED_ACCOUNT_ID is unset", async () => {
+    await withEnvironment(
+      {
+        VERCEL_ENV: undefined,
+        STRIPE_SECRET_KEY: "sk_test_signature_fixture",
+        STRIPE_WEBHOOK_SECRET: "whsec_valid_signature_fixture",
+        STRIPE_EXPECTED_ACCOUNT_ID: undefined,
+      },
+      async () => {
+        const stripe = new Stripe("sk_test_signature_fixture");
+        const payload = JSON.stringify({ id: `evt_test_unbound_${randomUUID()}`, object: "event", type: "checkout.session.expired",
+          livemode: false, data: { object: { id: `cs_test_unbound_${randomUUID()}`, object: "checkout.session" } } });
+        const signature = stripe.webhooks.generateTestHeaderString({ payload, secret: "whsec_valid_signature_fixture" });
+        const response = await stripeWebhookPost(new Request("http://localhost/api/stripe/webhook", {
+          method: "POST", headers: { "content-type": "application/json", "stripe-signature": signature }, body: payload }));
+        expect(response.status).toBe(503);
+      }
+    );
+  });
+
   test("[QA-S05:partial] P8-R1/R3: signed direct-account capture uses the order account; mismatched Connect account is reviewed", async () => {
     test.skip(
       !process.env.COMMERCE_DATABASE_URL,
@@ -271,6 +293,8 @@ test.describe("Payment remediation guardrails", () => {
         VERCEL_ENV: undefined,
         STRIPE_SECRET_KEY: "sk_test_signature_fixture",
         STRIPE_WEBHOOK_SECRET: "whsec_valid_signature_fixture",
+        // Direct-account events carry no `account`; the endpoint's account comes from configuration.
+        STRIPE_EXPECTED_ACCOUNT_ID: "acct_test_synthetic",
       },
       async () => {
         const pool = getCommercePool();
@@ -396,6 +420,7 @@ test.describe("Payment remediation guardrails", () => {
         VERCEL_ENV: undefined,
         STRIPE_SECRET_KEY: "sk_test_signature_fixture",
         STRIPE_WEBHOOK_SECRET: "whsec_valid_signature_fixture",
+        STRIPE_EXPECTED_ACCOUNT_ID: "acct_test_synthetic",
       },
       async () => {
         const pool = getCommercePool();
