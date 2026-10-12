@@ -6,6 +6,9 @@ import {
   recordRefundAndRecomputeAccess,
   getOrderSummaryBySessionId,
   markPurchaseOrderForReview,
+  recordDisputeAndRecomputeAccess,
+  closeExpiredCheckoutAttempt,
+  type PaymentEventOutcome,
 } from "./repository";
 import type { OrderSummaryDto } from "./types";
 import { drainOptionalAnalyticsExports } from "@/lib/analytics/drain";
@@ -97,7 +100,7 @@ export async function reconcileAndFulfillSession(
       // Local unsigned fixtures can only grant for locally-created mock sessions.
       await recordPaymentAndGrantAccess({
         orderId: order.id,
-        providerAccountId: order.provider_account_id || "acct_test_synthetic",
+        providerAccountId: order.provider_account_id,
         providerMode: "test",
         paymentIntentId: `pi_${sessionId}`,
         chargeId: `ch_${sessionId}`,
@@ -119,9 +122,11 @@ export async function processStripeWebhookEvent(event: {
   data: {
     object: Record<string, unknown>;
   };
-}): Promise<void> {
+}): Promise<PaymentEventOutcome> {
   const pool = getCommercePool();
   const obj = event.data.object;
+  // Ignored events carry a reason; anything that changed an order or access completes.
+  let outcome: PaymentEventOutcome = { state: "ignored", reason: "unhandled_event_type" };
 
   if (event.type === "checkout.session.completed") {
     const sessionId = obj.id as string;
@@ -138,6 +143,7 @@ export async function processStripeWebhookEvent(event: {
       }
     }
 
+    outcome = { state: "ignored", reason: orderId ? "session_not_paid" : "order_not_found" };
     if (orderId && obj.payment_status === "paid") {
       const orderRes = await pool.query(
         `SELECT po.id, po.user_id, po.session_id, po.snapshot,
@@ -148,7 +154,9 @@ export async function processStripeWebhookEvent(event: {
         [orderId]
       );
 
-      if (orderRes.rows.length > 0) {
+      if (orderRes.rows.length === 0) {
+        outcome = { state: "ignored", reason: "order_not_found" };
+      } else {
         const order = orderRes.rows[0];
         const paymentIntent = obj.payment_intent;
         const piId =
@@ -174,6 +182,7 @@ export async function processStripeWebhookEvent(event: {
           (event.account && event.account !== order.provider_account_id)
         ) {
           await markPurchaseOrderForReview(order.id);
+          outcome = { state: "completed", reason: "order_held_for_review" };
         } else {
           const latestCharge =
             paymentIntent && typeof paymentIntent === "object" && "latest_charge" in paymentIntent
@@ -199,20 +208,36 @@ export async function processStripeWebhookEvent(event: {
             currency: obj.currency as string,
             paidAt: new Date(),
           });
+          outcome = { state: "completed" };
         }
       }
     }
+  } else if (event.type === "checkout.session.expired") {
+    // Stripe never charges an expired session, so closing it only frees the buyer to start again.
+    outcome = (await closeExpiredCheckoutAttempt(obj.id as string))
+      ? { state: "completed" }
+      : { state: "ignored", reason: "no_open_attempt" };
+  } else if (event.type.startsWith("charge.dispute.")) {
+    outcome = (await recordStripeDispute(pool, obj))
+      ? { state: "completed" }
+      : { state: "ignored", reason: "payment_not_found" };
   } else if (event.type === "refund.created" || event.type === "refund.updated") {
     // The event object is the Refund itself, so no expansion or extra API call is needed.
-    await recordStripeRefund(pool, obj, null, null);
+    outcome = (await recordStripeRefund(pool, obj, null, null))
+      ? { state: "completed" }
+      : { state: "ignored", reason: "payment_not_found" };
   } else if (event.type === "charge.refunded") {
     // Since Stripe API 2022-11-15 a Charge no longer includes its refunds unless expanded,
     // so this list is usually empty; refund.created/updated carry the refunds (Phase 8 audit R8-02).
     const refundList = (obj.refunds as { data?: Array<Record<string, unknown>> } | undefined)?.data ?? [];
     const chargePaymentIntent = stripeObjectId(obj.payment_intent);
+    let recorded = 0;
     for (const refund of refundList) {
-      await recordStripeRefund(pool, refund, chargePaymentIntent, obj.id as string);
+      if (await recordStripeRefund(pool, refund, chargePaymentIntent, obj.id as string)) recorded++;
     }
+    outcome = recorded > 0
+      ? { state: "completed" }
+      : { state: "ignored", reason: refundList.length ? "payment_not_found" : "refunds_not_expanded" };
   }
 
   try {
@@ -220,6 +245,8 @@ export async function processStripeWebhookEvent(event: {
   } catch {
     // Optional export never blocks payment or access.
   }
+
+  return outcome;
 }
 
 /** A Stripe expandable field is either an id string or an object with an id. */
@@ -227,6 +254,72 @@ function stripeObjectId(value: unknown): string | null {
   if (typeof value === "string") return value;
   if (value && typeof value === "object" && "id" in value) return String((value as { id: unknown }).id);
   return null;
+}
+
+/** Find our payment row for a Stripe object that names a payment intent and/or charge. */
+async function findProviderPayment(
+  pool: ReturnType<typeof getCommercePool>,
+  paymentIntentId: string | null,
+  chargeId: string | null
+): Promise<{ id: string; order_id: string } | null> {
+  if (!paymentIntentId && !chargeId) return null;
+  const lookup = () =>
+    pool.query(
+      `SELECT id, order_id FROM private.provider_payments
+       WHERE ($1::text IS NOT NULL AND payment_intent_id = $1)
+          OR ($2::text IS NOT NULL AND charge_id = $2)
+       LIMIT 1`,
+      [paymentIntentId, chargeId]
+    );
+  const payRes = await lookup();
+  if (payRes.rows.length > 0) return payRes.rows[0];
+
+  // Stripe does not order events: a refund or dispute can arrive before checkout.session.completed.
+  // Record the payment from its Checkout Session first; a charge from no session of ours stays unknown.
+  if (!paymentIntentId || !isStripeConfigured()) return null;
+  const sessions = await getStripeClient().checkout.sessions.list({
+    payment_intent: paymentIntentId,
+    limit: 1,
+  });
+  const session = sessions.data[0];
+  if (!session) return null;
+  const orderRes = await pool.query(
+    `SELECT user_id FROM private.purchase_orders WHERE session_id = $1`,
+    [session.id]
+  );
+  if (orderRes.rows.length === 0) return null;
+  await reconcileAndFulfillSession(session.id, orderRes.rows[0].user_id);
+  return (await lookup()).rows[0] ?? null;
+}
+
+/**
+ * Record one Stripe dispute against its payment, with Stripe's response deadline. The database function owns the
+ * access rule: an open formal dispute holds this purchase, a lost one removes it, anything else keeps it.
+ */
+async function recordStripeDispute(
+  pool: ReturnType<typeof getCommercePool>,
+  dispute: Record<string, unknown>
+): Promise<boolean> {
+  const disputeId = dispute.id as string | undefined;
+  if (!disputeId) return false;
+  const pay = await findProviderPayment(
+    pool,
+    stripeObjectId(dispute.payment_intent),
+    stripeObjectId(dispute.charge)
+  );
+  if (!pay) return false;
+
+  await recordDisputeAndRecomputeAccess({
+    providerDisputeId: disputeId,
+    paymentId: pay.id,
+    amount: dispute.amount as number,
+    currency: dispute.currency as string,
+    status: dispute.status as string,
+    reason: typeof dispute.reason === "string" ? dispute.reason : null,
+    responseDeadline: typeof (dispute.evidence_details as { due_by?: unknown } | undefined)?.due_by === "number"
+      ? new Date(((dispute.evidence_details as { due_by: number }).due_by) * 1000) : null,
+  });
+  return true;
 }
 
 /**
@@ -239,23 +332,16 @@ async function recordStripeRefund(
   refund: Record<string, unknown>,
   fallbackPaymentIntentId: string | null,
   fallbackChargeId: string | null
-): Promise<void> {
+): Promise<boolean> {
   const refundId = refund.id as string | undefined;
-  if (!refundId) return;
-  const paymentIntentId = stripeObjectId(refund.payment_intent) ?? fallbackPaymentIntentId;
-  const chargeId = stripeObjectId(refund.charge) ?? fallbackChargeId;
-  if (!paymentIntentId && !chargeId) return;
-
-  const payRes = await pool.query(
-    `SELECT id, order_id FROM private.provider_payments
-     WHERE ($1::text IS NOT NULL AND payment_intent_id = $1)
-        OR ($2::text IS NOT NULL AND charge_id = $2)
-     LIMIT 1`,
-    [paymentIntentId, chargeId]
+  if (!refundId) return false;
+  const pay = await findProviderPayment(
+    pool,
+    stripeObjectId(refund.payment_intent) ?? fallbackPaymentIntentId,
+    stripeObjectId(refund.charge) ?? fallbackChargeId
   );
-  if (payRes.rows.length === 0) return;
+  if (!pay) return false;
 
-  const pay = payRes.rows[0];
   await recordRefundAndRecomputeAccess({
     orderId: pay.order_id,
     providerRefundId: refundId,
@@ -266,4 +352,5 @@ async function recordStripeRefund(
     reason: typeof refund.reason === "string" ? refund.reason : "customer_requested",
     occurredAt: typeof refund.created === "number" ? new Date(refund.created * 1000) : new Date(),
   });
+  return true;
 }
