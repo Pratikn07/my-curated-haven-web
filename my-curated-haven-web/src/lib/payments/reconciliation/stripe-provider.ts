@@ -29,7 +29,7 @@ export function createStripeReader(binding: Binding, client: Stripe = getStripeC
     async readCheckout(b) {
       if (b.sessionId === null) throw new ProviderBindingError("session_missing");
       const [account, session] = await Promise.all([
-        client.accounts.retrieve(),
+        client.accounts.retrieveCurrent(),
         client.checkout.sessions.retrieve(b.sessionId, { expand: ["payment_intent.latest_charge"] }),
       ]);
       if (session.client_reference_id !== b.orderId) throw new ProviderBindingError("session_order_mismatch");

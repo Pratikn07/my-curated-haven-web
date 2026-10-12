@@ -25,8 +25,14 @@ Owner of every row: the site owner (the only operator). Backup operator: none ye
 | `NEXT_PUBLIC_APP_ENV` | `production`; gates remote analytics | No |
 | `NEXT_PUBLIC_ANALYTICS_ENABLED` | `true`; set `false` and redeploy to switch analytics off | No |
 | `VERCEL_FORCE_NO_BUILD_CACHE` | `1`; the build cache once shipped stale CSS | No |
+| `STRIPE_SECRET_KEY` | Live restricted key (`rk_live_`, full access except sensitive operations), set 2026-10-12 | Yes |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret of live endpoint `we_1UPkTMPLtGCDwKKM62HXoTUg` | Yes |
+| `STRIPE_EXPECTED_ACCOUNT_ID`, `STRIPE_EXPECTED_LIVEMODE` | `acct_1UMM1WPLtGCDwKKM`, `true` | No |
+| `CRON_SECRET` | Bearer token Vercel Cron sends to `/api/cron/payments-reconcile` | Yes |
 
-Not set, so checkout stays off: `CHECKOUT_ENABLED`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_EXPECTED_ACCOUNT_ID`, `COMMERCE_DATABASE_URL`. `NEXT_PUBLIC_*` values are built into the site, so changing one needs a redeploy.
+Not set, so checkout stays off: `CHECKOUT_ENABLED`. `NEXT_PUBLIC_*` values are built into the site, so changing one needs a redeploy; server variables load on the next deploy.
+
+The live webhook endpoint (`https://mycuratedhaven.com/api/stripe/webhook`, 8 events) uses Stripe API version `2026-08-26.dahlia`, the same as `STRIPE_API_VERSION` in `src/lib/payments/stripe.ts`. An endpoint's version can't be changed; when the code moves to a newer version, create a new endpoint on that version and replace `STRIPE_WEBHOOK_SECRET`.
 
 ## Domain and DNS
 
