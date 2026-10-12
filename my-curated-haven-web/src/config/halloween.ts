@@ -62,7 +62,7 @@ export const HALLOWEEN_HERO = {
   /** The headline before and after the emphasised words. */
   title: { before: "Halloween, the", emphasis: "not-scary", after: "way." },
   lede: "Three recipes for the big night, made for little hands.",
-  byline: "Picked by Bhagyashree · Recipes by Tiny Soho",
+  byline: "Recipes by Tiny Soho",
 };
 
 export const HALLOWEEN_MENU: readonly HalloweenDish[] = [
