@@ -21,6 +21,16 @@ Use the post's page for its Story link sticker and for DMs about it. Keep the ta
 | --- | --- | --- |
 | Frittata fingers | `https://mycuratedhaven.com/stories/frittata-fingers?utm_source=instagram&utm_medium=organic_social&utm_campaign=story_link` | `https://mycuratedhaven.com/stories/frittata-fingers?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm` |
 
+## The Halloween page
+
+Halloween posts (Reels, feed posts, Stories and DMs) all point to one page, `/halloween`. Its first screen is the Halloween menu; see [HALLOWEEN.md](implementation/instagram-landing/HALLOWEEN.md).
+
+| Where you post it | Link |
+| --- | --- |
+| Story link sticker | `https://mycuratedhaven.com/halloween?utm_source=instagram&utm_medium=organic_social&utm_campaign=story_link` |
+| Automatic DM after a comment keyword | `https://mycuratedhaven.com/halloween?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm` |
+| DM or broadcast channel | `https://mycuratedhaven.com/halloween?utm_source=instagram&utm_medium=organic_social&utm_campaign=instagram_dm` |
+
 ## Telling Stories apart
 
 Add `&utm_content=` and a date or a short word to the end. For example, a Story posted on 1 October:

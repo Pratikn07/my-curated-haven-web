@@ -5,6 +5,7 @@
 @import "../styles/campaign.css";
 @import "../styles/admin.css";
 @import "../styles/collections.css";
+@import "../styles/halloween.css";
 
 @theme inline {
   --color-background: var(--canvas);
