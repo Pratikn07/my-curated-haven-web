@@ -66,7 +66,9 @@ SELECT throws_ok(format('SELECT pg_temp.claim(%L, %L)', (SELECT c FROM a), pg_te
 CREATE TEMP TABLE k AS SELECT pg_temp.claim((SELECT c FROM a), pg_temp.dispatch_check((SELECT c FROM a), pg_temp.facts())) k;
 SELECT ok((SELECT (k->>'fence')::bigint > 0 AND (k->>'expiresAt')::timestamptz <= clock_timestamp() + interval '10 seconds' FROM k),
   'the claim is fenced and lasts ten seconds at most');
-SELECT ok((SELECT state = 'dispatching' AND attempts = 1 AND retry_until = first_dispatched_at + interval '23 hours'
+-- The claim reads clock_timestamp() once for each column, so the window may start microseconds after the dispatch.
+SELECT ok((SELECT state = 'dispatching' AND attempts = 1
+    AND retry_until - (first_dispatched_at + interval '23 hours') BETWEEN interval '0' AND interval '1 second'
   FROM pg_temp.intent((SELECT c FROM a))), 'the dispatch and its 23-hour recovery window are written before anything is sent');
 SELECT throws_ok(format('SELECT pg_temp.claim(%L, %L)', (SELECT c FROM a), (SELECT gen_random_uuid())), 'PT409', 'ADM_CONFLICT',
   'a refund is dispatched once');
