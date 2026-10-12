@@ -165,7 +165,7 @@ export const HALLOWEEN_WALK: HalloweenMoment = {
   period: "pm",
   place: "around the block",
   heading: "Three doorbells, then home",
-  text: "Porch lights on all down the street, her hand in mine, three doorbells and then home. Any candy goes in a jar for later.",
+  text: "Porch lights on all down the street, her hand in mine, three doorbells and then home. Any candy goes in the jar for Dad.",
   clock: "Sat 31 Oct · 6:15 pm",
 };
 
@@ -198,11 +198,11 @@ export const HALLOWEEN_STREET = {
   houses: [0.197, 0.492, 0.797] as const,
 };
 
-/** Facts only: hard candy, whole nuts and popcorn are choking risks under 4 (AAP). */
+/** True to the facts: hard candy, whole nuts and popcorn are choking risks under 4 (AAP), so they go in the jar. */
 export const HALLOWEEN_REASONS: readonly { title: string; text: string }[] = [
   {
     title: "Most of the candy bag isn't for her yet.",
-    text: "Hard candy, whole nuts and popcorn are choking risks for children under 4. Food we make is food she can have.",
+    text: "She gets the bucket, I get the sorting job. Hard candy, whole nuts and popcorn go in the jar for Dad. Tonight's treat is the ghost pop she decorated herself.",
   },
   {
     title: "Costumes eat the dinner hour.",
