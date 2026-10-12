@@ -1,16 +1,21 @@
 import type { Json } from "@/lib/types/database";
-export type AdminRole = "owner" | "viewer" | "editor" | "reviewer" | "publisher";
+export type AdminRole = "owner" | "viewer" | "editor" | "reviewer" | "publisher" | "support_viewer" | "support_operator";
 export type Permission = "recipe.read" | "recipe.edit" | "recipe.review"
   | "recipe.publish" | "recipe.withdraw" | "recipe.emergency_withdraw" | "team.manage"
-  | "collection.read" | "collection.edit" | "collection.review" | "collection.publish";
+  | "collection.read" | "collection.edit" | "collection.review" | "collection.publish"
+  | "support.read" | "support.case.write" | "support.provider.inspect" | "support.repair.prepare"
+  | "support.repair.approve" | "support.repair.execute" | "support.refund.prepare" | "support.refund.approve"
+  | "support.refund.execute" | "support.notice.prepare" | "support.notice.approve" | "support.notice.send";
 export type ConsoleStage = "disabled" | "inspection" | "editing" | "publication";
 export type AdminCode = "AUTH_REQUIRED" | "MFA_REQUIRED" | "DENIED" | "DISABLED"
-  | "INVALID" | "NOT_FOUND" | "CONFLICT" | "UNAVAILABLE" | "BLOCKED";
+  | "INVALID" | "NOT_FOUND" | "CONFLICT" | "UNAVAILABLE" | "BLOCKED"
+  | "STALE" | "RATE_LIMITED" | "OUTCOME_UNKNOWN";
 export type Result<T> = { ok: true; value: T }
   | { ok: false; code: AdminCode; reference: string; fields?: Record<string, string> };
 export type Operator = { id: string; email: string; roles: AdminRole[]; permissions: Permission[] };
-export type AdminContext = { stage: ConsoleStage; collectionStage: ConsoleStage; operator: Operator;
-  assurance: "aal1" | "aal2" };
+export type SupportStage = "disabled" | "inspection" | "diagnosis" | "repair";
+export type AdminContext = { stage: ConsoleStage; collectionStage: ConsoleStage; supportStage: SupportStage;
+  operator: Operator; assurance: "aal1" | "aal2" };
 export type ContextResult = Result<AdminContext>;
 export type PublicationState = "draft" | "published" | "withdrawn";
 export type ReviewState = "unreviewed" | "submitted" | "approved" | "changes_requested" | "rejected";

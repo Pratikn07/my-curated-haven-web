@@ -108,8 +108,11 @@ test("keyboard users can reach the filters and the first collection link", async
   const tab = browserName === "webkit" ? "Alt+Tab" : "Tab";
   await f.login(page, "owner", "aal2");
   await page.goto(`/admin/collections?q=${f.slug}`);
-  await page.getByLabel("Search collections").focus();
-  await expect(page.getByLabel("Search collections")).toBeFocused();
+  // The streamed page can swap the form in just after load, which drops a focus set too early; focus it again.
+  await expect(async () => {
+    await page.getByLabel("Search collections").focus();
+    await expect(page.getByLabel("Search collections")).toBeFocused({ timeout: 1000 });
+  }).toPass();
   for (let i = 0; i < 12; i += 1) {
     await page.keyboard.press(tab);
     if (await page.getByRole("link", { name: f.title, exact: true }).locator("visible=true").evaluate((el) => el === document.activeElement)) break;

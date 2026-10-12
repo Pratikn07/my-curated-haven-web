@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createAdminFixture } from "./admin-fixtures";
 import { createCollectionsFixture } from "./collections-admin-fixtures";
+import { createSupportFixture } from "./support-admin-fixtures";
 
 test.describe.configure({ mode: "serial" });
 
@@ -99,6 +100,70 @@ test("Home and the collection publish page send nothing once admin pages load", 
     await expect(page.getByRole("heading", { level: 1, name: "Review collection effect" })).toBeVisible();
     await page.waitForTimeout(1000);
     expect(hits.slice(publicHits)).toEqual([]);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test("support lookups and order pages send nothing once admin pages load", async ({ page }) => {
+  const fixture = await createSupportFixture("support_operator");
+  try {
+    const hits = await watchSink(page);
+    await fixture.login(page, "aal2");
+    await page.goto("/");
+    await page.waitForTimeout(1500);
+    const publicHits = hits.length;
+    expect(publicHits).toBeGreaterThan(0);
+    await page.goto("/admin/support");
+    await page.getByLabel("Search by").selectOption("email");
+    await page.getByLabel("Email").fill(fixture.customerEmail);
+    await page.getByRole("button", { name: "Search" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(fixture.customerEmail);
+    await page.getByRole("link", { name: fixture.supportReference }).click();
+    await expect(page.getByRole("region", { name: "Where this order stands" })).toBeVisible();
+    await page.waitForTimeout(1000);
+    const later = hits.slice(publicHits);
+    expect(later).toEqual([]);
+    expect(JSON.stringify(hits)).not.toContain(fixture.customerEmail);
+    expect(JSON.stringify(hits)).not.toContain(fixture.supportReference);
+  } finally {
+    await fixture.dispose();
+  }
+});
+
+test("refund and dispute notice reviews send nothing and keep people and money out of URLs", async ({ page }) => {
+  const fixture = await createSupportFixture("owner", "repair", { verifier: true, policyVersion: "e2e-privacy", refundSending: false,
+    noticeSending: false });
+  try {
+    const disputeId = await fixture.openDispute();
+    const hits = await watchSink(page);
+    const urls: string[] = [];
+    page.on("request", (request) => urls.push(request.url()));
+    await fixture.login(page, "aal2");
+    await page.goto("/");
+    await page.waitForTimeout(1500);
+    const publicHits = hits.length;
+    await page.goto(`/admin/support/orders/${fixture.orderId}`);
+    await page.getByRole("button", { name: "Check provider status" }).click();
+    await expect(page.getByRole("status", { name: "Check status" })).toContainText("Checked.");
+    // WebKit can cut this load off with the page's own refresh after the check; retry it.
+    await expect(async () => { await page.goto(`/admin/support/orders/${fixture.orderId}`); }).toPass();
+    const notice = page.getByRole("region", { name: "Dispute notice" });
+    await notice.getByRole("button", { name: `Prepare notice for dispute ${disputeId}` }).click();
+    await expect(notice.getByRole("group", { name: "Notice preview" })).toContainText(fixture.customerEmail.toLowerCase());
+    const refund = page.getByRole("region", { name: "Refund", exact: true });
+    await refund.getByRole("button", { name: "Check Stripe before a refund" }).click();
+    await refund.getByLabel("Part of it").check();
+    await refund.getByLabel("Amount in USD").fill("4.00");
+    await refund.getByLabel("Internal reason").fill("Privacy check reason");
+    await refund.getByRole("button", { name: "Prepare refund" }).click();
+    await expect(refund.getByRole("group", { name: "Refund preview" })).toContainText("Refund $4.00");
+    await page.waitForTimeout(1000);
+    expect(hits.slice(publicHits)).toEqual([]);
+    const sent = JSON.stringify(hits) + urls.join("\n");
+    for (const secret of [fixture.customerEmail.toLowerCase(), fixture.supportReference, disputeId, "Privacy check reason", "amountMinor"]) {
+      expect(sent).not.toContain(secret);
+    }
   } finally {
     await fixture.dispose();
   }

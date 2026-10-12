@@ -29,6 +29,9 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
       COMMERCE_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      # Support provider checks in CI read the local ledger through the owned loopback database; never Stripe.
+      SUPPORT_VERIFIER_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      SUPPORT_PROVIDER_FIXTURE: local-ledger
     steps:
       - name: Check out the commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -108,6 +111,9 @@ jobs:
       - name: Collection unit tests
         run: npm run test:collections:unit
 
+      - name: Payment reconciliation unit tests
+        run: npm run test:reconciliation:unit
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -127,7 +133,8 @@ jobs:
           # Every collection acceptance spec must be discovered; a missing file fails here, not silently later.
           for spec in admin-collections-inspection admin-collections-editing admin-collections-review \
             admin-collections-publication admin-collections-access admin-collections-checkout \
-            admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home; do
+            admin-collections-corrections admin-collections-operator admin-collections-concurrency admin-home \
+            admin-support-inspection admin-support-diagnosis admin-support-repair admin-support-refunds admin-support-dispute-notices admin-home-support commerce-events; do
             printf '%s\n' "$list" | grep -q "${spec}.spec.ts" || { echo "Required spec ${spec} was not discovered"; exit 1; }
           done
           npm run test:e2e -- $(ls tests/e2e/*.spec.ts | grep -v 'admin-privacy.spec.ts')
@@ -246,7 +253,15 @@ jobs:
         run: |
           required="$(ls ../supabase/tests/database | grep -cE '^(1[7-9]|2[0-9]|56)_[a-z_]*admin[a-z_]*\.test\.sql$')"
           test "$required" -ge 14 || { echo "Expected 14 collection admin suites, found $required"; exit 1; }
+          support="$(ls ../supabase/tests/database | grep -cE '^[78][0-9]_[a-z_]*admin_support[a-z_]*\.test\.sql$')"
+          test "$support" -ge 16 || { echo "Expected 16 support admin suites (70-85), found $support"; exit 1; }
+          test -f ../supabase/tests/database/57_admin_home_support.test.sql || { echo "Home support suite 57 is missing"; exit 1; }
           node scripts/test-admin-db.mjs --all
+
+      - name: Support reconciliation races
+        # Concurrent sessions and test-only failpoints against this job's throwaway stack; synthetic rows are removed.
+        working-directory: my-curated-haven-web
+        run: node scripts/admin-support-concurrency.mjs --workdir .
 
       - name: Verify generated TypeScript types drift
         run: |

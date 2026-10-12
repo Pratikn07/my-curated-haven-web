@@ -10,6 +10,7 @@ import {
 import type { OrderSummaryDto } from "./types";
 import { drainOptionalAnalyticsExports } from "@/lib/analytics/drain";
 import { paymentCaptureMatchesSnapshot } from "./guardrails";
+import { refreshOrderFromProvider } from "./reconciliation/service";
 
 export async function reconcileAndFulfillSession(
   sessionId: string,
@@ -35,6 +36,12 @@ export async function reconcileAndFulfillSession(
     `SELECT id FROM private.provider_payments WHERE order_id = $1 AND status = 'succeeded'`,
     [order.id]
   );
+
+  // With an approved policy the order is re-checked with Stripe through the shared writer, which also catches refunds
+  // and disputes after payment; a recorded success alone is not trusted. The ownership check above still applies.
+  if (!sessionId.startsWith("cs_test_mock_") && (await refreshOrderFromProvider(order.id, payRes.rows.length > 0))) {
+    return getOrderSummaryBySessionId(sessionId, userId);
+  }
 
   if (payRes.rows.length === 0) {
     if (isStripeConfigured() && !sessionId.startsWith("cs_test_mock_")) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AdminHome as Home, AttentionFeed, ContinueItem, HomeResult } from "@/lib/admin/home/contracts";
 import { formatUtc, workingLabel } from "@/lib/admin/collections/labels";
+import { SUPPORT_RESULT_LABELS } from "@/lib/admin/support/labels";
 
 const ACTIONS: Record<HomeResult["action"], string> = {
   "revision.publish": "Recipe published",
@@ -24,9 +25,9 @@ function continueHref(item: ContinueItem): string {
   return item.domain === "recipe" ? `/admin/recipes/${item.objectId}/edit` : `/admin/collections/${item.objectId}/edit`;
 }
 
-function Lane({ id, title, feed }: { id: string; title: string; feed: AttentionFeed }) {
+function Lane({ id, title, feed, inventoryLabel }: { id: string; title: string; feed: AttentionFeed; inventoryLabel?: string }) {
   if (feed.state === "unauthorised") return null;
-  const inventory = <Link href={feed.inventoryHref}>Open {title.toLowerCase()}</Link>;
+  const inventory = <Link href={feed.inventoryHref}>{inventoryLabel ?? `Open ${title.toLowerCase()}`}</Link>;
   return <section aria-labelledby={id} className="admin-home__lane">
     <h3 id={id}>{title}</h3>
     {feed.state === "unavailable" ? <p role="status">{title} needing a decision are unavailable ({feed.code}, reference {feed.reference}).
@@ -52,6 +53,7 @@ function Lane({ id, title, feed }: { id: string; title: string; feed: AttentionF
 export default function AdminHome({ home }: { home: Home }) {
   const results = home.results;
   const continueWork = home.continueWork;
+  const supportResults = home.supportResults;
   return (
     <article className="admin-home">
       <header className="admin-record__header">
@@ -65,6 +67,29 @@ export default function AdminHome({ home }: { home: Home }) {
         <Lane id="home-recipes" title="Recipes" feed={home.recipes} />
         <Lane id="home-collections" title="Collections" feed={home.collections} />
       </section>
+
+      {home.support.state !== "unauthorised" ? <section aria-labelledby="home-support" className="admin-collection__section">
+        <h2 id="home-support">Customer support</h2>
+        <Lane id="home-support-attention" title="Support items" feed={home.support} inventoryLabel="Open support" />
+        {supportResults ? <section aria-labelledby="home-support-results" className="admin-home__lane">
+          <h3 id="home-support-results">Your recent support outcomes</h3>
+          {!supportResults.ok ? <p role="status">Support outcomes are unavailable ({supportResults.code}, reference {supportResults.reference}).</p>
+            : supportResults.value.length === 0 ? <p>You have no recent support outcomes.</p>
+            : <ul className="admin-home__rows" aria-label="Your recent support outcomes">
+              {supportResults.value.map((result) => {
+                const labels = SUPPORT_RESULT_LABELS[result.kind];
+                return <li key={result.operationId}>
+                  <div>
+                    <p className="admin-home__title">{result.supportReference}</p>
+                    <p>{labels.kind}: {labels.states[result.state] ?? result.state}</p>
+                    <p className="admin-home__meta"><time dateTime={result.at}>{formatUtc(result.at)}</time></p>
+                  </div>
+                  <Link href={`/admin/support/orders/${result.orderId}`} aria-label={`Open ${result.supportReference}`}>Open</Link>
+                </li>;
+              })}
+            </ul>}
+        </section> : null}
+      </section> : null}
 
       {continueWork ? <section aria-labelledby="home-continue" className="admin-collection__section">
         <h2 id="home-continue">Continue work</h2>

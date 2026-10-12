@@ -6,7 +6,21 @@ import { spawnSync } from 'node:child_process';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const testsDir = resolve(root, 'supabase/tests/database');
-const fixturePaths = ['admin-console.sql', 'admin-collections.sql'];
+const fixturePaths = ['admin-console.sql', 'admin-collections.sql', 'admin-support.sql', 'support-eligibility-matrix.sql'];
+const projectIds = ['my-curated-haven-impl', 'mch-admin-recipe-test', 'mch-admin-collections-test', 'mch-admin-support-test'];
+
+/**
+ * Inline the known fixtures a suite includes (`\ir ../../test-fixtures/<name>`). Any other include is refused,
+ * so a suite can never read an arbitrary file. Fixtures are inserted literally.
+ */
+export function bundleAdminSql(source, knownIncludes) {
+  let content = source;
+  for (const [include, fixture] of knownIncludes) {
+    content = content.replaceAll(`\\ir ${include}`, () => fixture);
+  }
+  if (/^\\(?:i|ir|include|include_relative)\s/m.test(content)) throw new Error('Unresolved SQL include');
+  return content;
+}
 
 export function selectAdminSql(names, all = false) {
   // Matches web-ci.yml, which excludes every `*admin*` suite from the plain pgTAP run.
@@ -40,24 +54,21 @@ function parseArgs(args) {
 function run() {
   const { workdir, all, files: explicitFiles } = parseArgs(process.argv.slice(2));
   const config = readFileSync(resolve(workdir, 'supabase/config.toml'), 'utf8');
-  if (!/^project_id\s*=\s*"(?:my-curated-haven-impl|mch-admin-recipe-test|mch-admin-collections-test)"/m.test(config)) {
-    throw new Error('Unrecognized local test project');
-  }
+  const projectId = /^project_id\s*=\s*"([^"]+)"/m.exec(config)?.[1];
+  if (!projectIds.includes(projectId)) throw new Error('Unrecognized local test project');
   const files = explicitFiles.length ? explicitFiles : selectAdminSql(readdirSync(testsDir), all);
   if (!files.length) throw new Error('No SQL tests selected');
+  const knownIncludes = new Map(fixturePaths.map((name) => [`../../test-fixtures/${name}`,
+    readFileSync(resolve(root, 'supabase/test-fixtures', name), 'utf8')]));
   const scratch = mkdtempSync(resolve(tmpdir(), 'mch-admin-pgtap-'));
   try {
     const bundled = files.map((file) => {
-      const source = readFileSync(resolve(testsDir, file), 'utf8');
-      let content = source;
-      for (const name of fixturePaths) {
-        const include = `\\ir ../../test-fixtures/${name}`;
-        if (content.includes(include)) {
-          const fixture = readFileSync(resolve(root, 'supabase/test-fixtures', name), 'utf8');
-          content = content.replaceAll(include, () => fixture);
-        }
+      let content;
+      try {
+        content = bundleAdminSql(readFileSync(resolve(testsDir, file), 'utf8'), knownIncludes);
+      } catch (error) {
+        throw new Error(`${error.message} in ${file}`);
       }
-      if (/^\\(?:i|ir)\s/m.test(content)) throw new Error(`Unresolved SQL include in ${file}`);
       const target = resolve(scratch, basename(file));
       writeFileSync(target, content);
       return target;

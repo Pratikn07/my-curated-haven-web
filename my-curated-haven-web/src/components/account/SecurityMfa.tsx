@@ -35,7 +35,13 @@ export default function SecurityMfa() {
     setStatus(null);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+      // A setup that was started but never confirmed (for example after a reload) blocks a new one, so clear it first.
+      const { data: existing } = await supabase.auth.mfa.listFactors();
+      for (const stale of (existing?.all ?? []).filter((f) => f.factor_type === "totp" && f.status === "unverified")) {
+        await supabase.auth.mfa.unenroll({ factorId: stale.id });
+      }
+      const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp",
+        friendlyName: `Authenticator app ${new Date().toISOString().slice(0, 16).replace("T", " ")}` });
       if (error || !data) {
         setStatus("Could not start enrollment. Try again.");
         return;
@@ -129,19 +135,21 @@ export default function SecurityMfa() {
           {/* eslint-disable-next-line @next/next/no-img-element -- QR code is a generated data URI; Image optimization does not apply */}
           <img src={qrCode} alt="Authenticator setup code" width={200} height={200} />
           {secret ? <p>Manual entry key: <code>{secret}</code></p> : null}
-          <label htmlFor="mfa-enroll-code">6-digit code</label>
+          <label htmlFor="mfa-enroll-code" className="block text-sm font-semibold text-foreground">6-digit code</label>
           <input
             id="mfa-enroll-code"
+            className="mt-2 block w-full max-w-xs min-h-12 rounded-xl border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-text-muted focus:border-action focus:outline-none focus:ring-2 focus:ring-action/20"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             inputMode="numeric"
             autoComplete="one-time-code"
           />
-          <button type="submit" disabled={pending || code.trim().length === 0}>
+          <button type="submit" disabled={pending || code.trim().length === 0} className="mt-3 min-h-12 rounded-xl bg-action px-6 py-3 font-semibold text-action-foreground hover:bg-action-hover focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors">
             Confirm enrollment
           </button>
           <button
             type="button"
+            className="mt-3 ml-3 min-h-12 rounded-xl border border-border px-6 py-3 font-semibold text-foreground hover:bg-surface focus:outline-none focus:ring-2 focus:ring-action"
             onClick={() => {
               setQrCode(null);
               setSecret(null);
@@ -153,7 +161,7 @@ export default function SecurityMfa() {
           </button>
         </form>
       ) : (
-        <button type="button" onClick={() => void startEnroll()} disabled={pending}>
+        <button type="button" onClick={() => void startEnroll()} disabled={pending} className="mt-3 min-h-12 rounded-xl bg-action px-6 py-3 font-semibold text-action-foreground hover:bg-action-hover focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors">
           {enrolled.length > 0 ? "Enroll another authenticator" : "Enroll authenticator app"}
         </button>
       )}

@@ -34,7 +34,13 @@ function decodeContext(data: unknown): AdminContext {
     && collectionStage !== "publication") {
     throw new Error("bad collection stage");
   }
-  return { ...(data as unknown as AdminContext), collectionStage };
+  // Likewise supportStage (Phase 3): missing means support is switched off.
+  const supportStage = data["supportStage"] ?? "disabled";
+  if (supportStage !== "disabled" && supportStage !== "inspection" && supportStage !== "diagnosis"
+    && supportStage !== "repair") {
+    throw new Error("bad support stage");
+  }
+  return { ...(data as unknown as AdminContext), collectionStage, supportStage };
 }
 
 function decodeLibrary(data: unknown): LibraryResult {
