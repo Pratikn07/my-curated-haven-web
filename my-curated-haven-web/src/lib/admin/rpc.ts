@@ -10,6 +10,9 @@ const KNOWN_CODES: Record<string, AdminCode> = {
   ADM_CONFLICT: "CONFLICT",
   ADM_UNAVAILABLE: "UNAVAILABLE",
   ADM_BLOCKED: "BLOCKED",
+  ADM_STALE: "STALE",
+  ADM_RATE_LIMITED: "RATE_LIMITED",
+  ADM_OUTCOME_UNKNOWN: "OUTCOME_UNKNOWN",
 };
 
 function reference(): string {

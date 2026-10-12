@@ -37,3 +37,23 @@ test("Home appears once collections are switched on and is current only on /admi
   assert.deepEqual(links[0], { href: "/admin", label: "Home", current: true, group: "Workspace" });
   assert.equal(adminNavigation(viewer, "/admin/recipes", "inspection")[0].current, false);
 });
+
+test("Support appears only for support readers while support is switched on", async () => {
+  const { adminNavigation } = await import("../../src/lib/admin/navigation.ts");
+  const support = { id: "u", email: "s@synthetic.test", roles: ["support_viewer"], permissions: ["support.read"] };
+  const editor = { id: "e", email: "e@synthetic.test", roles: ["editor"], permissions: ["recipe.read", "recipe.edit"] };
+  assert.deepEqual(adminNavigation(support, "/admin/support/orders/x", "disabled", "inspection").map((l) => [l.label, l.current]),
+    [["Support", true]]);
+  assert.equal(adminNavigation(support, "/admin/support", "disabled", "disabled").length, 0);
+  assert.ok(!adminNavigation(editor, "/admin/recipes", "disabled", "repair").some((l) => l.label === "Support"));
+});
+
+test("/admin sends support-only staff to Support and everyone else as before", async () => {
+  const { adminLanding } = await import("../../src/lib/admin/navigation.ts");
+  const support = { id: "u", email: "s@synthetic.test", roles: ["support_operator"], permissions: ["support.read"] };
+  const owner = { id: "o", email: "o@synthetic.test", roles: ["owner"], permissions: ["recipe.read", "collection.read", "support.read"] };
+  assert.equal(adminLanding(support, "disabled", "inspection"), "/admin/support");
+  assert.equal(adminLanding(support, "publication", "disabled"), "/admin");
+  assert.equal(adminLanding(owner, "disabled", "repair"), "/admin/recipes");
+  assert.equal(adminLanding(owner, "publication", "repair"), "/admin");
+});

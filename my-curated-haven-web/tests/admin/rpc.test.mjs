@@ -59,3 +59,9 @@ test("persistent transport failure gives up as unavailable", async () => {
   if (!result.ok) assert.equal(result.code, "UNAVAILABLE");
   assert.equal(calls, 3);
 });
+
+test("support codes classify as stale, rate limited and outcome unknown, never as a generic failure", () => {
+  assert.equal(classifyAdminError({ code: "PT409", message: "ADM_STALE" }), "STALE");
+  assert.equal(classifyAdminError({ code: "P0001", message: "ADM_RATE_LIMITED" }), "RATE_LIMITED");
+  assert.equal(classifyAdminError({ code: "P0001", message: "ADM_OUTCOME_UNKNOWN" }), "OUTCOME_UNKNOWN");
+});

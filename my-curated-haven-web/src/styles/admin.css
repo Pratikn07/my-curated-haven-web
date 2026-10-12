@@ -1385,3 +1385,23 @@
   gap: var(--space-1);
   min-height: 2.75rem;
 }
+
+/* Phase 3: customer support. */
+.admin-support { display: grid; gap: 1.5rem; }
+.admin-support__search form { display: grid; gap: 0.5rem; max-width: 32rem; }
+.admin-support__modes { display: flex; gap: 1rem; }
+.admin-support__modes a[aria-current="page"] { font-weight: 600; text-decoration: underline; }
+.admin-support__queue, .admin-support__orders, .admin-support__sources, .admin-support__cases { display: grid; gap: 0.5rem; padding-left: 1.25rem; }
+.admin-support__timeline { display: grid; gap: 0.75rem; padding-left: 1.25rem; }
+.admin-support__timeline p { margin: 0.25rem 0 0; overflow-wrap: anywhere; }
+.admin-support__cases form { display: grid; gap: 0.35rem; margin-top: 0.5rem; max-width: 32rem; }
+.admin-support__axes dd { overflow-wrap: anywhere; }
+.admin-support__prepare { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.35rem; max-width: 32rem; }
+.admin-support__prepare select, .admin-support__prepare textarea, .admin-support__prepare input:not([type="radio"]) { width: 100%; min-width: 0; max-width: 100%; }
+.admin-support__prepare fieldset { display: grid; gap: 0.35rem; min-width: 0; margin: 0; padding: 0.5rem 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-card); }
+.admin-support__repair { display: grid; gap: 0.5rem; padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-card); }
+.admin-support__repair dd { overflow-wrap: anywhere; }
+.admin-support__effect[data-change="remove"] { border-left: 4px solid var(--danger); padding-left: 0.5rem; }
+.admin-support__effect[data-change="restore"] { border-left: 4px solid var(--success); padding-left: 0.5rem; }
+.admin-support__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.admin-support__notice-text { white-space: pre-wrap; overflow-wrap: anywhere; }

@@ -78,7 +78,8 @@ test("a purchased recipe publishes only as an acknowledged correction, and its b
 
   await page.context().clearCookies();
   await f.login(page, "customer", "aal1");
-  await page.goto(`/recipes/${slug}`);
+  // WebKit can cut this load off with the publish page's own refresh; retry it.
+  await expect(async () => { await page.goto(`/recipes/${slug}`); }).toPass();
   await expect(page.getByRole("heading", { level: 1, name: "Corrected synthetic title" })).toBeVisible();
 });
 

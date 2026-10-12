@@ -49,16 +49,17 @@ export default function AdminMfa({ onVerified }: { onVerified: () => void }) {
       <h1>Verify your admin access</h1>
       <p>Enter the 6-digit code from your authenticator app.</p>
       <form onSubmit={verify}>
-        <label htmlFor="admin-mfa-code">Authenticator code</label>
+        <label htmlFor="admin-mfa-code" className="block text-sm font-semibold text-foreground">Authenticator code</label>
         <input
           id="admin-mfa-code"
+          className="mt-2 block w-full max-w-xs min-h-12 rounded-xl border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-text-muted focus:border-action focus:outline-none focus:ring-2 focus:ring-action/20"
           inputMode="numeric"
           autoComplete="one-time-code"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           required
         />
-        <button type="submit" disabled={pending || code.trim().length === 0}>
+        <button type="submit" disabled={pending || code.trim().length === 0} className="mt-3 min-h-12 rounded-xl bg-action px-6 py-3 font-semibold text-action-foreground hover:bg-action-hover focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors">
           Verify
         </button>
       </form>

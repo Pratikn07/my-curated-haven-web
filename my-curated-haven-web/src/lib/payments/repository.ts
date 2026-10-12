@@ -331,6 +331,10 @@ export async function recordRefundAndRecomputeAccess(params: {
   );
 }
 
+/**
+ * Store a signature-verified event once per account, mode and id, with the order it concerns when known. A repeated
+ * delivery returns the same inbox row and may fill in an order the first delivery could not find.
+ */
 export async function ingestPaymentEvent(params: {
   eventId: string;
   providerAccountId: string;
@@ -339,29 +343,50 @@ export async function ingestPaymentEvent(params: {
   eventType: string;
   objectId: string;
   payloadHash: string;
-}): Promise<boolean> {
+  orderId: string | null;
+}): Promise<string> {
   const pool = getCommercePool();
-  const query = `
-    INSERT INTO private.payment_events (
-      event_id,
-      provider_account_id,
-      provider_mode,
-      api_version,
-      event_type,
-      object_id,
-      payload_hash
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-    ON CONFLICT (provider_account_id, provider_mode, event_id) DO NOTHING
-    RETURNING id;
-  `;
-  const { rows } = await pool.query(query, [
-    params.eventId,
-    params.providerAccountId,
-    params.providerMode,
-    params.apiVersion,
-    params.eventType,
-    params.objectId,
-    params.payloadHash,
-  ]);
-  return rows.length > 0;
+  const { rows } = await pool.query(
+    `INSERT INTO private.payment_events (event_id, provider_account_id, provider_mode, api_version, event_type, object_id,
+       payload_hash, order_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (provider_account_id, provider_mode, event_id)
+     DO UPDATE SET order_id = coalesce(private.payment_events.order_id, EXCLUDED.order_id)
+     RETURNING id`,
+    [params.eventId, params.providerAccountId, params.providerMode, params.apiVersion, params.eventType, params.objectId,
+      params.payloadHash, params.orderId]
+  );
+  return rows[0].id as string;
+}
+
+/** Record the outcome of the older processing path for an inbox event, so recovery does not pick it up again. */
+export async function markPaymentEventProcessed(inboxId: string, state: "completed" | "failed", failureCode: string | null): Promise<void> {
+  await getCommercePool().query(
+    `UPDATE private.payment_events SET processing_state = $2, failure_code = $3,
+       processed_at = CASE WHEN $2 = 'completed' THEN now() END
+     WHERE id = $1 AND processing_state IN ('pending', 'failed')`,
+    [inboxId, state, failureCode]
+  );
+}
+
+const ORDER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+/**
+ * The one order a verified event concerns, from its checkout session, client reference, payment or charge, and that
+ * order's provider account. Null when nothing matches or the identities point at different orders.
+ */
+export async function resolveEventOrder(mode: string, hints: {
+  sessionId: string | null; clientReferenceId: string | null; paymentIntentId: string | null; chargeId: string | null;
+}): Promise<{ orderId: string; accountId: string | null } | null> {
+  const reference = hints.clientReferenceId && ORDER_ID.test(hints.clientReferenceId) ? hints.clientReferenceId : null;
+  const { rows } = await getCommercePool().query(
+    `SELECT DISTINCT o.id, o.snapshot->>'provider_account_id' AS account_id FROM private.purchase_orders o
+     WHERE (($1::text IS NOT NULL AND o.session_id = $1)
+        OR ($2::uuid IS NOT NULL AND o.id = $2::uuid)
+        OR o.id IN (SELECT p.order_id FROM private.provider_payments p WHERE p.provider_mode = $5
+          AND (($3::text IS NOT NULL AND p.payment_intent_id = $3) OR ($4::text IS NOT NULL AND p.charge_id = $4))))
+       AND coalesce(o.snapshot->>'provider_mode', $5) = $5`,
+    [hints.sessionId, reference, hints.paymentIntentId, hints.chargeId, mode]
+  );
+  return rows.length === 1 ? { orderId: rows[0].id as string, accountId: (rows[0].account_id as string | null) ?? null } : null;
 }

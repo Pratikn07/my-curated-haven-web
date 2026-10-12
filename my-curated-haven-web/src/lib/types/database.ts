@@ -1579,6 +1579,7 @@ export type Database = {
         Args: { p_limit: number }
         Returns: Json
       }
+      admin_home_support_results: { Args: { p_limit: number }; Returns: Json }
       admin_recipe_assets: { Args: never; Returns: Json }
       admin_recipe_correct: { Args: { p_command: Json }; Returns: Json }
       admin_recipe_correction_impact: {
@@ -1618,6 +1619,132 @@ export type Database = {
       admin_staff_lookup: { Args: { p_email: string }; Returns: Json }
       admin_staff_revoke: {
         Args: { p_operation_id: string; p_reason: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_support_access: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_approve: {
+        Args: {
+          p_digest: string
+          p_operation_id: string
+          p_proposal_id: string
+        }
+        Returns: Json
+      }
+      admin_support_case: { Args: { p_command: Json }; Returns: Json }
+      admin_support_cases: {
+        Args: { p_cursor: string; p_order_id: string }
+        Returns: Json
+      }
+      admin_support_customer: {
+        Args: { p_cursor: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_support_diagnose_begin: {
+        Args: { p_operation_id: string; p_order_id: string }
+        Returns: Json
+      }
+      admin_support_execute: {
+        Args: { p_observation_id: string; p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_execute_begin: { Args: { p_command: Json }; Returns: Json }
+      admin_support_history: {
+        Args: { p_cursor: string; p_order_id: string }
+        Returns: Json
+      }
+      admin_support_latest_observation: {
+        Args: { p_order_id: string }
+        Returns: Json
+      }
+      admin_support_lookup: { Args: { p_query: Json }; Returns: Json }
+      admin_support_metrics: { Args: { p_mode: string }; Returns: Json }
+      admin_support_notice_approve: {
+        Args: { p_digest: string; p_draft_id: string }
+        Returns: Json
+      }
+      admin_support_notice_operation: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_notice_prepare: {
+        Args: {
+          p_dispute_id: string
+          p_observation_id: string
+          p_order_id: string
+        }
+        Returns: Json
+      }
+      admin_support_notice_send_check: {
+        Args: { p_draft_id: string }
+        Returns: Json
+      }
+      admin_support_notice_send_claim: {
+        Args: { p_command: Json; p_observation_id: string }
+        Returns: Json
+      }
+      admin_support_notices: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_observation: { Args: { p_id: string }; Returns: Json }
+      admin_support_operation: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_order: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_postcheck: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_prepare: {
+        Args: {
+          p_kind: string
+          p_observation_id: string
+          p_operation_id: string
+          p_order_id: string
+          p_reason: string
+        }
+        Returns: Json
+      }
+      admin_support_proposals: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_queue: {
+        Args: { p_cursor: string; p_mode: string }
+        Returns: Json
+      }
+      admin_support_readiness: { Args: never; Returns: Json }
+      admin_support_redact_note: {
+        Args: { p_event_id: string; p_operation_id: string; p_reason: string }
+        Returns: Json
+      }
+      admin_support_refund_approve: {
+        Args: { p_digest: string; p_proposal_id: string }
+        Returns: Json
+      }
+      admin_support_refund_check_begin: {
+        Args: { p_operation_id: string; p_order_id: string }
+        Returns: Json
+      }
+      admin_support_refund_dispatch_check: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_dispatch_claim: {
+        Args: { p_command: Json; p_observation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_operation: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_prepare: {
+        Args: { p_input: Json; p_observation_id: string }
+        Returns: Json
+      }
+      admin_support_refund_reserve: { Args: { p_command: Json }; Returns: Json }
+      admin_support_refunds: { Args: { p_order_id: string }; Returns: Json }
+      admin_support_retention_run: {
+        Args: { p_operation_id: string }
+        Returns: Json
+      }
+      admin_support_set_stage: {
+        Args: { p_operation_id: string; p_reason: string; p_stage: string }
         Returns: Json
       }
       collection_effective_access: {

@@ -321,14 +321,22 @@ export async function createAdminFixture(
 
   const enroll = await browser.auth.mfa.enroll({ factorType: "totp", friendlyName: `admin-${safeLabel}` });
   if (enroll.error || !enroll.data) throw new Error(`Admin fixture MFA enroll failed: ${enroll.error?.message}`);
-  const challenge = await browser.auth.mfa.challenge({ factorId: enroll.data.id });
-  if (challenge.error) throw new Error(`Admin fixture MFA challenge failed: ${challenge.error.message}`);
-  const verified = await browser.auth.mfa.verify({
-    factorId: enroll.data.id,
-    challengeId: challenge.data.id,
-    code: totp(enroll.data.totp.secret),
-  });
-  if (verified.error) throw new Error(`Admin fixture MFA verify failed: ${verified.error.message}`);
+  // A code computed near the end of its 30-second window can reach a slow auth server after the window turns: wait
+  // out the last seconds of a window, and retry a rejected code with a fresh challenge.
+  let verified: Awaited<ReturnType<typeof browser.auth.mfa.verify>> | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const untilNextWindow = 30000 - (Date.now() % 30000);
+    if (untilNextWindow < 5000) await new Promise((resolve) => setTimeout(resolve, untilNextWindow + 250));
+    const challenge = await browser.auth.mfa.challenge({ factorId: enroll.data.id });
+    if (challenge.error) throw new Error(`Admin fixture MFA challenge failed: ${challenge.error.message}`);
+    verified = await browser.auth.mfa.verify({
+      factorId: enroll.data.id,
+      challengeId: challenge.data.id,
+      code: totp(enroll.data.totp.secret),
+    });
+    if (!verified.error || !/invalid totp/i.test(verified.error.message)) break;
+  }
+  if (!verified || verified.error) throw new Error(`Admin fixture MFA verify failed: ${verified?.error?.message}`);
   const aal2Cookies = [...captured];
 
   await withPg(async (pg) => {
