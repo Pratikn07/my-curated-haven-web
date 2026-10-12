@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Run the Vercel CLI with this repo's own login, separate from the global ~/.vercel login.
+# Auth lives in .vercel/cli/ (gitignored). First use: ops/vercel login
+set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+mkdir -p "$repo_root/.vercel/cli"
+cd "$repo_root"
+exec vercel --global-config "$repo_root/.vercel/cli" "$@"

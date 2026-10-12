@@ -2,6 +2,10 @@
 
 All production settings (names, owners, checks): [PRODUCTION-CONFIG.md](PRODUCTION-CONFIG.md).
 
+## Vercel CLI: `ops/vercel`
+
+The production project lives in the `pratik-r-nandoskars-projects` team, which a global `vercel` login on this Mac may not see. `ops/vercel` runs the Vercel CLI with this repo's own login, kept in `.vercel/cli/` (gitignored). Sign in once with `ops/vercel login`, then use it like `vercel`, for example `ops/vercel env ls production`. For a secret, pipe the value in so it is never printed: `openssl rand -hex 32 | tr -d '\n' | ops/vercel env add NAME production --sensitive`.
+
 ## Production backup (free plan)
 
 The Supabase project `ccrgvammglkvdlaojgzv` is on the free plan, which keeps no platform backups. `backup-production.sh` makes one every day on the owner's Mac:
