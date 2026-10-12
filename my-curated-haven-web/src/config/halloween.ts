@@ -222,5 +222,5 @@ export const HALLOWEEN_BOOK = {
 
 export const HALLOWEEN_CLOSING = {
   heading: "Made in our kitchen. Shared with yours.",
-  signature: "Bhagyashree & Anaika · Tiny Soho",
+  signature: "Tiny Soho",
 };
