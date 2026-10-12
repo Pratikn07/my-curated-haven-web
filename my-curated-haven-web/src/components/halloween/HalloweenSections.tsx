@@ -129,9 +129,9 @@ export function HalloweenTricks({ tricks }: { tricks: HalloweenTrickItem[] }) {
   return (
     <section className="hw-tricks" id="hw-tricks" data-hw-clock="Sat 31 Oct · Halloween">
       <div className="hw-sec-head">
-        <span className="hw-eyebrow">Two-minute tricks</span>
+        <span className="hw-eyebrow">Small Halloween tricks</span>
         <h2>Make them Halloween</h2>
-        <p>Same recipes, one small step at the end.</p>
+        <p>Ghost pops and mummy scrolls from the menu, with one small step at the end.</p>
       </div>
       {tricks.map((trick) => (
         <article className="hw-trick" key={trick.slug}>
