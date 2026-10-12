@@ -331,6 +331,41 @@ export async function recordRefundAndRecomputeAccess(params: {
   );
 }
 
+export async function recordDisputeAndRecomputeAccess(params: {
+  providerDisputeId: string;
+  paymentId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reason: string | null;
+  /** Stripe's evidence deadline (`evidence_details.due_by`), when it gave one. */
+  responseDeadline: Date | null;
+}): Promise<void> {
+  const pool = getCommercePool();
+  await pool.query(
+    `SELECT private.record_dispute_and_recompute_access($1, $2, $3, $4, $5, $6, $7)`,
+    [
+      params.providerDisputeId,
+      params.paymentId,
+      params.amount,
+      params.currency,
+      params.status,
+      params.reason,
+      params.responseDeadline,
+    ]
+  );
+}
+
+/** Close an unpaid attempt whose Checkout Session expired, so the buyer can start a new one. */
+export async function closeExpiredCheckoutAttempt(sessionId: string): Promise<boolean> {
+  const pool = getCommercePool();
+  const { rows } = await pool.query(
+    `SELECT private.close_expired_checkout_attempt($1) AS closed`,
+    [sessionId]
+  );
+  return rows[0]?.closed === true;
+}
+
 /**
  * Store a signature-verified event once per account, mode and id, with the order it concerns when known. A repeated
  * delivery returns the same inbox row and may fill in an order the first delivery could not find.
@@ -359,16 +394,6 @@ export async function ingestPaymentEvent(params: {
   return rows[0].id as string;
 }
 
-/** Record the outcome of the older processing path for an inbox event, so recovery does not pick it up again. */
-export async function markPaymentEventProcessed(inboxId: string, state: "completed" | "failed", failureCode: string | null): Promise<void> {
-  await getCommercePool().query(
-    `UPDATE private.payment_events SET processing_state = $2, failure_code = $3,
-       processed_at = CASE WHEN $2 = 'completed' THEN now() END
-     WHERE id = $1 AND processing_state IN ('pending', 'failed')`,
-    [inboxId, state, failureCode]
-  );
-}
-
 const ORDER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /**
@@ -389,4 +414,46 @@ export async function resolveEventOrder(mode: string, hints: {
     [hints.sessionId, reference, hints.paymentIntentId, hints.chargeId, mode]
   );
   return rows.length === 1 ? { orderId: rows[0].id as string, accountId: (rows[0].account_id as string | null) ?? null } : null;
+}
+
+export type PaymentEventOutcome =
+  | { state: "completed" | "ignored"; reason?: string }
+  | { state: "failed"; reason: string };
+
+/** Where one inbox event stands (pending, processing, completed, ignored, failed or dead_letter). */
+export async function getPaymentEventState(inboxId: string): Promise<string | null> {
+  const { rows } = await getCommercePool().query("SELECT processing_state FROM private.payment_events WHERE id = $1", [inboxId]);
+  return rows[0]?.processing_state ?? null;
+}
+
+/** Failed attempts before an event stops being retried and waits for a person (as on the verified path). */
+export const PAYMENT_EVENT_MAX_ATTEMPTS = 10;
+
+/**
+ * Record what the older processing path did with an inbox event, so recovery does not pick it up again. Ignored
+ * events keep their reason. A failure counts an attempt, waits 1, 2, 4 … up to 60 minutes before the next one and is
+ * set aside after ten; it never downgrades an event an earlier delivery already completed.
+ */
+export async function markPaymentEventOutcome(inboxId: string, outcome: PaymentEventOutcome): Promise<void> {
+  const pool = getCommercePool();
+  if (outcome.state === "failed") {
+    await pool.query(
+      `UPDATE private.payment_events
+       SET processing_state = CASE WHEN retry_count + 1 >= $3 THEN 'dead_letter' ELSE 'failed' END,
+           retry_count = retry_count + 1,
+           failure_code = 'LEGACY_FAILED',
+           failure_reason = left($2, 500),
+           processed_at = NULL,
+           next_attempt_at = clock_timestamp() + least(interval '60 minutes', interval '1 minute' * power(2, retry_count))
+       WHERE id = $1 AND processing_state NOT IN ('completed', 'ignored')`,
+      [inboxId, outcome.reason, PAYMENT_EVENT_MAX_ATTEMPTS]
+    );
+    return;
+  }
+  await pool.query(
+    `UPDATE private.payment_events
+     SET processing_state = $2, processed_at = now(), failure_code = $3, failure_reason = NULL, next_attempt_at = NULL
+     WHERE id = $1 AND processing_state <> 'completed'`,
+    [inboxId, outcome.state, outcome.reason ?? null]
+  );
 }

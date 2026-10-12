@@ -57,6 +57,12 @@ FROM private.payment_disputes d JOIN private.provider_payments p ON p.id = d.pay
 
 Every signed Stripe event is stored once per account, mode and event id, with the order it concerns. When the verifier login is registered and the order's policy is approved, the event is claimed under a fence, the order is re-checked with Stripe and the answer goes through the shared writer; the event body only identifies the order. Otherwise the guarded older processing handles the delivery, so purchases keep working while no policy is approved. Revoking the verifier login (above) is the emergency stop for automated reconciliation: webhooks fall back to the older path.
 
+Deployed webhooks need `STRIPE_EXPECTED_ACCOUNT_ID` (the Stripe account the endpoint belongs to); without it a direct-account event is refused with 503 so Stripe retries once it is set. Subscribe the endpoint to `checkout.session.completed`, `checkout.session.expired`, `refund.created`, `refund.updated`, `charge.refunded` and `charge.dispute.created`/`updated`/`closed`.
+
+On the older path (no verifier, or no approved policy for the order) every event ends `completed`, `ignored` with a reason, or `failed` with an attempt count; after ten failures it is set aside (`dead_letter`). An expired checkout session closes its unpaid attempt so the buyer can start again. Disputes follow the same rule as the shared writer: an open formal dispute holds that purchase, a lost one removes it, and a hold lifts when the dispute closes without a loss unless a full refund still excludes the purchase. Stripe's response deadline is stored for the support queue.
+
+A daily job (`/api/cron/payments-reconcile`, `vercel.json`, 06:15 UTC) re-reads the last 72 hours of these events from Stripe and processes any the inbox has not finished, through the same path as the webhook. It needs `CRON_SECRET` in the server's settings (Vercel sends it as a bearer token); without it the route refuses every call. Hobby plans allow one run a day; move to hourly on Pro.
+
 A retryable failure (Stripe unreachable, a check already running, an order not yet known) answers 500 so Stripe delivers again, and the inbox waits 1, 2, 4 … up to 60 minutes between attempts. After 10 attempts an event is set aside (`dead_letter`), as are events whose evidence needs a person.
 
 Recovery, on demand, for one mode at a time. A dry run (the default) prints counts only:

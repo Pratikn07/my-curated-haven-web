@@ -65,7 +65,16 @@ function code(error: unknown): string | null {
 
 async function decide(claim: Extract<EventClaim, { state: "claimed" }>, deps: EventDeps): Promise<EventOutcome> {
   const orderId = claim.orderId;
-  if (!VERIFIED_EVENT_TYPES.has(claim.type)) return { outcome: "ignored", code: "UNSUPPORTED_EVENT", orderId, reconciliation: null };
+  if (!VERIFIED_EVENT_TYPES.has(claim.type)) {
+    // Not a payment fact the shared writer judges (an expired checkout, say): the older processing handles it.
+    if (deps.legacy === null) return { outcome: "ignored", code: "UNSUPPORTED_EVENT", orderId, reconciliation: null };
+    try {
+      await deps.legacy();
+      return { outcome: "completed", code: "LEGACY", orderId, reconciliation: null };
+    } catch {
+      return { outcome: "retry", code: "LEGACY_FAILED", orderId, reconciliation: null };
+    }
+  }
   // The order may not be known yet (a refund event before its checkout); a later delivery can bind it.
   if (orderId === null) return { outcome: "retry", code: "ORDER_UNKNOWN", orderId, reconciliation: null };
   let ready: boolean;

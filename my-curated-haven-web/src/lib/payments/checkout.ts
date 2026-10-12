@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { canUseMockCheckout, getStripeConfig, isStripeConfigured } from "./config";
 import { getStripeClient } from "./stripe";
-import { bindSessionToOrder, recordCheckoutMeasurement } from "./repository";
+import { bindSessionToOrder, closeExpiredCheckoutAttempt, recordCheckoutMeasurement } from "./repository";
 import { findCollectionIdBySlug, reserveCollectionOrder } from "./collection-reservation";
 import type { CheckoutExpectation, CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
@@ -45,34 +45,58 @@ export async function createCheckoutSession({
   if (!collectionId) {
     return { status: "error", message: "This collection is not currently available for purchase.", code: "OFFER_NOT_FOUND" };
   }
-  const reservation = await reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID());
-  if (reservation.state === "owned") return { status: "already_owned", collectionSlug };
-  if (reservation.state === "stale") return { status: "stale", expected: reservation.expected };
-  if (reservation.state === "unavailable") {
-    return { status: "error", message: "This collection is not currently available for purchase.", code: "OFFER_NOT_FOUND" };
-  }
-  if (reservation.state === "review_required") {
-    return {
-      status: "error",
-      message: "An earlier checkout for this collection needs a quick check. Please contact support before buying again.",
-      code: "CHECKOUT_REVIEW_REQUIRED",
-    };
+  // A stored session that Stripe already expired is closed and the reservation retried once.
+  let reservation = await reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID());
+  for (let attempt = 0; ; attempt++) {
+    if (reservation.state === "owned") return { status: "already_owned", collectionSlug };
+    if (reservation.state === "stale") return { status: "stale", expected: reservation.expected };
+    if (reservation.state === "unavailable") {
+      return { status: "error", message: "This collection is not currently available for purchase.", code: "OFFER_NOT_FOUND" };
+    }
+    if (reservation.state === "review_required") {
+      return {
+        status: "error",
+        message: "An earlier checkout for this collection needs a quick check. Please contact support before buying again.",
+        code: "CHECKOUT_REVIEW_REQUIRED",
+      };
+    }
+    const pending = reservation.order;
+    if (
+      attempt === 0 &&
+      pending.sessionId &&
+      pending.attemptState === "open" &&
+      isStripeConfigured() &&
+      !pending.sessionId.startsWith("cs_test_mock_")
+    ) {
+      const session = await getStripeClient().checkout.sessions.retrieve(pending.sessionId);
+      if (session.status === "expired") {
+        await closeExpiredCheckoutAttempt(pending.sessionId);
+        reservation = await reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID());
+        continue;
+      }
+      if (session.status === "complete") {
+        // Paid but not yet recorded: the return page reconciles it instead of offering a dead link.
+        return {
+          status: "success",
+          checkoutUrl: `/checkout/return?session_id=${encodeURIComponent(pending.sessionId)}`,
+          supportReference: pending.supportReference,
+        };
+      }
+      if (!pending.checkoutUrl && session.url) {
+        await bindSessionToOrder(pending.id, pending.sessionId, session.url);
+        pending.checkoutUrl = session.url;
+      }
+    }
+    break;
   }
   const order = reservation.order;
 
   // 2. An open attempt with a session is reused as it is.
   if (order.sessionId && order.attemptState === "open") {
     let retrievedUrl: string | null = null;
-    if (!order.checkoutUrl) {
-      if (isStripeConfigured() && !order.sessionId.startsWith("cs_test_mock_")) {
-        const session = await getStripeClient().checkout.sessions.retrieve(order.sessionId);
-        retrievedUrl = session.url;
-      } else if (canUseMockCheckout() && order.sessionId.startsWith("cs_test_mock_")) {
-        retrievedUrl = `/checkout/return?session_id=${encodeURIComponent(order.sessionId)}`;
-      }
-      if (retrievedUrl) {
-        await bindSessionToOrder(order.id, order.sessionId, retrievedUrl);
-      }
+    if (!order.checkoutUrl && canUseMockCheckout() && order.sessionId.startsWith("cs_test_mock_")) {
+      retrievedUrl = `/checkout/return?session_id=${encodeURIComponent(order.sessionId)}`;
+      await bindSessionToOrder(order.id, order.sessionId, retrievedUrl);
     }
     const checkoutUrl = reusableCheckoutUrl(order.checkoutUrl, retrievedUrl);
     if (!checkoutUrl) {
