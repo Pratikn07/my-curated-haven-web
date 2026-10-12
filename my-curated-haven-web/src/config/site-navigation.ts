@@ -35,6 +35,7 @@ export const indexableRoutes: {
   { path: "/", changeFrequency: "weekly", priority: 1 },
   { path: "/recipes", changeFrequency: "weekly", priority: 0.8 },
   { path: "/collections", changeFrequency: "weekly", priority: 0.8 },
+  { path: "/halloween", changeFrequency: "weekly", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/support", changeFrequency: "monthly", priority: 0.6 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
