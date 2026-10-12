@@ -16,15 +16,17 @@ export async function openSupportOrder(page: Page, fixture: SupportFixture): Pro
 }
 
 /**
- * Chooses "Part of it" and types the amount. The form appears from the Stripe check and is then re-rendered by the
- * page's own refresh, so on WebKit the first click on the radio can land mid-render and change nothing ("Clicking
- * the checkbox did not change its state"). Choosing it again is harmless, so it is retried until it holds.
+ * Chooses "Part of it" and types the amount. The form appears from the Stripe check and is briefly disabled while the
+ * page's own refresh runs, so on WebKit the first click on the radio can land on a disabled control and change
+ * nothing ("Clicking the checkbox did not change its state"). Choosing it again is harmless, so it is retried until
+ * the radio is checked and the amount field it reveals has appeared.
  */
 export async function choosePartialRefund(refund: Locator, amount: string): Promise<void> {
   const part = refund.getByLabel("Part of it");
   await expect(async () => {
     await part.check({ timeout: 2_000 });
     await expect(part).toBeChecked({ timeout: 1_000 });
+    await expect(refund.getByLabel("Amount in USD")).toBeVisible({ timeout: 2_000 });
   }).toPass();
   await refund.getByLabel("Amount in USD").fill(amount);
 }
