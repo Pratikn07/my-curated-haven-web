@@ -1,5 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
-import { createSupportFixture, type SupportFixture } from "./support-admin-fixtures";
+import { expect, test } from "@playwright/test";
+import { createSupportFixture } from "./support-admin-fixtures";
+import { openSupportOrder as openOrder, prepareRefund as prepare } from "./support-refund-steps";
 
 // Refunds run against the local payment records (SUPPORT_PROVIDER_FIXTURE=local-ledger): the local writer records the
 // refund as Stripe would. The order was paid $15.00 with $1.00 already refunded, so $14.00 is still refundable. The
@@ -7,29 +8,6 @@ import { createSupportFixture, type SupportFixture } from "./support-admin-fixtu
 test.describe.configure({ mode: "serial" });
 const POLICY = "e2e-refund";
 
-// The page refreshes itself after each command; on WebKit that refresh can cut off the next page load, so it is retried.
-async function openOrder(page: Page, fixture: SupportFixture) {
-  await expect(async () => { await page.goto(`/admin/support/orders/${fixture.orderId}`); }).toPass();
-}
-
-async function prepare(page: Page, fixture: SupportFixture, amount: string | null, reason = "Charged twice by mistake") {
-  await openOrder(page, fixture);
-  const refund = page.getByRole("region", { name: "Refund", exact: true });
-  await refund.getByRole("button", { name: "Check Stripe before a refund" }).click();
-  if (amount !== null) {
-    await refund.getByLabel("Part of it").check();
-    await refund.getByLabel("Amount in USD").fill(amount);
-  }
-  await refund.getByLabel("Internal reason").fill(reason);
-  // WebKit occasionally drops this click; retrying can only prepare another unsent proposal.
-  const answered = refund.getByRole("group", { name: "Refund preview" })
-    .or(refund.getByRole("status", { name: "Refund status" }).filter({ hasText: /\S/ }));
-  await expect(async () => {
-    await refund.getByRole("button", { name: "Prepare refund" }).click();
-    await expect(answered).toBeVisible({ timeout: 5_000 });
-  }).toPass();
-  return refund;
-}
 
 test("the owner refunds part of a payment, and the receipt survives a reload", async ({ page }) => {
   const fixture = await createSupportFixture("owner", "repair", { verifier: true, policyVersion: POLICY, refundSending: true });
