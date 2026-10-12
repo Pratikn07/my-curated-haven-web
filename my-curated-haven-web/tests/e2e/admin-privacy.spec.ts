@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createAdminFixture } from "./admin-fixtures";
 import { createCollectionsFixture } from "./collections-admin-fixtures";
 import { createSupportFixture } from "./support-admin-fixtures";
+import { choosePartialRefund } from "./support-refund-steps";
 
 test.describe.configure({ mode: "serial" });
 
@@ -153,8 +154,7 @@ test("refund and dispute notice reviews send nothing and keep people and money o
     await expect(notice.getByRole("group", { name: "Notice preview" })).toContainText(fixture.customerEmail.toLowerCase());
     const refund = page.getByRole("region", { name: "Refund", exact: true });
     await refund.getByRole("button", { name: "Check Stripe before a refund" }).click();
-    await refund.getByLabel("Part of it").check();
-    await refund.getByLabel("Amount in USD").fill("4.00");
+    await choosePartialRefund(refund, "4.00");
     await refund.getByLabel("Internal reason").fill("Privacy check reason");
     await refund.getByRole("button", { name: "Prepare refund" }).click();
     await expect(refund.getByRole("group", { name: "Refund preview" })).toContainText("Refund $4.00");
