@@ -14,7 +14,7 @@ import {
   type HalloweenMoment,
 } from "@/config/halloween";
 import type { HalloweenBookData, HalloweenMenuItem, HalloweenTrickItem } from "@/lib/data/load-halloween";
-import { EverydayToggle, GhostPeek, PumpkinCarve } from "./HalloweenClient";
+import { BeforeAfter, GhostPeek, PumpkinCarve } from "./HalloweenClient";
 
 /** The colour each part of the story hands to the sky behind the page, from morning to night. */
 const SKY = { lastWeek: "#fbefd9", morning: "#fbe3bc", walk: "#4a2a45", night: "#23161c" } as const;
@@ -129,16 +129,16 @@ export function HalloweenTricks({ tricks }: { tricks: HalloweenTrickItem[] }) {
   return (
     <section className="hw-tricks" id="hw-tricks" data-hw-clock="Sat 31 Oct · Halloween">
       <div className="hw-sec-head">
-        <span className="hw-eyebrow">Two-minute tricks</span>
+        <span className="hw-eyebrow">Small Halloween tricks</span>
         <h2>Make them Halloween</h2>
-        <p>Same recipes, one small step at the end.</p>
+        <p>Ghost pops and mummy scrolls from the menu, with one small step at the end.</p>
       </div>
       {tricks.map((trick) => (
         <article className="hw-trick" key={trick.slug}>
-          <EverydayToggle>
-            <Image className="hw-dressed" src={trick.dressed.src} alt={trick.dressed.alt} width={trick.dressed.width} height={trick.dressed.height} sizes="(max-width: 30rem) 100vw, 30rem" />
-            <Image className="hw-everyday" src={trick.everyday.src} alt={trick.everyday.alt} width={trick.everyday.width} height={trick.everyday.height} sizes="(max-width: 30rem) 100vw, 30rem" />
-          </EverydayToggle>
+          <BeforeAfter
+            after={<Image src={trick.dressed.src} alt={trick.dressed.alt} width={trick.dressed.width} height={trick.dressed.height} sizes="(max-width: 30rem) 100vw, 30rem" />}
+            before={<Image src={trick.everyday.src} alt={trick.everyday.alt} width={trick.everyday.width} height={trick.everyday.height} sizes="(max-width: 30rem) 100vw, 30rem" />}
+          />
           <div className="hw-trick-body">
             <h3>{trick.alias}</h3>
             <p>{trick.how}</p>

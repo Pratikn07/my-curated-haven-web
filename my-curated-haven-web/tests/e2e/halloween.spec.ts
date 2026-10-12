@@ -79,3 +79,23 @@ test("[halloween] the visit is counted as the Halloween story", async ({ page })
   const view = (await recordedEvents(page)).find((event) => event.event_name === "story_view")!;
   expect(view.properties).toMatchObject({ story_slug: "halloween", room: "kitchen", story_series: "halloween-2026" });
 });
+
+test("[halloween] the before-and-after slider shows more of the everyday version as it moves left", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(PAGE);
+  const knob = page.getByRole("slider", { name: "Compare the everyday and Halloween versions" }).first();
+  await knob.scrollIntoViewIfNeeded();
+  await expect(knob).toHaveAttribute("aria-valuenow", "78");
+  await knob.focus();
+  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowLeft");
+  await expect(knob).toHaveAttribute("aria-valuenow", "68");
+
+  // A tap on the photo moves the line there.
+  const compare = page.locator(".hw-compare").first();
+  const box = (await compare.boundingBox())!;
+  await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.8);
+  const value = Number(await knob.getAttribute("aria-valuenow"));
+  expect(value).toBeGreaterThan(20);
+  expect(value).toBeLessThan(30);
+});
