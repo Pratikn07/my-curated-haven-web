@@ -121,6 +121,10 @@
 .hw-title em { font-style: italic; color: var(--hw-pumpkin-deep); position: relative; white-space: nowrap; }
 .hw-marker { position: absolute; left: -4%; bottom: -0.12em; height: 0.35em; width: 108%; overflow: visible; pointer-events: none; }
 .hw-marker path { fill: none; stroke: var(--hw-pumpkin); stroke-width: 7; stroke-linecap: round; opacity: 0.55; }
+.hw-ins, .hw-scary, .hw-scary i { display: inline-block; }
+.hw-scary i { font-style: inherit; }
+.hw-caret { position: absolute; left: -0.18em; bottom: -0.55em; width: 0.5em; height: 0.45em; overflow: visible; opacity: 0; pointer-events: none; }
+.hw-caret path { fill: none; stroke: var(--hw-pumpkin); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .hw-lede { margin: 0; max-width: 23rem; color: var(--hw-ink-soft); text-wrap: pretty; }
 
 /* ---------- Menu: the first screen's job ---------- */
@@ -312,13 +316,28 @@
 
 /* ---------- The load moment: the headline rises, the marker draws ---------- */
 @media (prefers-reduced-motion: no-preference) {
-  .hw-w > span, .hw-w > em { animation: hw-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 100ms); }
-  .hw-marker path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hw-draw 0.7s ease-in-out 0.75s forwards; }
+  .hw-w > span { animation: hw-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 100ms); }
+  /* The emphasis keeps its overflow visible for the caret and marker, so it lifts in instead of rising from a mask. */
+  .hw-w > em { animation: hw-rise-soft 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 100ms); }
+  /* Scary gets corrected. The final line is laid out from the first frame ("not-" is in place but hidden and
+     "scary" sits over its gap, 2em being the width of "not-" in Fraunces), so no word ever moves to another line. */
+  .hw-scary i { animation: hw-shiver 0.12s linear 0.45s 6 alternate; }
+  .hw-scary i:nth-child(2n) { animation-delay: 0.51s; }
+  .hw-caret { animation: hw-caret 0.9s ease-out 0.85s both; }
+  .hw-caret path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hw-draw 0.25s ease-out 0.85s forwards; }
+  .hw-ins { transform-origin: 50% 100%; animation: hw-drop 0.45s cubic-bezier(0.34, 1.5, 0.64, 1) 1.05s both; }
+  .hw-scary { animation: hw-calm 0.45s var(--hw-ease) 1.05s both; }
+  .hw-marker path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hw-draw 0.6s ease-in-out 1.4s forwards; }
   .hw-menu .hw-dish { animation: hw-slide 0.5s var(--hw-ease) both; }
   .hw-menu .hw-dish:nth-of-type(2) { animation-delay: 0.08s; }
   .hw-menu .hw-dish:nth-of-type(3) { animation-delay: 0.16s; }
 }
 @keyframes hw-rise { from { transform: translateY(110%); } }
+@keyframes hw-rise-soft { from { opacity: 0; transform: translateY(0.35em); } }
+@keyframes hw-shiver { from { transform: translate(-1px, 1px) rotate(-3deg); } to { transform: translate(1px, -1px) rotate(3deg); } }
+@keyframes hw-caret { 0%, 65% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes hw-drop { from { opacity: 0; transform: translateY(-0.5em) rotate(-8deg); } }
+@keyframes hw-calm { from { transform: translateX(-2em); color: var(--hw-ink); font-style: normal; } }
 @keyframes hw-draw { to { stroke-dashoffset: 0; } }
 @keyframes hw-slide { from { transform: translateX(-14px); } }
 
