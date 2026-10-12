@@ -59,7 +59,7 @@ function Meta({ item }: { item: HalloweenMenuItem }) {
 }
 
 export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; freeCount: number }) {
-  const { before, emphasis, after } = HALLOWEEN_HERO.title;
+  const { before, inserted, corrected, after } = HALLOWEEN_HERO.title;
   const beforeWords = before.split(" ").length;
   const menuLabel = freeCount === menu.length ? `${freeCount} free recipes` : freeCount > 0 ? `${freeCount} free · ${menu.length - freeCount} in the book` : "From the Halloween book";
 
@@ -67,11 +67,19 @@ export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; 
     <section className="hw-hero" data-hw-clock="Sat 31 Oct · Halloween">
       <PumpkinCarve />
       <span className="hw-eyebrow">{HALLOWEEN_HERO.eyebrow}</span>
-      <h1 className="hw-title">
+      <h1 className="hw-title" aria-label={`${before} ${inserted}${corrected} ${after}`}>
         <Words text={before} start={0} />
         <span className="hw-w hw-em-wrap">
-          <em style={{ "--i": beforeWords } as CSSProperties}>
-            {emphasis}
+          <em className="hw-fix" style={{ "--i": beforeWords } as CSSProperties}>
+            <svg className="hw-caret" viewBox="0 0 20 18" aria-hidden="true">
+              <path d="M2 16 L10 3 L18 16" pathLength={1} />
+            </svg>
+            <span className="hw-ins">{inserted}</span>
+            <span className="hw-scary">
+              {[...corrected].map((letter, index) => (
+                <i key={index}>{letter}</i>
+              ))}
+            </span>
             <svg className="hw-marker" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
               <path d="M4 14 C 60 4, 140 4, 196 12" pathLength={1} />
             </svg>
