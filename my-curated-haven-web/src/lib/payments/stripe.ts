@@ -4,7 +4,7 @@ import { getStripeConfig } from "./config";
 let stripeInstance: Stripe | null = null;
 
 /** The Stripe API version every server read and write uses; provider observations record it. */
-export const STRIPE_API_VERSION = "2025-02-24.acacia" as const;
+export const STRIPE_API_VERSION = "2026-08-26.dahlia" as const;
 
 export function getStripeClient(): Stripe {
   if (!stripeInstance) {
