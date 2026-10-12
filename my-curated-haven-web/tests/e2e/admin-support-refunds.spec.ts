@@ -17,7 +17,11 @@ async function prepare(page: Page, fixture: SupportFixture, amount: string | nul
   const refund = page.getByRole("region", { name: "Refund", exact: true });
   await refund.getByRole("button", { name: "Check Stripe before a refund" }).click();
   if (amount !== null) {
-    await refund.getByLabel("Part of it").check();
+    // The form is briefly disabled while the page refreshes after the check; WebKit can drop the first click.
+    await expect(async () => {
+      await refund.getByLabel("Part of it").check({ timeout: 2_000 });
+      await expect(refund.getByLabel("Amount in USD")).toBeVisible({ timeout: 2_000 });
+    }).toPass();
     await refund.getByLabel("Amount in USD").fill(amount);
   }
   await refund.getByLabel("Internal reason").fill(reason);
