@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createSupportFixture, type SupportFixture } from "./support-admin-fixtures";
+import { prepareRefund } from "./support-refund-steps";
 
 // The Customer support lane on Home. Home exists while collections are switched on, so each test turns them on and
 // restores the previous stage. The owner role is a singleton, so these run apart from admin-home.spec.ts's owner.
@@ -47,16 +48,11 @@ test("a refund the owner sent appears in their Home outcomes with no amount or e
   try {
     await withHome(fixture, async () => {
       await fixture.login(page);
-      await page.goto(`/admin/support/orders/${fixture.orderId}`);
-      const refund = page.getByRole("region", { name: "Refund", exact: true });
-      await refund.getByRole("button", { name: "Check Stripe before a refund" }).click();
-      await refund.getByLabel("Part of it").check();
-      await refund.getByLabel("Amount in USD").fill("1.00");
-      await refund.getByLabel("Internal reason").fill("Home outcome check");
-      await refund.getByRole("button", { name: "Prepare refund" }).click();
+      const refund = await prepareRefund(page, fixture, "1.00", "Home outcome check");
       await refund.getByRole("button", { name: "Approve and submit refund of $1.00" }).click();
       await expect(refund.getByRole("status", { name: "Refund outcome" })).toContainText("Sent to Stripe");
-      await page.goto("/admin");
+      // The submit refreshes the order page; on WebKit that refresh can cut off this load, so it is retried.
+      await expect(async () => { await page.goto("/admin"); }).toPass();
       const outcomes = page.getByRole("list", { name: "Your recent support outcomes" });
       await expect(outcomes.getByRole("listitem").first()).toContainText(`${fixture.supportReference}Refund: Sent to Stripe`);
       const html = await page.content();
