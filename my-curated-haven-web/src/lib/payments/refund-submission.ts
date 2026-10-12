@@ -51,7 +51,7 @@ function stripeWriter(mode: "test" | "live"): RefundWriter {
       if (!client) return { kind: "not_executed", code: "REFUND_KEY_MISSING" };
       let accountId: string;
       try {
-        accountId = (await client.accounts.retrieve()).id;
+        accountId = (await client.accounts.retrieveCurrent()).id;
       } catch {
         return { kind: "not_executed", code: "ACCOUNT_CHECK_FAILED" };
       }
