@@ -3,7 +3,6 @@
  * never download it, and only when motion is allowed.
  * - Books tilt toward the pointer and light sweeps across the foil.
  * - Buttons fill from where the pointer came in.
- * - The contents list shows each recipe's photo beside the pointer.
  */
 
 function setupTilt(root: HTMLElement): () => void {
@@ -52,60 +51,7 @@ function setupButtonFill(root: HTMLElement): () => void {
   return () => buttons.forEach((button) => button.removeEventListener("pointerenter", enter));
 }
 
-function setupPeek(root: HTMLElement): () => void {
-  const list = root.querySelector<HTMLElement>(".cl-rows");
-  if (!list || !window.matchMedia("(min-width: 900px)").matches) return () => {};
-
-  const peek = document.createElement("div");
-  peek.className = "cl-peek";
-  peek.setAttribute("aria-hidden", "true");
-  const image = document.createElement("img");
-  image.alt = "";
-  image.decoding = "async";
-  peek.append(image);
-  root.append(peek);
-
-  let x = 0;
-  let y = 0;
-  let current = "";
-  let frame = 0;
-
-  const place = () => {
-    peek.style.setProperty("--peek-x", `${x + 28}px`);
-    peek.style.setProperty("--peek-y", `${y - 150}px`);
-    peek.style.setProperty("--peek-r", `${Math.max(-6, Math.min(6, (x - window.innerWidth / 2) / 80))}deg`);
-  };
-
-  const move = (event: PointerEvent) => {
-    x = event.clientX;
-    y = event.clientY;
-    const row = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-peek]") : null;
-    if (row) {
-      const src = row.dataset.peek ?? "";
-      if (src !== current) {
-        current = src;
-        image.src = src;
-      }
-      peek.setAttribute("data-on", "");
-    } else {
-      peek.removeAttribute("data-on");
-    }
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(place);
-  };
-  const leave = () => peek.removeAttribute("data-on");
-
-  list.addEventListener("pointermove", move);
-  list.addEventListener("pointerleave", leave);
-  return () => {
-    list.removeEventListener("pointermove", move);
-    list.removeEventListener("pointerleave", leave);
-    cancelAnimationFrame(frame);
-    peek.remove();
-  };
-}
-
 export function setupPointer(root: HTMLElement): () => void {
-  const offs = [setupTilt(root), setupButtonFill(root), setupPeek(root)];
+  const offs = [setupTilt(root), setupButtonFill(root)];
   return () => offs.forEach((off) => off());
 }

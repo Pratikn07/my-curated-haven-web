@@ -27,11 +27,6 @@ export interface DetailModel {
   recipes: readonly CollectionRecipe[];
 }
 
-/** next/image's resized copy of a photo, for the pointer peek (a plain <img>). */
-function peekSrc(src: string): string {
-  return `/_next/image?url=${encodeURIComponent(src)}&w=384&q=75`;
-}
-
 function minutesLabel(minutes: number | null): string | null {
   if (minutes === null) return null;
   if (minutes < 90) return `${minutes} min`;
@@ -159,6 +154,7 @@ export function Contents({ model }: { model: DetailModel }) {
             {freeCount > 0 ? ` · ${freeCount} free to cook now` : null}
           </p>
         </div>
+        {/* A photo grid, not a text index: the food is what makes a parent tap. */}
         <ol className="cl-rows" data-reveal>
           {model.recipes.map((recipe, index) => {
             const time = minutesLabel(recipe.minutes);
@@ -166,51 +162,51 @@ export function Contents({ model }: { model: DetailModel }) {
             const body = (
               <div className="cl-row-inner" data-access={access ?? undefined} style={{ "--i": index } as CSSProperties}>
                 <div className="cl-row-thumb">
-                  {recipe.image ? <Image src={recipe.image} alt="" fill sizes="4.2rem" /> : null}
+                  {recipe.image ? (
+                    <Image src={recipe.image} alt="" fill sizes="(min-width: 1024px) 17rem, (min-width: 640px) 30vw, 45vw" />
+                  ) : null}
+                  <span className="cl-row-num" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  {access === "free" ? (
+                    <span className="cl-row-free" aria-hidden="true">
+                      Free
+                    </span>
+                  ) : access === "locked" ? (
+                    <span className="cl-row-mark" aria-hidden="true">
+                      <Lock />
+                    </span>
+                  ) : null}
                 </div>
                 <div className="cl-row-main">
                   <h3 className="cl-row-title">
-                    <span className="cl-row-num" aria-hidden="true">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span>
-                      {recipe.title}
-                      {access === "free" ? <span className="cl-row-free">Free</span> : null}
-                      {access === "locked" ? <span className="cl-sr">, in the book</span> : null}
-                    </span>
+                    {recipe.title}
+                    {access === "free" ? <span className="cl-sr">, free</span> : null}
+                    {access === "locked" ? <span className="cl-sr">, in the book</span> : null}
                   </h3>
                   <p className="cl-row-meta">
                     {time ? (
-                      <span className="cl-chip">
-                        <Clock aria-hidden="true" style={{ width: "0.85em", height: "0.85em", marginRight: "0.35em" }} />
+                      <span>
+                        <Clock aria-hidden="true" />
                         {time}
                       </span>
                     ) : null}
-                    {recipe.protein ? <span className="cl-chip">Built around {recipe.protein.toLowerCase()}</span> : null}
                     {recipe.freezes ? (
-                      <span className="cl-chip">
-                        <Snowflake aria-hidden="true" style={{ width: "0.85em", height: "0.85em", marginRight: "0.35em" }} />
+                      <span>
+                        <Snowflake aria-hidden="true" />
                         Freezes {recipe.freezes}
                       </span>
                     ) : null}
-                    {recipe.allergens.length > 0 ? (
-                      <span className="cl-chip" data-kind="allergen">
-                        Contains {recipe.allergens.join(", ")}
-                      </span>
-                    ) : null}
                   </p>
+                  {recipe.protein ? <p className="cl-row-note">Built around {recipe.protein.toLowerCase()}</p> : null}
+                  {recipe.allergens.length > 0 ? (
+                    <p className="cl-row-note">Contains {recipe.allergens.join(", ")}</p>
+                  ) : null}
                 </div>
-                {access === "free" ? (
-                  <ArrowRight className="cl-row-mark" aria-hidden="true" />
-                ) : access === "locked" ? (
-                  <Lock className="cl-row-mark" aria-hidden="true" />
-                ) : recipe.href ? (
-                  <ArrowRight className="cl-row-go" aria-hidden="true" />
-                ) : null}
               </div>
             );
             return (
-              <li className="cl-row" key={recipe.slug} data-peek={recipe.image ? peekSrc(recipe.image) : undefined}>
+              <li className="cl-row" key={recipe.slug}>
                 {recipe.href ? (
                   <Link className="cl-row-link" href={recipe.href}>
                     {body}
