@@ -42,7 +42,8 @@ async function expectReadable(page: Page, slug: string) {
 
 async function expectLocked(page: Page, slug: string) {
   await page.goto(`/recipes/${slug}`);
-  await expect(page.getByRole("heading", { name: "Collection Recipe", exact: true })).toBeVisible();
+  // The locked box names the open book holding the recipe, or says it is not on sale yet.
+  await expect(page.getByRole("heading", { name: /^(In .+|Not on sale yet)$/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ingredients" })).toHaveCount(0);
 }
 

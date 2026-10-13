@@ -9,3 +9,8 @@ test("adds 'the ... collection' only when the title lacks it", () => {
   assert.equal(bookNameStart("Halloween"), "The Halloween collection");
   assert.equal(bookNameStart("Meal Prep"), "The Meal Prep collection");
 });
+
+test("can call it a book, still without doubling up", () => {
+  assert.equal(bookName("Halloween", "book"), "the Halloween book");
+  assert.equal(bookName("The Comfort Haven Collection", "book"), "The Comfort Haven Collection");
+});

@@ -238,7 +238,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     // Paid slug without entitlement shows preview with locked instructions
     const paidRes = await page.goto("/recipes/synth-paid-golden-soup");
     expect(paidRes?.status()).toBe(200);
-    await expect(page.getByRole("heading", { name: "Collection Recipe" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Not on sale yet" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ingredients" })).toHaveCount(0);
   });
 

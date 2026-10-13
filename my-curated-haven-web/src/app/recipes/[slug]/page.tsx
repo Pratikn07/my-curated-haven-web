@@ -22,6 +22,7 @@ import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { listOpenPublishedCollections } from "@/lib/collections/publication";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
+import { bookName } from "@/lib/collections/book-name";
 import { recipeCount } from "@/lib/collections/visibility";
 import { loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import type { CollectionOfferDto } from "@/lib/payments/types";
@@ -39,6 +40,14 @@ const getCachedFreeCatalog = cache(async () => {
   const supabase = await createClient();
   return getFreeRecipeCatalog(supabase);
 });
+
+/** "Get Witch's Broomsticks and 19 more recipes, each with ...": the recipe they tapped, then the rest of the book. */
+function lockedOffer(title: string, bookSize: number): string {
+  const others = bookSize - 1;
+  const what = "steps, storage tips and a page you can print.";
+  if (others < 1) return `Get ${title}, with ${what}`;
+  return `Get ${title} and ${others} more recipe${others === 1 ? "" : "s"}, each with ${what}`;
+}
 
 interface RecipeDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -319,14 +328,14 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               <Lock className="h-7 w-7 text-action" aria-hidden="true" />
             </div>
             <h2 className="mt-4 text-2xl font-bold text-foreground">
-              Collection Recipe
+              {book ? `In ${bookName(book.collection.title, "book")}` : "Not on sale yet"}
             </h2>
             <p className="mx-auto mt-2 max-w-lg text-base text-text-muted leading-relaxed">
               {saleOffer && book
-                ? `This recipe is in “${book.collection.title}”: ${recipeCount(book.collection.recipes.length)}, one payment of ${saleOffer.formattedPrice}, yours to keep. Buying it opens the ingredients, steps, storage notes and printable page for every one of them.`
+                ? `${lockedOffer(catalog.title, book.collection.recipes.length)} One payment, yours to keep.`
                 : book
-                  ? `This recipe is in “${book.collection.title}”, a collection that opens soon.`
-                  : "This recipe isn't on sale yet. It will be part of one of our recipe collections."}
+                  ? "This book opens soon. Until then, try one of our free recipes."
+                  : "This recipe will be part of one of our recipe books. Until then, try a free one."}
             </p>
             {book && book.entry.allergens.length > 0 ? (
               <p className="mx-auto mt-3 max-w-lg text-sm text-text-muted">Contains {book.entry.allergens.join(", ")}.</p>
@@ -350,18 +359,20 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
             </div>
             {bookFreeRecipe ? (
               <p className="mt-5 text-sm text-text-muted">
-                Not sure yet? Cook a free one from this collection:{" "}
+                Not sure yet? Try{" "}
                 <Link href={`/recipes/${bookFreeRecipe.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
                   {bookFreeRecipe.title}
-                </Link>
+                </Link>{" "}
+                from the same book, free.
               </p>
             ) : null}
             {!user && (
               <p className="mt-3 text-sm text-text-muted">
-                Already have access?{" "}
+                Bought it already?{" "}
                 <Link href={`/sign-in?returnTo=/recipes/${catalog.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
                   Sign in
-                </Link>
+                </Link>{" "}
+                to open it.
               </p>
             )}
           </div>
