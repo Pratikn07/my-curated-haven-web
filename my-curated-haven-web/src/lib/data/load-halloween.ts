@@ -96,7 +96,9 @@ export async function loadHalloweenPage(): Promise<HalloweenPageData | null> {
 
   const live = await loadLiveOffer(collection.slug);
   const offer = live.ok ? live.offer : null;
-  const onSale = Boolean(offer?.saleEnabled);
+  // On sale only when checkout would take the order: an enabled offer that collection_sellable also
+  // picks (`expected`). Otherwise this page could say "Get it" while the collection page refuses.
+  const onSale = Boolean(offer?.saleEnabled && offer.expected);
 
   return {
     menu,
