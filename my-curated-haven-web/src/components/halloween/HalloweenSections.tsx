@@ -1,6 +1,7 @@
 import { Fragment, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import {
   HALLOWEEN_BOOK,
   HALLOWEEN_CLOSING,
@@ -61,7 +62,6 @@ function Meta({ item }: { item: HalloweenMenuItem }) {
 export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; freeCount: number }) {
   const { before, inserted, corrected, after } = HALLOWEEN_HERO.title;
   const beforeWords = before.split(" ").length;
-  const menuLabel = freeCount === menu.length ? `${freeCount} free recipes` : freeCount > 0 ? `${freeCount} free · ${menu.length - freeCount} in the book` : "From the Halloween book";
 
   return (
     <section className="hw-hero" data-hw-clock="Sat 31 Oct · Halloween">
@@ -92,7 +92,6 @@ export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; 
       <nav className="hw-menu" id="hw-menu" aria-label="Halloween menu" data-story-section="recipes">
         <div className="hw-menu-head">
           <h2>Halloween menu</h2>
-          <span>{menuLabel}</span>
         </div>
         {menu.map((item) => (
           <Link
@@ -109,7 +108,15 @@ export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; 
               <span className="hw-dish-when">
                 {item.when}
                 {item.minutes && !item.hideMinutes ? ` · ${item.minutes} min` : ""}
-                {item.free ? null : " · in the book"}
+                {/* Each dish says what a tap opens: the whole recipe, or its page in the book. */}
+                {item.free ? (
+                  <span className="hw-tag" data-kind="free">Free</span>
+                ) : (
+                  <span className="hw-tag" data-kind="book">
+                    <Lock aria-hidden="true" />
+                    In the book
+                  </span>
+                )}
               </span>
               <span className="hw-dish-alias">{item.alias}</span>
               <span className="hw-dish-name">{item.title}</span>

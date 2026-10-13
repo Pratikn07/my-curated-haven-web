@@ -31,6 +31,8 @@ test("[halloween] the first screen is the menu, and every dish opens a page that
   const menu = page.getByRole("navigation", { name: "Halloween menu" });
   const dishes = menu.getByRole("link");
   await expect(dishes).toHaveCount(3);
+  // Each dish says what a tap opens, instead of a count in the header.
+  await expect(menu.getByText(/^(Free|In the book)$/)).toHaveCount(3);
 
   const first = await dishes.first().boundingBox();
   expect(first, "the first dish is laid out").not.toBeNull();
