@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(21);
+SELECT plan(23);
 
 -- ============================================================================
 -- S11: Retired release stays readable for an active historical grant
@@ -208,10 +208,10 @@ SELECT is(
 -- ============================================================================
 RESET ROLE;
 SELECT throws_ok(
-  $$SELECT private.publish_free_recipe_slots(ARRAY['10000000-0000-0000-0000-000000000001']::uuid[])$$,
+  $$SELECT private.publish_free_recipe_slots(ARRAY[]::uuid[])$$,
   'P0001',
-  'free selection must contain exactly 3 recipes',
-  'S20: a short free selection is rejected'
+  'free selection must contain at least one recipe',
+  'S20: an empty free selection is rejected'
 );
 
 SELECT throws_ok(
@@ -234,6 +234,23 @@ SELECT throws_ok(
   'P0001',
   'every free slot recipe must be published',
   'S20: a draft recipe cannot occupy a free slot'
+);
+
+-- How many recipes are free is the owner's choice (20261013120000), so four is as valid as three.
+SELECT lives_ok(
+  $$SELECT private.publish_free_recipe_slots(ARRAY[
+    '10000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000003',
+    '20000000-0000-0000-0000-000000000001'
+  ]::uuid[])$$,
+  'S20: a selection of four published recipes is applied'
+);
+
+SELECT is(
+  (SELECT array_agg(slot ORDER BY slot) FROM public.free_recipe_slots),
+  ARRAY[1, 2, 3, 4]::smallint[],
+  'S20: four recipes fill slots 1 to 4'
 );
 
 SELECT lives_ok(

@@ -99,6 +99,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   const filterState = parseFilterParams(urlSearchParams);
 
   let catalog: RecipeCatalogItem[] = [];
+  let freeIds = new Set<string>();
   let fetchError: string | null = null;
 
   let user = null;
@@ -108,9 +109,12 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
   try {
     const supabase = await createClient();
     isAdmin = await isRecipeAdmin(supabase);
-    catalog = isAdmin
-      ? await getPublishedCatalog(supabase)
-      : await getFreeRecipeCatalog(supabase);
+    // Every published recipe is listed. Free ones come first, in slot order, and say so; the rest open
+    // to their locked page, which shows the book they are in. Admins also see drafts and withdrawn recipes.
+    const [published, free] = await Promise.all([getPublishedCatalog(supabase), getFreeRecipeCatalog(supabase)]);
+    // Saving needs access, so a locked recipe gets no save button (admins keep theirs).
+    freeIds = new Set(free.map((recipe) => recipe.id));
+    catalog = [...free, ...published.filter((recipe) => !freeIds.has(recipe.id))];
     user = await getCurrentUser();
     if (user) {
       savedIds = await getSavedRecipeIds(supabase, user.id);
@@ -145,7 +149,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
         <p className="mt-3 max-w-3xl text-lg text-text-muted">
           {isAdmin
             ? "Admin access: browse every recipe, including drafts and withdrawn recipes. These recipes keep their existing publication and customer access settings."
-            : "Simple toddler recipes for busy families. Every free recipe includes its ingredients, step-by-step instructions and storage guidance, with no sign-up or paywall."}
+            : "Simple toddler recipes for busy families. Recipes marked free include their ingredients, step-by-step instructions and storage guidance, with no sign-up or payment. The others come in our recipe collections."}
         </p>
         {!isAdmin && shelf.length > 0 ? (
           <p className="mt-4 text-base text-text-muted">
@@ -198,7 +202,8 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
                     priority={index === 0}
                     isSaved={savedIds.has(recipe.id)}
                     isAuthenticated={Boolean(user)}
-                    showSaveButton={true}
+                    showSaveButton={isAdmin || freeIds.has(recipe.id)}
+                    free={freeIds.has(recipe.id)}
                   />
                 ))}
               </div>

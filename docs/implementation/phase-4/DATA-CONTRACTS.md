@@ -34,13 +34,13 @@ recipe_bodies holds the current approved revision only. Keep drafts and revision
 
 A published correction to an existing recipe identity is distinct from adding a new recipe to a purchased collection. Phase 5 defines editorial revision handling and communication.
 
-## Three free recipes
+## Free recipes
 
 free_recipe_slots is the single source of free access. Do not maintain an independent is_free flag which drifts from slot membership.
 
-Enforce slot values 1, 2 or 3, a unique recipe per slot and valid recipe references. These constraints enforce a maximum of three. The launch gate verifies exactly three distinct, reviewed, published recipes with valid bodies.
+Enforce slot values of 1 or more, a unique recipe per slot and valid recipe references. The launch plan capped the list at three (slots 1, 2 and 3); on 2026-10-13 the owner made the number their choice, and `20261013120000_free_recipe_count_owner_choice.sql` lifted the cap. Every free recipe must still be distinct, reviewed, published and have a body.
 
-Use one transactional publication operation to select or replace the three recipes. Serialize competing publication updates and verify the postcondition before commit. Do not publish a half-updated free selection.
+Use one transactional publication operation (`private.publish_free_recipe_slots`, one or more recipes) to select or replace the free recipes. Serialize competing publication updates and verify the postcondition before commit. Do not publish a half-updated free selection.
 
 Changing free access has content and cache consequences. Purge public recipe caches before making previously free content paid. Previously downloaded or indexed public content cannot be made secret retroactively.
 

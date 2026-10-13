@@ -103,9 +103,17 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Synthetic Paid Golden Lentil Soup");
     await expect(page.getByText("Collection Recipe").first()).toBeVisible();
 
-    // Locked presentation is shown
+    // Locked presentation is shown. This recipe is in no configured book here, so it is not on sale and
+    // points to the free recipes; saving needs access, so there is no save button.
     await expect(page.getByRole("heading", { name: "Collection Recipe" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "View Collection & Unlock" })).toBeVisible();
+    await expect(page.getByText("This recipe isn't on sale yet.", { exact: false })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Browse the free recipes" })).toHaveAttribute("href", "/recipes");
+    await expect(page.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
+      "href",
+      "/sign-in?returnTo=/recipes/synth-paid-golden-soup"
+    );
+    const recipeHeader = page.locator("header", { has: page.getByRole("heading", { level: 1 }) });
+    await expect(recipeHeader.getByRole("button", { name: /save/i })).toHaveCount(0);
 
     // Protected body content is NOT in the DOM
     await expect(page.getByRole("heading", { name: "Ingredients" })).toHaveCount(0);
@@ -129,8 +137,9 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await expect(signinBtn).toBeVisible();
     await expect(signinBtn).toHaveAttribute("href", /\/sign-in\?returnTo=/);
 
-    // Free sample callout
-    await expect(page.getByRole("heading", { name: "Try Free Sample Recipes" })).toBeVisible();
+    // Free samples are this book's own free recipes; this one has none, so the hint points to the recipe list.
+    await expect(page.getByRole("heading", { name: "Try Free Sample Recipes" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Cook a free recipe first" })).toHaveAttribute("href", "/recipes");
   });
 
   test("V10 & V12: Checkout creation requires authentication and handles order reservation", async ({ page }) => {

@@ -282,7 +282,9 @@ test("about, support and legal pages describe the current site", async ({ page }
     }
   }
   await page.goto("/about");
-  await expect(page.locator("main")).toContainText("three free recipes");
+  await expect(page.locator("main")).toContainText("read and print the free recipes");
+  await expect(page.locator("main")).not.toContainText("Nothing is for sale");
+  await expect(page.locator("main").getByRole("link", { name: "collections" })).toHaveAttribute("href", "/collections");
   await expect(page.locator("main").getByRole("link", { name: "Recipes" })).toHaveAttribute("href", "/recipes");
   await page.goto("/support");
   await expect(page.locator("main")).toContainText("one-time code");

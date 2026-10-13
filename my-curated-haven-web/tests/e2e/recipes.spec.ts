@@ -35,7 +35,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(firstCard.getByText(/Free recipe/i)).toBeVisible();
   });
 
-  test("public recipe surfaces include only free-slot recipes in slot order", async ({
+  test("the recipe list shows free recipes first and labelled; other surfaces stay free-only", async ({
     page,
     request,
   }) => {
@@ -50,8 +50,15 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     const indexHrefs = await page.locator("article h3 a").evaluateAll((links) =>
       links.map((link) => (link as HTMLAnchorElement).getAttribute("href"))
     );
-    expect(indexHrefs).toEqual(expectedIndexHrefs);
-    expect(indexHrefs).not.toContain("/recipes/synth-paid-golden-soup");
+    // Every published recipe is listed: the free ones first, in slot order, then the rest.
+    expect(indexHrefs.slice(0, 3)).toEqual(expectedIndexHrefs);
+    expect(indexHrefs).toContain("/recipes/synth-paid-golden-soup");
+    expect(indexHrefs).not.toContain("/recipes/synth-draft-warm-salad");
+    const freeCard = page.locator("article").filter({ has: page.locator('a[href="/recipes/synth-free-oat-bake"]') });
+    await expect(freeCard.getByText("Free recipe", { exact: true })).toBeVisible();
+    const lockedCard = page.locator("article").filter({ has: page.locator('a[href="/recipes/synth-paid-golden-soup"]') });
+    await expect(lockedCard.getByText("Free recipe", { exact: true })).toHaveCount(0);
+    await expect(lockedCard.getByRole("button", { name: /save/i })).toHaveCount(0);
 
     const sitemapResponse = await request.get("/sitemap.xml");
     expect(sitemapResponse.status()).toBe(200);

@@ -1,12 +1,12 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Check, Clock, Snowflake } from "lucide-react";
+import { ArrowRight, Check, Clock, Lock, Snowflake } from "lucide-react";
 import { BookCover } from "@/components/collections/Book";
 import { FreeRecipeCard, MaskedWords } from "@/components/collections/Showroom";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
-import { collectionFacts, recipeCount } from "@/lib/collections/visibility";
+import { collectionFacts, recipeCount, rowAccess } from "@/lib/collections/visibility";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 
@@ -41,6 +41,8 @@ function minutesLabel(minutes: number | null): string | null {
 
 export function DetailHero({ model }: { model: DetailModel }) {
   const { offer } = model;
+  // This book's own free recipes sit further down the page; otherwise the recipe list has the free ones.
+  const tryFreeHref = model.recipes.some((recipe) => recipe.free) ? "#free-samples" : "/recipes";
   return (
     <section className="cl-dhero" data-cloth={model.cloth} aria-labelledby="collection-title">
       <div className="cl-wrap">
@@ -124,7 +126,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
                 "You own this collection. Every recipe below is open to you."
               ) : offer ? (
                 <>
-                  Not sure yet? <Link href="/recipes">Cook a free recipe first</Link>.
+                  Not sure yet? <Link href={tryFreeHref}>Cook a free recipe first</Link>.
                 </>
               ) : model.commerceUnavailable ? (
                 "We could not load checkout just now. Please refresh in a moment."
@@ -142,6 +144,9 @@ export function DetailHero({ model }: { model: DetailModel }) {
 }
 
 export function Contents({ model }: { model: DetailModel }) {
+  // A buyer owns every recipe here, so free and locked marks would only confuse them.
+  const owned = model.offer?.ownershipState === "owned";
+  const freeCount = owned ? 0 : model.recipes.filter((recipe) => recipe.free).length;
   return (
     <section className="cl-contents" data-cloth={model.cloth} aria-labelledby="contents-title">
       <div className="cl-wrap">
@@ -151,13 +156,15 @@ export function Contents({ model }: { model: DetailModel }) {
           </h2>
           <p>
             {recipeCount(model.recipes.length)}, in the order we&rsquo;d cook them
+            {freeCount > 0 ? ` · ${freeCount} free to cook now` : null}
           </p>
         </div>
         <ol className="cl-rows" data-reveal>
           {model.recipes.map((recipe, index) => {
             const time = minutesLabel(recipe.minutes);
+            const access = rowAccess(recipe, owned);
             const body = (
-              <div className="cl-row-inner" style={{ "--i": index } as CSSProperties}>
+              <div className="cl-row-inner" data-access={access ?? undefined} style={{ "--i": index } as CSSProperties}>
                 <div className="cl-row-thumb">
                   {recipe.image ? <Image src={recipe.image} alt="" fill sizes="4.2rem" /> : null}
                 </div>
@@ -166,7 +173,11 @@ export function Contents({ model }: { model: DetailModel }) {
                     <span className="cl-row-num" aria-hidden="true">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    {recipe.title}
+                    <span>
+                      {recipe.title}
+                      {access === "free" ? <span className="cl-row-free">Free</span> : null}
+                      {access === "locked" ? <span className="cl-sr">, in the book</span> : null}
+                    </span>
                   </h3>
                   <p className="cl-row-meta">
                     {time ? (
@@ -189,7 +200,13 @@ export function Contents({ model }: { model: DetailModel }) {
                     ) : null}
                   </p>
                 </div>
-                {recipe.href ? <ArrowRight className="cl-row-go" aria-hidden="true" /> : null}
+                {access === "free" ? (
+                  <ArrowRight className="cl-row-mark" aria-hidden="true" />
+                ) : access === "locked" ? (
+                  <Lock className="cl-row-mark" aria-hidden="true" />
+                ) : recipe.href ? (
+                  <ArrowRight className="cl-row-go" aria-hidden="true" />
+                ) : null}
               </div>
             );
             return (
@@ -213,7 +230,7 @@ export function Contents({ model }: { model: DetailModel }) {
 export function FreeSamples({ recipes }: { recipes: readonly RecipeCatalogItem[] }) {
   if (recipes.length === 0) return null;
   return (
-    <section className="cl-samples" aria-labelledby="samples-title">
+    <section className="cl-samples" id="free-samples" aria-labelledby="samples-title">
       <div className="cl-wrap">
         <div className="cl-free-head">
           <div>
@@ -221,7 +238,8 @@ export function FreeSamples({ recipes }: { recipes: readonly RecipeCatalogItem[]
               Try Free Sample Recipes
             </h2>
             <p className="cl-lede" style={{ marginTop: "0.8rem" }}>
-              Every recipe in this collection is laid out like these. Read, cook and print them now, with no account
+              {recipes.length === 1 ? "This one is" : "These are"} from this collection, and every other recipe in it is
+              laid out the same way. Read, cook and print {recipes.length === 1 ? "it" : "them"} now, with no account
               and no payment.
             </p>
           </div>
@@ -246,7 +264,7 @@ export function Questions() {
     },
     {
       q: "Can I get a refund?",
-      a: "All sales are final. That is why three complete recipes are free: cook one first and see whether our recipes suit your family.",
+      a: "All sales are final. That is why some complete recipes are free: cook one first and see whether our recipes suit your family.",
     },
     {
       q: "Do I need an account?",
