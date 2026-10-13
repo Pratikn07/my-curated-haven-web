@@ -174,6 +174,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
             supportReference={orderSummary.supportReference}
             formattedAmount={orderSummary.formattedAmount}
             email={user.email ?? null}
+            recipes={book?.recipes.map((recipe) => ({ slug: recipe.slug, title: recipe.title })) ?? []}
           />
         ) : (
           <div>

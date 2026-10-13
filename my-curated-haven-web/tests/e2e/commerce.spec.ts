@@ -112,6 +112,8 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
       "href",
       "/sign-in?returnTo=/recipes/synth-paid-golden-soup"
     );
+    // The fog teaser is decoration over no recipe content: hidden from assistive tech, no section headings.
+    await expect(page.locator(".recipe-fog")).toHaveAttribute("aria-hidden", "true");
     const recipeHeader = page.locator("header", { has: page.getByRole("heading", { level: 1 }) });
     await expect(recipeHeader.getByRole("button", { name: /save/i })).toHaveCount(0);
 

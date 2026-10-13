@@ -27,7 +27,9 @@ import { recipeCount } from "@/lib/collections/visibility";
 import { loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
-import { Lock } from "lucide-react";
+import { HALLOWEEN_COLLECTION_SLUG } from "@/config/halloween";
+import { LockIcon, RecipeFog, RecipeRevealStage } from "@/components/recipe/RecipeLock";
+import ClearOpenedParam from "@/components/recipe/ClearOpenedParam";
 
 const getCachedRecipe = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -51,6 +53,7 @@ function lockedOffer(title: string, bookSize: number): string {
 
 interface RecipeDetailPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({
@@ -92,8 +95,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function RecipeDetailPage({ params }: RecipeDetailPageProps) {
+export default async function RecipeDetailPage({ params, searchParams }: RecipeDetailPageProps) {
   const { slug } = await params;
+  const { opened } = await searchParams;
   const result = await getCachedRecipe(slug);
 
   if (result.status === "not_found") {
@@ -127,20 +131,27 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     }
   }
 
+  // A buyer arriving from "You're in" (?opened=1) sees the recipe open once. Only for bought recipes, never
+  // free ones or admins; for anyone without access the parameter changes nothing.
+  const playReveal = opened === "1" && !isAccessDenied && !isAdmin && accessKind === "paid";
+
   // A locked recipe names the open book it is in and, while that book is on sale, carries its buy button,
   // so a parent arriving from the book list, a search or a shared link can buy without going back.
   let book: { collection: ShowroomCollection; entry: CollectionRecipe; offer: CollectionOfferDto | null } | null = null;
-  if (isAccessDenied) {
+  if (isAccessDenied || playReveal) {
     try {
       const found = (await listOpenPublishedCollections()).find((c) => c.collection.recipes.some((r) => r.slug === catalog.slug));
       const entry = found?.collection.recipes.find((r) => r.slug === catalog.slug);
       if (found && entry) {
-        book = { collection: found.collection, entry, offer: offerOrNull(await loadLiveOffer(found.collection.slug, user?.id)) };
+        const offer = isAccessDenied ? offerOrNull(await loadLiveOffer(found.collection.slug, user?.id)) : null;
+        book = { collection: found.collection, entry, offer };
       }
     } catch {
       // Non-critical: the notice still links to the free recipes
     }
   }
+  // The seasonal touch: a ghost in the fog, for Halloween recipes only.
+  const ghost = book?.collection.slug === HALLOWEEN_COLLECTION_SLUG;
   // On sale only when checkout would take the order (the same rule as /halloween).
   const saleOffer = book?.offer?.saleEnabled && book.offer.expected ? book.offer : null;
 
@@ -320,64 +331,78 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
       ) : null}
 
       {/* Main Recipe Content Anchor */}
-      <div id="recipe-content" className="grid w-full min-w-0 gap-8 [overflow-wrap:anywhere]">
+      <div
+        id="recipe-content"
+        className="grid w-full min-w-0 gap-8 [overflow-wrap:anywhere]"
+        data-reveal={playReveal && body ? "" : undefined}
+      >
         {isAccessDenied ? (
-          /* Gated / Locked Recipe Presentation */
-          <div className="rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-action/10">
-              <Lock className="h-7 w-7 text-action" aria-hidden="true" />
-            </div>
-            <h2 className="mt-4 text-2xl font-bold text-foreground">
-              {book ? `In ${bookName(book.collection.title, "book")}` : "Not on sale yet"}
-            </h2>
-            <p className="mx-auto mt-2 max-w-lg text-base text-text-muted leading-relaxed">
-              {saleOffer && book
-                ? `${lockedOffer(catalog.title, book.collection.recipes.length)} One payment, yours to keep.`
-                : book
-                  ? "This book opens soon. Until then, try one of our free recipes."
-                  : "This recipe will be part of one of our recipe books. Until then, try a free one."}
-            </p>
-            {book && book.entry.allergens.length > 0 ? (
-              <p className="mx-auto mt-3 max-w-lg text-sm text-text-muted">Contains {book.entry.allergens.join(", ")}.</p>
-            ) : null}
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              {saleOffer ? (
-                <CheckoutButton
-                  collectionSlug={saleOffer.collectionSlug}
-                  formattedPrice={saleOffer.formattedPrice}
-                  ownershipState={saleOffer.ownershipState}
-                  expected={saleOffer.expected}
-                  signInHint={false}
-                />
+          /* Gated / Locked Recipe Presentation: the fog teaser, with the buy card over its lower half */
+          <div className="recipe-locked">
+            <RecipeFog ghost={ghost} />
+            <div className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm">
+              <div className="recipe-lock-badge mx-auto flex h-14 w-14 items-center justify-center rounded-full">
+                <LockIcon className="h-7 w-7" />
+              </div>
+              <h2 className="mt-4 text-2xl font-bold text-foreground">
+                {book ? `In ${bookName(book.collection.title, "book")}` : "Not on sale yet"}
+              </h2>
+              <p className="mx-auto mt-2 max-w-lg text-base text-text-muted leading-relaxed">
+                {saleOffer && book
+                  ? `${lockedOffer(catalog.title, book.collection.recipes.length)} One payment, yours to keep.`
+                  : book
+                    ? "This book opens soon. Until then, try one of our free recipes."
+                    : "This recipe will be part of one of our recipe books. Until then, try a free one."}
+              </p>
+              {book && book.entry.allergens.length > 0 ? (
+                <p className="mx-auto mt-3 max-w-lg text-sm text-text-muted">Contains {book.entry.allergens.join(", ")}.</p>
               ) : null}
-              <Link
-                href={book ? `/collections/${book.collection.slug}` : "/recipes"}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
-              >
-                {book ? `See all ${recipeCount(book.collection.recipes.length)}` : "Browse the free recipes"}
-              </Link>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                {saleOffer ? (
+                  <CheckoutButton
+                    collectionSlug={saleOffer.collectionSlug}
+                    formattedPrice={saleOffer.formattedPrice}
+                    ownershipState={saleOffer.ownershipState}
+                    expected={saleOffer.expected}
+                    signInHint={false}
+                    fromRecipeSlug={catalog.slug}
+                  />
+                ) : null}
+                <Link
+                  href={book ? `/collections/${book.collection.slug}` : "/recipes"}
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
+                >
+                  {book ? `See all ${recipeCount(book.collection.recipes.length)}` : "Browse the free recipes"}
+                </Link>
+              </div>
+              {bookFreeRecipe ? (
+                <p className="mt-5 text-sm text-text-muted">
+                  Not sure yet? Try{" "}
+                  <Link href={`/recipes/${bookFreeRecipe.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+                    {bookFreeRecipe.title}
+                  </Link>{" "}
+                  from the same book, free.
+                </p>
+              ) : null}
+              {!user && (
+                <p className="mt-3 text-sm text-text-muted">
+                  Bought it already?{" "}
+                  <Link href={`/sign-in?returnTo=/recipes/${catalog.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+                    Sign in
+                  </Link>{" "}
+                  to open it.
+                </p>
+              )}
             </div>
-            {bookFreeRecipe ? (
-              <p className="mt-5 text-sm text-text-muted">
-                Not sure yet? Try{" "}
-                <Link href={`/recipes/${bookFreeRecipe.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
-                  {bookFreeRecipe.title}
-                </Link>{" "}
-                from the same book, free.
-              </p>
-            ) : null}
-            {!user && (
-              <p className="mt-3 text-sm text-text-muted">
-                Bought it already?{" "}
-                <Link href={`/sign-in?returnTo=/recipes/${catalog.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
-                  Sign in
-                </Link>{" "}
-                to open it.
-              </p>
-            )}
           </div>
         ) : body ? (
           <>
+            {playReveal ? (
+              <>
+                <RecipeRevealStage title={catalog.title} ghost={ghost} />
+                <ClearOpenedParam />
+              </>
+            ) : null}
             {!isAdmin && <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />}
             <RecipeIngredients ingredients={body.ingredients} />
             <RecipeMethod instructions={body.instructions} />
