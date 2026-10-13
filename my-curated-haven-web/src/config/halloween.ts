@@ -65,7 +65,6 @@ export const HALLOWEEN_HERO = {
    */
   title: { before: "Halloween, the", inserted: "not-", corrected: "scary", after: "way." },
   lede: "Three recipes for the big night, made for little hands.",
-  byline: "Recipes by Tiny Soho",
 };
 
 /** The link preview picture when the page is shared. */

@@ -146,11 +146,6 @@
 .hw-menu-foot { margin: 0; padding: 0.6rem 0.15rem 0.7rem; border-top: 1.5px dashed var(--hw-line); font-size: 0.78rem; color: var(--hw-ink-soft); text-align: center; }
 .hw-menu-ready { animation: hw-ready 1.4s var(--hw-ease) 2; }
 @keyframes hw-ready { 50% { box-shadow: 0 0 0 8px rgb(226 113 42 / 0.25), var(--hw-shadow); } }
-.hw-byline { font-size: 0.78rem; color: var(--hw-ink-soft); }
-.hw-storylink {
-  display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--hw-line);
-  background: rgb(255 250 241 / 0.7); color: var(--hw-ink); text-decoration: none; font-weight: 500; font-size: 0.9rem;
-}
 
 /* ---------- Make them Halloween ---------- */
 .hw-tricks { display: grid; gap: 1rem; scroll-margin-top: 6rem; }
