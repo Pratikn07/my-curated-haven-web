@@ -79,7 +79,7 @@ export default async function AccountCollectionsPage() {
               Explore Free Recipes
             </Link>
             <Link
-              href="/collections/comfort-haven-collection"
+              href="/collections"
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
             >
               Browse Collections

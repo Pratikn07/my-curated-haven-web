@@ -238,3 +238,55 @@ export function ClockPill({ initial }: { initial: string }) {
     </div>
   );
 }
+
+/**
+ * The buy bar on phones: shown once the book card under the menu has scrolled away, hidden
+ * again when the book section near the end arrives. Measured on scroll, like the collection
+ * page's dock, because a jump (a link, the back button) can skip an observer's crossing.
+ * While it is off screen it is inert, so it is never focused or read out.
+ */
+export function HalloweenDock({ title, price, count, href, onSale }: { title: string; price: string; count: number; href: string; onSale: boolean }) {
+  const dock = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = dock.current;
+    const card = document.getElementById("hw-bookcard");
+    const end = document.querySelector<HTMLElement>('[data-story-section="collection"]');
+    if (!element || !card) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const pastCard = card.getBoundingClientRect().bottom < 0;
+      const atEnd = end ? end.getBoundingClientRect().top < window.innerHeight : false;
+      const on = pastCard && !atEnd;
+      element.toggleAttribute("data-on", on);
+      element.inert = !on;
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    element.removeAttribute("hidden");
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
+
+  return (
+    <div className="hw-dock" ref={dock} hidden>
+      <p className="hw-dock-text">
+        <strong>{title}</strong>
+        <span>
+          {price} · {count} recipes
+        </span>
+      </p>
+      <a className="hw-dock-cta" href={href} data-story-action="collection" data-story-placement="sticky">
+        {onSale ? "Get it" : "See it"} <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  );
+}

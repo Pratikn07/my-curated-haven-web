@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { oauthCallbackUrl } from "@/lib/auth/oauth";
 import { EMAIL_OTP_LENGTH } from "@/lib/auth/otp";
 import { emailSubmitBlocked, isTurnstileEnabled } from "@/lib/auth/turnstile";
+import { OPEN_IN_BROWSER_HINT } from "@/lib/auth/in-app-browser";
 import TurnstileWidget from "@/components/auth/TurnstileWidget";
 
 const CALLBACK_MESSAGES: Record<string, string> = {
@@ -19,6 +20,34 @@ const CALLBACK_MESSAGES: Record<string, string> = {
 interface SignInFormProps {
   returnTo?: string;
   authError?: string;
+  /** Instagram's or Facebook's in-app browser, where Google refuses to sign anyone in. */
+  inAppBrowser?: boolean;
+}
+
+/**
+ * The code step survives a reload: Instagram's browser can reload the page while the parent is in
+ * their mail app, and starting over would send a new code that replaces the one they are reading.
+ */
+const PENDING_KEY = "mch-sign-in-pending";
+const PENDING_MS = 10 * 60 * 1000; // the code's lifetime
+
+function rememberPending(email: string | null) {
+  try {
+    if (email) window.sessionStorage.setItem(PENDING_KEY, JSON.stringify({ email, at: Date.now() }));
+    else window.sessionStorage.removeItem(PENDING_KEY);
+  } catch {
+    // Storage can be blocked; the form still works, it just forgets on reload.
+  }
+}
+
+function readPending(): string | null {
+  try {
+    const saved = JSON.parse(window.sessionStorage.getItem(PENDING_KEY) ?? "null") as { email?: unknown; at?: unknown } | null;
+    if (saved && typeof saved.email === "string" && typeof saved.at === "number" && Date.now() - saved.at < PENDING_MS) return saved.email;
+  } catch {
+    // Unreadable or blocked: start at the email step.
+  }
+  return null;
 }
 
 function GoogleMark() {
@@ -32,7 +61,7 @@ function GoogleMark() {
   );
 }
 
-export default function SignInForm({ returnTo, authError }: SignInFormProps) {
+export default function SignInForm({ returnTo, authError, inAppBrowser = false }: SignInFormProps) {
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -61,6 +90,13 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
   const startedTrackedRef = useRef(false);
 
   useEffect(() => {
+    const pending = readPending();
+    if (!pending) return;
+    setEmail(pending);
+    setStep("code");
+  }, []);
+
+  useEffect(() => {
     if (startedTrackedRef.current) return;
     startedTrackedRef.current = true;
     trackAnalyticsEvent(
@@ -80,6 +116,7 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
       spendCaptchaToken();
       if (res.success) {
         setStep("code");
+        rememberPending(email.trim().toLowerCase());
       } else {
         setError(res.error || "Failed to send verification code. Please try again.");
       }
@@ -91,7 +128,11 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
     setError(null);
 
     startTransition(async () => {
+      // A successful verify redirects and never returns here, so forget the pending code first
+      // and remember it again only if the code was wrong.
+      rememberPending(null);
       const res = await verifyOtpAction(email, code, returnTo);
+      if (!res.success) rememberPending(email.trim().toLowerCase());
       if (res.success) {
         trackAnalyticsEvent(
           "sign_in_completed",
@@ -204,30 +245,39 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
                 : "Continue with Email"}
           </button>
 
-          <div className="flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-              or
-            </span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
+          {inAppBrowser ? (
+            <p className="text-sm text-text-muted">
+              We&apos;ll email you a {EMAIL_OTP_LENGTH}-digit code to type in here. Google sign-in doesn&apos;t
+              work inside Instagram; for Google, {OPEN_IN_BROWSER_HINT}.
+            </p>
+          ) : (
+            <>
+              <div className="flex items-center gap-3" aria-hidden="true">
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+                  or
+                </span>
+                <span className="h-px flex-1 bg-border" />
+              </div>
 
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={isPending || isGooglePending}
-            aria-busy={isGooglePending}
-            className="inline-flex w-full min-h-12 items-center justify-center gap-3 rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors"
-          >
-            {isGooglePending ? (
-              <span>Opening Google...</span>
-            ) : (
-              <>
-                <GoogleMark />
-                <span>Continue with Google</span>
-              </>
-            )}
-          </button>
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isPending || isGooglePending}
+                aria-busy={isGooglePending}
+                className="inline-flex w-full min-h-12 items-center justify-center gap-3 rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted focus:outline-none focus:ring-2 focus:ring-action focus:ring-offset-2 disabled:opacity-50 transition-colors"
+              >
+                {isGooglePending ? (
+                  <span>Opening Google...</span>
+                ) : (
+                  <>
+                    <GoogleMark />
+                    <span>Continue with Google</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </form>
       ) : (
         <form onSubmit={handleVerifyOtp} className="space-y-6">
@@ -303,6 +353,7 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
               type="button"
               onClick={() => {
                 setStep("email");
+                rememberPending(null);
                 setCode("");
                 setError(null);
                 setResendNotice(null);
@@ -327,8 +378,10 @@ export default function SignInForm({ returnTo, authError }: SignInFormProps) {
 
       {captchaUnavailable && (
         <p className="mt-4 text-sm text-text-muted" role="status">
-          We couldn&apos;t run the human check, which usually means a browser
-          extension blocked it. Continue with Google works without it.
+          {inAppBrowser
+            ? <>We couldn&apos;t run the human check in Instagram&apos;s browser. To sign in, {OPEN_IN_BROWSER_HINT}.</>
+            : <>We couldn&apos;t run the human check, which usually means a browser
+          extension blocked it. Continue with Google works without it.</>}
         </p>
       )}
     </div>
