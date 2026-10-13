@@ -126,8 +126,9 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
 
     // Pay first: visitors buy without an account; owners can still sign in.
     await expect(page.getByRole("button", { name: /Buy now — \$15\.00/i })).toBeVisible();
-    await expect(page.getByText(/No account needed to pay/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute("href", /\/sign-in\?returnTo=/);
+    const payFirstNote = page.locator("p", { hasText: "No account needed to pay" });
+    await expect(payFirstNote).toBeVisible();
+    await expect(payFirstNote.getByRole("link", { name: "Sign in" })).toHaveAttribute("href", /\/sign-in\?returnTo=/);
 
     // Free sample callout
     await expect(page.getByRole("heading", { name: "Try Free Sample Recipes" })).toBeVisible();
@@ -152,8 +153,8 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     const returnUrl = page.url();
 
     // 2. Stripe would collect the email; the mock form stands in for it.
-    await page.getByLabel("Email address").fill(buyerEmail);
-    await page.getByRole("button", { name: "Continue" }).click();
+    await page.locator("#mock-email").fill(buyerEmail);
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
 
     // 3. Paid, but nothing unlocked yet: the code goes to the email that paid.
     await expect(page.getByRole("heading", { name: "One last step" })).toBeVisible();
@@ -165,7 +166,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
 
     // 4. Signed in as that email, the purchase is theirs.
     await expect(page.getByRole("heading", { name: "You're in." })).toBeVisible();
-    await expect(page.getByText(buyerEmail)).toBeVisible();
+    await expect(page.getByText(buyerEmail).first()).toBeVisible();
     await page.goto("/account/collections");
     await expect(page.getByText("The Comfort Haven Collection")).toBeVisible();
     await expect(page.getByText("Active Access")).toBeVisible();

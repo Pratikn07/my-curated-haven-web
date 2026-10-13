@@ -1,4 +1,3 @@
-import "server-only";
 import { canUseMockCheckout, isStripeConfigured } from "./config";
 import { getStripeClient } from "./stripe";
 import { getCommercePool, markPurchaseOrderForReview, recordPaymentAndGrantAccess } from "./repository";
