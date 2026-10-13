@@ -53,6 +53,18 @@ test("without an approved policy a buyer keeps the original recipes only", async
   await expectLocked(page, additionSlug);
 });
 
+test("a buyer arriving from checkout sees the recipe open once, then plainly", async ({ page }) => {
+  await f.login(page, "customer", "aal1");
+  await page.goto(`/recipes/${originalSlug}?opened=1`);
+  // The reveal stage plays over the recipe, then the page drops ?opened=1 so a refresh does not replay it.
+  await expect(page.locator(".recipe-reveal-stage")).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: "Ingredients" })).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/recipes/${originalSlug}$`));
+  await page.reload();
+  await expect(page.locator(".recipe-reveal-stage")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Ingredients" })).toBeVisible();
+});
+
 test("with an approved additions policy the buyer reads the added recipe, with no new purchase", async ({ page }) => {
   const before = await f.query(`SELECT (SELECT count(*) FROM public.access_entitlements WHERE user_id=$1)::int e,
     (SELECT count(*) FROM private.purchase_orders WHERE user_id=$1)::int o`, [f.customerId]);
@@ -76,6 +88,11 @@ test("with an approved additions policy the buyer reads the added recipe, with n
 
 test("visitors and other signed-in people stay locked out of the addition", async ({ page }) => {
   await expectLocked(page, additionSlug);
+  // ?opened=1 only plays for people who own the recipe; anyone else still gets the locked page and its fog.
+  await page.goto(`/recipes/${additionSlug}?opened=1`);
+  await expect(page.locator(".recipe-reveal-stage")).toHaveCount(0);
+  await expect(page.locator(".recipe-fog")).toHaveAttribute("aria-hidden", "true");
+  await expect(page.getByRole("heading", { name: "Ingredients" })).toHaveCount(0);
   await f.login(page, "viewer", "aal1");
   await expectLocked(page, additionSlug);
 });
