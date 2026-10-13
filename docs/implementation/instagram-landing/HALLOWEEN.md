@@ -66,13 +66,15 @@ Owner decisions on 2026-10-12, recorded here because they override the staged la
 
 | Decision | Choice |
 | --- | --- |
-| Price | $6.99 USD, one-time, tax-inclusive, no Stripe Tax, no discount codes |
+| Price | $5.99 USD from 2026-10-13 (was $6.99), one-time, tax-inclusive, no Stripe Tax, no discount codes |
 | Who can buy | Everyone, as soon as it is ready (not invite-only) |
 | Sign-in | Pay first (RC-16, owner decision 2026-10-13): no account is needed to pay. After paying, the parent confirms the email they paid with by a 6-digit code, which creates or opens their account and unlocks the book. Any later sign-in with that email also claims it |
 | Refunds | All sales final (the collection page already says so); refunds by hand in Stripe only |
 | Recipes | All 20 published after the owner's review (one human `approve` row each in `private.recipe_reviews`) |
 
 Stripe (live, account `acct_1UMM1WPLtGCDwKKM`): product `prod_VQq99fuWxOZV9a` "Halloween collection", price `price_1UPySwPLtGCDwKKMMHANn13V` ($6.99, one-time, inclusive). Created with the Stripe CLI on 2026-10-12.
+
+On 2026-10-13 the owner lowered the price to $5.99. Stripe prices can't be edited, so a new live price `price_1UQCuFPLtGCDwKKMGWWetOft` ($5.99, one-time, inclusive) was created on the same product. In the database, one transaction turned the $6.99 offer off (`ba2c8824-…`, kept for its orders) and added the $5.99 offer (`12a71fa8-…`, sale enabled), then checked that `collection_sellable` returns $5.99. Checkout attempts already open at $6.99 keep their frozen price if their buyer taps Buy again, until the Stripe session expires (24 hours) or is expired by hand. Change a price the same way: never edit an offer row.
 
 Going on sale is a database change in one transaction: release 1 of `halloween` (state `published`) with the 20 recipes in book order, its `release_manifests` row, the `additions-v1` access policy (so buyers receive later additions), the `v1/v1` commerce access policy, and the offer with `sale_enabled = true`. `CHECKOUT_ENABLED=true` must be set in Vercel production first. To stop sales, set the offer's `sale_enabled = false`; the environment variable alone leaves a Buy button that fails.
 
