@@ -93,6 +93,13 @@ export async function getPublishedCollection(slug: string): Promise<PublicCollec
   return (await allCollections()).find((c) => c.collection.slug === slug && c.collection.availability === "open") ?? null;
 }
 
+/** The open collections that hold a recipe, listed ones first, so a locked recipe can link to a book that unlocks it. */
+export async function listCollectionsForRecipe(recipeSlug: string): Promise<PublicCollection[]> {
+  const holders = (await allCollections()).filter((c) => c.collection.availability === "open"
+    && c.collection.recipes.some((recipe) => recipe.slug === recipeSlug));
+  return [...holders.filter((c) => c.listed), ...holders.filter((c) => !c.listed)];
+}
+
 /**
  * Registry mode: a database collection whose publication is retired, coming soon or missing. Its page is
  * withheld (404) instead of being rebuilt from a stray offer, so it is neither shown nor sold by link.

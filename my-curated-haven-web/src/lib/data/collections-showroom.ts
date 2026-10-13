@@ -15,6 +15,7 @@ export {
 export {
   getPublishedCollection,
   isWithheldCollection,
+  listCollectionsForRecipe,
   listOpenPublishedCollections,
   listPublishedCollections,
   listPublishedShowroomChapters,

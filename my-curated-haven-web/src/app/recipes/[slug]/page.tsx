@@ -12,6 +12,7 @@ import {
 import { formatIngredient, normalizeInstructions, usableImageSrc } from "@/lib/recipes/format";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import { checkRecipeAccess, isRecipeAdmin } from "@/lib/data/access";
+import { listCollectionsForRecipe, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import AllergenInformation from "@/components/recipe/AllergenInformation";
 import { RecipeIngredients, RecipeMethod, RecipeStorageNotes } from "@/components/recipe/RecipeSections";
@@ -109,6 +110,20 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
       accessKind = access.type === "free" ? "free" : "paid";
     } catch {
       accessKind = "paid";
+    }
+  }
+
+  // A locked recipe links to a book that unlocks it: one on sale first, then any open book that holds
+  // it, then the bookcase.
+  let unlockHref = "/collections";
+  if (isAccessDenied) {
+    try {
+      const holders = await listCollectionsForRecipe(catalog.slug);
+      const offers = await Promise.all(holders.map((holder) => loadLiveOffer(holder.collection.slug)));
+      const holder = holders.find((_, index) => offerOrNull(offers[index])?.saleEnabled) ?? holders[0];
+      if (holder) unlockHref = `/collections/${holder.collection.slug}`;
+    } catch (error) {
+      console.error("[recipes] unlock collection unavailable", error instanceof Error ? error.message : error);
     }
   }
 
@@ -299,7 +314,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
-                href="/collections/comfort-haven-collection"
+                href={unlockHref}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white shadow-sm hover:bg-action-hover"
               >
                 View Collection & Unlock
