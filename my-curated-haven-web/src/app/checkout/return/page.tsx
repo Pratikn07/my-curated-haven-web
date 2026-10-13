@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { reconcileAndFulfillSession } from "@/lib/payments/fulfilment";
-import { CheckCircle2, Clock, AlertCircle, ShoppingBag } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
+import PurchaseConfirmed from "@/components/commerce/PurchaseConfirmed";
+import { getPublishedCollection } from "@/lib/collections/publication";
 
 export const metadata: Metadata = {
   title: "Checkout Status",
@@ -89,54 +91,24 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
   }
 
   const isConfirmed = orderSummary.isEntitled || orderSummary.statusDisplay === "paid_active";
+  // The book's cover and recipe count for the confirmation; the page still works without them.
+  const book = isConfirmed
+    ? await getPublishedCollection(orderSummary.collectionSlug).then((c) => c?.collection ?? null).catch(() => null)
+    : null;
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-16">
       <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 text-center shadow-sm">
         {isConfirmed ? (
-          <div>
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
-            </div>
-            <h1 className="mt-5 text-3xl font-extrabold text-foreground">
-              Purchase Confirmed!
-            </h1>
-            <p className="mt-2 text-base text-text-muted">
-              You now have full access to{" "}
-              <strong className="text-foreground">{orderSummary.collectionTitle}</strong>.
-            </p>
-
-            <div className="mt-6 rounded-xl bg-surface-muted p-4 text-left text-sm border border-border">
-              <div className="flex justify-between py-1">
-                <span className="text-text-muted">Order Reference:</span>
-                <span className="font-mono font-medium text-foreground">{orderSummary.supportReference}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-text-muted">Amount Paid:</span>
-                <span className="font-semibold text-foreground">{orderSummary.formattedAmount}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-text-muted">Access Status:</span>
-                <span className="font-semibold text-emerald-600">Active & Unlocked</span>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href={`/collections/${orderSummary.collectionSlug}`}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-action-hover"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                <span>Open Collection</span>
-              </Link>
-              <Link
-                href="/account/collections"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 text-base font-semibold text-foreground hover:bg-surface-muted"
-              >
-                View Library
-              </Link>
-            </div>
-          </div>
+          <PurchaseConfirmed
+            collectionSlug={orderSummary.collectionSlug}
+            collectionTitle={orderSummary.collectionTitle}
+            recipeCount={book?.recipes.length ?? null}
+            cover={book?.cover ?? null}
+            supportReference={orderSummary.supportReference}
+            formattedAmount={orderSummary.formattedAmount}
+            email={user.email ?? null}
+          />
         ) : (
           <div>
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">

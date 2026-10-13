@@ -91,7 +91,8 @@ export default async function AccountCollectionsPage() {
           {collections.map((coll) => (
             <div
               key={coll.collectionId}
-              className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 shadow-sm"
+              id={coll.slug}
+              className="scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
