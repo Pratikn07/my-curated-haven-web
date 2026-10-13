@@ -21,6 +21,11 @@ import RecipeOpenTracker from "@/components/recipe/RecipeOpenTracker";
 import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { listOpenPublishedCollections } from "@/lib/collections/publication";
+import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
+import { recipeCount } from "@/lib/collections/visibility";
+import { loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
+import type { CollectionOfferDto } from "@/lib/payments/types";
+import CheckoutButton from "@/components/commerce/CheckoutButton";
 import { Lock } from "lucide-react";
 
 const getCachedRecipe = cache(async (slug: string) => {
@@ -113,22 +118,32 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
     }
   }
 
-  // The book this recipe is in, for the unlock link; the bookcase when no open book has it.
-  let unlockHref = "/collections";
+  // A locked recipe names the open book it is in and, while that book is on sale, carries its buy button,
+  // so a parent arriving from the book list, a search or a shared link can buy without going back.
+  let book: { collection: ShowroomCollection; entry: CollectionRecipe; offer: CollectionOfferDto | null } | null = null;
   if (isAccessDenied) {
     try {
-      const book = (await listOpenPublishedCollections()).find((c) => c.collection.recipes.some((r) => r.slug === catalog.slug));
-      if (book) unlockHref = `/collections/${book.collection.slug}#buy`;
+      const found = (await listOpenPublishedCollections()).find((c) => c.collection.recipes.some((r) => r.slug === catalog.slug));
+      const entry = found?.collection.recipes.find((r) => r.slug === catalog.slug);
+      if (found && entry) {
+        book = { collection: found.collection, entry, offer: offerOrNull(await loadLiveOffer(found.collection.slug, user?.id)) };
+      }
     } catch {
-      // Non-critical: the bookcase link still works
+      // Non-critical: the notice still links to the free recipes
     }
   }
+  // On sale only when checkout would take the order (the same rule as /halloween).
+  const saleOffer = book?.offer?.saleEnabled && book.offer.expected ? book.offer : null;
 
   // Fetch sibling free recipes for discovery section
   let otherRecipes: RecipeCatalogItem[] = [];
+  let bookFreeRecipe: RecipeCatalogItem | undefined;
   try {
     const freeRecipes = await getCachedFreeCatalog();
     otherRecipes = freeRecipes.filter((r) => r.slug !== catalog.slug).slice(0, 2);
+    bookFreeRecipe = book
+      ? freeRecipes.find((r) => r.slug !== catalog.slug && book.collection.recipes.some((member) => member.slug === r.slug))
+      : undefined;
   } catch {
     // Non-critical if recommendation fails
   }
@@ -239,16 +254,16 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
           </div>
 
           <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0">
-            <div className="no-print flex-1 sm:flex-initial">
-              <SaveRecipeButton
-                recipeId={catalog.id}
-                recipeSlug={catalog.slug}
-                initialIsSaved={isSaved}
-                isAuthenticated={Boolean(user)}
-              />
-            </div>
             {!isAccessDenied && (
               <>
+                <div className="no-print flex-1 sm:flex-initial">
+                  <SaveRecipeButton
+                    recipeId={catalog.id}
+                    recipeSlug={catalog.slug}
+                    initialIsSaved={isSaved}
+                    isAuthenticated={Boolean(user)}
+                  />
+                </div>
                 <a
                   href="#recipe-content"
                   className="no-print inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-xl border border-border-control bg-surface px-4 text-sm font-semibold text-foreground hover:bg-surface-muted focus-visible:outline-2 sm:flex-initial"
@@ -307,24 +322,47 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
               Collection Recipe
             </h2>
             <p className="mx-auto mt-2 max-w-lg text-base text-text-muted leading-relaxed">
-              This recipe is part of our curated toddler collection. Sign in with an entitled account or purchase the collection to unlock full ingredients, instructions, and printable views.
+              {saleOffer && book
+                ? `This recipe is in “${book.collection.title}”: ${recipeCount(book.collection.recipes.length)}, one payment of ${saleOffer.formattedPrice}, yours to keep. Buying it opens the ingredients, steps, storage notes and printable page for every one of them.`
+                : book
+                  ? `This recipe is in “${book.collection.title}”, a collection that opens soon.`
+                  : "This recipe isn't on sale yet. It will be part of one of our recipe collections."}
             </p>
+            {book && book.entry.allergens.length > 0 ? (
+              <p className="mx-auto mt-3 max-w-lg text-sm text-text-muted">Contains {book.entry.allergens.join(", ")}.</p>
+            ) : null}
             <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {saleOffer ? (
+                <CheckoutButton
+                  collectionSlug={saleOffer.collectionSlug}
+                  formattedPrice={saleOffer.formattedPrice}
+                  ownershipState={saleOffer.ownershipState}
+                  expected={saleOffer.expected}
+                />
+              ) : null}
               <Link
-                href={unlockHref}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white shadow-sm hover:bg-action-hover"
+                href={book ? `/collections/${book.collection.slug}` : "/recipes"}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
               >
-                View Collection & Unlock
+                {book ? `See all ${recipeCount(book.collection.recipes.length)}` : "Browse the free recipes"}
               </Link>
-              {!user && (
-                <Link
-                  href={`/sign-in?returnTo=/recipes/${catalog.slug}`}
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
-                >
-                  Sign in to your account
-                </Link>
-              )}
             </div>
+            {bookFreeRecipe ? (
+              <p className="mt-5 text-sm text-text-muted">
+                Not sure yet? Cook a free one from this collection:{" "}
+                <Link href={`/recipes/${bookFreeRecipe.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+                  {bookFreeRecipe.title}
+                </Link>
+              </p>
+            ) : null}
+            {!user && (
+              <p className="mt-3 text-sm text-text-muted">
+                Already have access?{" "}
+                <Link href={`/sign-in?returnTo=/recipes/${catalog.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+                  Sign in
+                </Link>
+              </p>
+            )}
           </div>
         ) : body ? (
           <>

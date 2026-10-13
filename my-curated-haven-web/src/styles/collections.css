@@ -1805,6 +1805,37 @@
   display: none;
 }
 
+/* Free and locked rows say so on every screen size: phones have no hover to reveal an arrow. */
+.cl-row-inner[data-access] {
+  grid-template-columns: 4.2rem minmax(0, 1fr) auto;
+}
+
+.cl-row-free {
+  display: inline-block;
+  margin-left: 0.5rem;
+  vertical-align: 0.2em;
+  white-space: nowrap;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: var(--cloth, var(--cl-ember));
+  color: var(--cl-paper);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+}
+
+.cl-row-mark {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--cloth, var(--cl-ember));
+}
+
+.cl-row-inner[data-access="locked"] .cl-row-mark {
+  color: var(--cl-ink-soft);
+}
+
 /* Lists arrive as lists: rows rise a little, one after another. */
 @media (prefers-reduced-motion: no-preference) {
   .cl[data-motion-ready] .cl-rows:not([data-inview]) .cl-row-inner {
@@ -1825,6 +1856,10 @@
 
   .cl-row-thumb {
     display: none;
+  }
+
+  .cl-row-inner[data-access] {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .cl-row-main {

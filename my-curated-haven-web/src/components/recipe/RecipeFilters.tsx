@@ -145,7 +145,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               key={currentFilters.q}
               ref={searchInputRef}
               defaultValue={currentFilters.q}
-              placeholder="Search recipes (e.g. spinach, frittata, oats)..."
+              placeholder="Search recipes (e.g. pumpkin, banana, yogurt)..."
               maxLength={120}
               className="w-full rounded-xl border border-border-control bg-surface px-4 py-3 text-base text-foreground placeholder:text-text-muted focus:border-action focus:outline-none focus:ring-2 focus:ring-action/20"
             />

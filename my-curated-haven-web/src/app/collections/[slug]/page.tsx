@@ -19,10 +19,12 @@ import {
   loadLiveOffer,
   offerOrNull,
 } from "@/lib/data/collections-showroom";
-import { getFreeRecipeSlots, type RecipeCatalogItem } from "@/lib/data/recipes";
+import { getFreeRecipeCatalog, getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 import { usableImageSrc } from "@/lib/recipes/format";
-import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { withCatalogAccess } from "@/lib/collections/visibility";
+import { createPublicClient } from "@/lib/supabase/public";
+import { getCurrentUser } from "@/lib/supabase/server";
 
 interface CollectionPageProps {
   params: Promise<{ slug: string }>;
@@ -78,14 +80,26 @@ function buildModel(slug: string, config: ShowroomCollection | null, offer: Coll
   };
 }
 
-async function loadFreeSamples(): Promise<RecipeCatalogItem[]> {
-  try {
-    const slots = await getFreeRecipeSlots(await createClient());
-    return slots.map(({ recipe }) => recipe);
-  } catch (error) {
-    console.error("[collections] free samples unavailable", error instanceof Error ? error.message : error);
-    return [];
-  }
+/**
+ * What a visitor can open: the published recipes (each has a page) and the free ones (the whole recipe,
+ * no purchase). Read as a visitor, so an admin session never links to drafts. Either lookup failing
+ * leaves its part out: rows without a page stay plain text, and no row is called free.
+ */
+async function loadCatalogAccess(): Promise<{ published: ReadonlySet<string>; free: RecipeCatalogItem[] }> {
+  const client = createPublicClient();
+  const [published, free] = await Promise.all([
+    getPublishedCatalog(client)
+      .then((items) => new Set(items.map((item) => item.slug)))
+      .catch((error) => {
+        console.error("[collections] published recipes unavailable", error instanceof Error ? error.message : error);
+        return new Set<string>();
+      }),
+    getFreeRecipeCatalog(client).catch((error) => {
+      console.error("[collections] free recipes unavailable", error instanceof Error ? error.message : error);
+      return [];
+    }),
+  ]);
+  return { published, free };
 }
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
@@ -120,10 +134,15 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
   const user = await getCurrentUser();
-  const [published, live, freeSamples] = await Promise.all([getPublishedCollection(slug), loadLiveOffer(slug, user?.id), loadFreeSamples()]);
-  const model = buildModel(slug, published?.collection ?? null, offerOrNull(live), !live.ok);
+  const [published, live, access] = await Promise.all([getPublishedCollection(slug), loadLiveOffer(slug, user?.id), loadCatalogAccess()]);
+  const built = buildModel(slug, published?.collection ?? null, offerOrNull(live), !live.ok);
   // A retired or coming-soon database collection is not rebuilt from its offer.
-  if (!model || (!published && (await isWithheldCollection(slug)))) notFound();
+  if (!built || (!published && (await isWithheldCollection(slug)))) notFound();
+
+  // Every published recipe opens its own page (free, or locked with the way to buy); this book's free ones say so.
+  const freeSlugs = new Set(access.free.map((recipe) => recipe.slug));
+  const model: DetailModel = { ...built, recipes: withCatalogAccess(built.recipes, access.published, freeSlugs) };
+  const ownFree = access.free.filter((recipe) => model.recipes.some((member) => member.slug === recipe.slug));
 
   const shelf = (await listOpenPublishedCollections()).map((entry) => entry.collection);
   const position = shelf.findIndex((collection) => collection.slug === slug);
@@ -133,7 +152,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     <div className="cl" data-cloth={model.cloth}>
       <DetailHero model={model} />
       <Contents model={model} />
-      <FreeSamples recipes={freeSamples} />
+      <FreeSamples recipes={ownFree} />
       <Questions />
       {next && next.slug !== slug ? <NextBook next={next} /> : <span data-dock-end />}
       <BuyDock model={model} />

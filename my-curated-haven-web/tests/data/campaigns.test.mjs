@@ -21,10 +21,10 @@ test("every configured campaign is valid and has a unique slug", () => {
   assert.equal(new Set(slugs).size, slugs.length);
 });
 
-test("the first post's address keeps working", () => {
+test("the first post, a test, stays off the live site", () => {
   const first = CAMPAIGNS.find((campaign) => campaign.slug === "frittata-fingers");
   assert.ok(first);
-  assert.equal(first.status, "published");
+  assert.equal(first.status, "draft");
   assert.equal(first.recipes[0].slug, "sweet-potato-and-spinach-frittata-fingers");
 });
 

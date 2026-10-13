@@ -55,7 +55,7 @@ Database checks run from the repository root: `supabase test db` runs the pgTAP 
 
 ## CI and production
 
-- `.github/workflows/web-ci.yml` runs `web-quality` and `backend-quality` on every pull request, against a local Supabase in the runner. It never uses production credentials. Both checks must pass before merging to `main`.
+- `.github/workflows/web-ci.yml` runs `web-quality` and `backend-quality` on every pull request, against a local Supabase in the runner. It never uses production credentials. Both checks must pass before merging to `main`. `web-quality` is a summary job: it passes only when `web-static`, the three `web-browser` jobs (one per Playwright project) and `web-builds` all pass. Those run in parallel, each browser job on its own Supabase stack.
 - A merge to `main` deploys production on Vercel.
 - `.github/workflows/production-smoke.yml` runs `npm run smoke:production` after each successful production deploy and every hour.
 - Release and rollback steps: `docs/implementation/phase-2/PREVIEW-AND-RELEASE.md`.

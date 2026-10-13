@@ -21,16 +21,16 @@ Recipes picked and cooked by Bhagyashree with her daughter Anaika, written for t
 ## Operating Context
 
 - Entry: Instagram comment keyword, then a DM link to `/stories/<slug>`, or the bio link to the homepage.
-- Free recipes at `/recipes`; each recipe has one permanent page at `/recipes/[slug]` for reading, saving and printing.
+- Every published recipe at `/recipes`, the free ones first and labelled; each recipe has one permanent page at `/recipes/[slug]` for reading, saving and printing, or, when it is locked, the collection it is in and the way to buy.
 - Collections at `/collections` and `/collections/[slug]`; purchases at `/account/collections`.
 - One-time purchase checkout (Stripe). No refunds. Checkout currently needs sign-in first; pay-first is planned.
 
 ## Capabilities and Constraints
 
 - Next.js 16 App Router, Tailwind 4, Supabase (Postgres + RLS), Vercel.
-- Catalog: 70 reviewed recipes; 3 published as free, 67 drafts. Recipe bodies are readable only when published and either free or covered by a purchase.
+- Catalog: 3 test recipes and the 20 Halloween recipes are published; the rest are drafts. From 2026-10-13 the free recipes are three of the Halloween ones (Berry Ghost Yogurt Bark, Spider Cracker Bites, Apple Pie Halloween Pockets). Recipe bodies are readable only when published and either free or covered by a purchase.
 - Collections, prices and membership are not yet approved (plan task RC-02). Draft collections render only outside production; prices on drafts are placeholders.
-- Open: free sample count (3 today, 7–10 proposed), packs vs. collections, customer library, subscription shape. See `docs/implementation/recipe-collections/`.
+- How many recipes are free is the owner's choice (no fixed number since 2026-10-13); each collection page shows only its own free recipes. Open: packs vs. collections, customer library, subscription shape. See `docs/implementation/recipe-collections/`.
 
 ## Brand Commitments
 

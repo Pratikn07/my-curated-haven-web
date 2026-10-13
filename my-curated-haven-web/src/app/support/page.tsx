@@ -52,7 +52,7 @@ export default function Support() {
         <div>
           <h2 className="text-2xl font-semibold">What this site offers now</h2>
           <p className="mt-2 text-text-muted">
-            You can read and print three free recipes without an account. There is no live chat.
+            You can read and print the free recipes without an account, and buy recipe collections as one-time purchases. There is no live chat.
           </p>
         </div>
         <div>
