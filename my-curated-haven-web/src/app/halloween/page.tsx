@@ -59,7 +59,7 @@ export default async function HalloweenPage() {
       />
       <ClockPill initial="Sat 31 Oct · Halloween" />
       <div className="hw-column">
-        <HalloweenHero menu={data.menu} freeCount={data.freeCount} hasTricks={data.tricks.length > 0} />
+        <HalloweenHero menu={data.menu} freeCount={data.freeCount} />
         <HalloweenBookCard book={data.book} menu={data.menu} />
         <HalloweenTricks tricks={data.tricks} />
         <HalloweenStory />
