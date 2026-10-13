@@ -1,0 +1,72 @@
+name: Web test environment
+description: >-
+  Start a fresh local Supabase stack, install web dependencies and the Playwright
+  browsers a browser-test job needs. Run after actions/checkout.
+
+inputs:
+  browsers:
+    description: Space-separated Playwright browsers to install, e.g. "chromium" or "chromium webkit".
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Supabase CLI
+      uses: supabase/setup-cli@1dedf2c611547ede7232d26866dd3c56ab903bbb # v1.7.3
+      with:
+        version: 2.104.0
+
+    - name: Configure Supabase image registry
+      shell: bash
+      run: echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=public.ecr.aws" >> "$GITHUB_ENV"
+
+    - name: Start Supabase stack
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        SUPABASE_INTERNAL_IMAGE_REGISTRY: public.ecr.aws
+      run: |
+        # public.ecr.aws sometimes answers "toomanyrequests: Data limit exceeded"
+        # for long stretches. Skip containers the tests don't use (about 4.6 GB),
+        # and fall back to the same images on Docker Hub for later attempts.
+        for attempt in 1 2 3; do
+          if [ "$attempt" -gt 1 ]; then
+            export SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io
+            echo "SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io" >> "$GITHUB_ENV"
+          fi
+          echo "supabase start attempt $attempt from $SUPABASE_INTERNAL_IMAGE_REGISTRY"
+          if supabase start -x studio,analytics,vector,edge-runtime,imgproxy,realtime; then break; fi
+          if [ "$attempt" = 3 ]; then exit 1; fi
+          supabase stop --no-backup || true
+          sleep $((attempt * 30))
+        done
+        supabase db reset
+
+    - name: Export local Supabase test keys for browser fixtures
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        SERVICE_KEY="$(supabase status -o env | sed -n 's/^SERVICE_ROLE_KEY=//p' | tr -d '"')"
+        echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_KEY}" >> "$GITHUB_ENV"
+        echo 'ADMIN_TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres' >> "$GITHUB_ENV"
+
+    - name: Set up Node from .nvmrc
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: my-curated-haven-web/.nvmrc
+        cache: npm
+        cache-dependency-path: my-curated-haven-web/package-lock.json
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ github.workspace }}/my-curated-haven-web
+      run: npm ci
+
+    - name: Install Playwright browsers
+      shell: bash
+      working-directory: ${{ github.workspace }}/my-curated-haven-web
+      env:
+        BROWSERS: ${{ inputs.browsers }}
+      run: |
+        read -r -a browsers <<< "$BROWSERS"
+        npx playwright install --with-deps "${browsers[@]}"
