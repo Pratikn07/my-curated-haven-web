@@ -27,9 +27,10 @@ const LITTLE_HANDS_RECIPES: Campaign["recipes"] = [
 
 export const CAMPAIGNS: readonly Campaign[] = [
   {
-    // The first post. Its link already went out in DMs, so the address must keep working.
+    // The first post, a test. Owner decision 2026-10-13: hidden from the live site (its address now shows
+    // "not found" there, including the links sent in DMs on 2026-10-03); its three recipes are no longer free.
     slug: "frittata-fingers",
-    status: "published",
+    status: "draft",
     room: "kitchen",
     theme: "kitchen",
     motif: "leaves",

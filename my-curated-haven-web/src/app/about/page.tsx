@@ -12,7 +12,7 @@ export default function About() {
         Nibble &amp; Nurture is the company behind the My Curated Haven parenting product and the Tiny Soho recipe brand.
       </p>
       <p className="mt-4 text-lg text-text-muted">
-        This website is the home for those recipes: simple toddler recipes for busy families. It starts with three complete free recipes. Other parenting tools are not part of the website yet.
+        This website is the home for those recipes: simple toddler recipes for busy families. Some are free to read and print; the rest come in recipe collections you buy once. Other parenting tools are not part of the website yet.
       </p>
       <div className="mt-8 grid gap-4">
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
@@ -34,7 +34,11 @@ export default function About() {
         <section className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
           <h2 className="text-2xl font-semibold">What is public now</h2>
           <p className="mt-2 text-text-muted">
-            You can read and print three free recipes without an account. You can sign in with an email code to save recipes. Nothing is for sale on this website yet, and there is no live chat.
+            You can read and print the free recipes without an account. You can sign in with an email code to save recipes. Recipe{" "}
+            <Link href="/collections" className="font-semibold text-action">
+              collections
+            </Link>{" "}
+            are for sale here as one-time purchases, with no subscription. There is no live chat.
           </p>
         </section>
       </div>

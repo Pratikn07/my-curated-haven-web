@@ -208,7 +208,7 @@ export function HowItWorks() {
             <span className="cl-step-mark" aria-hidden="true">1</span>
             <div>
               <h3>Cook a free recipe</h3>
-              <p>Three complete recipes are free to read, cook and print. No account, no card.</p>
+              <p>Some complete recipes are free to read, cook and print. No account, no card.</p>
             </div>
           </li>
           <li className="cl-step">

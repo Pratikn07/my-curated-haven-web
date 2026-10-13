@@ -54,12 +54,14 @@ export interface CollectionRecipe {
   protein?: string;
   /** Only published recipes have a page to open. */
   href?: string;
+  /** On the free list: anyone can open the whole recipe. Set at request time, never in config. */
+  free?: boolean;
   /** Filter tags; absent for recipes that come only from the commerce database. */
   tags?: RecipeTags;
 }
 
 /** One recipe in the catalog snapshot (src/config/recipe-snapshot.ts). */
-export type RecipeSnapshot = Omit<CollectionRecipe, "slug" | "href" | "tags"> & { tags: RecipeTags };
+export type RecipeSnapshot = Omit<CollectionRecipe, "slug" | "href" | "free" | "tags"> & { tags: RecipeTags };
 
 export interface ShowroomCollection {
   slug: string;

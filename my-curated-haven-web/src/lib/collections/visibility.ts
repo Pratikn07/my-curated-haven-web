@@ -1,5 +1,5 @@
 import { SHOWROOM_COLLECTIONS } from "@/config/collections";
-import type { ShowroomCollection } from "@/lib/collections/types";
+import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 
 /**
  * Which collections this environment shows. No database access, so the site
@@ -59,4 +59,25 @@ export function collectionFacts(collection: Pick<ShowroomCollection, "recipes">)
 /** "1 recipe", "8 recipes". */
 export function recipeCount(count: number): string {
   return `${count} recipe${count === 1 ? "" : "s"}`;
+}
+
+/**
+ * A book's recipes as a visitor finds them: every published recipe opens its own page, and those on the
+ * free list say so. A recipe with no page stays plain text and is never called free.
+ */
+export function withCatalogAccess(recipes: readonly CollectionRecipe[], published: ReadonlySet<string>,
+  free: ReadonlySet<string>): CollectionRecipe[] {
+  return recipes.map((recipe) => {
+    const href = recipe.href ?? (published.has(recipe.slug) ? `/recipes/${recipe.slug}` : undefined);
+    return { ...recipe, href, free: Boolean(href) && free.has(recipe.slug) };
+  });
+}
+
+/**
+ * How a book row reads: "free" opens the whole recipe, "locked" opens its page with the way to buy. A buyer
+ * owns every recipe, and a recipe with no page opens nothing, so neither gets a mark.
+ */
+export function rowAccess(recipe: Pick<CollectionRecipe, "href" | "free">, owned: boolean): "free" | "locked" | null {
+  if (!recipe.href || owned) return null;
+  return recipe.free ? "free" : "locked";
 }

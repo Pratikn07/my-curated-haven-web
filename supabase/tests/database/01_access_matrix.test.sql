@@ -135,14 +135,14 @@ SELECT is(
 );
 
 -- ============================================================================
--- S12: Constraint check - slot 4 is rejected
+-- S12: Constraint check - slot 0 is rejected (any number of slots from 1 up is allowed)
 -- ============================================================================
 RESET ROLE;
 SELECT throws_ok(
-  'INSERT INTO public.free_recipe_slots (slot, recipe_id) VALUES (4, ''10000000-0000-0000-0000-000000000001'')',
+  'INSERT INTO public.free_recipe_slots (slot, recipe_id) VALUES (0, ''10000000-0000-0000-0000-000000000001'')',
   '23514',
   NULL,
-  'S12: Slot 4 is rejected by check constraint'
+  'S12: Slot 0 is rejected by check constraint'
 );
 
 -- ============================================================================
