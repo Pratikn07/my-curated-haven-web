@@ -132,6 +132,39 @@ export function HalloweenHero({ menu, freeCount, hasTricks }: { menu: HalloweenM
   );
 }
 
+/**
+ * The book, straight after the menu, for the parents who came for the recipes and will not
+ * scroll through the story. The full book section still closes the page.
+ */
+export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; menu: HalloweenMenuItem[] }) {
+  const count = book.recipes.length;
+  const named = menu.map((item) => item.alias.toLowerCase());
+  const more = count - named.length;
+  const contents = more > 0 ? `${named.join(", ")} and ${more} more.` : `${named.join(", ")}.`;
+  return (
+    <section className="hw-bookcard" id="hw-bookcard" aria-labelledby="hw-bookcard-title">
+      <Image className="hw-bookcard-cover" src={HALLOWEEN_BOOK.cover.src} alt="" width={HALLOWEEN_BOOK.cover.width} height={HALLOWEEN_BOOK.cover.height} sizes="5.5rem" />
+      <div className="hw-bookcard-body">
+        <span className="hw-eyebrow">{HALLOWEEN_BOOK.eyebrow}</span>
+        <h2 className="hw-bookcard-title" id="hw-bookcard-title">All {count} recipes in one book</h2>
+        <p className="hw-bookcard-contents">{contents.charAt(0).toUpperCase() + contents.slice(1)}</p>
+        <div className="hw-bookcard-row">
+          <span className="hw-bookcard-price">{book.price}</span>
+          <Link
+            className="hw-cta hw-cta-small"
+            href={book.onSale ? `${book.href}#buy` : book.href}
+            data-story-action="collection"
+            data-story-placement="card"
+          >
+            {book.onSale ? `Get all ${count}` : `See all ${count}`} <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+        <span className="hw-bookcard-note">{book.onSale ? "One-time purchase" : "Opening soon"}</span>
+      </div>
+    </section>
+  );
+}
+
 export function HalloweenTricks({ tricks }: { tricks: HalloweenTrickItem[] }) {
   if (tricks.length === 0) return null;
   return (

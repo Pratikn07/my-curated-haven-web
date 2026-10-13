@@ -43,6 +43,26 @@ test("[halloween] the first screen is the menu, and every dish opens a page that
   }
 });
 
+test("[halloween] the book sits under the menu, and the buy bar follows once it scrolls away", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 664 });
+  await page.goto(PAGE);
+
+  const card = page.locator("#hw-bookcard");
+  const top = await card.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+  expect(top, "the book starts by the second screen").toBeLessThan(2 * 664);
+  await expect(card.getByRole("link")).toHaveAttribute("href", /^\/collections\/halloween(#buy)?$/);
+
+  const dock = page.locator(".hw-dock");
+  await expect(dock).not.toHaveAttribute("data-on");
+  await page.locator("#hw-walk").scrollIntoViewIfNeeded();
+  await expect(dock).toHaveAttribute("data-on", "");
+  await expect(dock.getByRole("link")).toHaveAttribute("href", /^\/collections\/halloween(#buy)?$/);
+
+  // The full book section near the end takes over from the bar.
+  await page.locator('[data-story-section="collection"]').scrollIntoViewIfNeeded();
+  await expect(dock).not.toHaveAttribute("data-on");
+});
+
 test("[halloween] the page never scrolls sideways on a phone", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(PAGE);
