@@ -22,6 +22,8 @@ export type RecipeCardProps = {
   isSaved?: boolean;
   isAuthenticated?: boolean;
   showSaveButton?: boolean;
+  /** A catalog recipe off the free list opens to its locked page, so it carries no "Free recipe" label. */
+  free?: boolean;
 };
 
 function isCatalogItem(
@@ -36,6 +38,7 @@ export default function RecipeCard({
   isSaved = false,
   isAuthenticated = false,
   showSaveButton = false,
+  free = true,
 }: RecipeCardProps) {
   const isCatalog = isCatalogItem(recipe);
   const slug = isCatalog ? recipe.slug : undefined;
@@ -47,7 +50,7 @@ export default function RecipeCard({
   const dietLabels = isCatalog
     ? recipe.dietLabels || []
     : recipe.dietaryLabels || [];
-  const accessLabel = isCatalog ? "Free recipe" : (recipe.accessLabel ?? "Free sample");
+  const accessLabel = isCatalog ? (free ? "Free recipe" : undefined) : (recipe.accessLabel ?? "Free sample");
   const summary = isCatalog ? recipe.publicSummary : undefined;
   // A path next/image can't load (not root-relative or absolute) shows the no-photo state, not a broken image.
   const imageSrc = isCatalog ? usableImageSrc(recipe.previewImagePath) ?? undefined : undefined;

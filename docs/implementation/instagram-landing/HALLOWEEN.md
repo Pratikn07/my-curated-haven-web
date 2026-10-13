@@ -23,7 +23,9 @@ The full recipes are never copied here. The story is told as a plan because the 
 
 `src/lib/data/load-halloween.ts` asks the free catalog which of the three menu recipes are free. A free recipe links to `/recipes/<slug>` and is counted in "3 free recipes"; any other links to `/collections/halloween` and says "in the book". So no tap ever lands on a page that would not open.
 
-On 2026-10-11 none of the three were free on production (their recipe pages returned 404; the free slots held the frittata campaign's three recipes). The owner is deciding which recipes to make free; the page needs no change either way.
+On 2026-10-11 none of the three were free on production (their recipe pages returned 404; the free slots held the frittata campaign's three recipes). On 2026-10-13 the owner chose the free recipes: Berry Ghost Yogurt Bark and Spider Cracker Bites from the menu, and Apple Pie Halloween Pockets, tagged dairy-free and soy-free (contains egg and wheat), so a family avoiding dairy also has one to cook: all three menu dishes contain milk. Jack-o'-Lantern Mango Stars was considered and dropped: its dark chocolate chips mean it is not tagged dairy-free. Mummy Banana Pops stays in the book, so the menu reads "2 free · 1 in the book". The three test recipes stopped being free and `/stories/frittata-fingers` was hidden.
+
+On the collection page every published recipe opens its own page: the free ones are marked "Free" with an arrow, the rest have a lock and open the recipe's locked page, which names the book, its price and the buy button.
 
 ## Motion
 

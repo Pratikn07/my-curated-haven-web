@@ -7,7 +7,7 @@ test("the snapshot lists every configured campaign with the recipe slugs it prom
   const snapshot = buildCampaignSnapshot(CAMPAIGNS);
   assert.deepEqual(snapshot.campaigns.map((c) => c.slug), CAMPAIGNS.map((c) => c.slug));
   const frittata = snapshot.campaigns.find((c) => c.slug === "frittata-fingers");
-  assert.deepEqual(frittata, { slug: "frittata-fingers", status: "published",
+  assert.deepEqual(frittata, { slug: "frittata-fingers", status: "draft",
     recipeSlugs: ["sweet-potato-and-spinach-frittata-fingers", "soft-baked-blueberry-and-oat-bars", "salmon-and-pea-fish-cakes"] });
   assert.ok(!snapshot.campaigns.some((c) => c.slug.startsWith("local-sample")), "local sample campaigns stay out");
 });

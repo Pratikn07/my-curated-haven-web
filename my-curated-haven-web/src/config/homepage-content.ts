@@ -142,15 +142,16 @@ export function projectHomepageRecipes<T extends { slug: string }>(
 }
 
 /**
- * Owner decision 2026-09-25: the three free recipes in free_recipe_slots are live.
- * Only these slugs may appear on the homepage. Remove a slug here before withdrawing its recipe.
+ * Owner decision 2026-10-13: the homepage shows the three free Halloween recipes (they replaced the
+ * three test recipes on the free list). Only these slugs may appear on the homepage, and only while they
+ * are free. Remove a slug here before withdrawing its recipe.
  */
 export const APPROVED_HOMEPAGE_RECIPE_STATE = {
   mode: "free_ready",
   approvedRecipeSlugs: [
-    "sweet-potato-and-spinach-frittata-fingers",
-    "soft-baked-blueberry-and-oat-bars",
-    "salmon-and-pea-fish-cakes",
+    "berry-ghost-yogurt-bark",
+    "spider-cracker-bites",
+    "apple-pie-halloween-pockets",
   ],
 } as const;
 
