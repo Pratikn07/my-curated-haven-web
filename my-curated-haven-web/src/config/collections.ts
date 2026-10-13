@@ -23,7 +23,9 @@ function recipes(slugs: readonly string[]): CollectionRecipe[] {
   return slugs.map((slug) => {
     const fact = RECIPE_SNAPSHOT[slug];
     if (!fact) throw new Error(`[collections] Unknown recipe in config: ${slug}`);
-    return { ...fact, slug, image: `${PHOTO_BASE}${fact.image}` };
+    // Older photos are object names in Supabase Storage; newer ones are site paths under public/.
+    const image = fact.image.startsWith("/") ? fact.image : `${PHOTO_BASE}${fact.image}`;
+    return { ...fact, slug, image };
   });
 }
 
@@ -496,21 +498,34 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     title: "Halloween",
     tagline: "A festive table for little hands. Nothing scary.",
     story:
-      "Pumpkin, cocoa and berries: the colours of the season, in food a toddler can hold. Gnocchi pillows for dinner, snack fries for the walk around the block, yogurt pops for after.",
+      "Pumpkin, apple and berries: the colours of the season, in treats a toddler can hold. Ghost bark and mummy pops from the freezer, spider bites and witch's broomsticks for the party table, mandarin pumpkins for the walk around the block.",
     forWhen: "For the week the costumes come out, and the party where you said you'd bring something.",
     cloth: "ember",
     cover: cover("halloween", 1412, "A pumpkin-orange cloth cookbook with a gold-foil pumpkin on its cover"),
     refresh: "New recipes join each October, before the costumes come out.",
     placeholderPrice: "$6.99",
+    // Replaced on 2026-10-12 with the owner's 20 Halloween recipes (above the 8–12 guideline in COLLECTIONS.md, by choice).
     recipes: recipes([
-      "pumpkin-and-ricotta-gnocchi-pillows",
-      "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
-      "mini-berry-yogurt-pops",
-      "spinach-and-cheese-pizza-scrolls",
-      "soft-date-almond-cocoa-bites",
-      "savory-corn-and-cheddar-muffins",
-      "soft-banana-oat-toddler-cookies",
-      "apple-sunflower-snack-rounds",
+      "berry-ghost-yogurt-bark",
+      "mummy-banana-pops",
+      "spider-cracker-bites",
+      "witchs-broomsticks",
+      "mandarin-orange-pumpkins",
+      "banana-pumpkin-mini-donuts",
+      "sweet-potato-jack-o-lantern-cupcakes",
+      "mini-pumpkin-cheesecake-bites",
+      "apple-pie-halloween-pockets",
+      "jack-o-lantern-peanut-butter-tart",
+      "apple-peanut-butter-smiles",
+      "monster-energy-balls",
+      "candy-corn-parfaits",
+      "gummy-worms",
+      "protein-fruit-gummies",
+      "spider-peanut-butter-oat-bites",
+      "strawberry-yogurt-ghost-hearts",
+      "jack-o-lantern-mango-stars",
+      "blueberry-yogurt-bites",
+      "chocolate-pumpkin-protein-tarts",
     ]),
   },
   {

@@ -23,7 +23,8 @@ vocab = {group: {v["key"] for v in values} for group, values in seed["recipe_tag
 LIVE = {
     "meal-prep": {"slow-cooker-beef-and-vegetable-stew", "veggie-packed-lasagna", "mild-vegetable-curry-with-rice", "mini-turkey-and-apple-meatloaf-muffins", "one-pot-chicken-and-vegetable-rice", "cheesy-veggie-quinoa-toddler-bites", "cheesy-broccoli-and-quinoa-bites", "mini-bean-and-cheese-burritos", "veggie-lentil-pancakes", "cheesy-veggie-mini-muffins"},
     "protein-packs": {"mini-baked-chicken-nuggets", "onigiri-rice-triangles", "soft-chicken-veggie-rice-bowl", "mild-curried-red-lentil-cakes", "sesame-tofu-and-veggie-cubes", "turkey-and-hummus-pinwheels", "bean-and-veggie-burrito-bowl", "salmon-potato-veggie-mash", "soft-tofu-veggie-stir-fry-with-rice", "turkey-veggie-mini-meatballs-with-pasta"},
-    "halloween": {"pumpkin-and-ricotta-gnocchi-pillows", "cinnamon-sweet-potato-snack-fries-with-yogurt-dip", "mini-berry-yogurt-pops", "spinach-and-cheese-pizza-scrolls", "soft-date-almond-cocoa-bites", "savory-corn-and-cheddar-muffins", "soft-banana-oat-toddler-cookies", "apple-sunflower-snack-rounds"},
+    # Replaced on 2026-10-12 with the owner's 20 Halloween recipes.
+    "halloween": {"banana-pumpkin-mini-donuts", "sweet-potato-jack-o-lantern-cupcakes", "berry-ghost-yogurt-bark", "mini-pumpkin-cheesecake-bites", "apple-pie-halloween-pockets", "jack-o-lantern-peanut-butter-tart", "apple-peanut-butter-smiles", "witchs-broomsticks", "spider-cracker-bites", "mandarin-orange-pumpkins", "monster-energy-balls", "mummy-banana-pops", "candy-corn-parfaits", "gummy-worms", "protein-fruit-gummies", "spider-peanut-butter-oat-bites", "strawberry-yogurt-ghost-hearts", "jack-o-lantern-mango-stars", "blueberry-yogurt-bites", "chocolate-pumpkin-protein-tarts"},
 }
 
 # Phrases that name an allergen without containing it ("egg-free pasta", "check the label for soy").
@@ -126,8 +127,10 @@ for r in data["recipes"]:
             errors.append(f"{tag}: added to live collection {slug}")
         if r["free_sample"]:
             errors.append(f"{tag}: free sample in paid collection {slug}")
-        if r["review_gate"] != "passed":
-            errors.append(f"{tag}: review-rejected recipe in {slug}")
+        if r["review_gate"] == "rejected" or (r["review_gate"] != "passed" and not live):
+            errors.append(f"{tag}: {r['review_gate']} recipe in {slug}")
+        elif r["review_gate"] != "passed":
+            notes.append(f"{tag}: in live {slug} before the review gate ({r['review_gate']}); review before it goes on sale")
         if adult and not live:
             errors.append(f"{tag}: adult recipe in new collection {slug}")
         if lo is not None and not live:

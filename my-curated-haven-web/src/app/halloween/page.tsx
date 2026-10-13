@@ -12,7 +12,7 @@ import {
   HalloweenStory,
   HalloweenTricks,
 } from "@/components/halloween/HalloweenSections";
-import { HALLOWEEN_PATH, HALLOWEEN_SLUG, HALLOWEEN_TRICKS } from "@/config/halloween";
+import { HALLOWEEN_PATH, HALLOWEEN_SHARE_IMAGE, HALLOWEEN_SLUG } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { loadHalloweenPage } from "@/lib/data/load-halloween";
 
@@ -27,7 +27,7 @@ export const revalidate = 3600;
 
 const TITLE = "Not-Scary Halloween Recipes for Toddlers";
 const DESCRIPTION =
-  "Ghost pops, mummy scrolls and pumpkin pillows: Halloween food little hands can hold, and our plan for a Halloween that isn't scary.";
+  "Ghost bark, mummy pops and spider bites: Halloween food little hands can hold, and our plan for a Halloween that isn't scary.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: `${SITE_ORIGIN}${HALLOWEEN_PATH}`,
     type: "website",
-    images: [{ url: HALLOWEEN_TRICKS[0].dressed.src, alt: HALLOWEEN_TRICKS[0].dressed.alt }],
+    images: [{ url: HALLOWEEN_SHARE_IMAGE.src, alt: HALLOWEEN_SHARE_IMAGE.alt }],
   },
 };
 
@@ -58,7 +58,7 @@ export default async function HalloweenPage() {
       />
       <ClockPill initial="Sat 31 Oct · Halloween" />
       <div className="hw-column">
-        <HalloweenHero menu={data.menu} freeCount={data.freeCount} />
+        <HalloweenHero menu={data.menu} freeCount={data.freeCount} hasTricks={data.tricks.length > 0} />
         <HalloweenTricks tricks={data.tricks} />
         <HalloweenStory />
         <HalloweenReasons />

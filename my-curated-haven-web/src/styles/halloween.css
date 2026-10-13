@@ -190,7 +190,7 @@
 .hw-open:active { background: var(--hw-pumpkin-deep); color: #fff8f0; }
 
 /* ---------- Story ---------- */
-.hw-story-head { display: grid; gap: 0.35rem; text-align: center; justify-items: center; }
+.hw-story-head { display: grid; gap: 0.35rem; text-align: center; justify-items: center; scroll-margin-top: 6rem; }
 .hw-story-head p { max-width: 22rem; }
 .hw-chapter { position: relative; display: grid; gap: 1rem; }
 .hw-card { background: var(--hw-paper); border-radius: var(--hw-radius); box-shadow: var(--hw-shadow); padding: 1.35rem 1.25rem 1.4rem; display: grid; gap: 0.75rem; position: relative; }
