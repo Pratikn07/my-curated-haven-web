@@ -18,6 +18,8 @@ interface CheckoutButtonProps {
   className?: string;
   /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
   appearance?: "default" | "cloth";
+  /** Signed-out "Already bought it? Sign in" under the button; off where the page has its own sign-in line. */
+  signInHint?: boolean;
 }
 
 export default function CheckoutButton({
@@ -28,6 +30,7 @@ export default function CheckoutButton({
   releaseId,
   className = "",
   appearance = "default",
+  signInHint = true,
 }: CheckoutButtonProps) {
   const look = (defaults: string) => (appearance === "cloth" ? "cl-button" : defaults);
   const [isLoading, setIsLoading] = useState(false);
@@ -145,10 +148,15 @@ export default function CheckoutButton({
 
       {signedOut && (
         <p className="text-center text-sm text-text-muted">
-          No account needed to pay. Already bought it?{" "}
-          <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground">
-            Sign in
-          </Link>
+          No account needed to pay.
+          {signInHint ? (
+            <>
+              {" "}Already bought it?{" "}
+              <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground">
+                Sign in
+              </Link>
+            </>
+          ) : null}
         </p>
       )}
 

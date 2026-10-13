@@ -338,6 +338,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
                   formattedPrice={saleOffer.formattedPrice}
                   ownershipState={saleOffer.ownershipState}
                   expected={saleOffer.expected}
+                  signInHint={false}
                 />
               ) : null}
               <Link
