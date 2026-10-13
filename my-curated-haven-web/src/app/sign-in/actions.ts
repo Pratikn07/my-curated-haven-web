@@ -1,6 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { isInAppBrowser, OPEN_IN_BROWSER_HINT } from "@/lib/auth/in-app-browser";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
 import { otpRequestErrorMessage } from "@/lib/auth/otp-errors";
 import { isTurnstileEnabled } from "@/lib/auth/turnstile";
@@ -26,10 +28,13 @@ export async function requestOtpAction(
   if (isTurnstileEnabled() && !captchaToken) {
     // Covers both "still working on it" and "the widget never produced one",
     // so a visitor whose challenge failed is pointed somewhere that works.
+    // Google is no way out inside Instagram's browser, so point there to the phone's own browser.
+    const inApp = isInAppBrowser((await headers()).get("user-agent"));
     return {
       success: false,
-      error:
-        "We couldn't verify you're human. Please try again, or use Continue with Google.",
+      error: inApp
+        ? `We couldn't verify you're human. Please try again, or ${OPEN_IN_BROWSER_HINT} and sign in there.`
+        : "We couldn't verify you're human. Please try again, or use Continue with Google.",
     };
   }
 

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
+import { isInAppBrowser } from "@/lib/auth/in-app-browser";
 import SignInForm from "@/components/auth/SignInForm";
 
 export const metadata: Metadata = {
@@ -27,7 +29,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
   return (
     <div className="flex min-h-[calc(100vh-16rem)] w-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <SignInForm returnTo={returnTo} authError={authError} />
+      <SignInForm returnTo={returnTo} authError={authError} inAppBrowser={isInAppBrowser((await headers()).get("user-agent"))} />
     </div>
   );
 }

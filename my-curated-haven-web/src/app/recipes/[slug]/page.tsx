@@ -20,6 +20,7 @@ import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
 import RecipeOpenTracker from "@/components/recipe/RecipeOpenTracker";
 import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
+import { listOpenPublishedCollections } from "@/lib/collections/publication";
 import { Lock } from "lucide-react";
 
 const getCachedRecipe = cache(async (slug: string) => {
@@ -109,6 +110,17 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
       accessKind = access.type === "free" ? "free" : "paid";
     } catch {
       accessKind = "paid";
+    }
+  }
+
+  // The book this recipe is in, for the unlock link; the bookcase when no open book has it.
+  let unlockHref = "/collections";
+  if (isAccessDenied) {
+    try {
+      const book = (await listOpenPublishedCollections()).find((c) => c.collection.recipes.some((r) => r.slug === catalog.slug));
+      if (book) unlockHref = `/collections/${book.collection.slug}#buy`;
+    } catch {
+      // Non-critical: the bookcase link still works
     }
   }
 
@@ -299,7 +311,7 @@ export default async function RecipeDetailPage({ params }: RecipeDetailPageProps
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
-                href="/collections/comfort-haven-collection"
+                href={unlockHref}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white shadow-sm hover:bg-action-hover"
               >
                 View Collection & Unlock
