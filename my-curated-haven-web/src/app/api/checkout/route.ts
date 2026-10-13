@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { createCheckoutSession } from "@/lib/payments/checkout";
 import { acceptCampaignInput } from "@/lib/analytics/campaigns";
 import type { CheckoutExpectation } from "@/lib/payments/types";
+import { GUEST_COOKIE, isGuestPrincipal } from "@/lib/payments/guest-checkout";
 
 const CHECKOUT_FIELDS = new Set(["collectionSlug", "analyticsConsent", "attribution", "expected"]);
 const ATTRIBUTION_FIELDS = new Set([
@@ -14,12 +16,23 @@ const ATTRIBUTION_FIELDS = new Set([
 
 export async function POST(request: Request) {
   try {
+    // Pay first: a signed-out parent buys as a guest, and Stripe collects their email. Their random guest id lives in
+    // a cookie so a second tap reuses the same open checkout; it grants nothing by itself.
     const user = await getCurrentUser();
+    let guestPrincipal: string | null = null;
     if (!user) {
-      return NextResponse.json(
-        { error: "Authentication required before purchasing." },
-        { status: 401 }
-      );
+      const jar = await cookies();
+      const existing = jar.get(GUEST_COOKIE)?.value;
+      guestPrincipal = isGuestPrincipal(existing) ? existing : globalThis.crypto.randomUUID();
+      if (guestPrincipal !== existing) {
+        jar.set(GUEST_COOKIE, guestPrincipal, {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 30,
+        });
+      }
     }
 
     const body = await request.json().catch(() => null);
@@ -87,10 +100,8 @@ export async function POST(request: Request) {
     const result = await createCheckoutSession({
       collectionSlug,
       expected,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: user ? { id: user.id, email: user.email } : null,
+      guestPrincipal,
       requestOrigin,
       analyticsConsent: record.analyticsConsent === true,
       attribution,

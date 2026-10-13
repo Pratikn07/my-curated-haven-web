@@ -138,6 +138,8 @@ Create a `private.commercial_offers` row and `private.release_manifests` entry f
 
 ### RC-16: pay first, then create the account
 
+**Built 2026-10-13** (owner decision: build before Halloween). A signed-out parent taps "Buy now"; the order is reserved for a random guest id (cookie `mch_guest`, `private.reserve_guest_collection_order`) and Stripe collects the email. The webhook records the payment as before (no access without an account) and keeps the email (`purchase_orders.buyer_email`). `/checkout/return` then shows "One last step": a 6-digit code goes to that email (read from the order, never the browser), and the code signs the parent in and runs `private.claim_guest_orders`, which attaches every paid, unclaimed order whose email equals the account's confirmed email and grants access through the normal purchase source. The same claim runs on every email-code or Google sign-in and on My Library, so closing the page after paying loses nothing. Not covered yet: support tools show unclaimed guest orders without a customer; a typo in the Stripe email needs a support case.
+
 Checkout currently asks parents to sign in before paying, which fails inside Instagram's in-app browser. Let a parent pay first, then create or link the account. Fulfilment stays server-side through the idempotent webhook, not the success page.
 
 ### RC-17: My Library

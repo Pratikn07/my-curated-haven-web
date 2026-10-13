@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { reconcileAndFulfillSession } from "@/lib/payments/fulfilment";
-import { CheckCircle2, Clock, AlertCircle, ShoppingBag } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
+import PurchaseConfirmed from "@/components/commerce/PurchaseConfirmed";
+import { getPublishedCollection } from "@/lib/collections/publication";
+import ClaimPurchaseForm from "@/components/commerce/ClaimPurchaseForm";
+import MockCheckoutEmailForm from "@/components/commerce/MockCheckoutEmailForm";
+import { claimGuestOrders, loadGuestCheckout, type GuestCheckout } from "@/lib/payments/guest-checkout";
 
 export const metadata: Metadata = {
   title: "Checkout Status",
@@ -13,31 +19,93 @@ interface ReturnPageProps {
   searchParams: Promise<{ session_id?: string }>;
 }
 
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto w-full max-w-xl px-4 py-16">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 text-center shadow-sm">{children}</div>
+    </div>
+  );
+}
+
 export default async function CheckoutReturnPage({ searchParams }: ReturnPageProps) {
   const { session_id: sessionId } = await searchParams;
   const user = await getCurrentUser();
 
-  if (!user) {
-    const returnUrl = sessionId
-      ? `/checkout/return?session_id=${encodeURIComponent(sessionId)}`
-      : "/account/collections";
+  // Pay first: a guest order unlocks once the parent confirms the email they paid with. A signed-in parent whose
+  // email matches claims it straight away and falls through to "You're in".
+  if (sessionId) {
+    let guest: GuestCheckout;
+    try {
+      guest = await loadGuestCheckout(sessionId);
+    } catch (error) {
+      console.error("[checkout/return] guest lookup failed", error instanceof Error ? error.message : error);
+      guest = { state: "not_guest" };
+    }
+    if (guest.state !== "not_guest") {
+      let claimed = guest.state === "paid" && guest.claimed;
+      if (user && guest.state === "paid" && !guest.claimed) claimed = (await claimGuestOrders(user.id)) > 0;
+      if (!(user && claimed)) {
+        if (guest.state === "pending") {
+          return (
+            <Card>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                <Clock className="h-10 w-10 text-amber-600 animate-pulse" />
+              </div>
+              <h1 className="mt-5 text-2xl font-bold text-foreground">Confirming your payment</h1>
+              <p className="mt-2 text-sm text-text-muted">
+                This usually takes a few seconds. Order {guest.supportReference}.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
+                >
+                  Refresh
+                </Link>
+              </div>
+            </Card>
+          );
+        }
+        if (guest.state === "needs_email") {
+          return <Card><MockCheckoutEmailForm sessionId={sessionId} /></Card>;
+        }
+        if (guest.claimed) {
+          // Already unlocked in an account, but this browser is signed out (or in another account).
+          return (
+            <Card>
+              <h1 className="text-2xl font-bold text-foreground">Your recipes are in your account</h1>
+              <p className="mt-2 text-sm text-text-muted">
+                Sign in with <strong className="text-foreground">{guest.maskedEmail}</strong> to open {guest.collectionTitle}.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href={`/sign-in?returnTo=${encodeURIComponent("/account/collections")}`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
+                >
+                  Sign in with email
+                </Link>
+              </div>
+            </Card>
+          );
+        }
+        return (
+          <Card>
+            <ClaimPurchaseForm
+              sessionId={sessionId}
+              maskedEmail={guest.maskedEmail}
+              collectionTitle={guest.collectionTitle}
+              supportReference={guest.supportReference}
+            />
+          </Card>
+        );
+      }
+    }
+  }
 
-    return (
-      <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-foreground">Sign In to View Purchase</h1>
-        <p className="mt-2 text-sm text-text-muted">
-          Please sign in to verify your purchase and unlock your recipe collection.
-        </p>
-        <div className="mt-6">
-          <Link
-            href={`/sign-in?returnTo=${encodeURIComponent(returnUrl)}`}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
-          >
-            Sign in with email
-          </Link>
-        </div>
-      </div>
-    );
+  if (!user) {
+    // Not a guest order: an account's purchase is only shown to that account.
+    const returnUrl = sessionId ? `/checkout/return?session_id=${encodeURIComponent(sessionId)}` : "/account/collections";
+    redirect(`/sign-in?returnTo=${encodeURIComponent(returnUrl)}`);
   }
 
   if (!sessionId) {
@@ -89,54 +157,24 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
   }
 
   const isConfirmed = orderSummary.isEntitled || orderSummary.statusDisplay === "paid_active";
+  // The book's cover and recipe count for the confirmation; the page still works without them.
+  const book = isConfirmed
+    ? await getPublishedCollection(orderSummary.collectionSlug).then((c) => c?.collection ?? null).catch(() => null)
+    : null;
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-16">
       <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 text-center shadow-sm">
         {isConfirmed ? (
-          <div>
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
-            </div>
-            <h1 className="mt-5 text-3xl font-extrabold text-foreground">
-              Purchase Confirmed!
-            </h1>
-            <p className="mt-2 text-base text-text-muted">
-              You now have full access to{" "}
-              <strong className="text-foreground">{orderSummary.collectionTitle}</strong>.
-            </p>
-
-            <div className="mt-6 rounded-xl bg-surface-muted p-4 text-left text-sm border border-border">
-              <div className="flex justify-between py-1">
-                <span className="text-text-muted">Order Reference:</span>
-                <span className="font-mono font-medium text-foreground">{orderSummary.supportReference}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-text-muted">Amount Paid:</span>
-                <span className="font-semibold text-foreground">{orderSummary.formattedAmount}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-text-muted">Access Status:</span>
-                <span className="font-semibold text-emerald-600">Active & Unlocked</span>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href={`/collections/${orderSummary.collectionSlug}`}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-action-hover"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                <span>Open Collection</span>
-              </Link>
-              <Link
-                href="/account/collections"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 text-base font-semibold text-foreground hover:bg-surface-muted"
-              >
-                View Library
-              </Link>
-            </div>
-          </div>
+          <PurchaseConfirmed
+            collectionSlug={orderSummary.collectionSlug}
+            collectionTitle={orderSummary.collectionTitle}
+            recipeCount={book?.recipes.length ?? null}
+            cover={book?.cover ?? null}
+            supportReference={orderSummary.supportReference}
+            formattedAmount={orderSummary.formattedAmount}
+            email={user.email ?? null}
+          />
         ) : (
           <div>
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">

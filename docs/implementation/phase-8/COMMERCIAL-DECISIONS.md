@@ -41,7 +41,7 @@ Tax treatment, customer rights and seller obligations are business launch decisi
 
 ## Proposed engineering defaults
 
-- Require the existing verified Phase 7 account immediately before payment. Keep all free reading anonymous.
+- Require the existing verified Phase 7 account immediately before payment. Keep all free reading anonymous. **Superseded on 2026-10-13 by the owner's pay-first decision (RC-16):** a signed-out parent pays first and confirms the email they paid with afterwards; access attaches only to an account whose email is confirmed and equal to it. Signed-in purchases are unchanged.
 - Use Stripe-hosted Checkout with quantity fixed at one and `mode=payment`.
 - Start with cards and eligible wallets under reviewed payment-method settings. Do not promise a particular wallet on every device or in every country.
 - Disable promotions, adjustable quantity, automatic currency conversion and delayed payment methods for the first launch unless separately approved and tested.

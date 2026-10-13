@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
 import { SIGN_IN_METHOD_COOKIE } from "@/lib/auth/oauth";
+import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,9 @@ export async function GET(request: Request) {
 
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    // Pay first: anything bought before signing in with this Google email joins the account (never throws).
+    if (!error && data.user) await claimGuestOrders(data.user.id);
     if (error) {
       // Log the detail; never echo provider errors to the parent (audit R8-04).
       console.error("[auth/callback] code exchange failed", error.message);

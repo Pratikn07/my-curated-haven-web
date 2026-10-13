@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, Lock, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
@@ -18,6 +18,8 @@ interface CheckoutButtonProps {
   className?: string;
   /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
   appearance?: "default" | "cloth";
+  /** Signed-out "Already bought it? Sign in" under the button; off where the page has its own sign-in line. */
+  signInHint?: boolean;
 }
 
 export default function CheckoutButton({
@@ -28,22 +30,11 @@ export default function CheckoutButton({
   releaseId,
   className = "",
   appearance = "default",
+  signInHint = true,
 }: CheckoutButtonProps) {
   const look = (defaults: string) => (appearance === "cloth" ? "cl-button" : defaults);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  if (ownershipState === "unauthenticated") {
-    return (
-      <Link
-        href={`/sign-in?returnTo=/collections/${collectionSlug}`}
-        className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action text-center")} ${className}`}
-      >
-        <Lock className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className="break-words">Sign in to buy ({formattedPrice})</span>
-      </Link>
-    );
-  }
 
   if (ownershipState === "owned") {
     return (
@@ -58,7 +49,7 @@ export default function CheckoutButton({
   }
 
   // Nothing is on sale right now (no enabled offer for the current release); a pending checkout can still resume.
-  if (ownershipState === "unavailable" || (ownershipState === "not_owned" && !expected)) {
+  if (ownershipState === "unavailable" || ((ownershipState === "not_owned" || ownershipState === "unauthenticated") && !expected)) {
     return (
       <button
         disabled
@@ -68,6 +59,9 @@ export default function CheckoutButton({
       </button>
     );
   }
+
+  // Pay first: a signed-out parent pays now and confirms their email afterwards (RC-16).
+  const signedOut = ownershipState === "unauthenticated";
 
   async function handleCheckout() {
     setIsLoading(true);
@@ -148,9 +142,23 @@ export default function CheckoutButton({
             <span className="break-words">Preparing checkout...</span>
           </>
         ) : (
-          <span className="break-words">Buy Collection — {formattedPrice}</span>
+          <span className="break-words">{signedOut ? `Buy now — ${formattedPrice}` : `Buy Collection — ${formattedPrice}`}</span>
         )}
       </button>
+
+      {signedOut && (
+        <p className="text-center text-sm text-text-muted">
+          No account needed to pay.
+          {signInHint ? (
+            <>
+              {" "}Already bought it?{" "}
+              <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground">
+                Sign in
+              </Link>
+            </>
+          ) : null}
+        </p>
+      )}
 
       {errorMessage && (
         <p
