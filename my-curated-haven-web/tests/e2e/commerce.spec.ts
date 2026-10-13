@@ -105,8 +105,8 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
 
     // Locked presentation is shown. This recipe is in no configured book here, so it is not on sale and
     // points to the free recipes; saving needs access, so there is no save button.
-    await expect(page.getByRole("heading", { name: "Collection Recipe" })).toBeVisible();
-    await expect(page.getByText("This recipe isn't on sale yet.", { exact: false })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Not on sale yet" })).toBeVisible();
+    await expect(page.getByText("This recipe will be part of one of our recipe books.", { exact: false })).toBeVisible();
     await expect(page.getByRole("link", { name: "Browse the free recipes" })).toHaveAttribute("href", "/recipes");
     await expect(page.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute(
       "href",

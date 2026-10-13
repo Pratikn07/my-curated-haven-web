@@ -1,9 +1,10 @@
 /**
- * A collection named in a sentence: "the Halloween collection", or the title as written when it already says
- * "Collection" ("The Comfort Haven Collection"), so the page never reads "the The ... Collection collection".
+ * A collection named in a sentence: "the Halloween collection" (or "the Halloween book" with noun "book"), or
+ * the title as written when it already says "Collection" ("The Comfort Haven Collection"), so the page never
+ * reads "the The ... Collection collection".
  */
-export function bookName(title: string): string {
-  return /\bcollection\b/i.test(title) ? title : `the ${title} collection`;
+export function bookName(title: string, noun: "collection" | "book" = "collection"): string {
+  return /\bcollection\b/i.test(title) ? title : `the ${title} ${noun}`;
 }
 
 /** The same at the start of a sentence. */
