@@ -58,7 +58,7 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 | 14 | Lunchbox & Daycare (`lunchbox-and-daycare`) | 2–4 y | 12 | Ready |
 | 15 | Picky Eater Favorites (`picky-eater-favorites`) | 2–4 y | 12 | Ready |
 | 16 | Family Dinners (`family-dinners`) | all stages | 12 | Ready |
-| 17 | Halloween (`halloween`) | all stages | 20 | Live; replaced with 20 owner recipes on 2026-10-12, review gate pending |
+| 17 | Halloween (`halloween`) | all stages | 20 | Live; replaced with 20 owner recipes on 2026-10-12, owner-reviewed |
 | 18 | Thanksgiving Table (`thanksgiving-table`) | all stages | 4 | Short: 4+ Thanksgiving recipes (turkey, pumpkin, stuffing, cranberry) |
 | 19 | Holiday Baking (`holiday-baking`) | all stages | 1 | Short: 7+ baked holiday treats (cookies, breads, muffins) |
 | 20 | Birthday Party (`birthday-party`) | all stages | 4 | Short: 4+ nut-free party foods (cake, cupcakes, finger food) |
@@ -242,28 +242,28 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 
 ### Halloween · 20 recipes
 
-On 2026-10-12 the owner replaced the 8 earlier members (#25, #42, #43, #58, #61, #63, #64, #65; they stay in the catalog and their other collections, and #58 is now in none) with 20 new Halloween recipes, #71–#90. They are in the catalog as drafts and have not been through the review gate yet. Two safety edits were made before adding them: Apple Peanut Butter Smiles uses apple slivers instead of mini marshmallows for teeth, and the Jack-O'-Lantern Peanut Butter Tart uses finely ground instead of chopped peanuts. The owner's two later recipes also follow their own safety notes: peanut-butter dots instead of candy eyes on the spider bites, and halved blueberries on the blueberry bites. Times include required freezing or chilling.
+On 2026-10-12 the owner replaced the 8 earlier members (#25, #42, #43, #58, #61, #63, #64, #65; they stay in the catalog and their other collections, and #58 is now in none) with 20 new Halloween recipes, #71–#90. The owner approved all 20 in chat on 2026-10-12; that approval is recorded as one human `approve` row per recipe in `private.recipe_reviews`, so they pass the review gate. Two safety edits were made before adding them: Apple Peanut Butter Smiles uses apple slivers instead of mini marshmallows for teeth, and the Jack-O'-Lantern Peanut Butter Tart uses finely ground instead of chopped peanuts. The owner's two later recipes also follow their own safety notes: peanut-butter dots instead of candy eyes on the spider bites, and halved blueberries on the blueberry bites. Times include required freezing or chilling.
 
-- #71 Banana Pumpkin Mini Donuts (1–3 y): owner's Halloween recipe, review gate pending
-- #72 Sweet Potato Jack-O'-Lantern Cupcakes (1–3 y): owner's Halloween recipe, review gate pending
-- #73 Berry Ghost Yogurt Bark (1–3 y): owner's Halloween recipe, review gate pending
-- #74 Mini Pumpkin Cheesecake Bites (1–3 y): owner's Halloween recipe, review gate pending
-- #75 Apple Pie Halloween Pockets (1–3 y): owner's Halloween recipe, review gate pending
-- #76 Jack-O'-Lantern Peanut Butter Tart (1–3 y): owner's Halloween recipe, review gate pending
-- #77 Apple Peanut Butter Smiles (1–3 y): owner's Halloween recipe, review gate pending
-- #78 Witch's Broomsticks (1–3 y): owner's Halloween recipe, review gate pending
-- #79 Spider Cracker Bites (1–3 y): owner's Halloween recipe, review gate pending
-- #80 Mandarin Orange Pumpkins (1–3 y): owner's Halloween recipe, review gate pending
-- #81 Monster Energy Balls (1–3 y): owner's Halloween recipe, review gate pending
-- #82 Mummy Banana Pops (1–3 y): owner's Halloween recipe, review gate pending
-- #83 Candy Corn Parfaits (1–3 y): owner's Halloween recipe, review gate pending
-- #84 Gummy Worms (1–3 y): owner's Halloween recipe, review gate pending
-- #85 Protein Fruit Gummies (1–3 y): owner's Halloween recipe, review gate pending
-- #86 Spider Peanut Butter Oat Bites (1–3 y): owner's Halloween recipe, review gate pending
-- #87 Strawberry Yogurt Ghost Hearts (1–3 y): owner's Halloween recipe, review gate pending
-- #88 Jack-o'-Lantern Mango Stars (1–3 y): owner's Halloween recipe, review gate pending
-- #89 Blueberry Yogurt Bites (1–3 y): owner's Halloween recipe, review gate pending
-- #90 Chocolate Pumpkin Protein Tarts (1–3 y): owner's Halloween recipe, review gate pending
+- #71 Banana Pumpkin Mini Donuts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #72 Sweet Potato Jack-O'-Lantern Cupcakes (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #73 Berry Ghost Yogurt Bark (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #74 Mini Pumpkin Cheesecake Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #75 Apple Pie Halloween Pockets (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #76 Jack-O'-Lantern Peanut Butter Tart (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #77 Apple Peanut Butter Smiles (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #78 Witch's Broomsticks (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #79 Spider Cracker Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #80 Mandarin Orange Pumpkins (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #81 Monster Energy Balls (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #82 Mummy Banana Pops (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #83 Candy Corn Parfaits (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #84 Gummy Worms (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #85 Protein Fruit Gummies (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #86 Spider Peanut Butter Oat Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #87 Strawberry Yogurt Ghost Hearts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #88 Jack-o'-Lantern Mango Stars (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #89 Blueberry Yogurt Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #90 Chocolate Pumpkin Protein Tarts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 
 ### Thanksgiving Table · 4 recipes
 

@@ -57,3 +57,21 @@ The street (`HALLOWEEN_STREET` in `src/config/halloween.ts`) is five image layer
 ## Analytics
 
 The page reuses the campaign tracker: `story_view` with `story_slug: "halloween"` and `story_series: "halloween-2026"`, `story_action_clicked` for menu, trick, collection and all-recipes taps (`campaign_recipe` for a free recipe, `collection` otherwise), and `story_section_viewed` for recipes, story, story_end, collection and closing.
+
+## Selling the book (from 2026-10-13)
+
+Owner decisions on 2026-10-12, recorded here because they override the staged launch plan in `docs/implementation/phase-11/STAGED-ROLLOUT.md` and the Phase 10 NO-GO for this one collection:
+
+| Decision | Choice |
+| --- | --- |
+| Price | $6.99 USD, one-time, tax-inclusive, no Stripe Tax, no discount codes |
+| Who can buy | Everyone, as soon as it is ready (not invite-only) |
+| Sign-in | Email code before paying; inside Instagram the Google button is hidden. Paying first (RC-16) comes later |
+| Refunds | All sales final (the collection page already says so); refunds by hand in Stripe only |
+| Recipes | All 20 published after the owner's review (one human `approve` row each in `private.recipe_reviews`) |
+
+Stripe (live, account `acct_1UMM1WPLtGCDwKKM`): product `prod_VQq99fuWxOZV9a` "Halloween collection", price `price_1UPySwPLtGCDwKKMMHANn13V` ($6.99, one-time, inclusive). Created with the Stripe CLI on 2026-10-12.
+
+Going on sale is a database change in one transaction: release 1 of `halloween` (state `published`) with the 20 recipes in book order, its `release_manifests` row, the `additions-v1` access policy (so buyers receive later additions), the `v1/v1` commerce access policy, and the offer with `sale_enabled = true`. `CHECKOUT_ENABLED=true` must be set in Vercel production first. To stop sales, set the offer's `sale_enabled = false`; the environment variable alone leaves a Buy button that fails.
+
+On the page: a book card sits under the menu (screen 2.6 of 11 on a 390×664 phone, was screen 9) and, on phones, a buy bar follows once it scrolls away. Both go to `/collections/halloween#buy` while on sale.
