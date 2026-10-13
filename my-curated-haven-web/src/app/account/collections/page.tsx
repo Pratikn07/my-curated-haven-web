@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { getUserPurchasedCollections } from "@/lib/payments/repository";
+import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 import Badge from "@/components/ui/Badge";
 import StatePanel from "@/components/ui/StatePanel";
 import { BookOpen, ShoppingBag, ArrowRight } from "lucide-react";
@@ -22,6 +23,8 @@ export default async function AccountCollectionsPage() {
   let collections: Awaited<ReturnType<typeof getUserPurchasedCollections>> = [];
   let unavailable = false;
   try {
+    // Pay first: a purchase made before signing in with this email shows up here too (the claim never throws).
+    await claimGuestOrders(user.id);
     collections = await getUserPurchasedCollections(user.id);
   } catch (error) {
     // Don't show "no purchases" when we simply couldn't check (R8-05).

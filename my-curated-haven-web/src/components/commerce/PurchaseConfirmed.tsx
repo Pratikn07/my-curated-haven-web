@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { bookNameStart } from "@/lib/collections/book-name";
 
 export interface PurchaseConfirmedProps {
   collectionSlug: string;
@@ -27,7 +28,7 @@ export default function PurchaseConfirmed({
   formattedAmount,
   email,
 }: PurchaseConfirmedProps) {
-  const recipes = recipeCount ? `all ${recipeCount} recipes` : "every recipe";
+  const recipes = recipeCount ? `All ${recipeCount} recipes are` : "Every recipe is";
   return (
     <div>
       {cover ? (
@@ -43,7 +44,7 @@ export default function PurchaseConfirmed({
       ) : null}
       <h1 className="mt-6 text-3xl font-extrabold text-foreground">You&apos;re in.</h1>
       <p className="mx-auto mt-2 max-w-sm text-base text-text-muted">
-        The <strong className="text-foreground">{collectionTitle}</strong> collection is yours: {recipes}, ready to cook.
+        <strong className="text-foreground">{bookNameStart(collectionTitle)}</strong> is yours. {recipes} ready when you are.
       </p>
       <Link
         href={`/account/collections#${collectionSlug}`}
@@ -53,17 +54,19 @@ export default function PurchaseConfirmed({
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>
       <p className="mt-6 text-sm text-text-muted">
-        It stays in <Link href="/account/collections" className="underline hover:text-foreground">My Library</Link>
         {email ? (
           <>
-            . On another phone or browser, sign in with <strong className="text-foreground">{email}</strong> to find it.
+            Your recipes are saved to your account, <strong className="text-foreground">{email}</strong>. If you&apos;re ever
+            signed out, sign in with that email to open them.
           </>
         ) : (
-          "."
+          <>
+            Your recipes are saved in <Link href="/account/collections" className="underline hover:text-foreground">My Library</Link>.
+          </>
         )}
       </p>
       <p className="mt-4 text-xs text-text-muted">
-        Order {supportReference} · {formattedAmount} paid. Keep this reference if you ever need help.
+        Order {supportReference} · {formattedAmount}. If you ever need help, quote this order number.
       </p>
     </div>
   );

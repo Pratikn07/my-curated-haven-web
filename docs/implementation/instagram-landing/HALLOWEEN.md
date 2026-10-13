@@ -66,7 +66,7 @@ Owner decisions on 2026-10-12, recorded here because they override the staged la
 | --- | --- |
 | Price | $6.99 USD, one-time, tax-inclusive, no Stripe Tax, no discount codes |
 | Who can buy | Everyone, as soon as it is ready (not invite-only) |
-| Sign-in | Email code before paying; inside Instagram the Google button is hidden. Paying first (RC-16) comes later |
+| Sign-in | Pay first (RC-16, owner decision 2026-10-13): no account is needed to pay. After paying, the parent confirms the email they paid with by a 6-digit code, which creates or opens their account and unlocks the book. Any later sign-in with that email also claims it |
 | Refunds | All sales final (the collection page already says so); refunds by hand in Stripe only |
 | Recipes | All 20 published after the owner's review (one human `approve` row each in `private.recipe_reviews`) |
 

@@ -73,7 +73,9 @@ export async function proxy(request: NextRequest) {
   const isAuthCallback = pathname === "/auth/callback";
   const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
 
-  if ((isAccountRoute || isCheckoutReturn || isAdminRoute) && !user) {
+  // /checkout/return is reachable signed out: a parent who paid first confirms their email there. The page itself
+  // sends anyone without a guest order to sign in.
+  if ((isAccountRoute || isAdminRoute) && !user) {
     const returnTarget = pathname + (request.nextUrl.search || "");
     const redirectUrl = new URL(
       `/sign-in?returnTo=${encodeURIComponent(returnTarget)}`,

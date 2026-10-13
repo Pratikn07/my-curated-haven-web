@@ -14,6 +14,7 @@ import type { OrderSummaryDto } from "./types";
 import { drainOptionalAnalyticsExports } from "@/lib/analytics/drain";
 import { paymentCaptureMatchesSnapshot } from "./guardrails";
 import { refreshOrderFromProvider } from "./reconciliation/service";
+import { loadGuestCheckout, recordGuestBuyerEmail } from "./guest-checkout";
 
 export async function reconcileAndFulfillSession(
   sessionId: string,
@@ -208,6 +209,11 @@ export async function processStripeWebhookEvent(event: {
             currency: obj.currency as string,
             paidAt: new Date(),
           });
+          // Pay first: a guest order keeps the email Stripe collected, so the buyer can claim it by confirming it.
+          if (order.user_id === null) {
+            const details = obj.customer_details as { email?: unknown } | null | undefined;
+            await recordGuestBuyerEmail(order.id, typeof details?.email === "string" ? details.email : null);
+          }
           outcome = { state: "completed" };
         }
       }
@@ -288,7 +294,9 @@ async function findProviderPayment(
     [session.id]
   );
   if (orderRes.rows.length === 0) return null;
-  await reconcileAndFulfillSession(session.id, orderRes.rows[0].user_id);
+  // A guest order (pay first) has no account yet; its own path records the payment and the email.
+  if (orderRes.rows[0].user_id === null) await loadGuestCheckout(session.id);
+  else await reconcileAndFulfillSession(session.id, orderRes.rows[0].user_id);
   return (await lookup()).rows[0] ?? null;
 }
 

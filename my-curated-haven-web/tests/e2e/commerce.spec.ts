@@ -116,7 +116,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     expect(pageContent).not.toContain("SENTINEL_PAID_GOLDEN_SOUP_PROTECTED_SECRET");
   });
 
-  test("V06: Collection sales page shows truthful offer details and sign-in CTA for visitors", async ({ page }) => {
+  test("V06: Collection sales page shows truthful offer details and a pay-first Buy button for visitors", async ({ page }) => {
     await page.goto("/collections/comfort-haven-collection");
 
     await expect(page.getByRole("heading", { level: 1 })).toContainText("The Comfort Haven Collection");
@@ -124,21 +124,59 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await expect(page.getByText("One-time purchase")).toBeVisible();
     await expect(page.getByText(/Includes printable recipe pages/i)).toBeVisible();
 
-    // Sign in to buy button
-    const signinBtn = page.getByRole("link", { name: /Sign in to buy/i });
-    await expect(signinBtn).toBeVisible();
-    await expect(signinBtn).toHaveAttribute("href", /\/sign-in\?returnTo=/);
+    // Pay first: visitors buy without an account; owners can still sign in.
+    await expect(page.getByRole("button", { name: /Buy now — \$15\.00/i })).toBeVisible();
+    await expect(page.getByText(/No account needed to pay/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute("href", /\/sign-in\?returnTo=/);
 
     // Free sample callout
     await expect(page.getByRole("heading", { name: "Try Free Sample Recipes" })).toBeVisible();
   });
 
-  test("V10 & V12: Checkout creation requires authentication and handles order reservation", async ({ page }) => {
-    // Direct API call without auth fails with 401
+  test("V10 & V12: A signed-out checkout without the page's expectation is refused, never charged", async ({ page }) => {
+    // Pay first allows guests, but only for exactly what the page showed for sale.
     const unauthRes = await page.request.post("/api/checkout", {
       data: { collectionSlug: "comfort-haven-collection" },
     });
-    expect(unauthRes.status()).toBe(401);
+    expect(unauthRes.status()).toBe(409);
+    expect((await unauthRes.json()).code).toBe("refresh_required");
+  });
+
+  test("V07: Pay first, account after: a visitor buys, confirms their email and opens the collection", async ({ page, browser }) => {
+    const buyerEmail = `guest-${Date.now()}@synthetic.test`;
+
+    // 1. Buy without an account (local mock checkout stands in for Stripe).
+    await page.goto("/collections/comfort-haven-collection");
+    await page.getByRole("button", { name: /Buy now — \$15\.00/i }).click();
+    await expect(page).toHaveURL(/\/checkout\/return\?session_id=cs_test_mock_/);
+    const returnUrl = page.url();
+
+    // 2. Stripe would collect the email; the mock form stands in for it.
+    await page.getByLabel("Email address").fill(buyerEmail);
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // 3. Paid, but nothing unlocked yet: the code goes to the email that paid.
+    await expect(page.getByRole("heading", { name: "One last step" })).toBeVisible();
+    await expect(page.getByText(/g•••\d@synthetic\.test/)).toBeVisible();
+    await page.getByRole("button", { name: "Send my code" }).click();
+    const code = await getLatestOtp(buyerEmail);
+    await page.getByLabel(/digit code sent to/i).fill(code);
+    await page.getByRole("button", { name: "Unlock my recipes" }).click();
+
+    // 4. Signed in as that email, the purchase is theirs.
+    await expect(page.getByRole("heading", { name: "You're in." })).toBeVisible();
+    await expect(page.getByText(buyerEmail)).toBeVisible();
+    await page.goto("/account/collections");
+    await expect(page.getByText("The Comfort Haven Collection")).toBeVisible();
+    await expect(page.getByText("Active Access")).toBeVisible();
+
+    // 5. Someone else holding the same return link cannot take it.
+    const stranger = await browser.newContext();
+    const strangerPage = await stranger.newPage();
+    await strangerPage.goto(returnUrl);
+    await expect(strangerPage.getByRole("heading", { name: "Your recipes are in your account" })).toBeVisible();
+    await expect(strangerPage.getByRole("button", { name: "Send my code" })).toHaveCount(0);
+    await stranger.close();
   });
 
   test("[QA-J19:partial] [QA-J20:partial] V11, V12, V30: rejects client price overrides; concurrent checkout reuses one session and webhook fulfills without a return", async ({ page }) => {

@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { canUseMockCheckout, getStripeConfig, isStripeConfigured } from "./config";
 import { getStripeClient } from "./stripe";
 import { bindSessionToOrder, closeExpiredCheckoutAttempt, recordCheckoutMeasurement } from "./repository";
-import { findCollectionIdBySlug, reserveCollectionOrder } from "./collection-reservation";
+import { findCollectionIdBySlug, reserveCollectionOrder, reserveGuestCollectionOrder } from "./collection-reservation";
 import type { CheckoutExpectation, CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
@@ -12,10 +12,13 @@ export interface CreateCheckoutParams {
   collectionSlug: string;
   /** What the buyer's page showed for sale; a mismatch returns "stale" instead of charging. */
   expected: CheckoutExpectation | null;
+  /** The signed-in buyer, or null to pay first: Stripe then collects the email and the order is claimed afterwards. */
   user: {
     id: string;
     email?: string;
-  };
+  } | null;
+  /** A signed-out buyer's random id (browser cookie), so a second tap reuses their open checkout. Required without a user. */
+  guestPrincipal?: string | null;
   requestOrigin?: string;
   analyticsConsent?: boolean;
   attribution?: CampaignInput | null;
@@ -25,6 +28,7 @@ export async function createCheckoutSession({
   collectionSlug,
   expected,
   user,
+  guestPrincipal = null,
   requestOrigin,
   analyticsConsent = false,
   attribution = null,
@@ -45,8 +49,14 @@ export async function createCheckoutSession({
   if (!collectionId) {
     return { status: "error", message: "This collection is not currently available for purchase.", code: "OFFER_NOT_FOUND" };
   }
+  if (!user && !guestPrincipal) {
+    return { status: "error", message: "Please refresh the page and try again.", code: "CHECKOUT_INVALID" };
+  }
+  const reserve = () => user
+    ? reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID())
+    : reserveGuestCollectionOrder(guestPrincipal as string, collectionId, expected, crypto.randomUUID());
   // A stored session that Stripe already expired is closed and the reservation retried once.
-  let reservation = await reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID());
+  let reservation = await reserve();
   for (let attempt = 0; ; attempt++) {
     if (reservation.state === "owned") return { status: "already_owned", collectionSlug };
     if (reservation.state === "stale") return { status: "stale", expected: reservation.expected };
@@ -71,7 +81,7 @@ export async function createCheckoutSession({
       const session = await getStripeClient().checkout.sessions.retrieve(pending.sessionId);
       if (session.status === "expired") {
         await closeExpiredCheckoutAttempt(pending.sessionId);
-        reservation = await reserveCollectionOrder(user.id, collectionId, expected, crypto.randomUUID());
+        reservation = await reserve();
         continue;
       }
       if (session.status === "complete") {
@@ -131,7 +141,8 @@ export async function createCheckoutSession({
             quantity: 1,
           },
         ],
-        customer_email: user.email,
+        // A signed-in buyer's email is known; for a guest, Stripe asks for it and the order is claimed with it later.
+        ...(user?.email ? { customer_email: user.email } : {}),
         client_reference_id: order.id,
         metadata: {
           order_id: order.id,

@@ -46,7 +46,24 @@ export async function reserveCollectionOrder(userId: string, collectionId: strin
   const { rows } = await getCommercePool().query(
     "SELECT private.reserve_collection_order($1, $2, $3::jsonb, $4) AS reservation",
     [userId, collectionId, expected ? JSON.stringify(expected) : null, idempotencyKey]);
-  const r = rows[0]?.reservation as { state?: unknown; order?: unknown; expected?: unknown } | undefined;
+  return parseReservation(rows[0]?.reservation);
+}
+
+/**
+ * Reserve (or reuse) a signed-out buyer's order: pay first, account after. `guestPrincipal` is the buyer's random
+ * id from a browser cookie, so a second tap reuses their open attempt. The order has no account until the buyer
+ * confirms the email Stripe collected (claimGuestOrders).
+ */
+export async function reserveGuestCollectionOrder(guestPrincipal: string, collectionId: string,
+  expected: CheckoutExpectation | null, idempotencyKey: string): Promise<Reservation> {
+  const { rows } = await getCommercePool().query(
+    "SELECT private.reserve_guest_collection_order($1, $2, $3::jsonb, $4) AS reservation",
+    [guestPrincipal, collectionId, expected ? JSON.stringify(expected) : null, idempotencyKey]);
+  return parseReservation(rows[0]?.reservation);
+}
+
+function parseReservation(value: unknown): Reservation {
+  const r = value as { state?: unknown; order?: unknown; expected?: unknown } | undefined;
   if ((r?.state === "reserved" || r?.state === "existing") && isOrder(r.order)) return { state: r.state, order: r.order };
   if (r?.state === "owned") return { state: "owned" };
   if (r?.state === "unavailable") return { state: "unavailable" };

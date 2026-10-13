@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isInAppBrowser, OPEN_IN_BROWSER_HINT } from "@/lib/auth/in-app-browser";
+import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
 import { otpRequestErrorMessage } from "@/lib/auth/otp-errors";
 import { isTurnstileEnabled } from "@/lib/auth/turnstile";
@@ -74,7 +75,7 @@ export async function verifyOtpAction(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     email: trimmedEmail,
     token: trimmedToken,
     type: "email",
@@ -83,6 +84,9 @@ export async function verifyOtpAction(
   if (error) {
     return { success: false, error: error.message };
   }
+
+  // Pay first: anything bought before signing in with this (now confirmed) email joins the account.
+  if (data.user) await claimGuestOrders(data.user.id);
 
   const destination = sanitizeReturnTo(returnTo);
   revalidatePath("/", "layout");
