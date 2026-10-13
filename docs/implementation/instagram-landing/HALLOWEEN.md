@@ -8,8 +8,8 @@ Mock the owner approved (private): https://claude.ai/artifact/T58b3YQzcSAeh4Krfc
 
 | # | Section | What it does |
 | --- | --- | --- |
-| 1 | Menu (first screen) | The pumpkin (tap three times to carve it), "Halloween, the not-scary way", and the Halloween menu: Ghost pops, Mummy scrolls, Pumpkin pillows. Each row opens the recipe's own page when it is free, otherwise the Halloween collection |
-| 2 | Make them Halloween | The two dressed-up recipes, each a before-and-after slider (everyday on the left of the line, Halloween on the right; drag, tap or arrow keys; it nudges once on arrival), and the one small step that makes it Halloween |
+| 1 | Menu (first screen) | The pumpkin (tap three times to carve it), "Halloween, the not-scary way", and the Halloween menu: Ghost bark, Mummy pops, Spider bites (Ghost pops, Mummy scrolls and Pumpkin pillows until 2026-10-12). Each row opens the recipe's own page when it is free, otherwise the Halloween collection |
+| 2 | Make them Halloween | Hidden since 2026-10-12: its photos were of the old ghost pops and mummy scrolls, which left the book. With entries in `HALLOWEEN_TRICKS` it shows the dressed-up recipes, each a before-and-after slider (everyday on the left of the line, Halloween on the right; drag, tap or arrow keys; it nudges once on arrival), and the one small step that makes it Halloween |
 | 3 | Our plan for Saturday | Bhagyashree's plan, told before Halloween: the skeleton scare (last week), making ghosts (10:30), the walk (6:15, the rendered street), goodnight to the skeleton (7:30) |
 | 4 | Why we cook for Halloween | Three reasons. Hard candy, whole nuts and popcorn are choking risks under 4 (AAP) |
 | 5 | The Halloween collection | The cover opens to the contents (free recipes marked), the price and "See the Halloween collection" |
