@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { HALLOWEEN_TRICKS } from "../../src/config/halloween";
 
 /**
  * The Halloween landing page. Runs against the local database, where the
@@ -8,6 +9,8 @@ import { expect, test, type Page } from "@playwright/test";
  */
 const PAGE = "/halloween";
 const FROM_DM = `${PAGE}?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm`;
+/** The before-and-after section is empty until new photos exist (src/config/halloween.ts). */
+const HAS_TRICKS = HALLOWEEN_TRICKS.length > 0;
 
 type RecordedEvent = { event_name: string; properties: Record<string, unknown> };
 
@@ -65,7 +68,7 @@ test("[halloween] without script the whole page is there to read", async ({ brow
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(PAGE);
-  await expect(page.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
+  if (HAS_TRICKS) await expect(page.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How we're doing Halloween this year" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Three doorbells, then home" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Why we cook for Halloween" })).toBeVisible();
@@ -81,6 +84,7 @@ test("[halloween] the visit is counted as the Halloween story", async ({ page })
 });
 
 test("[halloween] the before-and-after slider shows more of the everyday version as it moves left", async ({ page }) => {
+  test.skip(!HAS_TRICKS, "No before-and-after photos on the page right now");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(PAGE);
   const knob = page.getByRole("slider", { name: "Compare the everyday and Halloween versions" }).first();

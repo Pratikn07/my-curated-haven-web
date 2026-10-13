@@ -68,64 +68,40 @@ export const HALLOWEEN_HERO = {
   byline: "Recipes by Tiny Soho",
 };
 
+/** The link preview picture when the page is shared. */
+export const HALLOWEEN_SHARE_IMAGE = {
+  src: "/images/recipes/berry-ghost-yogurt-bark-1040.webp",
+  alt: "Berry ghost yogurt bark: frozen yogurt with berries and chocolate-chip ghost faces",
+};
+
 export const HALLOWEEN_MENU: readonly HalloweenDish[] = [
   {
-    slug: "mini-berry-yogurt-pops",
-    alias: "Ghost pops",
+    slug: "berry-ghost-yogurt-bark",
+    alias: "Ghost bark",
     when: "Morning · make ahead",
     hideMinutes: true,
-    thumb: { src: `${IMG}/thumb-ghost-pops.webp`, alt: "", width: 160, height: 160 },
+    thumb: { src: `${IMG}/thumb-ghost-bark.webp`, alt: "", width: 160, height: 160 },
   },
   {
-    slug: "spinach-and-cheese-pizza-scrolls",
-    alias: "Mummy scrolls",
-    when: "Lunch",
-    thumb: { src: `${IMG}/thumb-mummy-scrolls.webp`, alt: "", width: 160, height: 160 },
+    slug: "mummy-banana-pops",
+    alias: "Mummy pops",
+    when: "Afternoon · make ahead",
+    hideMinutes: true,
+    thumb: { src: `${IMG}/thumb-mummy-pops.webp`, alt: "", width: 160, height: 160 },
   },
   {
-    slug: "pumpkin-and-ricotta-gnocchi-pillows",
-    alias: "Pumpkin pillows",
-    when: "Dinner",
-    thumb: { src: `${IMG}/thumb-pumpkin-pillows.webp`, alt: "", width: 160, height: 160 },
+    slug: "spider-cracker-bites",
+    alias: "Spider bites",
+    when: "Before the doorbells",
+    thumb: { src: `${IMG}/thumb-spider-bites.webp`, alt: "", width: 160, height: 160 },
   },
 ];
 
-export const HALLOWEEN_TRICKS: readonly HalloweenTrick[] = [
-  {
-    slug: "mini-berry-yogurt-pops",
-    alias: "Ghost pops",
-    how: "Once they're frozen, add two dots of melted chocolate for eyes. Ghosts she's allowed to eat.",
-    dressed: {
-      src: `${IMG}/ghost-pops.webp`,
-      alt: "Pink berry yogurt pops with chocolate-dot eyes, like little ghosts",
-      width: 800,
-      height: 640,
-    },
-    everyday: {
-      src: `${IMG}/ghost-pops-before.webp`,
-      alt: "The same berry yogurt pops without eyes",
-      width: 800,
-      height: 640,
-    },
-  },
-  {
-    slug: "spinach-and-cheese-pizza-scrolls",
-    alias: "Mummy scrolls",
-    how: "Lay thin cheese strips across before baking, then add two olive eyes. They freeze, so make a double batch for the party.",
-    dressed: {
-      src: `${IMG}/mummy-scrolls.webp`,
-      alt: "Pizza scrolls wrapped in cheese strips like mummies, with olive eyes",
-      width: 800,
-      height: 640,
-    },
-    everyday: {
-      src: `${IMG}/everyday-pizza-scrolls.webp`,
-      alt: "The same spinach and cheese pizza scrolls without the mummy wrap",
-      width: 800,
-      height: 640,
-    },
-  },
-];
+/**
+ * Before-and-after sliders ("Make them Halloween"). Empty since the 2026-10-12 recipe swap: the
+ * slider photos were of the old ghost pops and mummy scrolls. The section hides itself while empty.
+ */
+export const HALLOWEEN_TRICKS: readonly HalloweenTrick[] = [];
 
 export const HALLOWEEN_STORY = {
   kicker: "Our plan for Saturday",
@@ -152,7 +128,7 @@ export const HALLOWEEN_MORNING: readonly HalloweenMoment[] = [
     period: "am",
     place: "home",
     heading: "We'll make our own ghosts",
-    text: "Yogurt and berries into the moulds and into the freezer, then two chocolate eyes each once they've set. Ghosts you're allowed to eat are much less scary.",
+    text: "Yogurt, berries and two chocolate eyes for every ghost, then into the freezer. Ghosts you're allowed to eat are much less scary.",
     clock: "Sat 31 Oct · 10:30 am",
     image: {
       src: `${IMG}/making-ghosts.webp`,
@@ -177,7 +153,7 @@ export const HALLOWEEN_NIGHT: HalloweenMoment = {
   period: "pm",
   place: "home",
   heading: "Goodnight, skeleton",
-  text: "Bath, pyjamas, one ghost pop from the freezer, and a wave to the neighbour's skeleton from the window seat. That's the plan. We'll tell you how it really went.",
+  text: "Bath, pyjamas, one frozen ghost from the freezer, and a wave to the neighbour's skeleton from the window seat. That's the plan. We'll tell you how it really went.",
   clock: "Sat 31 Oct · 7:30 pm",
   image: {
     src: `${IMG}/skeleton-said-hi.webp`,
@@ -205,11 +181,11 @@ export const HALLOWEEN_STREET = {
 export const HALLOWEEN_REASONS: readonly { title: string; text: string }[] = [
   {
     title: "Most of the candy bag isn't for her yet.",
-    text: "She gets the bucket, I get the sorting job. Hard candy, whole nuts and popcorn go in the jar for Dad. Tonight's treat is the ghost pop she decorated herself.",
+    text: "She gets the bucket, I get the sorting job. Hard candy, whole nuts and popcorn go in the jar for Dad. Tonight's treat is a ghost she decorated herself.",
   },
   {
     title: "Costumes eat the dinner hour.",
-    text: "Something made that morning means she eats a real meal before the doorbell rings.",
+    text: "Spider bites take fifteen minutes, so she has a snack in her before the doorbell rings.",
   },
   {
     title: "The kitchen is the part she can do.",
@@ -219,7 +195,7 @@ export const HALLOWEEN_REASONS: readonly { title: string; text: string }[] = [
 
 export const HALLOWEEN_BOOK = {
   eyebrow: "The Halloween collection",
-  heading: "Eight recipes for the week the costumes come out",
+  heading: "Twenty recipes for the week the costumes come out",
   cover: { src: "/images/collections/cover-halloween-1040.webp", width: 1040, height: 1412, alt: "The Halloween collection: a pumpkin-orange cloth cookbook with a gold-foil pumpkin" },
 };
 

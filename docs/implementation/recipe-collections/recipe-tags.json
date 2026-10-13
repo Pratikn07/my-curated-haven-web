@@ -1,5 +1,5 @@
 {
- "$comment": "Recipe tags and collection placement for the 70 catalog recipes, reviewed one recipe at a time on 2026-10-05. Readable copy: RECIPE-TAGS.md. Vocabulary and rules: COLLECTIONS.md / collections.seed.json. Check with: python3 check_recipe_tags.py",
+ "$comment": "Recipe tags and collection placement for the catalog recipes: 70 reviewed one recipe at a time on 2026-10-05, plus 20 owner-supplied Halloween recipes added 2026-10-12 (review_gate pending). Readable copy: RECIPE-TAGS.md. Vocabulary and rules: COLLECTIONS.md / collections.seed.json. Check with: python3 check_recipe_tags.py",
  "version": 2,
  "source": "Reviewed catalog data as applied to production (recipe-review fix-output, the free recipes, and the two later step edits in apply-six-recipe-image-followup.sql)",
  "recipes": [
@@ -2141,12 +2141,10 @@
     "texture": "finger-food"
    },
    "collections": [
-    "halloween",
     "first-finger-foods",
     "thanksgiving-table"
    ],
    "collection_reasons": {
-    "halloween": "Live member; pumpkin",
     "first-finger-foods": "Soft strips from 8 m",
     "thanksgiving-table": "Pumpkin"
    },
@@ -3664,13 +3662,11 @@
     "texture": "finger-food"
    },
    "collections": [
-    "halloween",
     "lunchbox-and-daycare",
     "on-the-go-snacks",
     "thanksgiving-table"
    ],
    "collection_reasons": {
-    "halloween": "Live member",
     "lunchbox-and-daycare": "Summary says it holds up in a lunchbox",
     "on-the-go-snacks": "Freezes, travels without crumbling",
     "thanksgiving-table": "Corn muffins: a Thanksgiving side"
@@ -3762,13 +3758,11 @@
     "texture": "finger-food"
    },
    "collections": [
-    "halloween",
     "lunchbox-and-daycare",
     "picky-eater-favorites",
     "birthday-party"
    ],
    "collection_reasons": {
-    "halloween": "Live member",
     "lunchbox-and-daycare": "Written for packing, good cold",
     "picky-eater-favorites": "Pizza with spinach hidden inside",
     "birthday-party": "Pizza for a party"
@@ -5045,12 +5039,8 @@
     "occasion": [],
     "texture": "finger-food"
    },
-   "collections": [
-    "halloween"
-   ],
-   "collection_reasons": {
-    "halloween": "Live member"
-   },
+   "collections": [],
+   "collection_reasons": {},
    "after_rewrite": [],
    "flags": [
     "Fixed 2026-10-05: the gluten-free tag was removed.",
@@ -5310,12 +5300,10 @@
     "texture": "finger-food"
    },
    "collections": [
-    "halloween",
     "picky-eater-favorites",
     "thanksgiving-table"
    ],
    "collection_reasons": {
-    "halloween": "Live member",
     "picky-eater-favorites": "Fries with a dip",
     "thanksgiving-table": "Cinnamon sweet potato: a Thanksgiving flavour"
    },
@@ -5482,12 +5470,10 @@
     "texture": "bowl"
    },
    "collections": [
-    "halloween",
     "everyday-treats",
     "birthday-party"
    ],
    "collection_reasons": {
-    "halloween": "Live member",
     "everyday-treats": "Sweetened only by fruit",
     "birthday-party": "Frozen party treat"
    },
@@ -5564,12 +5550,10 @@
     "texture": "finger-food"
    },
    "collections": [
-    "halloween",
     "everyday-treats",
     "on-the-go-snacks"
    ],
    "collection_reasons": {
-    "halloween": "Live member",
     "everyday-treats": "No added sugar (banana)",
     "on-the-go-snacks": "Freezes, travels"
    },
@@ -5653,12 +5637,10 @@
     "texture": "bites"
    },
    "collections": [
-    "halloween",
     "everyday-treats",
     "holiday-baking"
    ],
    "collection_reasons": {
-    "halloween": "Live member",
     "everyday-treats": "Sweetened only by dates",
     "holiday-baking": "Chocolate treat for December (no-bake)"
    },
@@ -6103,6 +6085,1604 @@
      "Flatten every pea before mixing: whole peas are a choking risk for babies and young toddlers."
     ]
    }
+  },
+  {
+   "n": 71,
+   "slug": "banana-pumpkin-mini-donuts",
+   "title": "Banana Pumpkin Mini Donuts",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "wheat": [
+     "1 cup rolled oats, blended into flour (or oat flour)"
+    ],
+    "eggs": [
+     "1 large egg"
+    ]
+   },
+   "catalog_allergens": [
+    "egg",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "breakfast"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead"
+    ],
+    "free_from": [
+     "dairy-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "dairy-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 medium ripe banana, mashed",
+     "1/2 cup pumpkin puree (plain, not pie filling)",
+     "1 cup rolled oats, blended into flour (or oat flour)",
+     "1 large egg",
+     "1 tsp ground cinnamon",
+     "1 tsp baking powder",
+     "1 tbsp coconut oil, melted, plus more for the pan"
+    ],
+    "storage": "Keep in an airtight container at room temperature for 1 day or refrigerate up to 4 days. Freeze up to 2 months.",
+    "summary": "Soft-baked mini donuts sweetened with banana and pumpkin, with warm cinnamon. No added sugar, and the mini size fits a toddler's hand.",
+    "tips": [
+     "A ripe banana with brown spots gives the most sweetness, so no sugar is needed.",
+     "No donut pan? Bake in a greased mini muffin tin for 12 to 14 minutes.",
+     "Use certified gluten-free oats if you need these fully gluten-free."
+    ]
+   }
+  },
+  {
+   "n": 72,
+   "slug": "sweet-potato-jack-o-lantern-cupcakes",
+   "title": "Sweet Potato Jack-O'-Lantern Cupcakes",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "eggs": [
+     "2 large eggs"
+    ],
+    "milk": [
+     "1/4 cup plain Greek yogurt, plus 1/2 cup more for frosting"
+    ]
+   },
+   "catalog_allergens": [
+    "egg",
+    "milk",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 cup sweet potato puree (plain, canned or homemade)",
+     "1 cup oat flour",
+     "2 large eggs",
+     "1 tsp ground cinnamon",
+     "1/2 tsp baking soda",
+     "1/4 cup plain Greek yogurt, plus 1/2 cup more for frosting",
+     "1/2 tsp vanilla extract"
+    ],
+    "storage": "Refrigerate unfrosted cupcakes in an airtight container up to 4 days. Frost the day you serve.",
+    "summary": "Soft mini cupcakes made with sweet potato and oats, topped with a simple Greek yogurt frosting. Draw little jack-o'-lantern faces for the Halloween table.",
+    "tips": [
+     "Make the puree ahead: bake a sweet potato at 400°F for 45 minutes, scoop out and mash.",
+     "Frost just before serving so the yogurt stays fresh."
+    ]
+   }
+  },
+  {
+   "n": 73,
+   "slug": "berry-ghost-yogurt-bark",
+   "title": "Berry Ghost Yogurt Bark",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "2 cups plain Greek yogurt"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "soy-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 cups plain Greek yogurt",
+     "2 tbsp honey (optional, for toddlers 12 months and older)",
+     "1/2 tsp vanilla extract",
+     "1/2 cup mixed berries, quartered if large",
+     "1 tbsp chia seeds",
+     "2 tbsp mini dark chocolate chips"
+    ],
+    "storage": "Freeze in a sealed bag up to 1 month. Serve straight from the freezer after a 2-minute soften.",
+    "summary": "Frozen yogurt bark studded with berries, with little ghost faces made from chocolate chips. A no-bake treat that feels like Halloween candy.",
+    "tips": [
+     "Use full-fat Greek yogurt so the bark freezes creamy, not icy.",
+     "Keep uneaten pieces frozen; they melt fast at room temperature."
+    ]
+   }
+  },
+  {
+   "n": 74,
+   "slug": "mini-pumpkin-cheesecake-bites",
+   "title": "Mini Pumpkin Cheesecake Bites",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "1/2 cup plain Greek yogurt"
+    ],
+    "eggs": [
+     "1 large egg"
+    ]
+   },
+   "catalog_allergens": [
+    "egg",
+    "milk",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 cup rolled oats",
+     "3 tbsp coconut oil, melted",
+     "1/2 cup pumpkin puree (plain)",
+     "1/2 cup plain Greek yogurt",
+     "1 medium ripe banana, mashed",
+     "1 large egg",
+     "1 tsp ground cinnamon"
+    ],
+    "storage": "Refrigerate in a sealed container up to 4 days. These do not freeze well.",
+    "summary": "Creamy pumpkin cheesecake filling on a simple oat crust, baked in a mini muffin tin. All the fall flavor, none of the added sugar.",
+    "tips": [
+     "The centers firm up as they chill, so pull them when they still jiggle slightly.",
+     "Swap coconut oil for melted butter if you prefer."
+    ]
+   }
+  },
+  {
+   "n": 75,
+   "slug": "apple-pie-halloween-pockets",
+   "title": "Apple Pie Halloween Pockets",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "eggs": [
+     "1 large egg"
+    ]
+   },
+   "catalog_allergens": [
+    "egg",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "dairy-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "dairy-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 1/2 cups oat flour",
+     "1 large ripe banana, mashed",
+     "1 large egg",
+     "1 tsp ground cinnamon, divided",
+     "1 medium apple, peeled and finely diced",
+     "1 tsp lemon juice"
+    ],
+    "storage": "Refrigerate in an airtight container up to 3 days. Warm 10 seconds in the microwave before serving.",
+    "summary": "Hand-held apple pie pockets with a soft oat crust, cut into pumpkin shapes. Cinnamon apple filling, no added sugar.",
+    "tips": [
+     "Dice the apple very small so the pockets seal easily and toddlers can chew them.",
+     "Brush tops with a little milk before baking for a golden finish."
+    ]
+   }
+  },
+  {
+   "n": 76,
+   "slug": "jack-o-lantern-peanut-butter-tart",
+   "title": "Jack-O'-Lantern Peanut Butter Tart",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "peanuts": [
+     "3/4 cup natural peanut butter (no added sugar)",
+     "2 tbsp peanuts, finely ground"
+    ]
+   },
+   "catalog_allergens": [
+    "peanuts",
+    "milk",
+    "soy"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup dark chocolate chips",
+     "1 tsp coconut oil",
+     "3/4 cup natural peanut butter (no added sugar)",
+     "1 small banana, sliced into thin rounds",
+     "2 tbsp peanuts, finely ground"
+    ],
+    "storage": "Refrigerate in a sealed container up to 5 days. Add banana faces the day you serve.",
+    "summary": "No-bake chocolate cups filled with creamy peanut butter and finished with a banana jack-o'-lantern face. A 20-minute Halloween showpiece.",
+    "tips": [
+     "Warm the peanut butter 10 seconds in the microwave so it spreads smoothly.",
+     "Make the chocolate cups a day ahead and fill before serving."
+    ]
+   }
+  },
+  {
+   "n": 77,
+   "slug": "apple-peanut-butter-smiles",
+   "title": "Apple Peanut Butter Smiles",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "peanuts": [
+     "1/4 cup natural peanut butter"
+    ]
+   },
+   "catalog_allergens": [
+    "peanuts"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "egg-free",
+     "dairy-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 medium apple, cut into 8 wedges",
+     "1/4 cup natural peanut butter",
+     "2 large strawberries, sliced thin",
+     "8 to 12 thin slivers of peeled apple, for teeth",
+     "1 tsp lemon juice (optional, keeps apples bright)"
+    ],
+    "storage": "Best eaten fresh. If needed, refrigerate up to 4 hours with lemon juice on the apple.",
+    "summary": "Apple wedges turned into goofy smiles with peanut butter, strawberry tongues, and apple-sliver teeth. The silliest 10-minute Halloween snack.",
+    "tips": [
+     "Assemble just before serving so the apple stays crisp.",
+     "Sunflower seed butter works for nut-free classrooms."
+    ]
+   }
+  },
+  {
+   "n": 78,
+   "slug": "witchs-broomsticks",
+   "title": "Witch's Broomsticks",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "6 string cheese sticks"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "wheat"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "6 string cheese sticks",
+     "6 thin pretzel sticks"
+    ],
+    "storage": "Assemble fresh. Cheese keeps refrigerated 5 days; pretzels keep at room temperature.",
+    "summary": "String cheese brooms with pretzel stick handles. Salty, simple, and the fastest Halloween snack on this list.",
+    "tips": [
+     "Chill the cheese well first; cold cheese fringes more cleanly.",
+     "A platter of these next to fruit makes an easy party snack board."
+    ]
+   }
+  },
+  {
+   "n": 79,
+   "slug": "spider-cracker-bites",
+   "title": "Spider Cracker Bites",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "16 round butter crackers",
+     "1/4 cup cream cheese, softened"
+    ]
+   },
+   "catalog_allergens": [
+    "milk",
+    "wheat",
+    "soy"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "16 round butter crackers",
+     "1/4 cup cream cheese, softened",
+     "16 thin pretzel sticks, broken into short pieces",
+     "16 mini dark chocolate chips"
+    ],
+    "storage": "Best assembled fresh. Components keep separately: crackers airtight, cream cheese refrigerated.",
+    "summary": "Little cracker spiders with cream cheese bodies, pretzel legs, and chocolate chip eyes. Crunchy, creamy, and fun to build together.",
+    "tips": [
+     "Let toddlers place the legs and eyes themselves; it is a fine-motor activity and a snack.",
+     "Swap cream cheese for peanut butter for a protein boost."
+    ]
+   }
+  },
+  {
+   "n": 80,
+   "slug": "mandarin-orange-pumpkins",
+   "title": "Mandarin Orange Pumpkins",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian",
+     "vegan"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegan",
+     "vegetarian",
+     "gluten-free",
+     "dairy-free",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "6 seedless mandarins or clementines",
+     "1 celery stalk, cut into 1/2-inch pieces"
+    ],
+    "storage": "Best fresh. Peeled mandarins keep refrigerated 1 day.",
+    "summary": "The simplest Halloween snack there is: sweet mandarins with a little celery stem, turned into pumpkins. Zero cooking.",
+    "tips": [
+     "Cucumber sticks work as stems if your toddler will not touch celery.",
+     "A platter of these next to the candy bowl disappears fast."
+    ]
+   }
+  },
+  {
+   "n": 81,
+   "slug": "monster-energy-balls",
+   "title": "Monster Energy Balls",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "peanuts": [
+     "1/2 cup natural peanut butter"
+    ]
+   },
+   "catalog_allergens": [
+    "peanuts"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "dairy-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 cup rolled oats",
+     "1/2 cup natural peanut butter",
+     "1/2 cup pitted dates",
+     "1/4 cup shredded unsweetened coconut, plus more for rolling",
+     "1 tsp spinach powder",
+     "1/4 cup mini dark chocolate chips"
+    ],
+    "storage": "Refrigerate in a sealed container up to 1 week. Freeze up to 2 months.",
+    "summary": "No-bake energy balls with oats, peanut butter, and dates, tinted green with a little spinach powder. Monster looks, real-food ingredients.",
+    "tips": [
+     "If the mixture is sticky, chill 15 minutes before rolling.",
+     "Medjool dates blend smoothest; drier dates need the full soak."
+    ]
+   }
+  },
+  {
+   "n": 82,
+   "slug": "mummy-banana-pops",
+   "title": "Mummy Banana Pops",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "1 cup plain Greek yogurt"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "3 bananas, peeled and cut in half crosswise",
+     "1 cup plain Greek yogurt",
+     "1 tbsp honey (optional, for toddlers 12 months and older)",
+     "12 mini dark chocolate chips",
+     "6 popsicle sticks"
+    ],
+    "storage": "Freeze in a sealed bag up to 1 month. Soften a few minutes before serving.",
+    "summary": "Frozen banana pops wrapped in yogurt mummy bandages with chocolate chip eyes. Sweet, cold, and very Halloween.",
+    "tips": [
+     "Work quickly when drizzling; the yogurt sets fast on the frozen banana.",
+     "Use full-fat yogurt for the creamiest coating."
+    ]
+   }
+  },
+  {
+   "n": 83,
+   "slug": "candy-corn-parfaits",
+   "title": "Candy Corn Parfaits",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "2 cups vanilla Greek yogurt",
+     "1/2 cup coconut cream, chilled (thick part from a can of coconut milk)"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "under-15-min",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bowl"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "2 cups mango chunks, fresh or thawed",
+     "2 cups vanilla Greek yogurt",
+     "1/2 cup coconut cream, chilled (thick part from a can of coconut milk)"
+    ],
+    "storage": "Refrigerate up to 1 day. Add the coconut layer just before serving.",
+    "summary": "Layered mango, yogurt, and coconut parfaits in the colors of candy corn. No candy, all real food, served in clear cups.",
+    "tips": [
+     "Chill the can of coconut milk overnight so the cream separates cleanly.",
+     "Frozen mango works well; thaw fully before blending."
+    ]
+   }
+  },
+  {
+   "n": 84,
+   "slug": "gummy-worms",
+   "title": "Gummy Worms",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "dairy-free",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 cup 100% fruit juice, no added sugar (grape or apple for classic color)",
+     "2 tbsp unflavored gelatin"
+    ],
+    "storage": "Refrigerate in a sealed container up to 1 week.",
+    "summary": "Wiggly gummy worms made from 100% fruit juice and gelatin. Chewy like the candy version, with nothing artificial.",
+    "tips": [
+     "A squeeze of lemon juice brightens the flavor without adding sugar.",
+     "Lightly oil silicone molds for the easiest release."
+    ]
+   }
+  },
+  {
+   "n": 85,
+   "slug": "protein-fruit-gummies",
+   "title": "Protein Fruit Gummies",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "make-ahead"
+    ],
+    "free_from": [
+     "egg-free",
+     "dairy-free",
+     "nut-free",
+     "gluten-free"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "gluten-free",
+     "dairy-free",
+     "nut-free",
+     "egg-free",
+     "soy-free"
+    ],
+    "ingredients": [
+     "1 cup fresh or thawed frozen fruit",
+     "1/2 cup water",
+     "3 tbsp unflavored gelatin",
+     "1 tsp lemon juice"
+    ],
+    "storage": "Refrigerate in a sealed container up to 1 week.",
+    "summary": "A simple fruit gummy made with real fruit and gelatin, in whatever flavor your toddler loves. One base recipe, ten flavor ideas below.",
+    "tips": [
+     "Strawberry: use 1 cup strawberries.",
+     "Blackberry: use 1 cup blackberries, strained to remove seeds.",
+     "Watermelon: use 1 cup cubed seedless watermelon.",
+     "Mango: use 1 cup mango chunks.",
+     "Pineapple: use 1 cup pineapple chunks.",
+     "Strawberry raspberry: use 1/2 cup strawberries plus 1/2 cup raspberries.",
+     "Watermelon mango: use 1/2 cup watermelon plus 1/2 cup mango.",
+     "Peach mango: use 1/2 cup peach plus 1/2 cup mango.",
+     "Cherry: use 1 cup pitted cherries.",
+     "Use the ripest fruit you can find; ripe fruit means no added sugar is needed."
+    ]
+   }
+  },
+  {
+   "n": 86,
+   "slug": "spider-peanut-butter-oat-bites",
+   "title": "Spider Peanut Butter Oat Bites",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "peanuts": [
+     "1/2 cup creamy natural peanut butter",
+     "1/4 cup creamy peanut butter, for the spider bodies and eyes"
+    ],
+    "milk": [
+     "1 to 2 tbsp milk, as needed"
+    ]
+   },
+   "catalog_allergens": [
+    "peanuts",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup old-fashioned rolled oats",
+     "1/2 cup creamy natural peanut butter",
+     "3 tbsp pure maple syrup",
+     "1 tbsp chia seeds",
+     "1 to 2 tbsp milk, as needed",
+     "1/2 tsp vanilla extract (optional)",
+     "1/4 cup dark chocolate, melted, for the legs",
+     "1/4 cup creamy peanut butter, for the spider bodies and eyes"
+    ],
+    "storage": "Refrigerate in an airtight container up to 5 days. Freeze undecorated bites in a single layer, then in a freezer container, up to 2 months; thaw in the refrigerator before decorating.",
+    "summary": "No-bake peanut butter oat bites with chia seeds and a touch of maple syrup, decorated as little spiders with chocolate legs. Easy to make ahead for the Halloween snack table.",
+    "tips": [
+     "Smooth sunflower seed butter works in place of peanut butter for a peanut-free version.",
+     "Quick oats give a softer bite for younger toddlers."
+    ]
+   }
+  },
+  {
+   "n": 87,
+   "slug": "strawberry-yogurt-ghost-hearts",
+   "title": "Strawberry Yogurt Ghost Hearts",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "1/2 cup plain Greek yogurt",
+     "1/2 cup cottage cheese"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup fresh strawberries, washed and hulled",
+     "1/2 cup plain Greek yogurt",
+     "1/2 cup cottage cheese",
+     "1/2 tsp vanilla extract",
+     "1/3 cup white chocolate chips",
+     "1 tsp coconut oil (optional, helps the chocolate melt smoothly)",
+     "12 to 20 mini chocolate chips, for the ghost faces"
+    ],
+    "storage": "Freeze in an airtight freezer container up to 1 month. Move a portion to the refrigerator briefly before serving so it softens.",
+    "summary": "Creamy frozen hearts made with strawberries, Greek yogurt and cottage cheese, each topped with a little white chocolate ghost. A playful make-ahead Halloween treat.",
+    "tips": [
+     "Add the ghosts shortly before serving if you want them to look neat.",
+     "For a less sweet version, use plain yogurt and skip any sweetened add-ins."
+    ]
+   }
+  },
+  {
+   "n": 88,
+   "slug": "jack-o-lantern-mango-stars",
+   "title": "Jack-o'-Lantern Mango Stars",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {},
+   "catalog_allergens": [],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack"
+    ],
+    "goal": [],
+    "practical": [
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "2 large ripe but firm mangoes",
+     "1/4 cup dark chocolate chips",
+     "1 tsp coconut oil (optional)",
+     "1 kiwi, peeled, for the stems"
+    ],
+    "storage": "Best served fresh. Refrigerate in an airtight container up to 2 days. Do not freeze the decorated stars; the mango turns watery as it thaws.",
+    "summary": "Fresh mango cut into stars and decorated with little chocolate pumpkin faces and kiwi stems. A bright, simple fruit snack for the Halloween platter.",
+    "tips": [
+     "Cut the mango ahead of time and add the faces and stems shortly before serving.",
+     "Firm, just-ripe mango holds the star shape best."
+    ]
+   }
+  },
+  {
+   "n": 89,
+   "slug": "blueberry-yogurt-bites",
+   "title": "Blueberry Yogurt Bites",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "milk": [
+     "1 cup plain Greek yogurt"
+    ]
+   },
+   "catalog_allergens": [
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "nut-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "bites"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "nut-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup plain Greek yogurt",
+     "1/2 cup fresh blueberries",
+     "1 to 2 tbsp honey or maple syrup (optional; honey only for children 12 months and older)",
+     "1/2 tsp vanilla extract (optional)",
+     "1/4 cup white chocolate chips",
+     "1 tsp coconut oil (optional)",
+     "6 to 8 fresh blueberries, halved, for the topping"
+    ],
+    "storage": "Freeze in an airtight freezer container up to 1 month. Not for the refrigerator; the bites melt.",
+    "summary": "Creamy frozen Greek yogurt and blueberry bites with a delicate white chocolate spiderweb. A colorful make-ahead Halloween snack.",
+    "tips": [
+     "Blend the blueberries in fully for the deepest purple.",
+     "Take out only the bites you plan to serve; they melt quickly."
+    ]
+   }
+  },
+  {
+   "n": 90,
+   "slug": "chocolate-pumpkin-protein-tarts",
+   "title": "Chocolate Pumpkin Protein Tarts",
+   "free_sample": false,
+   "review_gate": "pending",
+   "written_for": "children",
+   "rewritten": null,
+   "age_min_months": 12,
+   "age_max_months": 36,
+   "age_source": "owner, 2026-10-12",
+   "age_note": "Written for 12-36 months with a SAFETY CHECK step (cut small, soften frozen treats, no honey under 12 m).",
+   "allergens": {
+    "tree_nuts": [
+     "1 cup almond flour",
+     "2 tbsp smooth almond butter, for the crust",
+     "2 tbsp smooth almond butter, for the filling"
+    ],
+    "milk": [
+     "2 tbsp smooth almond butter, for the crust",
+     "1 to 2 tsp milk, as needed",
+     "1/4 cup plain Greek yogurt",
+     "2 tbsp smooth almond butter, for the filling"
+    ]
+   },
+   "catalog_allergens": [
+    "tree nuts",
+    "milk"
+   ],
+   "tags": {
+    "stage": [
+     "1-2y",
+     "2-3y"
+    ],
+    "meal": [
+     "snack",
+     "treat"
+    ],
+    "goal": [],
+    "practical": [
+     "freezes",
+     "make-ahead",
+     "no-cook"
+    ],
+    "free_from": [
+     "egg-free",
+     "gluten-free",
+     "vegetarian"
+    ],
+    "occasion": [
+     "halloween"
+    ],
+    "texture": "finger-food"
+   },
+   "collections": [
+    "halloween"
+   ],
+   "collection_reasons": {
+    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+   },
+   "after_rewrite": [],
+   "flags": [],
+   "source": {
+    "catalog_age": [
+     12,
+     36
+    ],
+    "catalog_diet": [
+     "vegetarian",
+     "gluten-free",
+     "egg-free"
+    ],
+    "ingredients": [
+     "1 cup almond flour",
+     "2 tbsp unsweetened cocoa powder",
+     "2 tbsp smooth almond butter, for the crust",
+     "2 tbsp maple syrup, for the crust",
+     "1 to 2 tsp milk, as needed",
+     "1/2 cup pumpkin puree (plain, not pie filling)",
+     "1/4 cup plain Greek yogurt",
+     "2 tbsp smooth almond butter, for the filling",
+     "1 to 2 tbsp maple syrup, for the filling, to taste",
+     "1/2 tsp vanilla extract",
+     "1/2 tsp ground cinnamon",
+     "1 tbsp unflavored protein powder (optional)",
+     "2 tbsp dark chocolate chips",
+     "1/2 tsp coconut oil (optional)"
+    ],
+    "storage": "Refrigerate in an airtight container up to 3 days. Freeze in a single layer, then in a freezer container, up to 1 month; thaw in the refrigerator before serving.",
+    "summary": "No-bake mini tarts with a cocoa almond crust and a creamy pumpkin and Greek yogurt filling, finished with a chocolate jack-o'-lantern face.",
+    "tips": [
+     "The protein powder is optional; the tarts set without it.",
+     "Thaw frozen tarts in the refrigerator until soft enough to eat comfortably."
+    ]
+   }
   }
  ],
  "collections": [
@@ -6398,16 +7978,28 @@
    "title": "Halloween",
    "live": true,
    "recipes": [
-    "pumpkin-and-ricotta-gnocchi-pillows",
-    "savory-corn-and-cheddar-muffins",
-    "spinach-and-cheese-pizza-scrolls",
-    "apple-sunflower-snack-rounds",
-    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
-    "mini-berry-yogurt-pops",
-    "soft-banana-oat-toddler-cookies",
-    "soft-date-almond-cocoa-bites"
+    "banana-pumpkin-mini-donuts",
+    "sweet-potato-jack-o-lantern-cupcakes",
+    "berry-ghost-yogurt-bark",
+    "mini-pumpkin-cheesecake-bites",
+    "apple-pie-halloween-pockets",
+    "jack-o-lantern-peanut-butter-tart",
+    "apple-peanut-butter-smiles",
+    "witchs-broomsticks",
+    "spider-cracker-bites",
+    "mandarin-orange-pumpkins",
+    "monster-energy-balls",
+    "mummy-banana-pops",
+    "candy-corn-parfaits",
+    "gummy-worms",
+    "protein-fruit-gummies",
+    "spider-peanut-butter-oat-bites",
+    "strawberry-yogurt-ghost-hearts",
+    "jack-o-lantern-mango-stars",
+    "blueberry-yogurt-bites",
+    "chocolate-pumpkin-protein-tarts"
    ],
-   "count": 8,
+   "count": 20,
    "status": "ready",
    "needs": null
   },

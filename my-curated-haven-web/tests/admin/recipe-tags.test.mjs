@@ -23,7 +23,7 @@ test("the migration's vocabulary holds every reviewed tag in recipe-tags.json, s
   const vocabulary = seededVocabulary();
   assert.equal(vocabulary.length, 7);
   const parsed = parseTagSource(source, sha256);
-  assert.equal(parsed.recipes.length, 70);
+  assert.equal(parsed.recipes.length, 90);
   const problems = parsed.recipes.flatMap((r) => tagProblems(r.tags, vocabulary).map((p) => `${r.slug}: ${p}`));
   assert.deepEqual(problems, []);
 });

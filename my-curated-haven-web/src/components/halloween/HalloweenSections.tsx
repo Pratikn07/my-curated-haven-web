@@ -58,7 +58,7 @@ function Meta({ item }: { item: HalloweenMenuItem }) {
   return <span className="hw-dish-meta">{parts.join(" · ")}</span>;
 }
 
-export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; freeCount: number }) {
+export function HalloweenHero({ menu, freeCount, hasTricks }: { menu: HalloweenMenuItem[]; freeCount: number; hasTricks: boolean }) {
   const { before, inserted, corrected, after } = HALLOWEEN_HERO.title;
   const beforeWords = before.split(" ").length;
   const menuLabel = freeCount === menu.length ? `${freeCount} free recipes` : freeCount > 0 ? `${freeCount} free · ${menu.length - freeCount} in the book` : "From the Halloween book";
@@ -125,8 +125,8 @@ export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; 
         </p>
       </nav>
       <span className="hw-byline">{HALLOWEEN_HERO.byline}</span>
-      <a className="hw-storylink" href="#hw-tricks">
-        Make them Halloween, and our plan for the day <span aria-hidden="true">↓</span>
+      <a className="hw-storylink" href={hasTricks ? "#hw-tricks" : "#hw-story"}>
+        {hasTricks ? "Make them Halloween, and our plan for the day" : "Our plan for the day"} <span aria-hidden="true">↓</span>
       </a>
     </section>
   );
