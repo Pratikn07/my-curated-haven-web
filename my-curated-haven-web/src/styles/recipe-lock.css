@@ -1,0 +1,235 @@
+/*
+ * Locked recipe page: the fog teaser under the buy card, and the one-time reveal after buying (?opened=1).
+ * Components: src/components/recipe/RecipeLock.tsx. Everything here is decoration over a page that reads fine
+ * without it; reduced motion stops the drift and the ghost and shows the recipe at once.
+ */
+
+.recipe-locked {
+  display: grid;
+}
+
+/* Fog: card-shaped placeholders, like the real recipe sections, fading out downwards. */
+.recipe-fog {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  margin-bottom: -10rem;
+  -webkit-mask-image: linear-gradient(#000 0 30%, transparent 92%);
+  mask-image: linear-gradient(#000 0 30%, transparent 92%);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Sized like the real recipe cards (RecipeSections.tsx), so the reveal lands in the same places. */
+.recipe-fog-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  padding: 1rem;
+}
+
+.recipe-fog-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+}
+
+.recipe-fog-card:nth-child(3) .recipe-fog-title {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .recipe-fog-card {
+    padding: 2rem;
+  }
+}
+
+.recipe-fog-line {
+  display: block;
+  width: var(--w, 70%);
+  height: 0.55rem;
+  margin-top: 0.85rem;
+  border-radius: 999px;
+  background: var(--text);
+  opacity: var(--o, 0.12);
+}
+
+.recipe-fog-mist {
+  position: absolute;
+  inset: -1rem -2rem;
+  overflow: hidden;
+}
+
+.recipe-fog-mist i {
+  position: absolute;
+  width: 70%;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    var(--canvas) 0%,
+    color-mix(in srgb, var(--canvas) 80%, transparent) 45%,
+    transparent 100%
+  );
+  animation: recipe-mist-drift 14s ease-in-out infinite alternate;
+}
+
+.recipe-fog-mist i:nth-child(1) { left: -10%; top: 2%; }
+.recipe-fog-mist i:nth-child(2) { left: 35%; top: 28%; animation-duration: 17s; animation-direction: alternate-reverse; }
+.recipe-fog-mist i:nth-child(3) { left: 5%; top: 52%; animation-duration: 15s; }
+
+@keyframes recipe-mist-drift {
+  from { transform: translateX(-12%) scale(1); }
+  to { transform: translateX(16%) scale(1.15); }
+}
+
+.recipe-ghost {
+  position: absolute;
+  right: 16%;
+  top: 30%;
+  width: 2.2rem;
+  opacity: 0;
+  animation: recipe-ghost-peek 9s ease-in-out 2s infinite;
+}
+
+.recipe-ghost-body {
+  fill: var(--surface);
+  stroke: var(--border-subtle);
+  stroke-width: 1.5;
+}
+
+.recipe-ghost-eye {
+  fill: var(--text);
+}
+
+@keyframes recipe-ghost-peek {
+  0%, 62%, 100% { opacity: 0; transform: translateY(1.6rem); }
+  70% { opacity: 0.9; transform: translateY(0); }
+  82% { opacity: 0.9; transform: translateY(-0.25rem); }
+  92% { opacity: 0; transform: translateY(1.4rem); }
+}
+
+/* The buy card sits over the bottom of the fog. */
+.recipe-lock-card {
+  position: relative;
+  z-index: 1;
+}
+
+.recipe-lock-badge {
+  background: color-mix(in srgb, var(--action) 10%, transparent);
+  color: var(--action);
+}
+
+.recipe-lock-shackle {
+  transform-box: fill-box;
+  transform-origin: 85% 100%;
+}
+
+/* Reveal: a stage over the recipe that opens the lock, then lifts while the sections fade in. */
+#recipe-content[data-reveal] {
+  position: relative;
+}
+
+.recipe-reveal-stage {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: grid;
+  pointer-events: none;
+  animation: recipe-stage-out 0.4s ease 1.2s forwards;
+}
+
+.recipe-reveal-card .recipe-lock-badge {
+  animation: recipe-badge-open 0.4s ease 0.35s forwards;
+}
+
+.recipe-reveal-card .recipe-lock-shackle {
+  animation: recipe-shackle-open 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s forwards;
+}
+
+.recipe-reveal-card {
+  animation: recipe-card-away 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.95s forwards;
+}
+
+.recipe-reveal-stage .recipe-fog-mist {
+  animation: recipe-mist-lift 0.7s ease 1.05s forwards;
+}
+
+.recipe-reveal-stage .recipe-ghost {
+  animation: recipe-ghost-away 1s ease-out 0.2s forwards;
+}
+
+#recipe-content[data-reveal] > :not(.recipe-reveal-stage) {
+  opacity: 0;
+  animation: recipe-section-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: 1.5s;
+}
+
+/* The fog is gone (1.6s) before the recipe arrives, so the two never show the same headings at once. */
+#recipe-content[data-reveal] > :nth-child(3) { animation-delay: 1.62s; }
+#recipe-content[data-reveal] > :nth-child(4) { animation-delay: 1.74s; }
+#recipe-content[data-reveal] > :nth-child(5) { animation-delay: 1.86s; }
+#recipe-content[data-reveal] > :nth-child(n + 6) { animation-delay: 1.98s; }
+
+@keyframes recipe-badge-open {
+  to { background: color-mix(in srgb, var(--accent-strong) 14%, transparent); color: var(--accent-strong); }
+}
+
+@keyframes recipe-shackle-open {
+  to { transform: translateY(-3px) rotate(-28deg); }
+}
+
+@keyframes recipe-card-away {
+  to { opacity: 0; transform: translateY(1.1rem) scale(0.97); }
+}
+
+@keyframes recipe-mist-lift {
+  to { opacity: 0; transform: scale(1.25) translateY(-1.25rem); }
+}
+
+@keyframes recipe-ghost-away {
+  0% { opacity: 0; transform: translateY(1.2rem); }
+  30% { opacity: 0.9; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-3rem) translateX(1rem); }
+}
+
+@keyframes recipe-stage-out {
+  to { opacity: 0; visibility: hidden; }
+}
+
+@keyframes recipe-section-in {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recipe-fog-mist i,
+  .recipe-ghost {
+    animation: none;
+  }
+
+  .recipe-ghost,
+  .recipe-reveal-stage {
+    display: none;
+  }
+
+  #recipe-content[data-reveal] > :not(.recipe-reveal-stage) {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+@media print {
+  .recipe-fog,
+  .recipe-reveal-stage {
+    display: none;
+  }
+
+  #recipe-content[data-reveal] > * {
+    opacity: 1;
+    animation: none;
+  }
+}

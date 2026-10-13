@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import OpenBoughtRecipe from "@/components/commerce/OpenBoughtRecipe";
 import { bookNameStart } from "@/lib/collections/book-name";
 
 export interface PurchaseConfirmedProps {
@@ -13,6 +13,8 @@ export interface PurchaseConfirmedProps {
   formattedAmount: string;
   /** The signed-in email, so a parent who later opens the site in another browser knows how to get back in. */
   email: string | null;
+  /** The book's recipes, so a parent who bought from a recipe page can go straight back to it. */
+  recipes?: readonly { slug: string; title: string }[];
 }
 
 /**
@@ -27,6 +29,7 @@ export default function PurchaseConfirmed({
   supportReference,
   formattedAmount,
   email,
+  recipes: bookRecipes = [],
 }: PurchaseConfirmedProps) {
   const recipes = recipeCount ? `All ${recipeCount} recipes are` : "Every recipe is";
   return (
@@ -46,13 +49,11 @@ export default function PurchaseConfirmed({
       <p className="mx-auto mt-2 max-w-sm text-base text-text-muted">
         <strong className="text-foreground">{bookNameStart(collectionTitle)}</strong> is yours. {recipes} ready when you are.
       </p>
-      <Link
-        href={`/account/collections#${collectionSlug}`}
-        className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-action px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-action-hover sm:w-auto"
-      >
-        <span>{recipeCount ? `Open your ${recipeCount} recipes` : "Open your recipes"}</span>
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
+      <OpenBoughtRecipe
+        collectionSlug={collectionSlug}
+        recipes={bookRecipes}
+        libraryLabel={recipeCount ? `Open your ${recipeCount} recipes` : "Open your recipes"}
+      />
       <p className="mt-6 text-sm text-text-muted">
         {email ? (
           <>

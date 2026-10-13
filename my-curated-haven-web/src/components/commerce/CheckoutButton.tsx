@@ -7,6 +7,7 @@ import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types"
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
 import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
+import { rememberBoughtFrom } from "@/lib/recipes/bought-from";
 
 interface CheckoutButtonProps {
   collectionSlug: string;
@@ -20,6 +21,8 @@ interface CheckoutButtonProps {
   appearance?: "default" | "cloth";
   /** Signed-out "Already bought it? Sign in" under the button; off where the page has its own sign-in line. */
   signInHint?: boolean;
+  /** The recipe page this button sits on, so "You're in" can send the buyer straight back to it. */
+  fromRecipeSlug?: string;
 }
 
 export default function CheckoutButton({
@@ -31,6 +34,7 @@ export default function CheckoutButton({
   className = "",
   appearance = "default",
   signInHint = true,
+  fromRecipeSlug,
 }: CheckoutButtonProps) {
   const look = (defaults: string) => (appearance === "cloth" ? "cl-button" : defaults);
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +120,7 @@ export default function CheckoutButton({
       }
 
       if (data.checkoutUrl) {
+        if (fromRecipeSlug) rememberBoughtFrom(collectionSlug, fromRecipeSlug);
         window.location.href = data.checkoutUrl;
       } else {
         throw new Error("Missing checkout destination URL.");
