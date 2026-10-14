@@ -79,7 +79,7 @@ export default function SecurityMfa() {
       setSecret(null);
       setFactorId(null);
       setCode("");
-      setStatus("Authenticator enrolled. Admin access will ask for a code at sign-in.");
+      setStatus("Authenticator enrolled. Staff tools will ask for a code at sign-in.");
       await refreshFactors();
     } finally {
       setPending(false);
@@ -126,7 +126,7 @@ export default function SecurityMfa() {
           </ul>
         </div>
       ) : (
-        <p>No authenticator enrolled. Admin access requires one.</p>
+        <p>No authenticator enrolled.</p>
       )}
 
       {qrCode ? (

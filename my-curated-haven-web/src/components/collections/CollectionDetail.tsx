@@ -20,7 +20,8 @@ export interface DetailModel {
   cloth: ShowroomCollection["cloth"];
   cover: ShowroomCollection["cover"];
   refresh: string | null;
-  price: string;
+  /** The live offer's price; null while there is no offer (no made-up price is shown). */
+  price: string | null;
   offer: CollectionOfferDto | null;
   /** The commerce lookup failed: say so instead of "Opening soon", and infer nothing about price or ownership. */
   commerceUnavailable?: boolean;
@@ -78,7 +79,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
 
           <aside className="cl-buy" id="buy" data-cloth={model.cloth} aria-label="Get this collection">
             <div>
-              <p className="cl-buy-price">{model.price}</p>
+              {model.price ? <p className="cl-buy-price">{model.price}</p> : null}
               <p className="cl-buy-kind">One-time purchase</p>
             </div>
             <ul className="cl-buy-list">
@@ -264,7 +265,7 @@ export function Questions() {
     },
     {
       q: "Do I need an account?",
-      a: "Yes, to buy, so the collection waits for you on any device. You sign in with a code we email you; there is no password to remember.",
+      a: "No. Checkout asks only for your email and payment. Then we email you a code that opens the collection on any device; there is no password to remember.",
     },
     {
       q: "Can I print the recipes?",
@@ -319,7 +320,8 @@ export function BuyDock({ model }: { model: DetailModel }) {
       <p className="cl-dock-text">
         <strong>{model.title}</strong>
         <span>
-          {model.price} · {recipeCount(model.recipes.length)}
+          {model.price ? `${model.price} · ` : ""}
+          {recipeCount(model.recipes.length)}
         </span>
       </p>
       <a className="cl-button" data-tone="cream" href="#buy">

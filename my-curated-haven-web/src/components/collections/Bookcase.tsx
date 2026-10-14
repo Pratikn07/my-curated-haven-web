@@ -266,7 +266,7 @@ function BookTile({ entry }: { entry: BookcaseEntry }) {
       </span>
       <span className="bk-book-title">{entry.title}</span>
       <span className="bk-book-meta">
-        {recipeCount(entry.recipeCount)} · {entry.price}
+        {recipeCount(entry.recipeCount)} · {entry.price ?? "Opening soon"}
       </span>
     </Link>
   );
@@ -287,7 +287,7 @@ function Featured({ entry }: { entry: BookcaseEntry }) {
           </span>
           <span className="bk-featured-tagline">{entry.tagline}</span>
           <span className="bk-featured-meta">
-            {stageLabel(entry.stage)} · {recipeCount(entry.recipeCount)} · {entry.price}
+            {stageLabel(entry.stage)} · {recipeCount(entry.recipeCount)} · {entry.price ?? "Opening soon"}
           </span>
         </span>
       </Link>

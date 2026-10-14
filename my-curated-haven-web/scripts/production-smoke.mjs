@@ -10,6 +10,20 @@ const ATTEMPTS = 3;
 const RETRY_DELAY_MS = 10_000;
 const TIMEOUT_MS = 20_000;
 const UNAVAILABLE_TEXT = ["Temporarily Unavailable", "temporarily unavailable"];
+// Text that must never reach a visitor: the photo brief stored with a recipe image (it is data, so only a live
+// check sees it), copy from before the first book went on sale, and placeholder or staff-only wording.
+const LEAKED_TEXT = [
+  "no hands, no text",
+  "styled beside the dish",
+  "nothing to buy",
+  "no paid collection",
+  "test checkout",
+  "placeholder",
+  "admin access requires",
+];
+// /privacy and /terms still say this until their purchase wording is rewritten and approved.
+const STALE_SALE_TEXT = "nothing is for sale";
+const LEGAL_PATHS = new Set(["/privacy", "/terms"]);
 
 const originArg = process.argv.find((arg) => arg.startsWith("--origin="));
 const origin = (originArg ? originArg.slice("--origin=".length) : DEFAULT_ORIGIN).replace(/\/+$/, "");
@@ -53,17 +67,30 @@ async function check(name, url, assert, { redirect = "follow" } = {}) {
   return null;
 }
 
-function page(expectedStatus = 200) {
+/** Visible text only: scripts carry data the page never shows, and tags carry attributes like placeholder="". */
+function leakedText(path, body) {
+  const text = body
+    .replace(/<(script|style)\b[\s\S]*?<\/\1>/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  const banned = LEGAL_PATHS.has(path) ? LEAKED_TEXT : [...LEAKED_TEXT, STALE_SALE_TEXT];
+  return banned.find((phrase) => text.includes(phrase)) ?? "";
+}
+
+function page(path, expectedStatus = 200) {
   return ({ status, body }) => {
     if (status !== expectedStatus) return `expected HTTP ${expectedStatus}, got ${status}`;
     if (UNAVAILABLE_TEXT.some((text) => body.includes(text))) return "page shows the unavailable state";
+    const leaked = leakedText(path, body);
+    if (leaked) return `page shows ${JSON.stringify(leaked)}`;
     return "";
   };
 }
 
 /** A free recipe page must show its content, not just return 200 (Phase 6 audit R6-04). */
-function recipePage() {
-  const base = page();
+function recipePage(path) {
+  const base = page(path);
   return (result) => {
     const problem = base(result);
     if (problem) return problem;
@@ -81,8 +108,8 @@ const failures = [];
 
 console.log(`Production smoke check against ${origin}`);
 
-for (const path of ["/", "/recipes", "/about", "/support", "/privacy", "/terms", "/sign-in"]) {
-  await check(`GET ${path}`, `${origin}${path}`, page());
+for (const path of ["/", "/recipes", "/about", "/support", "/privacy", "/terms", "/sign-in", "/halloween", "/collections", "/collections/halloween"]) {
+  await check(`GET ${path}`, `${origin}${path}`, page(path));
 }
 
 await check("deferred /features is unavailable", `${origin}/features`, ({ status }) =>
@@ -99,7 +126,7 @@ if (sitemap) {
   const recipeUrls = [...sitemap.body.matchAll(/<loc>([^<]*\/recipes\/[^<]+)<\/loc>/g)].map((match) => match[1]);
   for (const url of recipeUrls) {
     const path = new URL(url).pathname;
-    await check(`GET ${path} (ingredients, steps, allergens)`, `${origin}${path}`, recipePage());
+    await check(`GET ${path} (ingredients, steps, allergens)`, `${origin}${path}`, recipePage(path));
   }
 }
 

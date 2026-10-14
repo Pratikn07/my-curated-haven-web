@@ -68,7 +68,7 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
       <ol className="bk-volumes" id="volumes">
         {volumes.map((volume, index) => {
           const open = volume.availability === "open";
-          const price = offers[index]?.formattedPrice ?? volume.placeholderPrice;
+          const price = offers[index]?.formattedPrice ?? "Opening soon";
           const body = (
             <>
               <span className="bk-volume-cover">

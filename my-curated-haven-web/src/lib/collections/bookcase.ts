@@ -70,7 +70,8 @@ export interface BookcaseEntry {
   shelf: ShelfKey;
   series: { key: SeriesKey; volume: number } | null;
   open: boolean;
-  price: string;
+  /** The live offer's price; null while the book has no offer, shown as "Opening soon". */
+  price: string | null;
   recipeCount: number;
   matches: FilterKey[];
   /** The first recipes, shown on the inside page when the book opens. */
@@ -80,7 +81,7 @@ export interface BookcaseEntry {
 /** Lines on the inside page of an opening book. */
 export const CONTENTS_LINES = 6;
 
-export function toBookcaseEntry(collection: ShowroomCollection, price: string): BookcaseEntry {
+export function toBookcaseEntry(collection: ShowroomCollection, price: string | null): BookcaseEntry {
   return {
     slug: collection.slug,
     title: collection.title,

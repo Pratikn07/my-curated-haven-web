@@ -268,7 +268,7 @@ test("[haven-house] FAQ names the company and points to support", async ({ page 
   await expect(faq.getByRole("heading", { name: "Questions" })).toBeVisible();
   await expect(faq).toContainText("read or print it without an account");
   await expect(faq).toContainText("Nibble & Nurture, our small company");
-  await expect(faq).toContainText("no paid collection is being presented here");
+  await expect(faq).toContainText("Recipe collections on the Collections page are one-time purchases");
   await expect(faq.getByRole("link", { name: "Support" })).toHaveAttribute("href", "/support");
 });
 

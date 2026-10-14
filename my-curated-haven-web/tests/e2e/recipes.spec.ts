@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { Client } from "pg";
 
 async function overflow(page: Page) {
   return page.evaluate(
@@ -288,4 +289,38 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     await expect(dialog.getByText("Breakfast", { exact: true })).toBeVisible();
     await expect(dialog.getByText("Finger Foods", { exact: true })).toHaveCount(0);
   });
+});
+
+/** The local Supabase database; refuses anything that is not loopback. */
+function localDatabaseUrl(): string {
+  const raw = process.env.ADMIN_TEST_DATABASE_URL || "postgresql://postgres:postgres@127.0.0.1:54342/postgres";
+  const host = new URL(raw).hostname;
+  if (host !== "127.0.0.1" && host !== "localhost") throw new Error("Refusing a non-loopback database.");
+  return raw;
+}
+
+test("the photo brief stored with a recipe image never shows on the recipe page", async ({ page }) => {
+  const slug = "synth-free-oat-bake";
+  const db = new Client({ connectionString: localDatabaseUrl() });
+  await db.connect();
+  const before = await db.query<{ brief: string | null }>(
+    "SELECT preview_image_description AS brief FROM public.recipe_catalog WHERE slug = $1",
+    [slug]
+  );
+  expect(before.rowCount).toBe(1);
+  try {
+    await db.query("UPDATE public.recipe_catalog SET preview_image_description = $2 WHERE slug = $1", [
+      slug,
+      "Overhead top-down shot of an oat bake, cream linen background, warm daylight, no hands, no text.",
+    ]);
+    await page.goto(`/recipes/${slug}`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Synthetic Free Oat Bake");
+    await expect(page.locator("body")).not.toContainText("no hands, no text");
+  } finally {
+    await db.query("UPDATE public.recipe_catalog SET preview_image_description = $2 WHERE slug = $1", [
+      slug,
+      before.rows[0]?.brief ?? null,
+    ]);
+    await db.end();
+  }
 });

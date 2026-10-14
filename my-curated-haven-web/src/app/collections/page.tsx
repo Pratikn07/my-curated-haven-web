@@ -41,8 +41,11 @@ export default async function CollectionsPage() {
     collections.map(async (collection) => (collection.availability === "open" ? offerOrNull(await loadLiveOffer(collection.slug)) : null))
   );
   const entries = collections.map((collection, index) =>
-    toBookcaseEntry(collection, offers[index]?.formattedPrice ?? collection.placeholderPrice)
+    toBookcaseEntry(collection, offers[index]?.formattedPrice ?? null)
   );
+  // Books with a live offer can be bought today; the rest of the open books are still "Opening soon".
+  const onSale = collections.filter((_, index) => offers[index]).map((collection) => collection.title);
+  const onSaleList = onSale.length > 1 ? `${onSale.slice(0, -1).join(", ")} and ${onSale[onSale.length - 1]}` : onSale[0];
   // Shelves with books to open come first, so the page does not open on a row of "coming soon".
   const openOn = (key: string) => entries.filter((entry) => entry.shelf === key && entry.open).length;
   const shelves = [...SHELVES].sort((a, b) => openOn(b.key) - openOn(a.key));
@@ -66,8 +69,17 @@ export default async function CollectionsPage() {
       <section className="bk-note" aria-labelledby="bk-note-title">
         <h2 id="bk-note-title">How the books work</h2>
         <p>
-          Each book is a one-time purchase: pay once, keep it, and get the recipes added later. Books are opening soon; until then,
-          you can cook from our <Link href="/recipes">free recipes</Link>.
+          Each book is a one-time purchase: pay once, keep it, and get the recipes added later.{" "}
+          {onSaleList ? (
+            <>
+              {onSaleList} {onSale.length > 1 ? "are" : "is"} open now, and the other books are opening soon. Not sure yet? Cook
+              one of our <Link href="/recipes">free recipes</Link> first.
+            </>
+          ) : (
+            <>
+              Books are opening soon; until then, you can cook from our <Link href="/recipes">free recipes</Link>.
+            </>
+          )}
         </p>
       </section>
     </div>

@@ -51,7 +51,7 @@ function buildModel(slug: string, config: ShowroomCollection | null, offer: Coll
       cloth: config.cloth,
       cover: config.cover,
       refresh: config.refresh,
-      price: offer?.formattedPrice ?? config.placeholderPrice,
+      price: offer?.formattedPrice ?? null,
       offer,
       recipes: config.recipes,
     };
@@ -113,7 +113,8 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   }
 
   const title = `${model.title} | Baby & Toddler Recipe Collection | My Curated Haven`;
-  const description = `${model.tagline ?? model.story} ${model.recipes.length} recipes. One-time purchase of ${model.price}. Includes printable recipe pages.`;
+  const buying = model.price ? `One-time purchase of ${model.price}.` : "Opening soon.";
+  const description = `${model.tagline ?? model.story} ${model.recipes.length} recipes. ${buying} Includes printable recipe pages.`;
   const canonicalUrl = `${SITE_ORIGIN}/collections/${slug}`;
 
   return {

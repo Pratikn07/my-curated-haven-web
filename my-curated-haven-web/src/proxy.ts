@@ -38,9 +38,10 @@ function unavailableHtml() {
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname.replace(/\/+$/, "") || "/";
-  const reviewRoute = pathname === "/design-review";
+  // Design review and the first collections showroom (/collections/test, placeholder prices) stay off production.
+  const reviewRoute = pathname === "/design-review" || pathname === "/collections/test";
 
-  // Enforce production exclusion for design review
+  // Enforce production exclusion for review pages
   if (reviewRoute && process.env.VERCEL_ENV === "production") {
     return new NextResponse(unavailableHtml(), {
       status: 404,

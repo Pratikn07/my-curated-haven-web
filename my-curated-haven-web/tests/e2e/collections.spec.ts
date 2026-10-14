@@ -58,8 +58,10 @@ test("a collection page lists every recipe with its allergens and is honest abou
   await expect(page.getByText("Contains wheat, milk, egg").first()).toBeVisible();
   await expect(page.getByText("One-time purchase")).toBeVisible();
   await expect(page.getByText(/all sales are final/i).first()).toBeVisible();
-  // No live offer yet: no checkout control, a plain statement instead.
+  // No live offer yet: no checkout control and no made-up price, a plain statement instead.
   await expect(page.getByRole("button", { name: /Buy Collection/ })).toHaveCount(0);
+  await expect(page.locator(".cl-buy-price")).toHaveCount(0);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /Opening soon\./);
   await expect(page.getByText("Opening soon")).toBeVisible();
   await expect(page.getByRole("link", { name: "Next on the shelf Freezer Dinners" })).toBeVisible();
 });
@@ -174,7 +176,8 @@ test("a series page shows its volumes and where the child is", async ({ page }) 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Breakfast, from first bites to big kids");
   await expect(page.getByText("Vol. 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Your child is here")).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Get all 3/ })).toBeVisible();
+  // No bundle offer exists, so the set shows no bundle price.
+  await expect(page.getByRole("heading", { name: "3 volumes, one at a time" })).toBeVisible();
   expect((await page.goto("/collections/series/not-a-series", LOAD))?.status()).toBe(404);
 });
 

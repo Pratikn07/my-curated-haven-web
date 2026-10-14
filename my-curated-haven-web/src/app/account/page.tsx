@@ -120,7 +120,7 @@ export default async function AccountPage() {
             Two-step verification
           </h2>
           <p className="mt-1 text-sm text-text-muted">
-            Add an authenticator app to protect your account. Admin access requires this second step.
+            For My Curated Haven staff. You don&apos;t need it to buy, save or read recipes.
           </p>
           <div className="mt-4">
             <SecurityMfa />

@@ -70,7 +70,7 @@ export default function Support() {
         <div>
           <h2 className="text-2xl font-semibold">Purchases</h2>
           <p className="mt-2 text-text-muted">
-            There is nothing to buy on this website yet. If a recipe collection goes on sale, its page will state the price and refund terms before you pay.
+            Recipe collections are one-time purchases, paid on Stripe&apos;s checkout page. Each collection&apos;s page states the price, what is included and the refund terms before you pay. If something goes wrong with a payment, email support from the address you paid with.
           </p>
         </div>
       </section>

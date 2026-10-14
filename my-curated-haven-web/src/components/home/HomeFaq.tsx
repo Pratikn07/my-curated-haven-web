@@ -11,7 +11,7 @@ export default function HomeFaq({ state }: { state: HomepageRecipePresentationSt
     state.mode === "collection_ready"
       ? "The approved collection page explains what is included and its current terms before any purchase. The room samples are separate from any recipe access."
       : state.mode === "free_ready"
-        ? "No. The free recipes are on the Recipes page, and no paid collection is being presented here."
+        ? "Yes. Recipe collections on the Collections page are one-time purchases, and the free recipes on the Recipes page stay free."
         : "Nothing on this site is for sale today. If a collection becomes available, its own page will explain exactly what it includes before any purchase.";
 
   const questions = [
