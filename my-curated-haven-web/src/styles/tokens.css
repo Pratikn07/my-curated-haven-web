@@ -41,6 +41,15 @@
   --room-library-wash: #eee9f6;
   --room-library-accent: #6a5b92;
 
+  /* Recipe method lines: each wash carries its own ink. */
+  --sage-wash: #e8efe6;
+  --sage-ink: #46603f;
+  --say-wash: #fbf1d3;
+  --say-ink: #5c4a12;
+  /* The step photo viewer: solid, so no page text shows through. */
+  --scrim: #18171d;
+  --scrim-ink: #f6f4ee;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
