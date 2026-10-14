@@ -12,11 +12,13 @@ import type { CollectionRecipe, SeriesKey, ShelfKey, ShowroomCollection } from "
  * out and have no page. Halloween, Meal Prep and Protein Packs are also the
  * chapters of the first showroom, /collections/test.
  *
- * Recipe facts are a catalog snapshot (src/config/recipe-snapshot.ts). The
- * recipes are drafts in the catalog, so they carry no link until published.
- * On 2026-10-05 seven adult recipes (written for pregnancy, no child steps)
- * were swapped out of the live books; those recipes were then rewritten for
- * children (RECIPE-TAGS.md).
+ * Recipe facts are a catalog snapshot (src/config/recipe-snapshot.ts). A recipe
+ * carries a link only once it is published; whether it is free is read from the
+ * free list at request time. Since 2026-10-14 each book has three free samples
+ * where the overlaps allow it (docs/implementation/recipe-collections/
+ * AUDIT-2026-10-14.md). On 2026-10-05 seven adult recipes (written for
+ * pregnancy, no child steps) were swapped out of the live books; those recipes
+ * were then rewritten for children (RECIPE-TAGS.md).
  */
 
 function recipes(slugs: readonly string[]): CollectionRecipe[] {
@@ -445,6 +447,9 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
       "soft-banana-oat-toddler-cookies",
       "soft-date-almond-cocoa-bites",
       "soft-peanut-butter-oat-energy-balls",
+      // Placed 2026-10-14: sweetened with banana and pumpkin only.
+      "mini-pumpkin-cheesecake-bites",
+      "banana-pumpkin-mini-donuts",
     ]),
   },
   {
@@ -461,7 +466,8 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     cover: cover("fruit-gummies", 1412, "A berry-red cloth cookbook with a gold-foil gummy mould, heart and star gummies and a strawberry on its cover"),
     refresh: "",
     placeholderPrice: "$6.99",
-    recipes: [],
+    // Placed 2026-10-14: both are also in the Halloween book.
+    recipes: recipes(["gummy-worms", "protein-fruit-gummies"]),
   },
   {
     slug: "on-the-go-snacks",
@@ -484,6 +490,8 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
       "cheesy-veggie-mini-muffins",
       "soft-banana-oat-toddler-cookies",
       "veggie-rice-snack-fritters",
+      // Placed 2026-10-14: toddler-hand size, keeps a day at room temperature, freezes.
+      "banana-pumpkin-mini-donuts",
     ]),
   },
 
@@ -548,6 +556,9 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
       "pumpkin-and-ricotta-gnocchi-pillows",
       "savory-corn-and-cheddar-muffins",
       "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+      // Placed 2026-10-14: pumpkin.
+      "mini-pumpkin-cheesecake-bites",
+      "banana-pumpkin-mini-donuts",
     ]),
   },
   {

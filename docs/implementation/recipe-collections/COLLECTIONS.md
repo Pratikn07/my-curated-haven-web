@@ -42,7 +42,7 @@ Stage bands for collections are coarse on purpose (fewer books). Recipes use fin
 
 By stage: 6–12 months 5 · 1–2 years 6 · 2–4 years 4 · all stages 5.
 
-**Live today:** `halloween`, `meal-prep` and `protein-packs` are published on the website with placeholder prices (see [the plan](README.md)). Keep these three slugs; live links and Instagram posts point at them. All other collections start as drafts.
+**Live today:** `halloween`, `meal-prep` and `protein-packs` are published on the website; Halloween has a real price since 2026-10-13, the other two placeholder prices (see [the plan](README.md)). Keep these three slugs; live links and Instagram posts point at them. All other collections start as drafts. Since 2026-10-14 each collection has three free sample recipes where the overlaps allow it ([AUDIT-2026-10-14.md](AUDIT-2026-10-14.md), [RECIPE-TAGS.md](RECIPE-TAGS.md#free-samples-2026-10-14)).
 
 **Not included:** sleep, potty training and other parenting guides. They are popular on Instagram but are guides, not recipe collections, and belong to a separate effort if added later. No South Asian holiday collections; the seasonal shelf follows the US and Western calendar.
 
