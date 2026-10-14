@@ -11,6 +11,8 @@
  * (docs/implementation/instagram-landing/HALLOWEEN.md lists their sources).
  */
 
+import type { MakeAheadPlanPreview } from "@/lib/collections/make-ahead-types";
+
 const IMG = "/images/campaigns/halloween";
 
 export interface HalloweenImage {
@@ -190,6 +192,60 @@ export const HALLOWEEN_BOOK = {
   heading: "Twenty recipes for the week the costumes come out",
   cover: { src: "/images/collections/cover-halloween-1040.webp", width: 1040, height: 1412, alt: "The Halloween collection: a pumpkin-orange cloth cookbook with a gold-foil pumpkin" },
 };
+
+/**
+ * The make-ahead plan that comes with the Halloween book (/collections/halloween/plan): the card on the book page
+ * for buyers, the line in the buy box for everyone else, and the link in My Library. Only books with an entry
+ * here get any of these. It stays up after 31 October: no date hides it.
+ *
+ * Only the preview lives here, because everyone sees it. The plan itself (tasks, shopping list, make-ahead tiers)
+ * is paid content: it is stored in public.collection_extras, read under the same rules as a paid recipe body, and
+ * loaded with scripts/load-make-ahead-plan.mjs from a file kept outside the repository.
+ */
+export interface MakeAheadPlanEntry {
+  collectionSlug: string;
+  path: string;
+  /** The page's browser title; the layout adds " | My Curated Haven". */
+  metadataTitle: string;
+  card: { title: string; subline: string };
+  buyLine: string;
+  libraryLink: string;
+  preview: MakeAheadPlanPreview;
+}
+
+export const HALLOWEEN_MAKE_AHEAD_PLAN: MakeAheadPlanEntry = {
+  collectionSlug: HALLOWEEN_COLLECTION_SLUG,
+  path: `/collections/${HALLOWEEN_COLLECTION_SLUG}/plan`,
+  metadataTitle: "Halloween make-ahead plan",
+  card: { title: "Your make-ahead plan", subline: "Thu, Fri, Sat · one shopping list" },
+  buyLine: "Comes with a make-ahead plan and one shopping list for Halloween weekend.",
+  libraryLink: "Make-ahead plan",
+  preview: {
+    byline: "Inside the Halloween book",
+    title: "Your Halloween make-ahead plan",
+    lede: "A party menu of 6 recipes, made across three short sessions so Saturday is calm. About 1 hour 40 minutes of cooking in all, and one shopping list.",
+    menuHeading: "The party menu",
+    menu: [
+      { slug: "berry-ghost-yogurt-bark", name: "Berry Ghost Yogurt Bark" },
+      { slug: "mummy-banana-pops", name: "Mummy Banana Pops" },
+      { slug: "gummy-worms", name: "Gummy Worms" },
+      { slug: "witchs-broomsticks", name: "Witch’s Broomsticks" },
+      { slug: "spider-cracker-bites", name: "Spider Cracker Bites" },
+      { slug: "mandarin-orange-pumpkins", name: "Mandarin Orange Pumpkins" },
+    ],
+    daysHeading: "Three short sessions",
+    days: [
+      { dow: "Thu", dom: "29", mon: "Oct", heading: "Freezer night", time: "About 45 min", pill: "freezer" },
+      { dow: "Fri", dom: "30", mon: "Oct", heading: "Fridge day", time: "About 15 min", pill: "fridge" },
+      { dow: "Sat", dom: "31", mon: "Oct", heading: "Halloween", time: "About 40 min", pill: "fresh" },
+    ],
+  },
+};
+
+/** The book's make-ahead plan, or null for every book without one. */
+export function makeAheadPlanFor(collectionSlug: string): MakeAheadPlanEntry | null {
+  return collectionSlug === HALLOWEEN_MAKE_AHEAD_PLAN.collectionSlug ? HALLOWEEN_MAKE_AHEAD_PLAN : null;
+}
 
 export const HALLOWEEN_CLOSING = {
   heading: "Made in our kitchen. Shared with yours.",

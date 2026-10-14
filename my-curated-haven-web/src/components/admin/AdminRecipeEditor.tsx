@@ -280,6 +280,13 @@ export default function AdminRecipeEditor({
   if (candidate.body && typeof candidate.body.yieldStructured !== "undefined" && candidate.body.yieldStructured !== null) {
     unknownNotes.push("Structured yield data is preserved as-is.");
   }
+  if (candidate.body?.method != null) {
+    unknownNotes.push(
+      "This recipe has method content, so parents see the method layout instead of the yield, ingredients, " +
+        "steps and notes edited here. The allergens below still show in its safety box. The method is kept " +
+        "as-is; change it with the method load script."
+    );
+  }
   ingredients.forEach((row, i) => {
     const extra = Object.keys(row).filter((k) => !["item", "amount", "unit"].includes(k));
     if (extra.length > 0) unknownNotes.push(`Ingredient ${i + 1} keeps unsupported ${extra.join(", ")}.`);

@@ -28,6 +28,14 @@ test("rejects emails, extra fields, and unknown events", () => {
   expect(tokenUrl.ok).toBe(false);
 });
 
+test("[make-ahead] accepts a plan open with only the release id", () => {
+  const releaseId = "a0000000-0000-0000-0000-000000000001";
+  expect(validateAnalyticsEvent("make_ahead_plan_open", { collection_release_id: releaseId }).ok).toBe(true);
+  expect(validateAnalyticsEvent("make_ahead_plan_open", {}).ok).toBe(false);
+  expect(validateAnalyticsEvent("make_ahead_plan_open", { collection_release_id: "halloween" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("make_ahead_plan_open", { collection_release_id: releaseId, item: "Bananas" }).ok).toBe(false);
+});
+
 test("accepts a minimal recipe open", () => {
   const result = validateAnalyticsEvent("recipe_open", {
     recipe_id: RECIPE_ID,
