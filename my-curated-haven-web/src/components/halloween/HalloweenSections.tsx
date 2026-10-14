@@ -15,7 +15,7 @@ import {
   type HalloweenMoment,
 } from "@/config/halloween";
 import type { HalloweenBookData, HalloweenMenuItem, HalloweenTrickItem } from "@/lib/data/load-halloween";
-import { BeforeAfter, GhostPeek, PumpkinCarve } from "./HalloweenClient";
+import { BeforeAfter, BookGrid, GhostPeek, PumpkinCarve } from "./HalloweenClient";
 
 /** The colour each part of the story hands to the sky behind the page, from morning to night. */
 const SKY = { lastWeek: "#fbefd9", morning: "#fbe3bc", walk: "#4a2a45", night: "#23161c" } as const;
@@ -340,15 +340,10 @@ export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; fr
           <div className="hw-book-back" />
         </div>
         <div className="hw-book-page">
-          <h3>Inside</h3>
-          <ol>
-            {book.recipes.map((recipe) => (
-              <li key={recipe.slug}>
-                {recipe.title}
-                {recipe.free ? <b>Free</b> : null}
-              </li>
-            ))}
-          </ol>
+          <h3>
+            Inside <small>Tap a dish</small>
+          </h3>
+          <BookGrid recipes={book.recipes} />
         </div>
       </div>
       <div className="hw-buy">

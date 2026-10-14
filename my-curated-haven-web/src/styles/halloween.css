@@ -274,28 +274,58 @@
 .hw-reasons strong { display: block; font: 620 1.12rem/1.3 var(--font-display); margin-bottom: 0.15rem; }
 .hw-reasons span { color: var(--hw-on-night-soft); font-size: 0.93rem; }
 .hw-book-sec .hw-lede { color: var(--hw-on-night-soft); }
-.hw-book { display: grid; gap: 1rem; justify-items: center; perspective: 1100px; }
-.hw-book-cover, .hw-book-page { width: min(78vw, 17.5rem); aspect-ratio: 1040 / 1412; border-radius: 0.35rem 0.9rem 0.9rem 0.35rem; }
+/* 64vw on a phone leaves room for the open cover beside the page; a long perspective keeps it from swelling over the text above. */
+.hw-book { display: grid; gap: 1rem; justify-items: center; perspective: 2000px; }
+.hw-book-cover, .hw-book-page { width: min(64vw, 17.5rem); aspect-ratio: 1040 / 1412; border-radius: 0.35rem 0.9rem 0.9rem 0.35rem; }
 .hw-book-cover { position: relative; transform-origin: left center; transform-style: preserve-3d; z-index: 2; }
 .hw-book-front, .hw-book-back { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .hw-book-front { box-shadow: 0 30px 50px -20px rgb(0 0 0 / 0.7), inset 6px 0 10px -6px rgb(0 0 0 / 0.5); }
 .hw-book-front img { width: 100%; height: 100%; object-fit: cover; }
-.hw-book-back { transform: rotateY(180deg); background: #7a3212; }
+/* The inside of the cover: an endpaper, so the open cover shows more than flat brown. */
+.hw-book-back {
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle at 25% 25%, rgb(248 199 108 / 0.22) 0 3px, transparent 4px) 0 0 / 22px 22px,
+    radial-gradient(circle at 75% 75%, rgb(248 199 108 / 0.14) 0 2px, transparent 3px) 0 0 / 22px 22px,
+    linear-gradient(90deg, #6a2a0f, var(--hw-pumpkin-deep));
+}
 .hw-book-title {
   position: absolute; left: 0; right: 0; bottom: 18%; text-align: center; color: #f3d9a4;
   font: 600 0.9rem var(--font-display); letter-spacing: 0.22em; text-transform: uppercase;
 }
+/* The page is the cover's size, so all twenty dishes fit as photos and the open book reads as a book. */
 .hw-book-page {
-  display: grid; align-content: start; gap: 0.55rem; padding: 1.2rem 1.1rem; background: #fbf2e2; color: var(--hw-ink);
+  position: relative; display: grid; grid-template-rows: auto 1fr; gap: 0.5rem; padding: 0.8rem 0.75rem; overflow: hidden;
+  background: #fbf2e2; color: var(--hw-ink);
   box-shadow: 0 30px 50px -24px rgb(0 0 0 / 0.75), inset 8px 0 14px -8px rgb(60 30 14 / 0.35);
 }
-.hw[data-motion="on"] .hw-book { grid-template-areas: "book"; }
+.hw[data-motion="on"] .hw-book { grid-template-areas: "book"; padding-top: 1.75rem; }
 .hw[data-motion="on"] .hw-book > * { grid-area: book; }
-.hw-book-page h3 { margin: 0; font: 600 0.68rem var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--hw-pumpkin-deep); }
-.hw-book-page ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.1rem; counter-reset: hw-c; }
-.hw-book-page li { display: flex; gap: 0.5rem; align-items: baseline; padding-block: 0.2rem; border-bottom: 1px dotted var(--hw-line); font: 0.88rem/1.3 var(--font-display); }
-.hw-book-page li::before { counter-increment: hw-c; content: counter(hw-c); min-width: 0.9rem; font: 600 0.7rem var(--font-body); color: var(--hw-ink-soft); }
-.hw-book-page li b { margin-left: auto; font: 700 0.6rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--hw-pumpkin-deep); }
+.hw-book-page h3 {
+  display: flex; justify-content: space-between; align-items: baseline; margin: 0;
+  font: 600 0.68rem var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--hw-pumpkin-deep);
+}
+.hw-book-page h3 small { font: 500 0.68rem var(--font-body); letter-spacing: 0.02em; text-transform: none; color: var(--hw-ink-soft); }
+.hw-book-tiles { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 1fr; gap: 4px; min-height: 0; }
+.hw-book-tiles li { position: relative; min-height: 0; }
+.hw-book-tile { position: absolute; inset: 0; padding: 0; border: 0; border-radius: 0.4rem; overflow: hidden; background: #e9dcc6; cursor: pointer; }
+.hw-book-tile img { object-fit: cover; transition: transform 0.3s var(--hw-ease); }
+.hw-book-tile:active img { transform: scale(0.94); }
+.hw-book-tile[aria-pressed="true"] { outline: 2px solid var(--hw-pumpkin); outline-offset: 1px; }
+.hw-book-tile b {
+  position: absolute; left: 3px; bottom: 3px; padding: 1px 4px; border-radius: 999px; background: var(--hw-pumpkin-deep); color: #fff8f0;
+  font: 700 0.5rem/1.4 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.hw-book-caption {
+  position: absolute; left: 0.5rem; right: 0.5rem; bottom: 0.5rem; display: grid; gap: 0.1rem; padding: 0.5rem 0.65rem; border-radius: 0.6rem;
+  background: rgb(43 26 18 / 0.94); color: #fff8f0; font: 0.88rem/1.25 var(--font-display);
+  opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity 0.25s, transform 0.25s var(--hw-ease), visibility 0.25s;
+}
+.hw-book-caption[data-on] { opacity: 1; visibility: visible; transform: none; }
+.hw-book-caption a {
+  display: inline-flex; align-items: center; gap: 0.3rem; min-height: 1.75rem; color: var(--hw-candle); text-decoration: none;
+  font: 600 0.72rem var(--font-body); letter-spacing: 0.04em;
+}
 .hw-buy { display: grid; gap: 0.7rem; padding: 1.2rem 1.25rem 1.3rem; border-radius: var(--hw-radius); background: var(--hw-paper); color: var(--hw-ink); box-shadow: var(--hw-shadow); }
 .hw-buy-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
 .hw-price { font: 700 2rem var(--font-display); font-variant-numeric: tabular-nums; }

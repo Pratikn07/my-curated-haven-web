@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 const HINTS = ["Tap the pumpkin to carve it", "Tap again", "One more tap", "Happy Halloween! Recipes below ↓"];
 
@@ -160,6 +162,51 @@ export function BeforeAfter({ before, after, className }: { before: ReactNode; a
         ⇆
       </span>
     </div>
+  );
+}
+
+/**
+ * The pages inside the open book: every recipe as a photo, sized to fit under
+ * the cover. A tap names the dish and offers its link (the recipe when it is
+ * free, otherwise the book), so a stray tap never leaves the page.
+ */
+export function BookGrid({ recipes }: { recipes: { slug: string; title: string; image: string; free: boolean; href: string }[] }) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const recipe = picked === null ? null : recipes[picked];
+
+  return (
+    <>
+      <ol className="hw-book-tiles">
+        {recipes.map((item, index) => (
+          <li key={item.slug}>
+            <button
+              className="hw-book-tile"
+              type="button"
+              aria-label={`${item.title}, ${item.free ? "free" : "in the book"}`}
+              aria-pressed={picked === index}
+              onClick={() => setPicked(picked === index ? null : index)}
+            >
+              {item.image ? <Image src={item.image} alt="" fill sizes="4.5rem" /> : null}
+              {item.free ? <b aria-hidden="true">Free</b> : null}
+            </button>
+          </li>
+        ))}
+      </ol>
+      <div className="hw-book-caption" aria-live="polite" data-on={recipe ? "" : undefined}>
+        {recipe ? (
+          <>
+            <span>{recipe.title}</span>
+            <Link
+              href={recipe.href}
+              data-story-action={recipe.free ? "campaign_recipe" : "collection"}
+              data-story-placement="collection"
+            >
+              {recipe.free ? "Free · open the recipe" : "In the book · see it"} <span aria-hidden="true">→</span>
+            </Link>
+          </>
+        ) : null}
+      </div>
+    </>
   );
 }
 
