@@ -6,7 +6,8 @@ import { getUserPurchasedCollections } from "@/lib/payments/repository";
 import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 import Badge from "@/components/ui/Badge";
 import StatePanel from "@/components/ui/StatePanel";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight, ListChecks } from "lucide-react";
+import { makeAheadPlanFor } from "@/config/halloween";
 
 export const metadata: Metadata = {
   title: "My Recipe Collections",
@@ -92,34 +93,49 @@ export default async function AccountCollectionsPage() {
       ) : (
         <div className="space-y-8">
           {/* One card per book; its page lists every recipe, so the library doesn't repeat them. */}
-          {collections.map((coll) => (
-            <div
-              key={coll.collectionId}
-              id={coll.slug}
-              className="scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 shadow-sm"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <Badge variant="collection">Active Access</Badge>
-                  <h2 className="mt-2 text-2xl font-bold text-foreground">
-                    {coll.title}
-                  </h2>
-                  <p className="mt-1 text-sm text-text-muted max-w-2xl">
-                    {coll.summary}
-                  </p>
-                </div>
+          {collections.map((coll) => {
+            const plan = makeAheadPlanFor(coll.slug);
+            return (
+              <div
+                key={coll.collectionId}
+                id={coll.slug}
+                className="scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 shadow-sm"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <Badge variant="collection">Active Access</Badge>
+                    <h2 className="mt-2 text-2xl font-bold text-foreground">
+                      {coll.title}
+                    </h2>
+                    <p className="mt-1 text-sm text-text-muted max-w-2xl">
+                      {coll.summary}
+                    </p>
+                  </div>
 
-                <Link
-                  href={`/collections/${coll.slug}`}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-5 py-2.5 text-sm font-semibold text-white hover:bg-action-hover"
-                >
-                  <BookOpen className="h-4 w-4" aria-hidden="true" />
-                  <span>Open Collection</span>
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href={`/collections/${coll.slug}`}
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-5 py-2.5 text-sm font-semibold text-white hover:bg-action-hover"
+                    >
+                      <BookOpen className="h-4 w-4" aria-hidden="true" />
+                      <span>Open Collection</span>
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                    {/* Halloween only: the plan that comes with the book. */}
+                    {plan ? (
+                      <Link
+                        href={plan.path}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted"
+                      >
+                        <ListChecks className="h-4 w-4 text-action" aria-hidden="true" />
+                        <span>{plan.libraryLink}</span>
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

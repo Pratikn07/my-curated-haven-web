@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "menuSub": "Fixture plan: invented words in the real plan's shape. Never the real plan.",
+  "menu": [
+    { "slug": "berry-ghost-yogurt-bark", "when": "freezer", "label": "Fixture day one · freezer" },
+    { "slug": "mummy-banana-pops", "when": "freezer", "label": "Fixture day one · freezer" },
+    { "slug": "gummy-worms", "when": "fridge", "label": "Fixture day two · fridge" },
+    { "slug": "witchs-broomsticks", "when": "fresh", "label": "Fixture day three · fresh" },
+    { "slug": "spider-cracker-bites", "when": "fresh", "label": "Fixture day three · fresh" },
+    { "slug": "mandarin-orange-pumpkins", "when": "fresh", "label": "Fixture day three · fresh" }
+  ],
+  "freeOf": "Fixture allergen note for the comet crumble.",
+  "daysSub": "Fixture times for moon-themed sessions.",
+  "days": [
+    {
+      "dom": "29",
+      "tasks": [
+        {
+          "when": "Fixture start with the comets",
+          "steps": [
+            [{ "slug": "mummy-banana-pops", "text": "Comet Crumble" }, ", fixture steps one and two."],
+            ["Fixture: while it chills, make the ", { "slug": "berry-ghost-yogurt-bark", "text": "Moonbeam Mousse" }, "."],
+            ["Fixture: stack the stardust trays."]
+          ],
+          "toddler": "Fixture toddler job: sprinkle the stardust."
+        }
+      ]
+    },
+    {
+      "dom": "30",
+      "tasks": [
+        {
+          "when": "Fixture any time",
+          "steps": [
+            ["Fixture: set the ", { "slug": "gummy-worms", "text": "Nebula Noodles" }, " in the fridge."],
+            ["Fixture: wrap the mousse in foil."]
+          ],
+          "toddler": "Fixture toddler job: count the noodles.",
+          "safety": "Fixture safety note: mind the warm pan."
+        }
+      ]
+    },
+    {
+      "dom": "31",
+      "tasks": [
+        {
+          "when": "Fixture an hour before",
+          "steps": [
+            ["Fixture: make the ", { "slug": "witchs-broomsticks", "text": "Rocket Rolls" }, "."],
+            ["Fixture: make the ", { "slug": "spider-cracker-bites", "text": "Satellite Snaps" }, "."],
+            ["Fixture: make the ", { "slug": "mandarin-orange-pumpkins", "text": "Planet Peels" }, " last."]
+          ],
+          "toddler": "Fixture toddler job: press on the planets."
+        },
+        {
+          "when": "Fixture just before",
+          "steps": [["Fixture: take everything out of the freezer."]],
+          "safety": "Fixture safety note: cut the noodles small."
+        }
+      ]
+    }
+  ],
+  "shopping": {
+    "heading": "Fixture shopping list",
+    "sub": "Fixture: everything for the moon party.",
+    "copyTitle": "Fixture moon party list",
+    "aisles": [
+      {
+        "aisle": "Fixture cold aisle",
+        "items": [
+          { "item": "Stardust yogurt", "amount": "2 fixture tubs", "forWhat": "Moonbeam Mousse" },
+          { "item": "Comet cheese", "amount": "4 fixture sticks", "forWhat": "Rocket Rolls" }
+        ]
+      },
+      {
+        "aisle": "Fixture fruit aisle",
+        "items": [
+          { "item": "Moon melons", "amount": "3", "forWhat": "Comet Crumble" },
+          { "item": "Planet plums", "amount": "6", "forWhat": "Planet Peels" }
+        ]
+      },
+      {
+        "aisle": "Fixture check you have",
+        "items": [{ "item": "Rocket sticks", "amount": "", "forWhat": "Comet Crumble" }]
+      }
+    ]
+  },
+  "tiers": {
+    "heading": "Fixture: making something else?",
+    "sub": "Fixture tiers for the moon book.",
+    "items": [
+      { "pill": "freezer", "title": "Fixture a month ahead · freezer", "list": "Comet Crumble, Moonbeam Mousse", "also": "Fixture: the rockets freeze too." },
+      { "pill": "fridge", "title": "Fixture a week ahead · fridge", "list": "Nebula Noodles", "also": "" },
+      { "pill": "fresh", "title": "Fixture on the day", "list": "Rocket Rolls, Satellite Snaps, Planet Peels", "also": "Fixture: serve them cold." }
+    ]
+  }
+}

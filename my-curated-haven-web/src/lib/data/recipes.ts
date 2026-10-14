@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/database";
+import { methodProblem, parseRecipeMethod, type RecipeMethod } from "../recipes/method";
 
 export interface RecipeCatalogItem {
   id: string;
@@ -37,6 +38,8 @@ export interface RecipeBody {
   allergenReviewState: "unknown" | "reviewed_listed" | "reviewed_no_allergens";
   allergens: string[] | null;
   storageNotes?: string | null;
+  /** The new method layout's content; null (missing or malformed) keeps today's layout. */
+  method: RecipeMethod | null;
   updatedAt: string;
 }
 
@@ -109,6 +112,11 @@ export async function getPublishedCatalog(
   return data.map(mapCatalogRow);
 }
 
+const BODY_COLUMNS =
+  "recipe_id, content_version, ingredients, instructions, yield, yield_structured, reviewed_notes, allergen_review_state, allergens, storage_notes, updated_at" as const;
+/** Postgres "undefined_column", which PostgREST passes through. */
+const UNDEFINED_COLUMN = "42703";
+
 /**
  * Fetch a single recipe by its slug.
  * Executes body query under caller credentials so database RLS enforces entitlement/free-slot rules.
@@ -136,13 +144,18 @@ export async function getRecipeBySlug(
   const catalog = mapCatalogRow(catalogData);
 
   // Attempt to fetch body under caller session credentials
-  const { data: bodyData, error: bodyError } = await client
+  let bodyResult = await client
     .from("recipe_bodies")
-    .select(
-      "recipe_id, content_version, ingredients, instructions, yield, yield_structured, reviewed_notes, allergen_review_state, allergens, storage_notes, updated_at"
-    )
+    .select(`${BODY_COLUMNS}, method`)
     .eq("recipe_id", catalog.id)
     .maybeSingle();
+  // A database without the method column yet (20261014120000_recipe_method.sql not applied) is not an error:
+  // the recipe keeps today's layout.
+  if (bodyResult.error?.code === UNDEFINED_COLUMN) {
+    const classic = await client.from("recipe_bodies").select(BODY_COLUMNS).eq("recipe_id", catalog.id).maybeSingle();
+    bodyResult = { ...classic, data: classic.data ? { ...classic.data, method: null } : null } as typeof bodyResult;
+  }
+  const { data: bodyData, error: bodyError } = bodyResult;
 
   if (bodyError) {
     return { status: "error", message: bodyError.message };
@@ -169,6 +182,12 @@ export async function getRecipeBySlug(
       : "unknown"
   ) as RecipeBody["allergenReviewState"];
 
+  // A recipe page must never break on bad method data: anything malformed falls back to today's layout.
+  const method = parseRecipeMethod(bodyData.method);
+  if (bodyData.method != null && !method) {
+    console.warn(`Recipe ${slug}: method content is malformed at ${methodProblem(bodyData.method)}; showing the classic layout.`);
+  }
+
   const body: RecipeBody = {
     recipeId: bodyData.recipe_id,
     contentVersion: bodyData.content_version,
@@ -183,6 +202,7 @@ export async function getRecipeBySlug(
     allergenReviewState: allergenState,
     allergens: bodyData.allergens,
     storageNotes: bodyData.storage_notes,
+    method,
     updatedAt: bodyData.updated_at,
   };
 

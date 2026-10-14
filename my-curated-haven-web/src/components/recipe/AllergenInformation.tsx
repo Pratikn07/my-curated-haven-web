@@ -1,15 +1,10 @@
 import Badge from "@/components/ui/Badge";
-import { getAllergenDisplay } from "@/lib/recipes/allergen-display";
+import { allergenLabel, getAllergenDisplay } from "@/lib/recipes/allergen-display";
 import type { RecipeBody } from "@/lib/data/recipes";
 
 interface AllergenInformationProps {
   reviewState: RecipeBody["allergenReviewState"];
   allergens: string[] | null;
-}
-
-/** Stored names read as words: the catalog says "tree_nuts" where the Halloween recipes say "tree nuts". */
-function allergenLabel(allergen: string): string {
-  return allergen.replace(/_/g, " ");
 }
 
 export default function AllergenInformation({

@@ -202,6 +202,38 @@ export type Database = {
           },
         ]
       }
+      collection_extras: {
+        Row: {
+          collection_id: string
+          content: Json
+          created_at: string
+          kind: string
+          updated_at: string
+        }
+        Insert: {
+          collection_id: string
+          content: Json
+          created_at?: string
+          kind: string
+          updated_at?: string
+        }
+        Update: {
+          collection_id?: string
+          content?: Json
+          created_at?: string
+          kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_extras_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_publication_projection: {
         Row: {
           availability: string
@@ -650,6 +682,7 @@ export type Database = {
           content_version: number
           ingredients: Json
           instructions: Json
+          method: Json | null
           recipe_id: string
           reviewed_notes: string | null
           storage_notes: string | null
@@ -663,6 +696,7 @@ export type Database = {
           content_version?: number
           ingredients?: Json
           instructions?: Json
+          method?: Json | null
           recipe_id: string
           reviewed_notes?: string | null
           storage_notes?: string | null
@@ -676,6 +710,7 @@ export type Database = {
           content_version?: number
           ingredients?: Json
           instructions?: Json
+          method?: Json | null
           recipe_id?: string
           reviewed_notes?: string | null
           storage_notes?: string | null
