@@ -1,0 +1,114 @@
+{
+  "slug": "synthetic-snack-pops",
+  "title": "Synthetic Snack Pops",
+  "shortName": "Snack Pops",
+  "handsOnMinutes": 15,
+  "totalMinutes": 165,
+  "waitLabel": "freezer",
+  "makes": "6 pops",
+  "safety": {
+    "all": [
+      "Check every label for allergens before you start.",
+      "Let the pops sit out for a few minutes so they are not too hard."
+    ],
+    "byAge": {
+      "1": "For age 1, serve thin slices on a plate, without the stick.",
+      "2": "Hand it over on the stick at the table.",
+      "3": "Hand it over on the stick at the table."
+    }
+  },
+  "contains": ["milk"],
+  "ingredientGroups": [
+    {
+      "name": null,
+      "items": [
+        { "amount": "3", "item": "pears" },
+        { "amount": "1 cup", "item": "plain yogurt" },
+        { "amount": "1 tbsp", "item": "honey (optional, over-1s only)" },
+        { "amount": "12", "item": "blueberry halves" }
+      ]
+    }
+  ],
+  "tools": [
+    "6 wooden sticks",
+    "Small tray and parchment",
+    "Tall glass",
+    "Small zip-top bag"
+  ],
+  "sections": [
+    {
+      "name": null,
+      "steps": [
+        {
+          "stage": "Prep the fruit",
+          "text": "Line the tray with parchment. Cut the pears into 6 thick wedges and push a stick into each one.",
+          "toddler": {
+            "1": "Hand you the sticks one at a time.",
+            "2": "Wash the pears.",
+            "3": "Wash the pears, then line up the sticks on the tray."
+          },
+          "say": {
+            "1": "Say it slowly: pear, pear, pear."
+          }
+        },
+        {
+          "stage": "Coat the fruit",
+          "text": "Stir the yogurt and honey in the tall glass. Put 2 spoonfuls in the zip-top bag for later. Dip each wedge, let it drip and lay it on the tray. Freeze 30 minutes.",
+          "ready": "The coat feels dry to the touch.",
+          "photo": {
+            "file": "synthetic-snack-pops-step-coated",
+            "caption": "Test caption: six coated wedges on a tray."
+          }
+        },
+        {
+          "stage": "Add stripes and eyes",
+          "text": "Cut a small corner off the bag and draw stripes across each pop. Add 2 blueberry halves as eyes before the stripes set.",
+          "toddler": {
+            "2": "Place the eyes.",
+            "3": "Draw the stripes with you, then place the eyes."
+          },
+          "say": {
+            "2": "Stripe, stripe, stripe.",
+            "3": "Stripe, stripe, stripe. Then count the eyes up to 12."
+          },
+          "tip": "Go fast so the stripes stay neat.",
+          "photo": {
+            "file": "synthetic-snack-pops-step-striped",
+            "caption": "Test caption: striped pops with two eyes each."
+          }
+        },
+        {
+          "stage": "Freeze, then soften",
+          "text": "Freeze for 2 hours. Take the pops out 5 minutes before serving.",
+          "ready": "The pop is solid, but a spoon can dent it.",
+          "safety": {
+            "1": "Slice it thin and serve it on a plate.",
+            "2": "Hand it over on the stick at the table.",
+            "3": "Hand it over on the stick at the table."
+          },
+          "wait": {
+            "title": "While it freezes · 2 hours",
+            "activity": {
+              "1": "Hide and seek. Hide a toy car under a cup and let them find it.",
+              "2": "Pillow fort. Build a small fort from two cushions and a blanket.",
+              "3": "Draw the pops. They draw the stripes and eyes with crayons."
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tips": ["Chill the glass first so the yogurt stays thick."],
+  "storage": "Keep in a sealed box in the freezer for up to 2 weeks.",
+  "madeIt": "Share a photo of your Snack Pops and tag @tinysoho on Instagram.",
+  "review": {
+    "countCheck": "Test fixture. Not a real recipe.",
+    "fixes": [],
+    "newSafetyLines": [],
+    "newCues": [],
+    "changedIngredients": [],
+    "photos": [],
+    "heroMismatch": [],
+    "openQuestions": []
+  }
+}

@@ -33,7 +33,9 @@ export type RecipeSnapshot = { recipeId: string; slug: string;
   body: null | { ingredients: Json; instructions: Json; yield: string;
     yieldStructured: Json; reviewedNotes: string | null;
     allergenReviewState: "unknown" | "reviewed_listed" | "reviewed_no_allergens";
-    allergens: string[] | null; storageNotes: string | null };
+    allergens: string[] | null; storageNotes: string | null;
+    /** The recipe page's method layout. Present only when the recipe has it; the editor keeps it as-is. */
+    method?: Json };
   image: { path: string; alt: string | null; description: string | null;
     objectId: string | null; objectVersion: string | null };
   /** Reviewed global tags; absent until the recipe's tags are imported (Phase 2). */

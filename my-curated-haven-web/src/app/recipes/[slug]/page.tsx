@@ -10,6 +10,9 @@ import {
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
 import { formatIngredient, normalizeInstructions, usableImageSrc } from "@/lib/recipes/format";
+import { methodHowTo, methodIngredientLines, methodTime } from "@/lib/recipes/method";
+import { allergenLine, getAllergenDisplay } from "@/lib/recipes/allergen-display";
+import RecipeMethodLayout from "@/components/recipe/RecipeMethodLayout";
 import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import { checkRecipeAccess, isRecipeAdmin } from "@/lib/data/access";
 import RecipeCard from "@/components/recipe/RecipeCard";
@@ -114,6 +117,9 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
   const catalog = isAccessDenied ? result.catalog : result.recipe.catalog;
   const body = isAccessDenied ? null : result.recipe.body;
   const instructions = body ? normalizeInstructions(body.instructions) : [];
+  // The method layout, only for a recipe the visitor can open and that has valid method content.
+  const method = body?.method ?? null;
+  const time = method ? methodTime(method) : null;
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
   const imageSrc = usableImageSrc(catalog.previewImagePath);
   const everyday = EVERYDAY_PHOTOS[catalog.slug];
@@ -178,18 +184,27 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
     name: catalog.title,
     description: catalog.publicSummary,
     image: imageSrc ? [imageSrc] : [],
-    ...(body
+    ...(method
       ? {
-          recipeYield: body.yield,
-          recipeIngredient: body.ingredients.map(formatIngredient),
-          recipeInstructions: instructions.map((step) => ({
-            "@type": "HowToStep",
-            position: step.step,
-            text: step.text,
-          })),
+          // The structured data describes what the page shows: the method's steps, ingredients and times.
+          recipeYield: method.makes,
+          recipeIngredient: methodIngredientLines(method),
+          recipeInstructions: methodHowTo(method),
+          prepTime: `PT${method.handsOnMinutes}M`,
+          totalTime: `PT${method.totalMinutes}M`,
         }
-      : {}),
-    ...(catalog.totalMinutes
+      : body
+        ? {
+            recipeYield: body.yield,
+            recipeIngredient: body.ingredients.map(formatIngredient),
+            recipeInstructions: instructions.map((step) => ({
+              "@type": "HowToStep",
+              position: step.step,
+              text: step.text,
+            })),
+          }
+        : {}),
+    ...(!method && catalog.totalMinutes
       ? { totalTime: `PT${catalog.totalMinutes}M` }
       : {}),
     author: {
@@ -248,23 +263,21 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
         {/* Quick Recipe Info Bar */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-surface p-4">
           <div className="flex flex-wrap items-center gap-4">
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-text-muted">
-                Total Time
-              </span>
-              <span className="text-base font-semibold text-foreground">
-                {catalog.totalMinutes ? `${catalog.totalMinutes} min` : "Not reviewed"}
-              </span>
-            </div>
-            <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-text-muted">
-                Yield
-              </span>
-              <span className="text-base font-semibold text-foreground">
-                {body ? body.yield : "Toddler portions"}
-              </span>
-            </div>
+            {method && time ? (
+              <>
+                <InfoStat label="Hands-on" value={time.handsOn} />
+                <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
+                <InfoStat label="Total" value={time.total} />
+                <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
+                <InfoStat label="Makes" value={method.makes} />
+              </>
+            ) : (
+              <>
+                <InfoStat label="Total Time" value={catalog.totalMinutes ? `${catalog.totalMinutes} min` : "Not reviewed"} />
+                <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
+                <InfoStat label="Yield" value={body ? body.yield : "Toddler portions"} />
+              </>
+            )}
             <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
             <div>
               <span className="block text-xs font-bold uppercase tracking-wider text-text-muted">
@@ -274,6 +287,14 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                 {isAdmin ? "Admin access" : isAccessDenied ? "Collection Recipe" : accessKind === "free" ? "Free Toddler Recipe" : "Your Collection Recipe"}
               </span>
             </div>
+            {time ? (
+              <div className="rm-time">
+                <div className="rm-timebar" role="img" aria-label={`${time.handsOn} hands-on out of ${time.total} total`}>
+                  <span style={{ width: `${time.handsOnPercent}%` }} />
+                </div>
+                <p>{time.sentence}</p>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0">
@@ -414,13 +435,23 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
               </>
             ) : null}
             {!isAdmin && <RecipeOpenTracker recipeId={catalog.id} accessKind={accessKind} />}
-            <RecipeIngredients ingredients={body.ingredients} />
-            <RecipeMethod instructions={body.instructions} />
-            <AllergenInformation
-              reviewState={body.allergenReviewState}
-              allergens={body.allergens}
-            />
-            <RecipeStorageNotes storageNotes={body.storageNotes} reviewedNotes={body.reviewedNotes} />
+            {method ? (
+              /* Age switch, safety box (with the allergens), ingredients, method, "We made it!", tips and storage. */
+              <RecipeMethodLayout
+                method={method}
+                allergenLine={allergenLine(getAllergenDisplay(body.allergenReviewState, body.allergens))}
+              />
+            ) : (
+              <>
+                <RecipeIngredients ingredients={body.ingredients} />
+                <RecipeMethod instructions={body.instructions} />
+                <AllergenInformation
+                  reviewState={body.allergenReviewState}
+                  allergens={body.allergens}
+                />
+                <RecipeStorageNotes storageNotes={body.storageNotes} reviewedNotes={body.reviewedNotes} />
+              </>
+            )}
 
             {/* Print Footer Attribution (visible only in print) */}
             <div className="hidden border-t border-border pt-4 text-xs text-text-muted print:block">
@@ -453,6 +484,15 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+function InfoStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="block text-xs font-bold uppercase tracking-wider text-text-muted">{label}</span>
+      <span className="text-base font-semibold text-foreground">{value}</span>
     </div>
   );
 }

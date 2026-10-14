@@ -1,14 +1,16 @@
 // Phase 4 scenario S16 (audit R4-07): a backend error is a typed failure,
 // never a successful empty result or a false "denied".
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { register } from "node:module";
 import test from "node:test";
-import { checkRecipeAccess, isRecipeAdmin } from "../../src/lib/data/access.ts";
-import {
-  getFreeRecipeCatalog,
-  getFreeRecipeSlots,
-  getPublishedCatalog,
-  getRecipeBySlug,
-} from "../../src/lib/data/recipes.ts";
+
+// recipes.ts imports the method validator without a file extension, so resolve app imports the way Next does.
+register("../../scripts/ts-alias-hooks.mjs", import.meta.url);
+const { checkRecipeAccess, isRecipeAdmin } = await import("../../src/lib/data/access.ts");
+const { getFreeRecipeCatalog, getFreeRecipeSlots, getPublishedCatalog, getRecipeBySlug } = await import(
+  "../../src/lib/data/recipes.ts"
+);
 
 const FAILURE = { data: null, error: { message: "backend unavailable" } };
 const RECIPE_ID = "10000000-0000-0000-0000-000000000009";
@@ -33,7 +35,8 @@ function fakeClient({ tables = {}, user = { data: { user: null }, error: null },
   return {
     from(table) {
       if (table === throwOn) throw new Error("network down");
-      const response = tables[table] ?? { data: null, error: null };
+      // { sequence: [...] } answers successive queries on the same table in order.
+      const response = (tables[table]?.sequence ? tables[table].sequence.shift() : tables[table]) ?? { data: null, error: null };
       const builder = new Proxy(
         {},
         {
@@ -61,6 +64,50 @@ test("getRecipeBySlug returns a typed error, not access_denied, when the body qu
   });
   const result = await getRecipeBySlug(client, "fixture-recipe");
   assert.equal(result.status, "error");
+});
+
+test("getRecipeBySlug keeps valid method content and drops malformed content, never failing the page", async () => {
+  const example = JSON.parse(
+    readFileSync(new URL("../fixtures/recipe-method-sample.json", import.meta.url), "utf8")
+  );
+  const body = (method) => ({
+    recipe_catalog: { data: CATALOG_ROW, error: null },
+    recipe_bodies: {
+      data: { recipe_id: RECIPE_ID, content_version: 1, ingredients: [], instructions: [], yield: "2", yield_structured: null,
+        reviewed_notes: null, allergen_review_state: "unknown", allergens: null, storage_notes: null, method, updated_at: "2026-10-14T00:00:00Z" },
+      error: null,
+    },
+  });
+  const valid = await getRecipeBySlug(fakeClient({ tables: body(example) }), "fixture-recipe");
+  assert.equal(valid.status, "ok");
+  assert.equal(valid.recipe.body.method.shortName, "Snack Pops");
+  assert.equal("review" in valid.recipe.body.method, false);
+
+  const warn = console.warn;
+  const warnings = [];
+  console.warn = (message) => warnings.push(message);
+  try {
+    const malformed = await getRecipeBySlug(fakeClient({ tables: body({ ...example, sections: "oops" }) }), "fixture-recipe");
+    assert.equal(malformed.status, "ok");
+    assert.equal(malformed.recipe.body.method, null);
+    assert.match(warnings[0], /fixture-recipe: method content is malformed at sections/);
+  } finally {
+    console.warn = warn;
+  }
+  assert.equal((await getRecipeBySlug(fakeClient({ tables: body(null) }), "fixture-recipe")).recipe.body.method, null);
+
+  // Before the migration is applied, the method column does not exist: the recipe still opens, in today's layout.
+  const missingColumn = { data: null, error: { code: "42703", message: "column recipe_bodies.method does not exist" } };
+  const classicRow = { ...body(null).recipe_bodies.data };
+  delete classicRow.method;
+  const classic = await getRecipeBySlug(fakeClient({ tables: { recipe_catalog: { data: CATALOG_ROW, error: null },
+    recipe_bodies: { sequence: [missingColumn, { data: classicRow, error: null }] } } }), "fixture-recipe");
+  assert.equal(classic.status, "ok");
+  assert.equal(classic.recipe.body.method, null);
+  // Any other body error is still an error, never a silent fallback.
+  const other = await getRecipeBySlug(fakeClient({ tables: { recipe_catalog: { data: CATALOG_ROW, error: null },
+    recipe_bodies: { sequence: [FAILURE, { data: classicRow, error: null }] } } }), "fixture-recipe");
+  assert.equal(other.status, "error");
 });
 
 test("getFreeRecipeSlots throws instead of returning an empty list", async () => {

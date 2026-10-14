@@ -682,6 +682,7 @@ export type Database = {
           content_version: number
           ingredients: Json
           instructions: Json
+          method: Json | null
           recipe_id: string
           reviewed_notes: string | null
           storage_notes: string | null
@@ -695,6 +696,7 @@ export type Database = {
           content_version?: number
           ingredients?: Json
           instructions?: Json
+          method?: Json | null
           recipe_id: string
           reviewed_notes?: string | null
           storage_notes?: string | null
@@ -708,6 +710,7 @@ export type Database = {
           content_version?: number
           ingredients?: Json
           instructions?: Json
+          method?: Json | null
           recipe_id?: string
           reviewed_notes?: string | null
           storage_notes?: string | null
