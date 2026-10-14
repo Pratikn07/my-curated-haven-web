@@ -63,6 +63,18 @@
     object-fit: contain !important;
   }
 
+  /* A before-and-after slider prints as its Halloween photo alone. */
+  .recipe-print-figure .hw-compare-before,
+  .recipe-print-figure .hw-compare-label,
+  .recipe-print-figure .hw-compare-bar,
+  .recipe-print-figure .hw-compare-knob {
+    display: none !important;
+  }
+
+  .recipe-print-figure .hw-compare img {
+    object-fit: contain !important;
+  }
+
   /* Make links visible without underlines and remove anchor URLs clutter */
   .recipe-print-root a {
     text-decoration: none !important;
