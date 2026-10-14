@@ -28,7 +28,7 @@ Recipes picked and cooked by Bhagyashree with her daughter Anaika, written for t
 ## Capabilities and Constraints
 
 - Next.js 16 App Router, Tailwind 4, Supabase (Postgres + RLS), Vercel.
-- Catalog: 3 test recipes and the 20 Halloween recipes are published; the rest are drafts. From 2026-10-13 the free recipes are three of the Halloween ones (Berry Ghost Yogurt Bark, Spider Cracker Bites, Apple Pie Halloween Pockets). Recipe bodies are readable only when published and either free or covered by a purchase.
+- Catalog: 48 of 90 recipes are published (the 20 Halloween recipes, the 3 launch test recipes and 25 free samples published 2026-10-14); the rest are drafts. 28 recipes are free: the owner's three Halloween ones (Berry Ghost Yogurt Bark, Spider Cracker Bites, Apple Pie Halloween Pockets, chosen 2026-10-13) and, since 2026-10-14, three per collection where the overlaps allow it (`docs/implementation/recipe-collections/AUDIT-2026-10-14.md`). Recipe bodies are readable only when published and either free or covered by a purchase.
 - Collections, prices and membership are not yet approved (plan task RC-02). Draft collections render only outside production; prices on drafts are placeholders.
 - How many recipes are free is the owner's choice (no fixed number since 2026-10-13); each collection page shows only its own free recipes. Open: packs vs. collections, customer library, subscription shape. See `docs/implementation/recipe-collections/`.
 

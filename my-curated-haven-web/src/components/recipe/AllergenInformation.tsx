@@ -7,6 +7,11 @@ interface AllergenInformationProps {
   allergens: string[] | null;
 }
 
+/** Stored names read as words: the catalog says "tree_nuts" where the Halloween recipes say "tree nuts". */
+function allergenLabel(allergen: string): string {
+  return allergen.replace(/_/g, " ");
+}
+
 export default function AllergenInformation({
   reviewState,
   allergens,
@@ -28,7 +33,7 @@ export default function AllergenInformation({
             <div className="mt-2 flex flex-wrap gap-2">
               {display.allergens.map((allergen) => (
                 <Badge key={allergen} variant="collection">
-                  {allergen}
+                  {allergenLabel(allergen)}
                 </Badge>
               ))}
             </div>
@@ -38,7 +43,7 @@ export default function AllergenInformation({
             <div className="mt-2 flex flex-wrap gap-2">
               {display.allergens.map((allergen) => (
                 <Badge key={allergen} variant="collection">
-                  {allergen}
+                  {allergenLabel(allergen)}
                 </Badge>
               ))}
             </div>

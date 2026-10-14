@@ -39,7 +39,7 @@ NEGATIONS = [
 ALLERGENS = {
     "milk": r"(?<!coconut )(?<!almond )(?<!breast )\bmilk\b|yogurt|cheese|cheddar|mozzarella|ricotta|feta|parmesan|(?<!peanut )(?<!nut )(?<!seed )\bbutter\b|\bcream\b|ghee",
     "eggs": r"\beggs?\b|mayonnaise",
-    "wheat": r"(?<!rice )(?<!chickpea )(?<!oat )(?<!almond )\bflour\b(?! tortilla)|flour tortilla|bread|panko|(?<!chickpea )(?<!lentil )\bpasta\b|spaghetti|(?<!rice )noodles|(?<!corn )tortilla|pita|puff pastry|pizza dough|lasagna|soy sauce|naan|couscous",
+    "wheat": r"(?<!rice )(?<!chickpea )(?<!oat )(?<!almond )\bflour\b(?! tortilla)|flour tortilla|bread|panko|(?<!chickpea )(?<!lentil )\bpasta\b|spaghetti|(?<!rice )noodles|(?<!corn )tortilla|pita|puff pastry|pizza dough|lasagna|soy sauce|naan|couscous|pretzel|cracker",
     "soy": r"tofu|soy sauce|tamari|edamame|miso",
     "peanuts": r"peanut",
     "tree_nuts": r"almond|cashew|walnut|pecan|pistachio|hazelnut|pine nut|pesto",
@@ -52,6 +52,14 @@ MEAT = r"chicken|beef|turkey|salmon|tuna|\bfish\b|pork|\bham\b|bacon|gelatin|anc
 IRON = r"beef|lentil|\bdal\b|bean|chickpea|tofu|spinach|\begg|iron-fortified"
 PREGNANCY = r"pregnan|nausea|morning sickness"
 STAGES = [("6-8m", 6, 9), ("9-12m", 9, 12), ("1-2y", 12, 24), ("2-3y", 24, 36), ("3-5y", 36, 61)]
+
+
+CATALOG_NAMES = {"egg": "eggs", "tree nuts": "tree_nuts"}
+
+
+def catalog_allergens(recipe):
+    """The catalog list in this file's spelling (the Halloween recipes say 'egg' and 'tree nuts')."""
+    return {CATALOG_NAMES.get(a, a) for a in recipe["catalog_allergens"]}
 
 
 def allergens_in(ingredients):
@@ -88,8 +96,17 @@ for r in data["recipes"]:
     # Allergens and free-from tags
     if set(found) != set(r["allergens"]):
         errors.append(f"{tag}: recorded allergens {sorted(r['allergens'])}, ingredients contain {sorted(found)}")
-    if set(found) != set(r["catalog_allergens"]):
-        notes.append(f"{tag}: catalog allergen list {sorted(r['catalog_allergens'])}, ingredients contain {sorted(found)}")
+    catalog = catalog_allergens(r)
+    if set(found) != catalog:
+        extra, missing = catalog - set(found), set(found) - catalog
+        if missing:
+            notes.append(f"{tag}: catalog allergen list {sorted(catalog)} misses {sorted(missing)} found in the ingredients")
+        elif extra <= {"milk", "soy"} and "chocolate" in ingredients:
+            notes.append(f"{tag}: catalog lists {sorted(extra)} beyond the ingredients: chocolate chips, a label check")
+        elif extra == {"wheat"} and re.search(r"\boats?\b|oat flour", ingredients):
+            notes.append(f"{tag}: catalog lists wheat for oats that are not named gluten-free (cross-contact), not for a wheat ingredient")
+        else:
+            notes.append(f"{tag}: catalog allergen list {sorted(catalog)}, ingredients contain {sorted(found)}")
     for label, allergen in (("egg-free", {"eggs"}), ("dairy-free", {"milk"}), ("nut-free", {"peanuts", "tree_nuts"})):
         if label in free_from and allergen & set(found):
             errors.append(f"{tag}: tagged {label} but contains {sorted(allergen & set(found))}")
@@ -125,8 +142,6 @@ for r in data["recipes"]:
         live = slug in LIVE
         if live and r["slug"] not in LIVE[slug]:
             errors.append(f"{tag}: added to live collection {slug}")
-        if r["free_sample"]:
-            errors.append(f"{tag}: free sample in paid collection {slug}")
         if r["review_gate"] == "rejected" or (r["review_gate"] != "passed" and not live):
             errors.append(f"{tag}: {r['review_gate']} recipe in {slug}")
         elif r["review_gate"] != "passed":
@@ -151,6 +166,30 @@ for r in data["recipes"]:
         if slug == "iron-rich-first-foods" and not re.search(IRON, ingredients):
             errors.append(f"{tag}: no iron source for iron-rich-first-foods")
 
+# Free samples: three per collection (owner request, 2026-10-14), inside the books they belong to. Halloween keeps
+# the owner's three of 2026-10-13. Where exactly three is impossible the expected count is recorded here with why.
+FREE_EXPECTED = {
+    "holiday-baking": 1,  # its only recipe
+    "birthday-party": 2,  # a third (samosa puffs or pizza scrolls) would make Lunchbox or Picky Eater four
+    "fruit-gummies": 0,  # both members are in the Halloween book, whose free three are the owner's choice
+}
+HALLOWEEN_FREE = {"berry-ghost-yogurt-bark", "spider-cracker-bites", "apple-pie-halloween-pockets"}
+free_by_slug = collections.defaultdict(set)
+for r in data["recipes"]:
+    if r["free_sample"]:
+        for slug in r["collections"]:
+            free_by_slug[slug].add(r["slug"])
+for slug, meta in cmeta.items():
+    members = {r["slug"] for r in data["recipes"] if slug in r["collections"]}
+    expected = FREE_EXPECTED.get(slug, min(3, len(members)))
+    if len(free_by_slug[slug]) != expected:
+        errors.append(f"collection {slug}: {len(free_by_slug[slug])} free samples, expected {expected}: {sorted(free_by_slug[slug])}")
+if free_by_slug["halloween"] != HALLOWEEN_FREE:
+    errors.append(f"halloween: free samples must stay the owner's three, got {sorted(free_by_slug['halloween'])}")
+for c in data["collections"]:
+    if set(c.get("free", [])) != free_by_slug[c["slug"]]:
+        errors.append(f"collection {c['slug']}: 'free' list does not match the free recipes placed in it")
+
 # Live memberships must stay complete, and collection lists must match recipe placements
 by_slug = collections.defaultdict(set)
 for r in data["recipes"]:
@@ -172,5 +211,5 @@ for n in notes:
     print("  ", n)
 print("\nCollections:")
 for c in data["collections"]:
-    print(f"   {c['count']:3}  {c['status']:5}  {c['slug']}")
+    print(f"   {c['count']:3}  {c['status']:5}  {len(c.get('free', [])):2} free  {c['slug']}")
 sys.exit(1 if errors else 0)
