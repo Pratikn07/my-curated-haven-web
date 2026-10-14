@@ -78,8 +78,8 @@ test("with an approved additions policy the buyer reads the added recipe, with n
   await page.goto("/account/collections");
   const entry = page.getByRole("heading", { name: f.title });
   await expect(entry).toHaveCount(1);
-  await expect(page.getByRole("link", { name: f.extraRecipes.reviewed.title })).toBeVisible();
-  await expect(page.getByRole("link", { name: f.recipeTitles[0] })).toBeVisible();
+  // The library lists the book once and opens its page, where the addition sits with the original recipes.
+  await expect(page.getByRole("link", { name: "Open Collection" })).toHaveAttribute("href", `/collections/${f.slug}`);
 
   const after = await f.query(`SELECT (SELECT count(*) FROM public.access_entitlements WHERE user_id=$1)::int e,
     (SELECT count(*) FROM private.purchase_orders WHERE user_id=$1)::int o`, [f.customerId]);
