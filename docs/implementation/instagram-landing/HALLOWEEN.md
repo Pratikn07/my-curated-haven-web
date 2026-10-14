@@ -8,7 +8,7 @@ Mock the owner approved (private): https://claude.ai/artifact/T58b3YQzcSAeh4Krfc
 
 | # | Section | What it does |
 | --- | --- | --- |
-| 1 | Headline | The pumpkin (tap three times to carve it; the first recipe then glows once), "Halloween, the not-scary way" and "Three recipes for the big night" |
+| 1 | Headline | "Halloween, the not-scary way" (not-scary underlined) and "Three recipes for the big night". Still on arrival: since 2026-10-14 there is no tap-to-carve pumpkin and the headline no longer animates, so the recipes are the first thing that moves |
 | 2 | Make them Halloween (first screen) | The three recipes, Ghost bark, Mummy pops and Spider bites, each a before-and-after slider: everyday on the left of the line, Halloween on the right, resting half and half. The first time a slider comes into view it shows the whole everyday photo, then the whole Halloween one, then rests (not with reduced motion); drag, tap or arrow keys stop it. A chip on each photo says Free or In the book. Under it: when in the day, the recipe name, freezing and allergens, the one small step, and the link (the recipe's own page when free, otherwise the Halloween collection). Since 2026-10-13 this replaces the Halloween menu list that used to sit under the headline |
 | 3 | Book card | "All 20 recipes in one book", the price and "Get all 20", straight after the recipes |
 | 4 | Our plan for Saturday | Bhagyashree's plan, told before Halloween: the skeleton scare (last week), making ghosts (10:30), the walk (6:15, the rendered street), goodnight to the skeleton (7:30) |
@@ -30,7 +30,7 @@ On the collection page every published recipe opens its own page: the free ones 
 
 ## Motion
 
-GSAP (with ScrollTrigger) loads after the first screen, on phones too, when the browser is idle or on the first scroll. It drives the sky, the pinned street, the book and the cards settling. The headline, the pumpkin, the photo swap and the ghost are CSS.
+GSAP (with ScrollTrigger) loads after the first screen, on phones too, when the browser is idle or on the first scroll. It drives the sky, the pinned street, the book and the cards settling. The photo swap and the ghost are CSS.
 
 Reduced motion, Data Saver and no script all get the still page: every layer of the street in place with every light on, and the night sections with their own dark background. `.hw[data-motion="on"]` is the switch.
 
@@ -43,7 +43,7 @@ The street (`HALLOWEEN_STREET` in `src/config/halloween.ts`) is five image layer
 | `src/app/halloween/page.tsx` | The route. Cached for an hour, listed in the sitemap |
 | `src/config/halloween.ts` | All words and images that are ours: the three recipes (name, time, Halloween step), story, street, reasons |
 | `src/lib/data/load-halloween.ts` | Menu links (free or in the book), book contents, price |
-| `src/components/halloween/` | Sections (server), the client islands (pumpkin, photo swap, ghost, time pill) and the motion |
+| `src/components/halloween/` | Sections (server), the client islands (photo swap, ghost, time pill) and the motion |
 | `src/styles/halloween.css` | Everything under `.hw`, still by default |
 | `public/images/campaigns/halloween/` | The page's images |
 | `tests/e2e/halloween.spec.ts` | First screen, links that open, no sideways scroll, reduced motion, no script, analytics |

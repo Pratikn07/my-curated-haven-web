@@ -1,4 +1,3 @@
-import { Fragment, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Lock } from "lucide-react";
@@ -15,7 +14,7 @@ import {
   type HalloweenMoment,
 } from "@/config/halloween";
 import type { HalloweenBookData, HalloweenMenuItem } from "@/lib/data/load-halloween";
-import { BeforeAfter, BookGrid, GhostPeek, PumpkinCarve } from "./HalloweenClient";
+import { BeforeAfter, BookGrid, GhostPeek } from "./HalloweenClient";
 
 /** The colour each part of the story hands to the sky behind the page, from morning to night. */
 const SKY = { lastWeek: "#fbefd9", morning: "#fbe3bc", walk: "#4a2a45", night: "#23161c" } as const;
@@ -41,16 +40,6 @@ export function HalloweenSky() {
 }
 
 /** Each word rises from behind its own mask. The spaces sit between the masks, where inline blocks keep them. */
-function Words({ text, start }: { text: string; start: number }) {
-  return text.split(" ").map((word, index) => (
-    <Fragment key={`${word}-${index}`}>
-      <span className="hw-w">
-        <span style={{ "--i": start + index } as CSSProperties}>{word}</span>
-      </span>{" "}
-    </Fragment>
-  ));
-}
-
 function Meta({ item }: { item: HalloweenMenuItem }) {
   const parts = [
     item.freezes ? `Freezes ${item.freezes}` : null,
@@ -60,32 +49,21 @@ function Meta({ item }: { item: HalloweenMenuItem }) {
 }
 
 export function HalloweenHero() {
-  const { before, inserted, corrected, after } = HALLOWEEN_HERO.title;
-  const beforeWords = before.split(" ").length;
+  const { before, emphasis, after } = HALLOWEEN_HERO.title;
 
+  // Still on arrival: the recipes just below are the first thing to look at.
   return (
     <section className="hw-hero" data-hw-clock="Sat 31 Oct · Halloween">
-      <PumpkinCarve />
       <span className="hw-eyebrow">{HALLOWEEN_HERO.eyebrow}</span>
-      <h1 className="hw-title" aria-label={`${before} ${inserted}${corrected} ${after}`}>
-        <Words text={before} start={0} />
-        <span className="hw-w hw-em-wrap">
-          <em className="hw-fix" style={{ "--i": beforeWords } as CSSProperties}>
-            <svg className="hw-caret" viewBox="0 0 20 18" aria-hidden="true">
-              <path d="M2 16 L10 3 L18 16" pathLength={1} />
-            </svg>
-            <span className="hw-ins">{inserted}</span>
-            <span className="hw-scary">
-              {[...corrected].map((letter, index) => (
-                <i key={index}>{letter}</i>
-              ))}
-            </span>
-            <svg className="hw-marker" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M4 14 C 60 4, 140 4, 196 12" pathLength={1} />
-            </svg>
-          </em>
-        </span>{" "}
-        <Words text={after} start={beforeWords + 1} />
+      <h1 className="hw-title">
+        {before}{" "}
+        <em>
+          {emphasis}
+          <svg className="hw-marker" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M4 14 C 60 4, 140 4, 196 12" />
+          </svg>
+        </em>{" "}
+        {after}
       </h1>
       <p className="hw-lede">{HALLOWEEN_HERO.lede}</p>
     </section>
