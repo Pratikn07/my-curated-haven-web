@@ -53,11 +53,8 @@ export const HALLOWEEN_PATH = "/halloween";
 
 export const HALLOWEEN_HERO = {
   eyebrow: "Tiny Soho · Halloween 2026",
-  /**
-   * The headline. On load "scary" shivers, then a caret slips "not-" in front of it and it calms
-   * into the italic: scary corrected to not-scary. Screen readers and the still page get the whole line.
-   */
-  title: { before: "Halloween, the", inserted: "not-", corrected: "scary", after: "way." },
+  /** The headline, with the emphasis underlined in pumpkin. */
+  title: { before: "Halloween, the", emphasis: "not-scary", after: "way." },
   lede: "Three recipes for the big night, made for little hands.",
 };
 
