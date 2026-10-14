@@ -1654,6 +1654,12 @@
   color: var(--cloth);
 }
 
+.cl-buy-plan {
+  color: var(--cl-ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .cl-buy-cta > * {
   width: 100%;
 }

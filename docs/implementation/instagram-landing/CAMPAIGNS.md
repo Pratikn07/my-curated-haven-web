@@ -160,8 +160,8 @@ All values are fixed lists or patterns, checked in `src/lib/analytics/sanitize.t
 | --- | --- | --- |
 | `story_view` | `story_slug`, `room`, `recipe_count`, `offer_state` (none, pack, collection, both), `story_series` | The page is shown |
 | `story_action_clicked` | `story_slug`, `story_action`, `story_placement`, and for recipe taps `recipe_id` and `recipe_position` | A marked link is tapped |
-| `story_section_viewed` | `story_slug`, `story_section` (recipes, story, story_end, pack, collection, related, questions, closing) | A section is first reached |
+| `story_section_viewed` | `story_slug`, `story_section` (recipes, story, story_end, pack, collection, related, questions, closing, plan) | A section is first reached |
 
-Actions: `recipe_jump` (hero button), `campaign_recipe` (a promised recipe opened), `more_recipe`, `pack` and `collection` (purchase intent), `instagram` (back to Instagram), `recipes_index`, `home`. The older `full_recipe` and `about` stay valid for past events.
+Actions: `recipe_jump` (hero button), `campaign_recipe` (a promised recipe opened), `more_recipe`, `pack` and `collection` (purchase intent), `instagram` (back to Instagram), `recipes_index`, `home`, `make_ahead_plan` ("See the plan" on /halloween, placement `plan`). The older `full_recipe` and `about` stay valid for past events.
 
 The visit still remembers its first campaign page (`entry_story` in PostHog), so a recipe opened or a purchase later in the visit is tied back to the post. `comment_dm` and the other Instagram campaign codes still come from the link's UTM tags.

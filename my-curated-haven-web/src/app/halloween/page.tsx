@@ -8,19 +8,20 @@ import {
   HalloweenBookCard,
   HalloweenClosing,
   HalloweenHero,
+  HalloweenPlanStrip,
   HalloweenReasons,
   HalloweenRecipes,
   HalloweenSky,
   HalloweenStory,
 } from "@/components/halloween/HalloweenSections";
-import { HALLOWEEN_PATH, HALLOWEEN_SHARE_IMAGE, HALLOWEEN_SLUG } from "@/config/halloween";
+import { HALLOWEEN_PATH, HALLOWEEN_PLAN_STRIP, HALLOWEEN_SHARE_IMAGE, HALLOWEEN_SLUG } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { loadHalloweenPage } from "@/lib/data/load-halloween";
 
 /**
  * The Halloween landing page, where Instagram posts send parents. Under the
  * headline come the three recipes as before-and-after sliders (each marked Free
- * or In the book), then the book, and a buy bar on phones once it scrolls away; the plan for the day (with the rendered street),
+ * or In the book), then the book, the make-ahead plan that comes with it, and a buy bar on phones once the book scrolls away; the plan for the day (with the rendered street),
  * the reasons and the full book section follow for anyone who keeps scrolling. No account features, so it is built once and served from the cache,
  * which keeps the first screen fast inside Instagram's in-app browser.
  */
@@ -62,6 +63,7 @@ export default async function HalloweenPage() {
         <HalloweenHero />
         <HalloweenRecipes menu={data.menu} />
         <HalloweenBookCard book={data.book} menu={data.menu} />
+        <HalloweenPlanStrip />
         <HalloweenStory />
         <HalloweenReasons />
         <HalloweenBook book={data.book} freeCount={data.freeCount} />
@@ -71,6 +73,7 @@ export default async function HalloweenPage() {
         title={data.book.title}
         price={data.book.price}
         count={data.book.recipes.length}
+        extra={HALLOWEEN_PLAN_STRIP.dock}
         href={data.book.onSale ? `${data.book.href}#buy` : data.book.href}
         onSale={data.book.onSale}
       />
