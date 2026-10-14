@@ -31,6 +31,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Short links for Instagram (docs/INSTAGRAM-LINKS.md). Temporary, so the target can change after a season
+  // without editing the bio; these tags win over any the visitor's link already carries.
+  async redirects() {
+    return [
+      {
+        source: "/ig",
+        destination: "/halloween?utm_source=instagram&utm_medium=organic_social&utm_campaign=bio_link",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
