@@ -4,12 +4,22 @@ Copy the link for where you're posting it. Each one opens the normal website; th
 
 | Where you post it | Link |
 | --- | --- |
-| Profile bio | `https://mycuratedhaven.com/?utm_source=instagram&utm_medium=organic_social&utm_campaign=bio_link` |
+| Profile bio | `https://mycuratedhaven.com/ig` (see "The bio short link" below) |
 | Story link sticker | `https://mycuratedhaven.com/?utm_source=instagram&utm_medium=organic_social&utm_campaign=story_link` |
 | DM or broadcast channel | `https://mycuratedhaven.com/?utm_source=instagram&utm_medium=organic_social&utm_campaign=instagram_dm` |
 | Automatic DM after a comment keyword | `https://mycuratedhaven.com/stories/<post>?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm` |
 
 Reel and feed captions can't hold clickable links, so they ask people to comment a keyword (the DM tool replies with the post's page) or point them to the bio.
+
+## The bio short link
+
+The bio holds `https://mycuratedhaven.com/ig`. It forwards to the bio's current page with the `bio_link` tag, so PostHog sees the same visit as the long link would give it. Until 31 October 2026 that page is the Halloween page:
+
+```text
+https://mycuratedhaven.com/halloween?utm_source=instagram&utm_medium=organic_social&utm_campaign=bio_link
+```
+
+To send the bio somewhere else, change the `/ig` destination in `my-curated-haven-web/next.config.ts`; the bio itself never needs editing. The forward is temporary on purpose, so browsers don't remember the old page. Our tags win over any the link already carries (Instagram can add its own to bio links).
 
 ## Linking to a post's own page
 
