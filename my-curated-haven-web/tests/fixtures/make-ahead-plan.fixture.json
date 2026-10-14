@@ -4,7 +4,7 @@
   "menu": [
     { "slug": "berry-ghost-yogurt-bark", "when": "freezer", "label": "Fixture day one · freezer" },
     { "slug": "mummy-banana-pops", "when": "freezer", "label": "Fixture day one · freezer" },
-    { "slug": "gummy-worms", "when": "fridge", "label": "Fixture day two · fridge" },
+    { "slug": "protein-fruit-gummies", "when": "fridge", "label": "Fixture day two · fridge" },
     { "slug": "witchs-broomsticks", "when": "fresh", "label": "Fixture day three · fresh" },
     { "slug": "spider-cracker-bites", "when": "fresh", "label": "Fixture day three · fresh" },
     { "slug": "mandarin-orange-pumpkins", "when": "fresh", "label": "Fixture day three · fresh" }
@@ -32,7 +32,7 @@
         {
           "when": "Fixture any time",
           "steps": [
-            ["Fixture: set the ", { "slug": "gummy-worms", "text": "Nebula Noodles" }, " in the fridge."],
+            ["Fixture: set the ", { "slug": "protein-fruit-gummies", "text": "Nebula Noodles" }, " in the fridge."],
             ["Fixture: wrap the mousse in foil."]
           ],
           "toddler": "Fixture toddler job: count the noodles.",
