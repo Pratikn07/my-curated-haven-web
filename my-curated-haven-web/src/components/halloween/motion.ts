@@ -130,16 +130,23 @@ export function buildHalloweenMotion(root: HTMLElement, gsap: Gsap, ScrollTrigge
       scrollTrigger: { trigger: ".hw-ghost", start: "top 95%", end: "top 45%", scrub: true },
     });
 
-    // The book lifts, then its cover swings open to the contents.
+    // The book lifts, then its cover swings open to the photos inside. The book slides right by
+    // about half the open cover's width, so the cover stays on a phone screen.
+    const coverWidth = () => root.querySelector<HTMLElement>(".hw-book-cover")?.offsetWidth ?? 0;
     gsap
-      .timeline({ scrollTrigger: { trigger: ".hw-book", start: "top 72%", end: "top 18%", scrub: true, refreshPriority: -1 } })
+      .timeline({
+        scrollTrigger: { trigger: ".hw-book", start: "top 72%", end: "top 18%", scrub: true, refreshPriority: -1, invalidateOnRefresh: true },
+      })
       .to(".hw-book-cover", { y: -10, duration: 0.2, ease: "none" })
-      .to(".hw-book-cover", { rotateY: -108, duration: 0.8, ease: "power1.inOut" }, 0.15);
+      .to(".hw-book-cover", { rotateY: -108, duration: 0.8, ease: "power1.inOut" }, 0.15)
+      .to(".hw-book", { x: () => coverWidth() * 0.17, duration: 0.8, ease: "power1.inOut" }, 0.15);
   }, root);
 
-  // Photos arrive late inside Instagram's browser; measure again once they have.
+  // Photos arrive late inside Instagram's browser; measure again once they have. When the page had
+  // already loaded before this ran, measure now, or the book (refreshPriority -1) is never measured.
   const refresh = () => ScrollTrigger.refresh();
-  window.addEventListener("load", refresh);
+  if (document.readyState === "complete") refresh();
+  else window.addEventListener("load", refresh);
 
   return () => {
     window.removeEventListener("load", refresh);

@@ -65,6 +65,26 @@ test("[halloween] the book sits under the menu, and the buy bar follows once it 
   await expect(dock).not.toHaveAttribute("data-on");
 });
 
+test("[halloween] the open book shows every recipe as a photo, and a tap names it", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(PAGE);
+  const book = page.locator(".hw-book");
+  const tiles = book.locator(".hw-book-tile");
+  const count = await tiles.count();
+  expect(count, "one photo per recipe").toBeGreaterThan(0);
+
+  // The page is the cover's size, so the open book reads as a book.
+  const [cover, inside] = await Promise.all([book.locator(".hw-book-cover").boundingBox(), book.locator(".hw-book-page").boundingBox()]);
+  expect(Math.abs(cover!.height - inside!.height), "the page matches the cover").toBeLessThan(2);
+
+  // Scroll to where the cover has swung open (its scroll range ends with the book's top at 18%).
+  await book.evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.12));
+  await tiles.first().click();
+  const caption = book.locator(".hw-book-caption");
+  await expect(caption).toHaveAttribute("data-on", "");
+  await expect(caption.getByRole("link")).toHaveAttribute("href", /^\/(recipes\/[a-z0-9-]+|collections\/halloween)$/);
+});
+
 test("[halloween] the page never scrolls sideways on a phone", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(PAGE);
