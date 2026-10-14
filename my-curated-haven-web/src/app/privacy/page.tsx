@@ -37,7 +37,7 @@ export default function Privacy() {
                             <h2 className={h2}>3. How we use it</h2>
                             <ul className={list}>
                                 <li>To sign you in and keep your saved recipes private to you.</li>
-                                <li>To take payment for a collection you buy, give you access to it, and handle refunds and chargebacks.</li>
+                                <li>To take payment for a collection you buy, give you access to it, and handle payment disputes (chargebacks).</li>
                                 <li>To answer support requests.</li>
                                 <li>To understand how people find and use the website, for example which recipes are read, saved and printed and where visitors get stuck, so we can improve it.</li>
                                 <li>To keep the website secure and working.</li>
@@ -74,7 +74,7 @@ export default function Privacy() {
                                 If you buy without signing in, we send a one-time code to the email you gave Stripe. Entering it creates an account for that email, if you do not have one, and adds the collection to it.
                             </p>
                             <p className="leading-relaxed">
-                                We keep purchase records to give you access to what you bought, to handle refunds and chargebacks, and to meet tax and accounting obligations.
+                                We keep purchase records to give you access to what you bought, to handle payment disputes (chargebacks), and to meet tax and accounting obligations.
                             </p>
                         </section>
 
