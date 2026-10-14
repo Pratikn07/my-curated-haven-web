@@ -292,8 +292,7 @@ test("about, support and legal pages describe the current site", async ({ page }
 
 /**
  * Text that must never reach a visitor: the photo brief stored with a recipe image, copy written before the
- * first book went on sale, placeholder prices and staff-only wording. /privacy and /terms are left out until
- * their purchase wording is rewritten and approved.
+ * first book went on sale, placeholder prices and staff-only wording.
  */
 const leakedCopy = [
   /no hands, no text/i,
@@ -313,6 +312,8 @@ test("public pages show no photo briefs, stale sale copy or placeholder prices",
     "/",
     "/about",
     "/support",
+    "/privacy",
+    "/terms",
     "/recipes",
     "/recipes/synth-free-oat-bake",
     "/halloween",

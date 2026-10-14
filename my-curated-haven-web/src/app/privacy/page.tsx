@@ -8,7 +8,7 @@ export default function Privacy() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-text-muted mb-12">Last updated: September 28, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: October 14, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
@@ -25,7 +25,7 @@ export default function Privacy() {
                                 <li><strong>Recipes you save.</strong> If you save a recipe, we store which recipe you saved and when.</li>
                                 <li><strong>Emails you send us.</strong> If you email support, we keep the message and your address so we can reply.</li>
                                 <li><strong>How you use the website.</strong> Pages you visit, what you click, and recordings of your visits. See section 4.</li>
-                                <li><strong>Purchase records, only if you buy something.</strong> Nothing is for sale on this website yet. See section 5.</li>
+                                <li><strong>Purchase records, if you buy a recipe collection.</strong> What you bought, when, the amount and the email you paid with. See section 5.</li>
                                 <li><strong>Basic request data.</strong> Like any website, each request sends your IP address and browser type to our hosting provider, which uses them to deliver the site and protect it from abuse.</li>
                             </ul>
                             <p className="leading-relaxed">
@@ -37,6 +37,7 @@ export default function Privacy() {
                             <h2 className={h2}>3. How we use it</h2>
                             <ul className={list}>
                                 <li>To sign you in and keep your saved recipes private to you.</li>
+                                <li>To take payment for a collection you buy, give you access to it, and handle refunds and chargebacks.</li>
                                 <li>To answer support requests.</li>
                                 <li>To understand how people find and use the website, for example which recipes are read, saved and printed and where visitors get stuck, so we can improve it.</li>
                                 <li>To keep the website secure and working.</li>
@@ -49,7 +50,8 @@ export default function Privacy() {
                         <section>
                             <h2 className={h2}>4. Cookies, browser storage and analytics</h2>
                             <ul className={list}>
-                                <li><strong>Sign-in cookies.</strong> If you sign in, our authentication provider sets cookies that keep you signed in. The website needs them for accounts and saved recipes.</li>
+                                <li><strong>Sign-in cookies.</strong> If you sign in, our authentication provider sets cookies that keep you signed in. The website needs them for accounts, saved recipes and the collections you buy.</li>
+                                <li><strong>Checkout cookie.</strong> If you start a purchase without signing in, we set a cookie (<code>mch_guest</code>) holding a random identifier for 30 days, so tapping buy again returns you to the same checkout instead of starting a second one.</li>
                                 <li>
                                     <strong>Analytics.</strong> We use PostHog to measure how the website is used. It stores a random identifier in a cookie and in your browser storage, and records the pages you visit, the links and buttons you click, the website that sent you, and your device and browser type. Our own code also stores a browser and session identifier (<code>mch_browser_id</code>, <code>mch_session_id</code>) and the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>).
                                 </li>
@@ -63,7 +65,16 @@ export default function Privacy() {
                         <section>
                             <h2 className={h2}>5. Purchases</h2>
                             <p className="leading-relaxed">
-                                Nothing is for sale on this website yet. If we offer a recipe collection and you buy it, Stripe handles the payment on its own checkout page. We receive your email address, the order details and whether the payment succeeded, and we keep those records to give you access and meet accounting obligations. We never receive your full card number.
+                                Stripe takes payment on its own checkout page. It collects your email address and card details, and its own <a className="font-semibold text-action underline" href="https://stripe.com/privacy">privacy policy</a> applies to what you give it there. We never receive your full card number.
+                            </p>
+                            <p className="leading-relaxed">
+                                From Stripe we receive your email address, what you bought, the amount, whether the payment succeeded, was refunded or was disputed, and Stripe&apos;s references for the payment.
+                            </p>
+                            <p className="leading-relaxed">
+                                If you buy without signing in, we send a one-time code to the email you gave Stripe. Entering it creates an account for that email, if you do not have one, and adds the collection to it.
+                            </p>
+                            <p className="leading-relaxed">
+                                We keep purchase records to give you access to what you bought, to handle refunds and chargebacks, and to meet tax and accounting obligations.
                             </p>
                         </section>
 
@@ -93,7 +104,7 @@ export default function Privacy() {
                         <section>
                             <h2 className={h2}>8. How long we keep information</h2>
                             <p className="leading-relaxed">
-                                We keep your account and saved recipes until you ask us to close your account. Browser identifiers stay in your browser until you clear your browser data. PostHog keeps analytics and recordings for a limited period set by its retention rules, then deletes them. Support emails and purchase records are kept as long as we need them to help you and to meet legal and accounting obligations.
+                                We keep your account and saved recipes until you ask us to close your account. Browser identifiers stay in your browser until you clear your browser data. PostHog keeps analytics and recordings for a limited period set by its retention rules, then deletes them. Support emails and purchase records are kept as long as we need them to help you and to meet legal and accounting obligations, including after you close your account.
                             </p>
                         </section>
 

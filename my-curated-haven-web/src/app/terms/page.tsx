@@ -9,7 +9,7 @@ export default function Terms() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Terms of Service</h1>
-                    <p className="text-text-muted mb-12">Last updated: September 28, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: October 14, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
@@ -29,7 +29,7 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>3. What the website offers</h2>
                             <p className="leading-relaxed">
-                                The website offers toddler recipes by Tiny Soho, including free recipes that anyone can read and print without an account. An optional account lets you save recipes. Other parenting features shown on the homepage are previews and are not available on the website.
+                                The website offers toddler recipes by Tiny Soho: free recipes that anyone can read and print without an account, and recipe collections you can buy. An optional account lets you save recipes. Other parenting features shown on the homepage are previews and are not available on the website.
                             </p>
                         </section>
 
@@ -39,7 +39,9 @@ export default function Terms() {
                                 <li>You sign in with a one-time code sent to your email address. Keep access to that email account secure, because anyone who can read it can sign in as you.</li>
                                 <li>Your account may also work in the My Curated Haven parenting app, which uses the same account system.</li>
                                 <li>To close your account, email <a className="font-semibold text-action underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> from the address you sign in with.</li>
+                                <li>If you buy a collection without signing in, confirming your email after checkout creates an account for that email.</li>
                                 <li>We may suspend or close an account that breaks these terms.</li>
+                                <li>If your account is closed, you lose access to the collections bought with it.</li>
                             </ul>
                         </section>
 
@@ -61,8 +63,17 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>6. Purchases</h2>
                             <p className="leading-relaxed">
-                                Nothing is for sale on this website yet. If we offer a recipe collection, its page will state the price, what is included, how long you have access and the refund terms before you pay. Those terms will apply to that purchase along with these terms. Stripe processes payments.
+                                You can buy recipe collections on the website. Each collection&apos;s page shows its price and what it includes before you pay.
                             </p>
+                            <ul className={list}>
+                                <li><strong>Payment.</strong> Prices are in US dollars, and the price shown at checkout is the amount you are charged. Stripe takes payment by card on its own checkout page. Your bank may add its own fees, for example for a payment in a foreign currency.</li>
+                                <li><strong>Getting your collection.</strong> After you pay, we email a one-time code to the address you gave at checkout. Enter it to open the collection. If you close the page first, sign in later with the same email and the collection will be in your library. If you mistype your email at checkout, email support and we will help match the order to you.</li>
+                                <li><strong>What you get.</strong> A collection gives your household a personal license to read, print and cook its recipes, as described in section 7. Recipes we add to a collection later are included at no extra cost. We may correct or update a recipe, for example to fix a mistake or improve its safety guidance.</li>
+                                <li><strong>How long it lasts.</strong> Your access does not expire while your account is open. If we ever stop running the website, we will email you at least 30 days before it closes, so you can print your recipes.</li>
+                                <li><strong>Refunds.</strong> All sales are final, because some complete recipes are free to try before you buy. We may still give a refund, for example for a duplicate payment or a collection that does not open for you. A full refund removes access to that collection. Nothing in these terms limits refund rights you have under the law where you live.</li>
+                                <li><strong>Chargebacks.</strong> If you dispute a payment with your bank, access to that collection is paused until the dispute closes, and removed if the bank reverses the payment. Please email support first; we can usually fix a problem faster.</li>
+                                <li><strong>Price changes.</strong> We may change prices for future purchases. A change never affects what you have already paid.</li>
+                            </ul>
                         </section>
 
                         <section>
@@ -124,7 +135,7 @@ export default function Terms() {
                         <section>
                             <h2 className={h2}>14. Changes to these terms</h2>
                             <p className="leading-relaxed">
-                                We may update these terms. When we do, we change the date at the top of this page. If you keep using the website after a change, the updated terms apply.
+                                We may update these terms. When we do, we change the date at the top of this page. If you keep using the website after a change, the updated terms apply. A change does not alter the price of a purchase you have already made.
                             </p>
                         </section>
 
