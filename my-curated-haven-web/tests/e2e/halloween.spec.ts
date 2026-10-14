@@ -66,6 +66,8 @@ test("[halloween] the book sits under the menu, and the buy bar follows once it 
 });
 
 test("[halloween] the open book shows every recipe as a photo, and a tap names it", async ({ page }) => {
+  // Reduced motion keeps the cover still beside the page, so the tap does not race the scroll-driven swing.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(PAGE);
   const book = page.locator(".hw-book");
@@ -77,8 +79,6 @@ test("[halloween] the open book shows every recipe as a photo, and a tap names i
   const [cover, inside] = await Promise.all([book.locator(".hw-book-cover").boundingBox(), book.locator(".hw-book-page").boundingBox()]);
   expect(Math.abs(cover!.height - inside!.height), "the page matches the cover").toBeLessThan(2);
 
-  // Scroll to where the cover has swung open (its scroll range ends with the book's top at 18%).
-  await book.evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.12));
   await tiles.first().click();
   const caption = book.locator(".hw-book-caption");
   await expect(caption).toHaveAttribute("data-on", "");
