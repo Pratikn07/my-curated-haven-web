@@ -34,7 +34,8 @@ export interface HalloweenTrickItem extends HalloweenTrick, HalloweenLink {
 export interface HalloweenBookData {
   href: string;
   title: string;
-  recipes: { slug: string; title: string; free: boolean }[];
+  /** In book order. `image` is a site path or Storage URL; `href` is the recipe when free, else the book. */
+  recipes: { slug: string; title: string; image: string; free: boolean; href: string }[];
   /** The live price while the offer is on sale, otherwise the collection's placeholder. */
   price: string;
   onSale: boolean;
@@ -107,7 +108,12 @@ export async function loadHalloweenPage(): Promise<HalloweenPageData | null> {
     book: {
       href: bookHref,
       title: collection.title,
-      recipes: collection.recipes.map((recipe) => ({ slug: recipe.slug, title: recipe.title, free: free.has(recipe.slug) })),
+      recipes: collection.recipes.map((recipe) => ({
+        slug: recipe.slug,
+        title: recipe.title,
+        image: recipe.image,
+        ...linkFor(recipe.slug),
+      })),
       price: onSale && offer ? offer.formattedPrice : collection.placeholderPrice,
       onSale,
       refresh: collection.refresh,
