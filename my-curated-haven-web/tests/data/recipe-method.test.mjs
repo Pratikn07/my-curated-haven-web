@@ -195,6 +195,6 @@ test("the safety box's Contains line keeps every allergen review state", () => {
   assert.deepEqual(allergenLine(getAllergenDisplay("unknown", [])), { kind: "message", text: "No allergens are listed for this recipe." });
   assert.deepEqual(allergenLine(getAllergenDisplay("reviewed_no_allergens", [])), {
     kind: "message",
-    text: "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+    text: "No allergens were found in this recipe's ingredients. Please check all ingredient packaging carefully.",
   });
 });

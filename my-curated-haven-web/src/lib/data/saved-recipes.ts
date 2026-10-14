@@ -3,6 +3,10 @@ import type { Database } from "../types/database";
 import type { RecipeCatalogItem } from "./recipes";
 import { checkRecipeAccess } from "./access";
 
+/** What a parent sees when saving or removing fails; the database error goes to the server log instead. */
+const SAVE_FAILED = "We couldn't save this recipe just now. Please try again.";
+const REMOVE_FAILED = "We couldn't remove this recipe just now. Please try again.";
+
 export interface SavedRecipeItem {
   id: string;
   recipeId: string;
@@ -167,16 +171,14 @@ export async function saveRecipe(
       );
 
     if (error) {
-      return { status: "error", code: "save_failed", message: error.message };
+      console.error("[saved-recipes] save failed", error.message);
+      return { status: "error", code: "save_failed", message: SAVE_FAILED };
     }
 
     return { status: "ok", isSaved: true };
   } catch (err) {
-    return {
-      status: "error",
-      code: "save_failed",
-      message: err instanceof Error ? err.message : "Failed to save recipe",
-    };
+    console.error("[saved-recipes] save failed", err instanceof Error ? err.message : err);
+    return { status: "error", code: "save_failed", message: SAVE_FAILED };
   }
 }
 
@@ -197,15 +199,13 @@ export async function removeSavedRecipe(
       .eq("recipe_id", recipeId);
 
     if (error) {
-      return { status: "error", code: "remove_failed", message: error.message };
+      console.error("[saved-recipes] remove failed", error.message);
+      return { status: "error", code: "remove_failed", message: REMOVE_FAILED };
     }
 
     return { status: "ok", isSaved: false };
   } catch (err) {
-    return {
-      status: "error",
-      code: "remove_failed",
-      message: err instanceof Error ? err.message : "Failed to remove recipe",
-    };
+    console.error("[saved-recipes] remove failed", err instanceof Error ? err.message : err);
+    return { status: "error", code: "remove_failed", message: REMOVE_FAILED };
   }
 }

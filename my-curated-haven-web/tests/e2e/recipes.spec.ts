@@ -87,7 +87,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     const noAllergens = page.locator("section[aria-labelledby='allergens-heading']");
     await expect(
       noAllergens.getByText(
-        "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+        "No allergens were found in this recipe's ingredients. Please check all ingredient packaging carefully.",
         { exact: true }
       )
     ).toBeVisible();
@@ -100,7 +100,7 @@ test.describe("Phase 6 Free Recipe Experience", () => {
       "section[aria-labelledby='allergens-heading']"
     );
     await expect(
-      listedAllergens.getByText("Contains reviewed allergens:", { exact: true })
+      listedAllergens.getByText("Contains:", { exact: true })
     ).toBeVisible();
     await expect(listedAllergens.getByText("Tree Nuts", { exact: true })).toBeVisible();
   });

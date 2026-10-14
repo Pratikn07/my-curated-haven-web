@@ -150,7 +150,8 @@ export async function createCheckoutSession({
           offer_id: order.offerId,
         },
         success_url: `${origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/checkout/cancel?order_id=${order.id}`,
+        // The cancel page offers the way back to this book; the order id stays out of the address bar.
+        cancel_url: `${origin}/checkout/cancel?book=${encodeURIComponent(collectionSlug)}`,
       },
       { idempotencyKey: order.idempotencyKey }
     );

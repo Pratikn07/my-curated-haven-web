@@ -10,7 +10,7 @@ import { BookOpen, ArrowRight, ListChecks } from "lucide-react";
 import { makeAheadPlanFor } from "@/config/halloween";
 
 export const metadata: Metadata = {
-  title: "My Recipe Collections",
+  title: "My Library",
   robots: { index: false, follow: false },
 };
 
@@ -46,23 +46,23 @@ export default async function AccountCollectionsPage() {
             </li>
             <li aria-hidden="true">/</li>
             <li aria-current="page" className="font-medium text-foreground">
-              Purchased Collections
+              My Library
             </li>
           </ol>
         </nav>
 
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          My Recipe Collections
+          My Library
         </h1>
         <p className="mt-2 text-base text-text-muted">
-          Your purchased recipe collections and printable views.
+          The recipe books you bought, ready to read and print.
         </p>
       </header>
 
       {/* Purchased Collections Listing */}
       {unavailable ? (
         <StatePanel title="Purchases are unavailable right now">
-          We couldn&apos;t load your recipe collections. Please try again later, or email support@mycuratedhaven.com.
+          We couldn&apos;t load your books. Please try again later, or email support@mycuratedhaven.com.
         </StatePanel>
       ) : collections.length === 0 ? (
         <div className="rounded-2xl border border-border bg-surface p-8 text-center sm:p-12">
@@ -70,10 +70,10 @@ export default async function AccountCollectionsPage() {
             <BookOpen className="h-7 w-7 text-text-muted" aria-hidden="true" />
           </div>
           <h2 className="mt-4 text-xl font-bold text-foreground">
-            No Purchased Collections Yet
+            No books yet
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-text-muted">
-            When you purchase a curated collection, it will appear here with unlimited reading and printing access.
+            When you buy a recipe book, it appears here. You can read and print it any time.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
@@ -103,7 +103,7 @@ export default async function AccountCollectionsPage() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <Badge variant="collection">Active Access</Badge>
+                    <Badge variant="collection">Yours to keep</Badge>
                     <h2 className="mt-2 text-2xl font-bold text-foreground">
                       {coll.title}
                     </h2>

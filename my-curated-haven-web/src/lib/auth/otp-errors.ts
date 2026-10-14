@@ -1,6 +1,9 @@
+/** Shown when sending a code fails for a reason we don't recognise; Supabase's own text is never shown. */
+export const OTP_SEND_FAILED = "We couldn't send a code just now. Please try again in a minute.";
+
 /**
  * Turns Supabase sign-in email errors into messages a parent can act on.
- * Unknown errors pass through unchanged.
+ * Unknown errors get a plain retry message.
  */
 export function otpRequestErrorMessage(error: { code?: string; message: string }): string {
   const code = error.code ?? "";
@@ -27,8 +30,14 @@ export function otpRequestErrorMessage(error: { code?: string; message: string }
 
   // Turnstile rejected the token, or it was reused or had expired.
   if (code === "captcha_failed" || message.includes("captcha")) {
-    return "That verification check didn't go through. Please try again, or use Continue with Google.";
+    // No Google suggestion: Google sign-in does not work inside Instagram's browser, where most parents arrive.
+    return "That verification check didn't go through. Please wait a moment and try again.";
   }
 
-  return error.message;
+  return OTP_SEND_FAILED;
+}
+
+/** A code that was wrong, expired or already used, in words a parent can act on. */
+export function otpVerifyErrorMessage(): string {
+  return "That code didn't work or has expired. Check it, or ask for a new code.";
 }

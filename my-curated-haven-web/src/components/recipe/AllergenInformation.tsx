@@ -24,7 +24,7 @@ export default function AllergenInformation({
       <div className="mt-3 text-sm leading-relaxed text-text-muted">
         {display.kind === "reviewed_listed" ? (
           <div>
-            <p className="font-semibold text-foreground">Contains reviewed allergens:</p>
+            <p className="font-semibold text-foreground">Contains:</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {display.allergens.map((allergen) => (
                 <Badge key={allergen} variant="collection">

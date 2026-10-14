@@ -107,7 +107,9 @@ test("[halloween] with reduced motion the street stands still with every light o
 test("[halloween] without script the whole page is there to read", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(PAGE);
+  // The checks below read text and links only. Waiting for every photo made this flaky: under load the image
+  // resizer could stall one request and the page's load event never came.
+  await page.goto(PAGE, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How we're doing Halloween this year" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Three doorbells, then home" })).toBeVisible();

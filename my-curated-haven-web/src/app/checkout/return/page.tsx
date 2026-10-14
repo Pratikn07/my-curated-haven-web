@@ -8,7 +8,8 @@ import PurchaseConfirmed from "@/components/commerce/PurchaseConfirmed";
 import { getPublishedCollection } from "@/lib/collections/publication";
 import ClaimPurchaseForm from "@/components/commerce/ClaimPurchaseForm";
 import MockCheckoutEmailForm from "@/components/commerce/MockCheckoutEmailForm";
-import { claimGuestOrders, loadGuestCheckout, type GuestCheckout } from "@/lib/payments/guest-checkout";
+import { claimGuestOrders, isMockCheckoutSession, loadGuestCheckout, type GuestCheckout } from "@/lib/payments/guest-checkout";
+import { SUPPORT_EMAIL } from "@/config/site-navigation";
 
 export const metadata: Metadata = {
   title: "Checkout Status",
@@ -17,6 +18,16 @@ export const metadata: Metadata = {
 
 interface ReturnPageProps {
   searchParams: Promise<{ session_id?: string }>;
+}
+
+const BUTTON = "inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover";
+
+function SupportLink() {
+  return (
+    <a className="font-semibold text-foreground underline underline-offset-4" href={`mailto:${SUPPORT_EMAIL}`}>
+      {SUPPORT_EMAIL}
+    </a>
+  );
 }
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -39,6 +50,26 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
       guest = await loadGuestCheckout(sessionId);
     } catch (error) {
       console.error("[checkout/return] guest lookup failed", error instanceof Error ? error.message : error);
+      // A signed-out parent who just paid must not be sent to sign in with no word of their payment.
+      if (!user) {
+        return (
+          <Card>
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+              <Clock className="h-10 w-10 text-amber-600 animate-pulse" />
+            </div>
+            <h1 className="mt-5 text-2xl font-bold text-foreground">We&apos;re checking your payment</h1>
+            <p className="mt-2 text-sm text-text-muted">
+              We couldn&apos;t load it just now. If you paid, nothing is lost: refresh in a moment. Still stuck? Email{" "}
+              <SupportLink /> from the address you paid with.
+            </p>
+            <div className="mt-6">
+              <Link href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`} className={BUTTON}>
+                Refresh
+              </Link>
+            </div>
+          </Card>
+        );
+      }
       guest = { state: "not_guest" };
     }
     if (guest.state !== "not_guest") {
@@ -67,7 +98,18 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
           );
         }
         if (guest.state === "needs_email") {
-          return <Card><MockCheckoutEmailForm sessionId={sessionId} /></Card>;
+          // Only a local mock session has no Stripe page to collect the email. A real payment without an email on
+          // record needs a person, never the test form.
+          if (isMockCheckoutSession(sessionId)) return <Card><MockCheckoutEmailForm sessionId={sessionId} /></Card>;
+          return (
+            <Card>
+              <h1 className="text-2xl font-bold text-foreground">Your payment went through</h1>
+              <p className="mt-2 text-sm text-text-muted">
+                We couldn&apos;t read the email from your payment, so we can&apos;t send your code yet. Email <SupportLink /> with
+                order {guest.supportReference} and we&apos;ll add {guest.collectionTitle} to your account.
+              </p>
+            </Card>
+          );
         }
         if (guest.claimed) {
           // Already unlocked in an account, but this browser is signed out (or in another account).
@@ -111,16 +153,13 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
   if (!sessionId) {
     return (
       <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-foreground">No Checkout Session</h1>
+        <h1 className="text-2xl font-bold text-foreground">We couldn&apos;t find that checkout</h1>
         <p className="mt-2 text-sm text-text-muted">
-          We could not find an active checkout reference.
+          If you just paid, your book is in My Library.
         </p>
         <div className="mt-6">
-          <Link
-            href="/account/collections"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
-          >
-            Go to Your Collections
+          <Link href="/account/collections" className={BUTTON}>
+            Go to My Library
           </Link>
         </div>
       </div>
@@ -134,22 +173,22 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
     return (
       <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
         <AlertCircle className="mx-auto h-12 w-12 text-yellow-600" />
-        <h1 className="mt-4 text-2xl font-bold text-foreground">Order Not Found</h1>
+        <h1 className="mt-4 text-2xl font-bold text-foreground">We couldn&apos;t find this order in your account</h1>
         <p className="mt-2 text-sm text-text-muted">
-          We couldn&apos;t match this payment reference to your account. If you were charged, please contact support with reference: {sessionId}.
+          If you were charged, email us from the address you paid with and we&apos;ll find it.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link
             href="/recipes"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
           >
-            Browse Free Recipes
+            Browse free recipes
           </Link>
           <a
-            href="mailto:support@mycuratedhaven.com"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-surface-muted px-6 py-3 font-semibold text-foreground border border-border hover:bg-surface"
           >
-            Contact Support
+            Email support
           </a>
         </div>
       </div>
@@ -181,11 +220,9 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
               <Clock className="h-10 w-10 text-amber-600 animate-pulse" />
             </div>
-            <h1 className="mt-5 text-2xl font-bold text-foreground">
-              Payment Received — Preparing Access
-            </h1>
+            <h1 className="mt-5 text-2xl font-bold text-foreground">Payment received. Getting your book ready</h1>
             <p className="mt-2 text-sm text-text-muted">
-              We received your payment for {orderSummary.collectionTitle} and are setting up your access. This normally completes in a few seconds.
+              We received your payment for {orderSummary.collectionTitle} and are adding it to your library. This usually takes a few seconds.
             </p>
 
             <div className="mt-6">
@@ -193,7 +230,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
                 href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
               >
-                Refresh Status
+                Refresh
               </Link>
             </div>
           </div>

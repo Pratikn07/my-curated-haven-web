@@ -1,7 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { EMAIL_OTP_LENGTH } from "../../src/lib/auth/otp";
 
-const MAILPIT_URL = "http://127.0.0.1:54324";
+// The local Supabase mail inbox; set MAILPIT_URL when the test stack runs on other ports.
+const MAILPIT_URL = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 
 async function overflow(page: Page) {
   return page.evaluate(
@@ -101,7 +102,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
 
     // Title and summary are public previews
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Synthetic Paid Golden Lentil Soup");
-    await expect(page.getByText("Collection Recipe").first()).toBeVisible();
+    await expect(page.getByText("In a recipe book", { exact: true }).first()).toBeVisible();
 
     // Locked presentation is shown. This recipe is in no configured book here, so it is not on sale and
     // points to the free recipes; saving needs access, so there is no save button.
@@ -180,7 +181,7 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await expect(page.getByText(buyerEmail).first()).toBeVisible();
     await page.goto("/account/collections");
     await expect(page.getByText("The Comfort Haven Collection")).toBeVisible();
-    await expect(page.getByText("Active Access")).toBeVisible();
+    await expect(page.getByText("Yours to keep")).toBeVisible();
 
     // 5. Someone else holding the same return link cannot take it.
     const stranger = await browser.newContext();
@@ -284,9 +285,9 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
 
     // Purchased collection appears in customer library /account/collections.
     await page.goto("/account/collections");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("My Recipe Collections");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("My Library");
     await expect(page.getByText("The Comfort Haven Collection")).toBeVisible();
-    await expect(page.getByText("Active Access")).toBeVisible();
+    await expect(page.getByText("Yours to keep")).toBeVisible();
     // The library shows the book, not its recipe list, and sends the buyer to the book's page.
     await expect(page.getByText("Synthetic Paid Golden Lentil Soup")).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Open Collection" })).toHaveAttribute("href", "/collections/comfort-haven-collection");

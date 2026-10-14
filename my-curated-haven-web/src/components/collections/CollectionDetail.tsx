@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { chocolateNote } from "@/config/allergen-notes";
 import { ArrowRight, Check, Clock, Lock, Snowflake } from "lucide-react";
 import { BookCover } from "@/components/collections/Book";
 import { MakeAheadPlanCard } from "@/components/collections/MakeAheadPlan";
@@ -11,6 +12,7 @@ import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/typ
 import { collectionFacts, recipeCount, rowAccess } from "@/lib/collections/visibility";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
+import { formatMinutes } from "@/lib/recipes/format";
 
 /** One collection page's content, from the showroom config, the commerce database, or both. */
 export interface DetailModel {
@@ -33,10 +35,7 @@ export interface DetailModel {
 }
 
 function minutesLabel(minutes: number | null): string | null {
-  if (minutes === null) return null;
-  if (minutes < 90) return `${minutes} min`;
-  const hours = Math.round((minutes / 60) * 2) / 2;
-  return `${hours} hours`;
+  return minutes === null ? null : formatMinutes(minutes);
 }
 
 export function DetailHero({ model }: { model: DetailModel }) {
@@ -216,6 +215,9 @@ export function Contents({ model }: { model: DetailModel }) {
                   {recipe.protein ? <p className="cl-row-note">Built around {recipe.protein.toLowerCase()}</p> : null}
                   {recipe.allergens.length > 0 ? (
                     <p className="cl-row-note">Contains {recipe.allergens.join(", ")}</p>
+                  ) : null}
+                  {chocolateNote(recipe.slug, recipe.allergens) ? (
+                    <p className="cl-row-note">{chocolateNote(recipe.slug, recipe.allergens)}</p>
                   ) : null}
                 </div>
               </div>

@@ -210,6 +210,8 @@ export interface MakeAheadPlanEntry {
   card: { title: string; subline: string };
   buyLine: string;
   libraryLink: string;
+  /** The picture a shared link to the plan shows. */
+  shareImage: { src: string; alt: string };
   preview: MakeAheadPlanPreview;
 }
 
@@ -220,6 +222,7 @@ export const HALLOWEEN_MAKE_AHEAD_PLAN: MakeAheadPlanEntry = {
   card: { title: "Your make-ahead plan", subline: "Thu, Fri, Sat · one shopping list" },
   buyLine: "Comes with a make-ahead plan and one shopping list for Halloween weekend.",
   libraryLink: "Make-ahead plan",
+  shareImage: HALLOWEEN_SHARE_IMAGE,
   preview: {
     byline: "Inside the Halloween book",
     title: "Your Halloween make-ahead plan",

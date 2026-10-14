@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "My Curated Haven: good enough is exactly enough. Free toddler recipes by Tiny Soho.";
+export const alt = "My Curated Haven: good enough is exactly enough. Free toddler recipes and recipe books by Tiny Soho.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -30,7 +30,7 @@ export default function OpenGraphImage() {
             Good enough is exactly enough.
           </div>
           <div style={{ fontFamily: "Arial, sans-serif", fontSize: 28, lineHeight: 1.4, color: "#666578" }}>
-            A calm corner for parents of little ones, starting with free toddler recipes by Tiny Soho.
+            A calm corner for parents of little ones: free toddler recipes and little recipe books by Tiny Soho.
           </div>
         </div>
         <div style={{ display: "flex", gap: 16, fontFamily: "Arial, sans-serif", fontSize: 20 }}>

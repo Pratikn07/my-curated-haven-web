@@ -6353,7 +6353,6 @@
      "vegetarian",
      "gluten-free",
      "nut-free",
-     "soy-free",
      "egg-free"
     ],
     "ingredients": [
@@ -6974,7 +6973,6 @@
     ],
     "free_from": [
      "egg-free",
-     "dairy-free",
      "vegetarian"
     ],
     "occasion": [
@@ -6997,9 +6995,7 @@
     ],
     "catalog_diet": [
      "vegetarian",
-     "dairy-free",
-     "egg-free",
-     "soy-free"
+     "egg-free"
     ],
     "ingredients": [
      "1 cup rolled oats",
@@ -7080,8 +7076,7 @@
      "vegetarian",
      "gluten-free",
      "nut-free",
-     "egg-free",
-     "soy-free"
+     "egg-free"
     ],
     "ingredients": [
      "3 bananas, peeled and cut in half crosswise",

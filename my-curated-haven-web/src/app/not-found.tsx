@@ -12,7 +12,7 @@ export default function NotFound() {
     <Container reading className="py-16 text-center">
       <h1 className="text-[2rem] font-semibold">This page is not available</h1>
       <p className="mt-4 text-lg text-text-muted">
-        That address is not part of the public site. You can go home or email support.
+        We couldn&apos;t find that page. It may have moved. You can go home or email support.
       </p>
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
         <ButtonLink href="/">Home</ButtonLink>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Badge from "@/components/ui/Badge";
 import SaveRecipeButton from "./SaveRecipeButton";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
-import { usableImageSrc } from "@/lib/recipes/format";
+import { formatMinutes, tagLabel, usableImageSrc } from "@/lib/recipes/format";
 
 export type RecipeExample = {
   id: string;
@@ -45,7 +45,7 @@ export default function RecipeCard({
   const title = recipe.title;
   const totalMinutes = recipe.totalMinutes;
   const mealLabel = isCatalog
-    ? recipe.mealLabels?.join(", ")
+    ? recipe.mealLabels?.map(tagLabel).join(", ")
     : recipe.mealLabel;
   const dietLabels = isCatalog
     ? recipe.dietLabels || []
@@ -110,7 +110,7 @@ export default function RecipeCard({
           </h3>
 
           <p className="text-sm text-text-muted">
-            {totalMinutes ? `${totalMinutes} min` : "Time not reviewed"}
+            {totalMinutes ? formatMinutes(totalMinutes) : "Time not reviewed"}
             {mealLabel ? ` · ${mealLabel}` : ""}
           </p>
 
@@ -128,7 +128,7 @@ export default function RecipeCard({
             ) : null}
             {dietLabels.map((label) => (
               <Badge key={label} variant="outline">
-                {label}
+                {tagLabel(label)}
               </Badge>
             ))}
           </div>

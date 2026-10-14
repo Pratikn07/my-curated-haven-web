@@ -14,6 +14,7 @@ import {
   type HalloweenMoment,
 } from "@/config/halloween";
 import type { HalloweenBookData, HalloweenMenuItem } from "@/lib/data/load-halloween";
+import { chocolateNote } from "@/config/allergen-notes";
 import { BeforeAfter, BookGrid, GhostPeek } from "./HalloweenClient";
 
 /** The colour each part of the story hands to the sky behind the page, from morning to night. */
@@ -43,7 +44,8 @@ export function HalloweenSky() {
 function Meta({ item }: { item: HalloweenMenuItem }) {
   const parts = [
     item.freezes ? `Freezes ${item.freezes}` : null,
-    item.allergens.length > 0 ? `Contains ${item.allergens.join(", ")}` : "No listed allergens",
+    item.allergens.length > 0 ? `Contains ${item.allergens.join(", ")}` : null,
+    chocolateNote(item.slug, item.allergens)?.toLowerCase() ?? (item.allergens.length > 0 ? null : "No listed allergens"),
   ].filter(Boolean);
   return <span className="hw-dish-meta">{parts.join(" · ")}</span>;
 }

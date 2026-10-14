@@ -9,7 +9,7 @@ import {
   getFreeRecipeCatalog,
   type RecipeCatalogItem,
 } from "@/lib/data/recipes";
-import { formatIngredient, normalizeInstructions, usableImageSrc } from "@/lib/recipes/format";
+import { formatIngredient, formatMinutes, normalizeInstructions, tagLabel, usableImageSrc } from "@/lib/recipes/format";
 import { methodHowTo, methodIngredientLines, methodTime } from "@/lib/recipes/method";
 import { allergenLine, getAllergenDisplay } from "@/lib/recipes/allergen-display";
 import RecipeMethodLayout from "@/components/recipe/RecipeMethodLayout";
@@ -25,7 +25,8 @@ import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { listOpenPublishedCollections } from "@/lib/collections/publication";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
-import { bookName } from "@/lib/collections/book-name";
+import { bookName, bookNameStart } from "@/lib/collections/book-name";
+import { chocolateNote } from "@/config/allergen-notes";
 import { recipeCount } from "@/lib/collections/visibility";
 import { loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import type { CollectionOfferDto } from "@/lib/payments/types";
@@ -273,7 +274,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
               </>
             ) : (
               <>
-                <InfoStat label="Total Time" value={catalog.totalMinutes ? `${catalog.totalMinutes} min` : "Not reviewed"} />
+                <InfoStat label="Total Time" value={catalog.totalMinutes ? formatMinutes(catalog.totalMinutes) : "Not reviewed"} />
                 <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
                 <InfoStat label="Yield" value={body ? body.yield : "Toddler portions"} />
               </>
@@ -284,7 +285,15 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                 Access
               </span>
               <span className={`text-base font-semibold ${isAccessDenied ? "text-text-muted" : "text-action"}`}>
-                {isAdmin ? "Admin access" : isAccessDenied ? "Collection Recipe" : accessKind === "free" ? "Free Toddler Recipe" : "Your Collection Recipe"}
+                {isAdmin
+                  ? "Admin access"
+                  : isAccessDenied
+                    ? book
+                      ? bookNameStart(book.collection.title).replace(/^The /, "In the ")
+                      : "In a recipe book"
+                    : accessKind === "free"
+                      ? "Free Toddler Recipe"
+                      : "In your library"}
               </span>
             </div>
             {time ? (
@@ -326,12 +335,12 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
         <div className="mt-4 flex flex-wrap gap-2">
           {catalog.mealLabels?.map((meal) => (
             <Badge key={meal} variant="primary">
-              {meal}
+              {tagLabel(meal)}
             </Badge>
           ))}
           {catalog.dietLabels?.map((diet) => (
             <Badge key={diet} variant="outline">
-              {diet}
+              {tagLabel(diet)}
             </Badge>
           ))}
         </div>
@@ -380,13 +389,20 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
               </h2>
               <p className="mx-auto mt-2 max-w-lg text-base text-text-muted leading-relaxed">
                 {saleOffer && book
-                  ? `${lockedOffer(catalog.title, book.collection.recipes.length)} One payment, yours to keep.`
+                  ? `${lockedOffer(catalog.title, book.collection.recipes.length)} One payment, yours to keep. All sales are final.`
                   : book
                     ? "This book opens soon. Until then, try one of our free recipes."
                     : "This recipe will be part of one of our recipe books. Until then, try a free one."}
               </p>
-              {book && book.entry.allergens.length > 0 ? (
-                <p className="mx-auto mt-3 max-w-lg text-sm text-text-muted">Contains {book.entry.allergens.join(", ")}.</p>
+              {book && (book.entry.allergens.length > 0 || chocolateNote(catalog.slug, book.entry.allergens)) ? (
+                <p className="mx-auto mt-3 max-w-lg text-sm text-text-muted">
+                  {[
+                    book.entry.allergens.length > 0 ? `Contains ${book.entry.allergens.join(", ")}.` : null,
+                    chocolateNote(catalog.slug, book.entry.allergens) ? `${chocolateNote(catalog.slug, book.entry.allergens)}; check the label.` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                </p>
               ) : null}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 {saleOffer ? (

@@ -329,7 +329,7 @@ test.describe("Phase 6 approved live recipe content", () => {
         );
         await expect(
           allergenNotice.getByText(
-            "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+            "No allergens were found in this recipe's ingredients. Please check all ingredient packaging carefully.",
             { exact: true }
           )
         ).toBeVisible();

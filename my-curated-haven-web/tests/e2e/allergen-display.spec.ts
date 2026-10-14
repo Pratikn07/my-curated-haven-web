@@ -12,7 +12,7 @@ test("allergen display follows the explicit review state", () => {
   expect(getAllergenDisplay("reviewed_no_allergens", [])).toEqual({
     kind: "reviewed_no_allergens",
     message:
-      "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+      "No allergens were found in this recipe's ingredients. Please check all ingredient packaging carefully.",
   });
 
   expect(getAllergenDisplay("reviewed_listed", ["milk", "eggs"])).toEqual({

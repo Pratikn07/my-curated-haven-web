@@ -26,7 +26,7 @@ export function getAllergenDisplay(
     return {
       kind: "reviewed_no_allergens",
       message:
-        "Reviewed: No allergens were listed for this recipe. Please check all ingredient packaging carefully.",
+        "No allergens were found in this recipe's ingredients. Please check all ingredient packaging carefully.",
     };
   }
 

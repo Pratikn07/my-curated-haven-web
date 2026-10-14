@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { otpRequestErrorMessage } from "@/lib/auth/otp-errors";
+import { otpRequestErrorMessage, otpVerifyErrorMessage } from "@/lib/auth/otp-errors";
 import { isTurnstileEnabled } from "@/lib/auth/turnstile";
 import { claimGuestOrders, guestBuyerEmail, recordMockGuestEmail } from "@/lib/payments/guest-checkout";
 
@@ -52,7 +52,7 @@ export async function verifyPurchaseCodeAction(sessionId: string, code: string):
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
-  if (error || !data.user) return { success: false, error: error?.message ?? "That code didn't work. Check it and try again." };
+  if (error || !data.user) return { success: false, error: otpVerifyErrorMessage() };
 
   await claimGuestOrders(data.user.id);
   revalidatePath("/", "layout");
