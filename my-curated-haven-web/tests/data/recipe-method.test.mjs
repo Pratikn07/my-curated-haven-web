@@ -12,6 +12,7 @@ import {
   numberedSections,
   parseRecipeMethod,
   pickForAge,
+  STEP_PHOTO_FOLDER,
   stepPhotoSrc,
   validateRecipeMethod,
 } from "../../src/lib/recipes/method.ts";
@@ -180,7 +181,12 @@ test("steps are numbered straight through sections, and structured data follows 
   assert.equal(flat.length, 4);
   assert.deepEqual(flat[0], { "@type": "HowToStep", name: "Prep the fruit", text: example.sections[0].steps[0].text });
   assert.deepEqual(methodIngredientLines(validateRecipeMethod(example)).slice(0, 2), ["3 pears", "1 cup plain yogurt"]);
-  assert.equal(stepPhotoSrc("synthetic-snack-pops-step-coated", 192), "/images/recipes/steps/synthetic-snack-pops-step-coated-192.webp");
+  // Step photos come from the public storage folder, never from the repo.
+  assert.equal(STEP_PHOTO_FOLDER, "recipe-steps/halloween");
+  assert.equal(stepPhotoSrc("https://example.supabase.co/", "synthetic-snack-pops-step-coated", 192),
+    "https://example.supabase.co/storage/v1/object/public/recipe-steps/halloween/synthetic-snack-pops-step-coated-192.webp");
+  assert.equal(stepPhotoSrc("http://127.0.0.1:54321", "synthetic-snack-pops-step-coated", 720),
+    "http://127.0.0.1:54321/storage/v1/object/public/recipe-steps/halloween/synthetic-snack-pops-step-coated-720.webp");
 });
 
 test("the safety box's Contains line keeps every allergen review state", () => {

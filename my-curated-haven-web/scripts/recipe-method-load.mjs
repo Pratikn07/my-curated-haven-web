@@ -4,7 +4,8 @@
 //   node scripts/recipe-method-load.mjs --db-url-env LOCAL_DB_URL mummy-banana-pops spider-cracker-bites
 //   node scripts/recipe-method-load.mjs --db-url-env LOCAL_DB_URL --all
 //   node scripts/recipe-method-load.mjs --db-url-env LOCAL_DB_URL --apply mummy-banana-pops
-//   node scripts/recipe-method-load.mjs --db-url-env PROD_DB_URL --apply --confirm-host <db host> mummy-banana-pops
+//   node scripts/recipe-method-load.mjs --db-url-env PROD_DB_URL --storage-url https://<project>.supabase.co \
+//     --apply --confirm-host <db host> mummy-banana-pops
 //
 // A dry run by default: it reads the database in a read-only transaction and prints what would change. The
 // connection string comes from the named environment variable; there is no default target. --apply writes,
@@ -13,9 +14,12 @@
 // For each recipe it drops `review`, validates the rest against RecipeMethod (src/lib/recipes/method.ts) and
 // writes it to recipe_bodies.method. If totalMinutes differs from recipe_catalog.total_minutes, it updates that
 // too. It never changes ingredients, instructions, allergens, publication, collections or access. Apply stops
-// before writing anything if a recipe is invalid, missing from the database, or names a step photo that is not
-// in public/images/recipes/steps/. Writing a method changes the recipe's active hash in the admin console, so
-// an open recipe draft for it must rebase; the report names those.
+// before writing anything if a recipe is invalid, missing from the database, or names a step photo that public
+// storage does not serve: each photo gets a HEAD request at <storage-url>/storage/v1/object/public/recipe-steps/
+// halloween/<file>-192.webp and -720.webp. --storage-url defaults to the app's Supabase URL
+// (getSupabasePublicConfig); a database that is not this machine needs a storage URL that is not this machine
+// either. Writing a method changes the recipe's active hash in the admin console, so an open recipe draft for it
+// must rebase; the report names those.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,7 +27,6 @@ import pg from "pg";
 
 const WEB = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_DIR = resolve(WEB, "..", "docs/implementation/recipe-method/recipes");
-const STEPS_DIR = resolve(WEB, "public/images/recipes/steps");
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
@@ -37,6 +40,7 @@ function parseArgs(argv) {
     else if (arg === "--db-url-env" && argv[i + 1]) args.dbUrlEnv = argv[++i];
     else if (arg === "--confirm-host" && argv[i + 1]) args.confirmHost = argv[++i];
     else if (arg === "--dir" && argv[i + 1]) args.dir = resolve(argv[++i]);
+    else if (arg === "--storage-url" && argv[i + 1]) args.storageUrl = argv[++i];
     else if (SLUG.test(arg)) args.slugs.push(arg);
     else throw new Error(`Unknown or incomplete argument: ${arg}`);
   }
@@ -71,9 +75,20 @@ function readSource(dir, slug, validate, problem) {
   if (bad) return { slug, error: `invalid method at ${bad}` };
   const method = validate(raw);
   const photos = method.sections.flatMap((s) => s.steps).filter((s) => s.photo).map((s) => s.photo.file);
-  const missingPhotos = photos.flatMap((file) => [192, 720].map((size) => `${file}-${size}.webp`))
-    .filter((name) => !existsSync(resolve(STEPS_DIR, name)));
-  return { slug, method, missingPhotos };
+  return { slug, method, photos, missingPhotos: [] };
+}
+
+/** The photo addresses public storage does not serve (anything but a 2xx answer to HEAD, or no answer). */
+async function missingPhotos(storageUrl, files, stepPhotoSrc) {
+  const urls = files.flatMap((file) => [192, 720].map((size) => stepPhotoSrc(storageUrl, file, size)));
+  const answers = await Promise.all(urls.map(async (url) => {
+    try {
+      return (await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(15_000) })).ok;
+    } catch {
+      return false;
+    }
+  }));
+  return urls.filter((_, i) => !answers[i]);
 }
 
 async function readDatabase(client, slugs) {
@@ -108,7 +123,7 @@ function plan(source, row) {
     notes.push(`"contains" says [${listed}] but the page shows the reviewed allergens [${stored}] ` +
       `(${row.allergen_review_state}); fix the allergens in the admin console if the method is right`);
   }
-  if (source.missingPhotos.length) notes.push(`missing step photos: ${source.missingPhotos.join(", ")}`);
+  if (source.missingPhotos.length) notes.push(`step photos not in storage: ${source.missingPhotos.join(", ")}`);
   if (row.open_draft && methodChange !== "unchanged") notes.push("an open admin draft for this recipe will need to rebase");
   if (row.publication_state !== "published") notes.push(`the recipe is ${row.publication_state}`);
   const status = methodChange === "unchanged" && !minutesChange ? "unchanged" : methodChange === "unchanged" ? "minutes only" : methodChange;
@@ -125,10 +140,20 @@ async function main() {
   if (args.apply && !local && args.confirmHost !== target.hostname) {
     throw new Error(`Applying to ${target.hostname} needs --confirm-host ${target.hostname}`);
   }
+  const { getSupabasePublicConfig } = await import("../src/lib/supabase/env.ts");
+  const storage = new URL(args.storageUrl ?? getSupabasePublicConfig()?.url ?? "");
+  if (storage.protocol !== "https:" && storage.protocol !== "http:") throw new Error("--storage-url must be an http(s) URL");
+  if (!local && LOOPBACK.has(storage.hostname)) {
+    throw new Error("The database is not this machine, so check photos in its project: pass --storage-url https://<project>.supabase.co");
+  }
   console.log(`Target: ${target.hostname}:${target.port || 5432}${target.pathname} (${args.apply ? "apply" : "dry run"})`);
 
-  const { methodProblem, validateRecipeMethod } = await import("../src/lib/recipes/method.ts");
+  const { methodProblem, validateRecipeMethod, stepPhotoSrc, STEP_PHOTO_FOLDER } = await import("../src/lib/recipes/method.ts");
+  console.log(`Step photos: ${storage.origin}/storage/v1/object/public/${STEP_PHOTO_FOLDER}/`);
   const sources = args.slugs.map((slug) => readSource(args.dir, slug, validateRecipeMethod, methodProblem));
+  for (const source of sources) {
+    if (!source.error) source.missingPhotos = await missingPhotos(storage.origin, source.photos, stepPhotoSrc);
+  }
 
   const client = new pg.Client({ connectionString: url });
   await client.connect();

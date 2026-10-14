@@ -10,6 +10,8 @@ test.describe.configure({ mode: "serial" });
 const OPEN = "synth-free-veggie-frittata"; // a free recipe every visitor can open
 const LOCKED = "synth-paid-golden-soup"; // a paid recipe nobody owns in the seed
 const CLASSIC = "synth-free-oat-bake"; // no method content: today's layout
+// Step photos are served from the public storage folder of the Supabase project the app uses.
+const PHOTOS = `${(process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321").replace(/\/+$/, "")}/storage/v1/object/public/recipe-steps/halloween`;
 
 const example = JSON.parse(
   readFileSync(join(__dirname, "../fixtures/recipe-method-sample.json"), "utf8")
@@ -144,6 +146,7 @@ test("a step photo opens on a solid viewer and closes with Close and with Esc", 
   await page.goto(`/recipes/${OPEN}`);
   const caption = example.sections[0].steps[1].photo.caption as string;
   const shot = page.getByRole("button", { name: /How it should look/ }).first();
+  await expect(shot.locator("img")).toHaveAttribute("src", `${PHOTOS}/synthetic-snack-pops-step-coated-192.webp`);
   // The full-size photo is not fetched until the viewer opens.
   await expect(page.locator("img[src*='-720.webp']")).toHaveCount(0);
 
@@ -151,7 +154,7 @@ test("a step photo opens on a solid viewer and closes with Close and with Esc", 
   const viewer = page.getByRole("dialog", { name: "Step photo" });
   await expect(viewer).toBeVisible();
   await expect(viewer).toHaveAttribute("aria-modal", "true");
-  await expect(viewer.locator("img")).toHaveAttribute("src", "/images/recipes/steps/synthetic-snack-pops-step-coated-720.webp");
+  await expect(viewer.locator("img")).toHaveAttribute("src", `${PHOTOS}/synthetic-snack-pops-step-coated-720.webp`);
   // Solid: an opaque background over the whole screen, and the page under it does not scroll.
   await expect(viewer).toHaveCSS("background-color", "rgb(24, 23, 29)");
   const covers = await viewer.evaluate((el) => {

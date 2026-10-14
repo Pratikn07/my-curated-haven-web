@@ -16,6 +16,7 @@ import {
   type RecipeMethod,
 } from "@/lib/recipes/method";
 import type { AllergenLine } from "@/lib/recipes/allergen-display";
+import { getSupabasePublicConfig } from "@/lib/supabase/env";
 
 /** The parent's chosen age, remembered on this device only. */
 const AGE_STORAGE_KEY = "mch:recipe-age";
@@ -43,6 +44,8 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
   const [wiggles, setWiggles] = useState(0);
   const photoButton = useRef<HTMLButtonElement | null>(null);
   const showAges = hasPerAgeContent(method);
+  // Step photos are served from Supabase Storage; without a project URL the steps show without them.
+  const supabaseUrl = getSupabasePublicConfig()?.url ?? null;
 
   useEffect(() => {
     // The server renders the default age; this device's choice comes back once mounted.
@@ -173,6 +176,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
                     age={age}
                     current={current === number}
                     headingLevel={named ? 4 : 3}
+                    supabaseUrl={supabaseUrl}
                     onMark={() => setCurrent(number)}
                     onPhoto={(button) => {
                       photoButton.current = button;
@@ -215,7 +219,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
 
       <TipsAndStorage tips={method.tips} storage={method.storage} />
 
-      {photo ? <PhotoViewer photo={photo} onClose={closePhoto} /> : null}
+      {photo && supabaseUrl ? <PhotoViewer photo={photo} supabaseUrl={supabaseUrl} onClose={closePhoto} /> : null}
     </>
   );
 }
@@ -226,6 +230,7 @@ function StepItem({
   age,
   current,
   headingLevel,
+  supabaseUrl,
   onMark,
   onPhoto,
 }: {
@@ -234,6 +239,7 @@ function StepItem({
   age: MethodAge;
   current: boolean;
   headingLevel: 3 | 4;
+  supabaseUrl: string | null;
   onMark: () => void;
   onPhoto: (button: HTMLButtonElement) => void;
 }) {
@@ -258,13 +264,13 @@ function StepItem({
       <Stage className="rm-stage">{step.stage}</Stage>
       <div className="rm-body">
         <p>{step.text}</p>
-        {step.photo ? (
+        {step.photo && supabaseUrl ? (
           <button
             type="button"
             className="rm-shot no-print"
             onClick={(event: MouseEvent<HTMLButtonElement>) => onPhoto(event.currentTarget)}
           >
-            <Image src={stepPhotoSrc(step.photo.file, 192)} alt="" width={84} height={84} loading="lazy" unoptimized />
+            <Image src={stepPhotoSrc(supabaseUrl, step.photo.file, 192)} alt="" width={84} height={84} loading="lazy" unoptimized />
             <span className="rm-shot-cap">
               <b>How it should look</b>
               <span>{step.photo.caption}</span>
@@ -335,7 +341,7 @@ function withHandles(text: string) {
  * Full screen on a solid background, so no page text shows through. The 720px photo loads only now. Esc,
  * Close or a tap outside the photo closes it, and focus goes back to the photo button.
  */
-function PhotoViewer({ photo, onClose }: { photo: Photo; onClose: () => void }) {
+function PhotoViewer({ photo, supabaseUrl, onClose }: { photo: Photo; supabaseUrl: string; onClose: () => void }) {
   const closeButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -376,7 +382,7 @@ function PhotoViewer({ photo, onClose }: { photo: Photo; onClose: () => void }) 
         Close
       </button>
       <figure>
-        <Image src={stepPhotoSrc(photo.file, 720)} alt="" width={720} height={720} loading="eager" unoptimized />
+        <Image src={stepPhotoSrc(supabaseUrl, photo.file, 720)} alt="" width={720} height={720} loading="eager" unoptimized />
         <figcaption>{photo.caption}</figcaption>
       </figure>
     </div>,

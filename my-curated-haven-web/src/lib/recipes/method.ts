@@ -292,8 +292,15 @@ export function numberedSections(method: RecipeMethod): { name: string | null; s
   });
 }
 
-export function stepPhotoSrc(file: string, size: 192 | 720): string {
-  return `/images/recipes/steps/${file}-${size}.webp`;
+/** Step photos live in Supabase Storage, in this public bucket and folder, never in the repo. */
+export const STEP_PHOTO_FOLDER = "recipe-steps/halloween";
+
+/**
+ * A step photo's public address. `supabaseUrl` is the project URL from getSupabasePublicConfig(); it is passed in
+ * so this file stays free of imports.
+ */
+export function stepPhotoSrc(supabaseUrl: string, file: string, size: 192 | 720): string {
+  return `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/${STEP_PHOTO_FOLDER}/${file}-${size}.webp`;
 }
 
 /** Schema.org steps: a HowToSection for a named section, plain HowToSteps otherwise. */
