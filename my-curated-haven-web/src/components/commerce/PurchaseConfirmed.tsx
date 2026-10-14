@@ -18,7 +18,7 @@ export interface PurchaseConfirmedProps {
 }
 
 /**
- * The first screen after paying: the book is theirs, and one button opens its recipes in the library.
+ * The first screen after paying: the book is theirs, and one button opens its page, every recipe unlocked.
  * Most buyers arrive from Instagram's in-app browser, so it also says how to find the book again elsewhere.
  */
 export default function PurchaseConfirmed({
@@ -52,7 +52,7 @@ export default function PurchaseConfirmed({
       <OpenBoughtRecipe
         collectionSlug={collectionSlug}
         recipes={bookRecipes}
-        libraryLabel={recipeCount ? `Open your ${recipeCount} recipes` : "Open your recipes"}
+        openLabel={recipeCount ? `Open your ${recipeCount} recipes` : "Open your recipes"}
       />
       <p className="mt-6 text-sm text-text-muted">
         {email ? (

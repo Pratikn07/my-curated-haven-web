@@ -143,7 +143,7 @@ export function Contents({ model }: { model: DetailModel }) {
   const owned = model.offer?.ownershipState === "owned";
   const freeCount = owned ? 0 : model.recipes.filter((recipe) => recipe.free).length;
   return (
-    <section className="cl-contents" data-cloth={model.cloth} aria-labelledby="contents-title">
+    <section className="cl-contents" id="collection-recipes" data-cloth={model.cloth} aria-labelledby="contents-title">
       <div className="cl-wrap">
         <div className="cl-contents-head">
           <h2 className="cl-h2" id="contents-title">
