@@ -1,6 +1,6 @@
 # Recipe collections
 
-Status: plan documented 2026-10-04. Owner decisions pending. No application or database changes have been made under this effort.
+Status: plan documented 2026-10-04. Owner decisions pending. The site now has the bookcase and collection pages (2026-10-06), the Halloween book on sale (2026-10-13) and three free samples per collection (2026-10-14, [AUDIT-2026-10-14.md](AUDIT-2026-10-14.md)); the rest of this plan is still open.
 
 This is a **separate effort**, outside Phases 1–12. It turns the recipe area into a place to shop themed collections, sample free recipes and use what you bought. Task IDs use the `RC-` prefix. The detailed tasks are in [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md).
 

@@ -1,7 +1,7 @@
 {
- "$comment": "Recipe tags and collection placement for the catalog recipes: 70 reviewed one recipe at a time on 2026-10-05, plus 20 owner-supplied Halloween recipes added 2026-10-12 (owner review recorded 2026-10-12). Readable copy: RECIPE-TAGS.md. Vocabulary and rules: COLLECTIONS.md / collections.seed.json. Check with: python3 check_recipe_tags.py",
+ "$comment": "Recipe tags and collection placement for the catalog recipes: 70 reviewed one recipe at a time on 2026-10-05, plus 20 owner-supplied Halloween recipes added 2026-10-12 (owner review recorded 2026-10-12). Readable copy: RECIPE-TAGS.md. Vocabulary and rules: COLLECTIONS.md / collections.seed.json. Free samples: three per collection since 2026-10-14 (AUDIT-2026-10-14.md); free_sample follows the production free list. Check with: python3 check_recipe_tags.py",
  "version": 2,
- "source": "Reviewed catalog data as applied to production (recipe-review fix-output, the free recipes, and the two later step edits in apply-six-recipe-image-followup.sql)",
+ "source": "Reviewed catalog data as applied to production (recipe-review fix-output, the free recipes, and the two later step edits in apply-six-recipe-image-followup.sql); 2026-10-14 audit: free list (28 recipes) and four placements",
  "recipes": [
   {
    "n": 1,
@@ -84,7 +84,7 @@
    "n": 2,
    "slug": "asian-pear-rice-congee-pure",
    "title": "Asian Pear Rice Congee Purée",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -134,6 +134,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Catalog diet tags miss gluten-free; rice, pear and water are gluten-free."
    ],
    "source": {
@@ -165,7 +166,7 @@
    "n": 3,
    "slug": "banana-avocado-breakfast-pure-with-yogurt",
    "title": "Banana Avocado Breakfast Purée with Yogurt",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -214,7 +215,9 @@
     "first-breakfasts": "Named as a breakfast purée"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day)."
+   ],
    "source": {
     "catalog_age": [
      6,
@@ -585,7 +588,7 @@
    "n": 8,
    "slug": "mild-mexican-black-bean-sweet-corn-pure",
    "title": "Mild Mexican Black Bean Sweet Corn Purée",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -636,6 +639,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Left out of First Tastes: a spiced bean purée from 8 m is a second-stage purée, not a first spoonful."
    ],
    "source": {
@@ -670,7 +674,7 @@
    "n": 9,
    "slug": "silky-carrot-apple-starter-pure",
    "title": "Silky Carrot Apple Starter Purée",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -717,6 +721,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Left out of Thanksgiving Table: a carrot-apple baby purée has no Thanksgiving link."
    ],
    "source": {
@@ -836,7 +841,7 @@
    "n": 11,
    "slug": "mild-vegetable-curry-with-rice",
    "title": "Mild Vegetable Curry with Rice",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -890,6 +895,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Fixed 2026-10-05: the internal reviewer note (step 9) was deleted.",
     "Coconut milk: not a tree nut under current FDA guidance, but some parents avoid it; say 'contains coconut'.",
     "Curry powder: check label for wheat fillers to keep gluten-free."
@@ -1203,7 +1209,7 @@
    "n": 15,
    "slug": "baked-fish-tacos-with-slaw",
    "title": "Baked Fish Tacos with Slaw",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -1250,6 +1256,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Fixed 2026-10-05: allergen list is now fish only, and the tortilla ingredient says to check the label for wheat."
    ],
    "source": {
@@ -1639,7 +1646,7 @@
    "n": 20,
    "slug": "veggie-packed-lasagna",
    "title": "Veggie-Packed Lasagna",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -1703,6 +1710,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Catalog diet tags miss vegetarian; no meat in the recipe. Marinara: check label."
    ],
    "source": {
@@ -1823,7 +1831,7 @@
    "n": 22,
    "slug": "cheesy-broccoli-and-quinoa-bites",
    "title": "Cheesy Broccoli & Quinoa Bites",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -1885,6 +1893,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "If cooked in broth (tip), check the broth label for gluten."
    ],
    "source": {
@@ -2091,7 +2100,7 @@
    "n": 25,
    "slug": "pumpkin-and-ricotta-gnocchi-pillows",
    "title": "Pumpkin & Ricotta Gnocchi Pillows",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -2150,6 +2159,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Parmesan usually uses animal rennet, so not tagged vegetarian."
    ],
    "source": {
@@ -2358,7 +2368,7 @@
    "n": 28,
    "slug": "baked-sweet-potato-with-black-beans-and-avocado",
    "title": "Baked Sweet Potato with Black Beans and Avocado",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": "2026-10-05, from a pregnancy recipe",
@@ -2408,6 +2418,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.",
     "Also fits Family Dinners, which is full at 12."
    ],
@@ -2540,7 +2551,7 @@
    "n": 30,
    "slug": "folate-rich-lentil-and-spinach-soup",
    "title": "Folate-Rich Lentil and Spinach Soup",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": "2026-10-05, from a pregnancy recipe",
@@ -2595,6 +2606,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.",
     "The title still says 'Folate-Rich', a nutrition claim. Changing it needs a URL redirect.",
     "Broth: check the label for gluten."
@@ -2636,7 +2648,7 @@
    "n": 31,
    "slug": "greek-yogurt-parfait-with-berries-and-almonds",
    "title": "Greek Yogurt Parfait with Berries and Almonds",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": "2026-10-05, from a pregnancy recipe",
@@ -2688,6 +2700,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.",
     "Gluten-free relies on the certified gluten-free oats it names. A nut-free version is in the tips."
    ],
@@ -2907,7 +2920,7 @@
    "n": 34,
    "slug": "overnight-oats-with-chia-and-berries",
    "title": "Overnight Oats with Chia and Berries",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": "2026-10-05, from a pregnancy recipe",
@@ -2958,6 +2971,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.",
     "Regular oats: not gluten-free."
    ],
@@ -3080,7 +3094,7 @@
    "n": 36,
    "slug": "salmon-and-sweet-potato-bowl-with-avocado",
    "title": "Salmon and Sweet Potato Bowl with Avocado",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": "2026-10-05, from a pregnancy recipe",
@@ -3130,6 +3144,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06."
    ],
    "source": {
@@ -3166,7 +3181,7 @@
    "n": 37,
    "slug": "spinach-and-feta-egg-muffins",
    "title": "Spinach and Feta Egg Muffins",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": "2026-10-05, from a pregnancy recipe",
@@ -3227,6 +3242,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06."
    ],
    "source": {
@@ -3346,7 +3362,7 @@
    "n": 39,
    "slug": "mini-baked-chicken-nuggets",
    "title": "Mini Baked Chicken Nuggets",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -3408,6 +3424,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "In 4 collections."
    ],
    "source": {
@@ -3607,7 +3624,7 @@
    "n": 42,
    "slug": "savory-corn-and-cheddar-muffins",
    "title": "Savory Corn & Cheddar Muffins",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -3673,6 +3690,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Left out of Holiday Baking: a savory corn muffin, not a festive bake.",
     "In 4 collections."
    ],
@@ -3975,7 +3993,7 @@
    "n": 46,
    "slug": "greek-pita-bento-box",
    "title": "Greek Pita Bento Box",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -4031,7 +4049,9 @@
     "lunchbox-and-daycare": "A packed bento lunch"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day)."
+   ],
    "source": {
     "catalog_age": [
      12,
@@ -4152,7 +4172,7 @@
    "n": 48,
    "slug": "apple-cinnamon-oat-toddler-porridge",
    "title": "Apple Cinnamon Oat Toddler Porridge",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -4199,6 +4219,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Left out of Thanksgiving Table: an everyday porridge.",
     "A tip suggests optional nut butter; still nut-free as written."
    ],
@@ -4580,7 +4601,7 @@
    "n": 53,
    "slug": "salmon-potato-veggie-mash",
    "title": "Salmon Potato Veggie Mash",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -4630,6 +4651,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Catalog diet tags miss gluten-free."
    ],
    "source": {
@@ -4740,7 +4762,7 @@
    "n": 55,
    "slug": "soft-tofu-veggie-stir-fry-with-rice",
    "title": "Soft Tofu Veggie Stir Fry with Rice",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -4789,7 +4811,9 @@
     "protein-packs": "Added 2026-10-05: tofu, written for 1-3 years"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day)."
+   ],
    "source": {
     "catalog_age": [
      12,
@@ -5257,7 +5281,7 @@
    "n": 61,
    "slug": "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
    "title": "Cinnamon Sweet Potato Snack Fries with Yogurt Dip",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -5309,6 +5333,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Catalog diet tags miss gluten-free.",
     "Left out of Birthday Party: a side dish."
    ],
@@ -5425,7 +5450,7 @@
    "n": 63,
    "slug": "mini-berry-yogurt-pops",
    "title": "Mini Berry Yogurt Pops",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -5479,6 +5504,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Catalog diet tags miss gluten-free."
    ],
    "source": {
@@ -5509,7 +5535,7 @@
    "n": 64,
    "slug": "soft-banana-oat-toddler-cookies",
    "title": "Soft Banana Oat Toddler Cookies",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -5559,6 +5585,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Left out of Holiday Baking: a plain everyday cookie, not a festive bake.",
     "Coconut oil is an option: say 'may contain coconut'."
    ],
@@ -5594,7 +5621,7 @@
    "n": 65,
    "slug": "soft-date-almond-cocoa-bites",
    "title": "Soft Date Almond Cocoa Bites",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -5646,6 +5673,7 @@
    },
    "after_rewrite": [],
    "flags": [
+    "Free since 2026-10-14: a free sample of its collections (three per collection; published that day).",
     "Left out of Birthday Party: tree nuts at a shared party.",
     "Holiday Baking fit is loose: no oven involved."
    ],
@@ -5848,7 +5876,7 @@
    "n": 68,
    "slug": "sweet-potato-and-spinach-frittata-fingers",
    "title": "Sweet Potato & Spinach Frittata Fingers",
-   "free_sample": true,
+   "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -5899,7 +5927,7 @@
    "collection_reasons": {},
    "after_rewrite": [],
    "flags": [
-    "Free sample: tagged, kept out of paid collections.",
+    "Free from launch until 2026-10-13 (owner decision); still published, in no collection, so its page is locked with no book to buy.",
     "Re-reviewed 2026-10-05 against the live text; the first review used an older copy."
    ],
    "source": {
@@ -5931,7 +5959,7 @@
    "n": 69,
    "slug": "soft-baked-blueberry-and-oat-bars",
    "title": "Soft-Baked Blueberry & Oat Bars",
-   "free_sample": true,
+   "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -5976,7 +6004,7 @@
    "collection_reasons": {},
    "after_rewrite": [],
    "flags": [
-    "Free sample: tagged, kept out of paid collections.",
+    "Free from launch until 2026-10-13 (owner decision); still published, in no collection, so its page is locked with no book to buy.",
     "Owner approval recorded in the review log on 2026-10-05; the review gate now passes.",
     "Coconut oil: say 'contains coconut'.",
     "Catalog diet tags miss vegan."
@@ -6010,7 +6038,7 @@
    "n": 70,
    "slug": "salmon-and-pea-fish-cakes",
    "title": "Salmon & Pea Fish Cakes",
-   "free_sample": true,
+   "free_sample": false,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -6059,7 +6087,7 @@
    "collection_reasons": {},
    "after_rewrite": [],
    "flags": [
-    "Free sample: tagged, kept out of paid collections.",
+    "Free from launch until 2026-10-13 (owner decision); still published, in no collection, so its page is locked with no book to buy.",
     "Re-reviewed 2026-10-05 against the live text: the pea step is already there (the first review used an older copy)."
    ],
    "source": {
@@ -6130,15 +6158,22 @@
      "vegetarian"
     ],
     "occasion": [
-     "halloween"
+     "halloween",
+     "thanksgiving"
     ],
     "texture": "finger-food"
    },
    "collections": [
-    "halloween"
+    "halloween",
+    "on-the-go-snacks",
+    "everyday-treats",
+    "thanksgiving-table"
    ],
    "collection_reasons": {
-    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+    "halloween": "Owner's Halloween recipe, added 2026-10-12",
+    "on-the-go-snacks": "Mini size for a toddler's hand; keeps a day at room temperature and freezes. Placed 2026-10-14",
+    "everyday-treats": "No added sugar (banana and pumpkin). Placed 2026-10-14",
+    "thanksgiving-table": "Pumpkin and cinnamon: a fall flavour, like the sweet potato fries. Placed 2026-10-14"
    },
    "after_rewrite": [],
    "flags": [],
@@ -6257,7 +6292,7 @@
    "n": 73,
    "slug": "berry-ghost-yogurt-bark",
    "title": "Berry Ghost Yogurt Bark",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -6306,7 +6341,9 @@
     "halloween": "Owner's Halloween recipe, added 2026-10-12"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Free since 2026-10-13: one of the owner's three free Halloween recipes."
+   ],
    "source": {
     "catalog_age": [
      12,
@@ -6378,15 +6415,20 @@
      "vegetarian"
     ],
     "occasion": [
-     "halloween"
+     "halloween",
+     "thanksgiving"
     ],
     "texture": "bites"
    },
    "collections": [
-    "halloween"
+    "halloween",
+    "everyday-treats",
+    "thanksgiving-table"
    ],
    "collection_reasons": {
-    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+    "halloween": "Owner's Halloween recipe, added 2026-10-12",
+    "everyday-treats": "Dessert with no added sugar (banana only), from 12 m. Placed 2026-10-14",
+    "thanksgiving-table": "Pumpkin: a bite-size Thanksgiving dessert. Placed 2026-10-14"
    },
    "after_rewrite": [],
    "flags": [],
@@ -6421,7 +6463,7 @@
    "n": 75,
    "slug": "apple-pie-halloween-pockets",
    "title": "Apple Pie Halloween Pockets",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -6468,7 +6510,9 @@
     "halloween": "Owner's Halloween recipe, added 2026-10-12"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Free since 2026-10-13: one of the owner's three free Halloween recipes."
+   ],
    "source": {
     "catalog_age": [
      12,
@@ -6670,6 +6714,9 @@
    "allergens": {
     "milk": [
      "6 string cheese sticks"
+    ],
+    "wheat": [
+     "6 thin pretzel sticks"
     ]
    },
    "catalog_allergens": [
@@ -6706,7 +6753,9 @@
     "halloween": "Owner's Halloween recipe, added 2026-10-12"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Fixed 2026-10-14: wheat (pretzel sticks) was missing from the allergens here; the catalog already listed it."
+   ],
    "source": {
     "catalog_age": [
      12,
@@ -6734,7 +6783,7 @@
    "n": 79,
    "slug": "spider-cracker-bites",
    "title": "Spider Cracker Bites",
-   "free_sample": false,
+   "free_sample": true,
    "review_gate": "passed",
    "written_for": "children",
    "rewritten": null,
@@ -6746,6 +6795,10 @@
     "milk": [
      "16 round butter crackers",
      "1/4 cup cream cheese, softened"
+    ],
+    "wheat": [
+     "16 round butter crackers",
+     "16 thin pretzel sticks, broken into short pieces"
     ]
    },
    "catalog_allergens": [
@@ -6783,7 +6836,10 @@
     "halloween": "Owner's Halloween recipe, added 2026-10-12"
    },
    "after_rewrite": [],
-   "flags": [],
+   "flags": [
+    "Free since 2026-10-13: one of the owner's three free Halloween recipes.",
+    "Fixed 2026-10-14: wheat (crackers, pretzel sticks) was missing from the allergens here; the catalog already listed it. Soy in the catalog list comes from the crackers or chocolate chips: label check."
+   ],
    "source": {
     "catalog_age": [
      12,
@@ -7159,10 +7215,12 @@
     "texture": "bites"
    },
    "collections": [
-    "halloween"
+    "halloween",
+    "fruit-gummies"
    ],
    "collection_reasons": {
-    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+    "halloween": "Owner's Halloween recipe, added 2026-10-12",
+    "fruit-gummies": "Real-fruit gummy: 100% juice and gelatin, no added sugar. Placed 2026-10-14 (the book was empty)"
    },
    "after_rewrite": [],
    "flags": [],
@@ -7228,10 +7286,12 @@
     "texture": "bites"
    },
    "collections": [
-    "halloween"
+    "halloween",
+    "fruit-gummies"
    ],
    "collection_reasons": {
-    "halloween": "Owner's Halloween recipe, added 2026-10-12"
+    "halloween": "Owner's Halloween recipe, added 2026-10-12",
+    "fruit-gummies": "Real-fruit gummy: fruit purée and gelatin, ten flavours. Placed 2026-10-14 (the book was empty)"
    },
    "after_rewrite": [],
    "flags": [],
@@ -7702,7 +7762,12 @@
    ],
    "count": 8,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "asian-pear-rice-congee-pure",
+    "banana-avocado-breakfast-pure-with-yogurt",
+    "silky-carrot-apple-starter-pure"
+   ]
   },
   {
    "slug": "first-finger-foods",
@@ -7720,7 +7785,12 @@
    ],
    "count": 8,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "cheesy-broccoli-and-quinoa-bites",
+    "pumpkin-and-ricotta-gnocchi-pillows",
+    "salmon-and-sweet-potato-bowl-with-avocado"
+   ]
   },
   {
    "slug": "iron-rich-first-foods",
@@ -7740,7 +7810,12 @@
    ],
    "count": 10,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "mild-mexican-black-bean-sweet-corn-pure",
+    "baked-sweet-potato-with-black-beans-and-avocado",
+    "folate-rich-lentil-and-spinach-soup"
+   ]
   },
   {
    "slug": "first-breakfasts",
@@ -7753,7 +7828,12 @@
    ],
    "count": 3,
    "status": "short",
-   "needs": "5+ breakfasts for 6–12 months (soft pancakes, oat fingers, porridges). The free Frittata Fingers stay free"
+   "needs": "5+ breakfasts for 6–12 months (soft pancakes, oat fingers, porridges). The free Frittata Fingers stay free",
+   "free": [
+    "asian-pear-rice-congee-pure",
+    "banana-avocado-breakfast-pure-with-yogurt",
+    "spinach-and-feta-egg-muffins"
+   ]
   },
   {
    "slug": "batch-and-freeze-for-babies",
@@ -7775,7 +7855,12 @@
    ],
    "count": 12,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "asian-pear-rice-congee-pure",
+    "mild-mexican-black-bean-sweet-corn-pure",
+    "silky-carrot-apple-starter-pure"
+   ]
   },
   {
    "slug": "toddler-breakfasts",
@@ -7791,7 +7876,12 @@
    ],
    "count": 6,
    "status": "short",
-   "needs": "2+ toddler breakfasts (the Instagram waffle and pancake guides)"
+   "needs": "2+ toddler breakfasts (the Instagram waffle and pancake guides)",
+   "free": [
+    "overnight-oats-with-chia-and-berries",
+    "spinach-and-feta-egg-muffins",
+    "apple-cinnamon-oat-toddler-porridge"
+   ]
   },
   {
    "slug": "meal-prep",
@@ -7811,7 +7901,12 @@
    ],
    "count": 10,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "mild-vegetable-curry-with-rice",
+    "veggie-packed-lasagna",
+    "cheesy-broccoli-and-quinoa-bites"
+   ]
   },
   {
    "slug": "protein-packs",
@@ -7831,7 +7926,12 @@
    ],
    "count": 10,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "mini-baked-chicken-nuggets",
+    "salmon-potato-veggie-mash",
+    "soft-tofu-veggie-stir-fry-with-rice"
+   ]
   },
   {
    "slug": "everyday-treats",
@@ -7844,20 +7944,30 @@
     "mini-berry-yogurt-pops",
     "soft-banana-oat-toddler-cookies",
     "soft-date-almond-cocoa-bites",
-    "soft-peanut-butter-oat-energy-balls"
+    "soft-peanut-butter-oat-energy-balls",
+    "banana-pumpkin-mini-donuts",
+    "mini-pumpkin-cheesecake-bites"
    ],
-   "count": 7,
-   "status": "short",
-   "needs": "1+ dessert with no added sugar"
+   "count": 9,
+   "status": "ready",
+   "free": [
+    "mini-berry-yogurt-pops",
+    "soft-banana-oat-toddler-cookies",
+    "soft-date-almond-cocoa-bites"
+   ]
   },
   {
    "slug": "fruit-gummies",
    "title": "Fruit Gummies",
    "live": false,
-   "recipes": [],
-   "count": 0,
+   "recipes": [
+    "gummy-worms",
+    "protein-fruit-gummies"
+   ],
+   "count": 2,
    "status": "short",
-   "needs": "8+ real-fruit gummy recipes; none in the catalog (the Instagram GUMMIES guides have them)"
+   "needs": "6+ more real-fruit gummy recipes (the Instagram GUMMIES guides have them); both members are also in the Halloween book",
+   "free": []
   },
   {
    "slug": "on-the-go-snacks",
@@ -7869,11 +7979,17 @@
     "cheesy-veggie-quinoa-toddler-bites",
     "cheesy-veggie-mini-muffins",
     "soft-banana-oat-toddler-cookies",
-    "veggie-rice-snack-fritters"
+    "veggie-rice-snack-fritters",
+    "banana-pumpkin-mini-donuts"
    ],
-   "count": 6,
+   "count": 7,
    "status": "short",
-   "needs": "2+ snacks for 1–2 years that travel"
+   "needs": "1+ snack for 1–2 years that travels",
+   "free": [
+    "cheesy-broccoli-and-quinoa-bites",
+    "savory-corn-and-cheddar-muffins",
+    "soft-banana-oat-toddler-cookies"
+   ]
   },
   {
    "slug": "big-kid-breakfasts",
@@ -7887,7 +8003,12 @@
    ],
    "count": 4,
    "status": "short",
-   "needs": "4+ breakfasts for 2–4 years"
+   "needs": "4+ breakfasts for 2–4 years",
+   "free": [
+    "greek-yogurt-parfait-with-berries-and-almonds",
+    "overnight-oats-with-chia-and-berries",
+    "spinach-and-feta-egg-muffins"
+   ]
   },
   {
    "slug": "freezer-dinners",
@@ -7905,7 +8026,12 @@
    ],
    "count": 8,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "mild-vegetable-curry-with-rice",
+    "veggie-packed-lasagna",
+    "folate-rich-lentil-and-spinach-soup"
+   ]
   },
   {
    "slug": "lunchbox-and-daycare",
@@ -7927,7 +8053,12 @@
    ],
    "count": 12,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "mini-baked-chicken-nuggets",
+    "savory-corn-and-cheddar-muffins",
+    "greek-pita-bento-box"
+   ]
   },
   {
    "slug": "picky-eater-favorites",
@@ -7949,7 +8080,12 @@
    ],
    "count": 12,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "veggie-packed-lasagna",
+    "mini-baked-chicken-nuggets",
+    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip"
+   ]
   },
   {
    "slug": "family-dinners",
@@ -7971,7 +8107,12 @@
    ],
    "count": 12,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "mild-vegetable-curry-with-rice",
+    "baked-fish-tacos-with-slaw",
+    "veggie-packed-lasagna"
+   ]
   },
   {
    "slug": "halloween",
@@ -8001,7 +8142,12 @@
    ],
    "count": 20,
    "status": "ready",
-   "needs": null
+   "needs": null,
+   "free": [
+    "berry-ghost-yogurt-bark",
+    "apple-pie-halloween-pockets",
+    "spider-cracker-bites"
+   ]
   },
   {
    "slug": "thanksgiving-table",
@@ -8011,11 +8157,18 @@
     "mini-turkey-and-apple-meatloaf-muffins",
     "pumpkin-and-ricotta-gnocchi-pillows",
     "savory-corn-and-cheddar-muffins",
-    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip"
+    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip",
+    "banana-pumpkin-mini-donuts",
+    "mini-pumpkin-cheesecake-bites"
    ],
-   "count": 4,
+   "count": 6,
    "status": "short",
-   "needs": "4+ Thanksgiving recipes (turkey, pumpkin, stuffing, cranberry)"
+   "needs": "2+ Thanksgiving recipes (turkey, stuffing, cranberry)",
+   "free": [
+    "pumpkin-and-ricotta-gnocchi-pillows",
+    "savory-corn-and-cheddar-muffins",
+    "cinnamon-sweet-potato-snack-fries-with-yogurt-dip"
+   ]
   },
   {
    "slug": "holiday-baking",
@@ -8026,7 +8179,10 @@
    ],
    "count": 1,
    "status": "short",
-   "needs": "7+ baked holiday treats (cookies, breads, muffins)"
+   "needs": "7+ baked holiday treats (cookies, breads, muffins)",
+   "free": [
+    "soft-date-almond-cocoa-bites"
+   ]
   },
   {
    "slug": "birthday-party",
@@ -8040,7 +8196,11 @@
    ],
    "count": 4,
    "status": "short",
-   "needs": "4+ nut-free party foods (cake, cupcakes, finger food)"
+   "needs": "4+ nut-free party foods (cake, cupcakes, finger food)",
+   "free": [
+    "mini-baked-chicken-nuggets",
+    "mini-berry-yogurt-pops"
+   ]
   }
  ]
 }

@@ -60,7 +60,9 @@ test("existing database identities are reused", () => {
 });
 
 test("an empty collection is a valid candidate with no count warning", () => {
-  const report = mapCollectionImport(input());
+  // Fruit Gummies has had recipes since 2026-10-14, so the empty case is built here rather than read from config.
+  const config = SHOWROOM_COLLECTIONS.map((c) => (c.slug === "fruit-gummies" ? { ...c, recipes: [] } : c));
+  const report = mapCollectionImport(input({ config }));
   const empty = report.candidates.find((c) => c.slug === "fruit-gummies");
   assert.equal(empty.members.length, 0);
   assert.deepEqual(codes(report, "fruit-gummies").filter((c) => c !== "COLLECTION_IDENTITY_NEW"), []);

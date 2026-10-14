@@ -1,8 +1,8 @@
 # Recipe tags and collection placement
 
-Status: reviewed one recipe at a time on 2026-10-05, replacing the first batch pass. For owner review before the admin panel exists. The admin panel can import [recipe-tags.json](recipe-tags.json); this page is the readable copy. Vocabulary and rules: [COLLECTIONS.md](COLLECTIONS.md). Re-check any edit with `python3 check_recipe_tags.py`.
+Status: reviewed one recipe at a time on 2026-10-05, replacing the first batch pass. For owner review before the admin panel exists. The admin panel can import [recipe-tags.json](recipe-tags.json); this page is the readable copy. Vocabulary and rules: [COLLECTIONS.md](COLLECTIONS.md). Re-check any edit with `python3 check_recipe_tags.py`. Updated 2026-10-14 after the free-sample audit ([AUDIT-2026-10-14.md](AUDIT-2026-10-14.md)): every collection has three free samples where the overlaps allow it, four Halloween recipes were also placed in short books, and two allergen lists here were corrected.
 
-**In short:** each of the 70 recipes was read in full (ingredients, steps, tips, storage) and checked for allergens, then age, then collections. **11 of 20 collections** have 8–12 recipes (First Tastes, First Finger Foods, Iron-Rich First Foods, Batch & Freeze for Babies, Meal Prep for Toddlers, Protein Packs, Freezer Dinners, Lunchbox & Daycare, Picky Eater Favorites, Family Dinners, Halloween). **9 are short.** The review found 10 adult recipes written for pregnancy (#28–37), 2 wrong allergen lists, 1 wrong gluten-free claim and 1 internal reviewer note shown as a recipe step. All of these were fixed on 2026-10-05: the catalog errors were corrected, the 10 adult recipes were rewritten for children, and the live collections were swapped to children's recipes.
+**In short:** each of the 70 recipes was read in full (ingredients, steps, tips, storage) and checked for allergens, then age, then collections. **12 of 20 collections** have 8–12 recipes (First Tastes, First Finger Foods, Iron-Rich First Foods, Batch & Freeze for Babies, Meal Prep for Toddlers, Protein Packs, Freezer Dinners, Lunchbox & Daycare, Picky Eater Favorites, Family Dinners, Halloween, and since 2026-10-14 Everyday Treats). **8 are short.** The review found 10 adult recipes written for pregnancy (#28–37), 2 wrong allergen lists, 1 wrong gluten-free claim and 1 internal reviewer note shown as a recipe step. All of these were fixed on 2026-10-05: the catalog errors were corrected, the 10 adult recipes were rewritten for children, and the live collections were swapped to children's recipes.
 
 Example: *Overnight Oats with Chia and Berries* (#34) was a pregnancy recipe with no age: honey or maple, a sliced-almond topping and a tip about nausea. It was rewritten for children (banana instead of honey, no almonds, berries flattened or quartered under 4) and is now "from 12 months" in Toddler Breakfasts and Big-Kid Breakfasts.
 
@@ -25,6 +25,8 @@ Example: *Overnight Oats with Chia and Berries* (#34) was a pregnancy recipe wit
 | #28 Baked Sweet Potato with Black Beans and Avocado | One of 10 adult recipes (#28–37): no age, no child steps; 8 of them mention pregnancy | Rewritten for children: ages 9 or 12 months up, child portion before salt, round foods flattened or quartered | Done 2026-10-05 |
 | #69 Soft-Baked Blueberry & Oat Bars | Rejected by the review gate over its 6-month minimum age | Owner confirmed it has been reviewed and is fine; approval recorded in the review log | Done 2026-10-05 |
 | #70 Salmon & Pea Fish Cakes | Flagged: smashing the peas only a tip | Already step 4 in the live recipe; the first review read an older copy of the 3 free recipes | No change needed |
+| #78 Witch's Broomsticks, #79 Spider Cracker Bites | The allergen list in this file said milk only; pretzel sticks and butter crackers contain wheat (the catalog already listed wheat, and soy for #79) | Wheat added here; the keyword check now knows pretzels and crackers | Done 2026-10-14 |
+| #68–#70 (the three launch free recipes) | Still marked free here after the owner made three Halloween recipes free instead on 2026-10-13 | `free_sample` now follows the production free list, and the rule that free recipes stay out of paid books is retired (free samples live inside their books) | Done 2026-10-14 |
 
 The fixes were guarded database changes: each edited recipe moved to a new content version with a new review record, so the review gate still passes. Backups: `~/MyCuratedHavenBackups/2026-10-05-before-recipe-tag-fixes` and `2026-10-05-before-child-rewrite-28-37`; SQL and the rewrite source: `recipe-review/apply-tag-review-fixes.sql`, `apply-child-rewrite-28-37.sql`, `rewrite-28-37.py` (private, outside this repository). The owner read and approved the 10 rewrites on 2026-10-06; that approval is recorded in the review log.
 
@@ -38,6 +40,33 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 - **Meal Prep for Toddlers:** out #30 Folate-Rich Lentil Soup and #32 Lentil Curry. In #11 Mild Vegetable Curry with Rice and #50 Cheesy Veggie Quinoa Toddler Bites; both freeze, so "every one of them freezes" still holds.
 - **Halloween:** unchanged.
 
+## Free samples (2026-10-14)
+
+Owner request of 2026-10-14: three free recipes in every collection, chosen for quality. A recipe is free when it is on the production free list (`public.free_recipe_slots`, written with `private.publish_free_recipe_slots`), and a free recipe must be published, so the 25 drafts in the table were published the same day. Each collection page shows its own free recipes. The Halloween three are the owner's choice of 2026-10-13 and stay as they are. Because 46 recipes sit in two or more books, a recipe freed for one book counts in every book it is in; the set below gives 17 collections exactly three. Holiday Baking has its only recipe free, Birthday Party reaches two (its third would be Samosa Puffs or Pizza Scrolls, which would make Lunchbox & Daycare or Picky Eater Favorites four), and Fruit Gummies has none (both its recipes are in the Halloween book). The reason for each pick and the rollback are in [AUDIT-2026-10-14.md](AUDIT-2026-10-14.md).
+
+| Collection | Free |
+|---|---|
+| First Tastes | #9 Silky Carrot Apple Starter Purée · #2 Asian Pear Rice Congee Purée · #3 Banana Avocado Breakfast Purée with Yogurt |
+| First Finger Foods | #22 Cheesy Broccoli & Quinoa Bites · #25 Pumpkin & Ricotta Gnocchi Pillows · #36 Salmon and Sweet Potato Bowl with Avocado |
+| Iron-Rich First Foods | #8 Mild Mexican Black Bean Sweet Corn Purée · #28 Baked Sweet Potato with Black Beans and Avocado · #30 Folate-Rich Lentil and Spinach Soup |
+| First Breakfasts | #2 · #3 · #37 Spinach and Feta Egg Muffins (all three it has) |
+| Batch & Freeze for Babies | #9 · #2 · #8 |
+| Toddler Breakfasts | #37 · #34 Overnight Oats with Chia and Berries · #48 Apple Cinnamon Oat Toddler Porridge |
+| Meal Prep for Toddlers | #11 Mild Vegetable Curry with Rice · #20 Veggie-Packed Lasagna · #22 |
+| Protein Packs | #39 Mini Baked Chicken Nuggets · #53 Salmon Potato Veggie Mash · #55 Soft Tofu Veggie Stir Fry with Rice |
+| Everyday Treats | #63 Mini Berry Yogurt Pops · #64 Soft Banana Oat Toddler Cookies · #65 Soft Date Almond Cocoa Bites |
+| Fruit Gummies | none: #84 and #85 are in the Halloween book |
+| On-the-Go Snacks | #22 · #42 Savory Corn & Cheddar Muffins · #64 |
+| Big-Kid Breakfasts | #37 · #34 · #31 Greek Yogurt Parfait with Berries and Almonds |
+| Freezer Dinners | #20 · #11 · #30 |
+| Lunchbox & Daycare | #39 · #42 · #46 Greek Pita Bento Box |
+| Picky Eater Favorites | #39 · #61 Cinnamon Sweet Potato Snack Fries with Yogurt Dip · #20 |
+| Family Dinners | #11 · #20 · #15 Baked Fish Tacos with Slaw |
+| Halloween | #73 Berry Ghost Yogurt Bark · #79 Spider Cracker Bites · #75 Apple Pie Halloween Pockets (owner, 2026-10-13) |
+| Thanksgiving Table | #61 · #42 · #25 |
+| Holiday Baking | #65 (its only recipe) |
+| Birthday Party | #39 · #63 (two) |
+
 ## Collections
 
 | # | Collection | Stage | Recipes | Ready? |
@@ -50,16 +79,16 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 | 6 | Toddler Breakfasts (`toddler-breakfasts`) | 1–2 y | 6 | Short: 2+ toddler breakfasts (the Instagram waffle and pancake guides) |
 | 7 | Meal Prep for Toddlers (`meal-prep`) | 1–2 y | 10 | Ready (live) |
 | 8 | Protein Packs (`protein-packs`) | 1–2 y | 10 | Ready (live) |
-| 9 | Everyday Treats (`everyday-treats`) | 1 y+ | 7 | Short: 1+ dessert with no added sugar |
-| 10 | Fruit Gummies (`fruit-gummies`) | 1 y+ | 0 | Short: 8+ real-fruit gummy recipes; none in the catalog (the Instagram GUMMIES guides have them) |
-| 11 | On-the-Go Snacks (`on-the-go-snacks`) | 1–2 y | 6 | Short: 2+ snacks for 1–2 years that travel |
+| 9 | Everyday Treats (`everyday-treats`) | 1 y+ | 9 | Ready since 2026-10-14 (#71 and #74 placed); still coming soon on the site until the owner opens it |
+| 10 | Fruit Gummies (`fruit-gummies`) | 1 y+ | 2 | Short: 6+ more real-fruit gummy recipes (the Instagram GUMMIES guides have them); #84 and #85 placed 2026-10-14, both also in the Halloween book |
+| 11 | On-the-Go Snacks (`on-the-go-snacks`) | 1–2 y | 7 | Short: 1+ snack for 1–2 years that travels (#71 placed 2026-10-14) |
 | 12 | Big-Kid Breakfasts (`big-kid-breakfasts`) | 2–4 y | 4 | Short: 4+ breakfasts for 2–4 years |
 | 13 | Freezer Dinners (`freezer-dinners`) | 2–4 y | 8 | Ready |
 | 14 | Lunchbox & Daycare (`lunchbox-and-daycare`) | 2–4 y | 12 | Ready |
 | 15 | Picky Eater Favorites (`picky-eater-favorites`) | 2–4 y | 12 | Ready |
 | 16 | Family Dinners (`family-dinners`) | all stages | 12 | Ready |
 | 17 | Halloween (`halloween`) | all stages | 20 | Live; replaced with 20 owner recipes on 2026-10-12, owner-reviewed |
-| 18 | Thanksgiving Table (`thanksgiving-table`) | all stages | 4 | Short: 4+ Thanksgiving recipes (turkey, pumpkin, stuffing, cranberry) |
+| 18 | Thanksgiving Table (`thanksgiving-table`) | all stages | 6 | Short: 2+ Thanksgiving recipes (turkey, stuffing, cranberry); #71 and #74 placed 2026-10-14 |
 | 19 | Holiday Baking (`holiday-baking`) | all stages | 1 | Short: 7+ baked holiday treats (cookies, breads, muffins) |
 | 20 | Birthday Party (`birthday-party`) | all stages | 4 | Short: 4+ nut-free party foods (cake, cupcakes, finger food) |
 
@@ -154,7 +183,7 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 - #55 Soft Tofu Veggie Stir Fry with Rice (1–3 y): Added 2026-10-05: tofu, written for 1-3 years
 - #56 Turkey Veggie Mini Meatballs with Pasta (18 m–4 y): Added 2026-10-05: turkey meatballs cut small
 
-### Everyday Treats · 7 recipes
+### Everyday Treats · 9 recipes
 
 - #49 Banana Peanut Butter Chia Pudding (18 m–4 y): Pudding with no added sugar (banana only)
 - #60 Chickpea Cookie Dough Fruit Dip (18 m–5 y): Dessert-style dip sweetened only with banana or dates
@@ -163,12 +192,15 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 - #64 Soft Banana Oat Toddler Cookies (1–4 y): No added sugar (banana)
 - #65 Soft Date Almond Cocoa Bites (2–6 y): Sweetened only by dates
 - #66 Soft Peanut Butter Oat Energy Balls (2–5 y): Sweetened only by banana
+- #71 Banana Pumpkin Mini Donuts (1–3 y): No added sugar (banana and pumpkin). Placed 2026-10-14
+- #74 Mini Pumpkin Cheesecake Bites (1–3 y): Dessert with no added sugar (banana only), from 12 m. Placed 2026-10-14
 
-### Fruit Gummies · 0 recipes
+### Fruit Gummies · 2 recipes
 
-- None yet.
+- #84 Gummy Worms (1–3 y): Real-fruit gummy: 100% juice and gelatin, no added sugar. Placed 2026-10-14 (the book was empty)
+- #85 Protein Fruit Gummies (1–3 y): Real-fruit gummy: fruit purée and gelatin, ten flavours. Placed 2026-10-14 (the book was empty)
 
-### On-the-Go Snacks · 6 recipes
+### On-the-Go Snacks · 7 recipes
 
 - #22 Cheesy Broccoli & Quinoa Bites (9 m–5 y): Holds its shape at room temperature
 - #42 Savory Corn & Cheddar Muffins (1–10 y): Freezes, travels without crumbling
@@ -176,6 +208,7 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 - #59 Cheesy Veggie Mini Muffins (1–4 y): Freezes, easy to hold
 - #64 Soft Banana Oat Toddler Cookies (1–4 y): Freezes, travels
 - #67 Veggie Rice Snack Fritters (1–4 y): Tip says pack for lunchboxes and outings
+- #71 Banana Pumpkin Mini Donuts (1–3 y): Mini size for a toddler's hand; keeps a day at room temperature and freezes. Placed 2026-10-14
 
 ### Big-Kid Breakfasts · 4 recipes
 
@@ -244,33 +277,35 @@ The live collections held 7 adult recipes. They were swapped for reviewed childr
 
 On 2026-10-12 the owner replaced the 8 earlier members (#25, #42, #43, #58, #61, #63, #64, #65; they stay in the catalog and their other collections, and #58 is now in none) with 20 new Halloween recipes, #71–#90. The owner approved all 20 in chat on 2026-10-12; that approval is recorded as one human `approve` row per recipe in `private.recipe_reviews`, so they pass the review gate. Two safety edits were made before adding them: Apple Peanut Butter Smiles uses apple slivers instead of mini marshmallows for teeth, and the Jack-O'-Lantern Peanut Butter Tart uses finely ground instead of chopped peanuts. The owner's two later recipes also follow their own safety notes: peanut-butter dots instead of candy eyes on the spider bites, and halved blueberries on the blueberry bites. Times include required freezing or chilling.
 
-- #71 Banana Pumpkin Mini Donuts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #71 Banana Pumpkin Mini Donuts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; also in Everyday Treats, On-the-Go Snacks and Thanksgiving Table since 2026-10-14
 - #72 Sweet Potato Jack-O'-Lantern Cupcakes (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
-- #73 Berry Ghost Yogurt Bark (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
-- #74 Mini Pumpkin Cheesecake Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
-- #75 Apple Pie Halloween Pockets (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #73 Berry Ghost Yogurt Bark (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; free since 2026-10-13
+- #74 Mini Pumpkin Cheesecake Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; also in Everyday Treats and Thanksgiving Table since 2026-10-14
+- #75 Apple Pie Halloween Pockets (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; free since 2026-10-13
 - #76 Jack-O'-Lantern Peanut Butter Tart (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #77 Apple Peanut Butter Smiles (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #78 Witch's Broomsticks (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
-- #79 Spider Cracker Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #79 Spider Cracker Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; free since 2026-10-13
 - #80 Mandarin Orange Pumpkins (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #81 Monster Energy Balls (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #82 Mummy Banana Pops (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #83 Candy Corn Parfaits (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
-- #84 Gummy Worms (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
-- #85 Protein Fruit Gummies (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
+- #84 Gummy Worms (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; also in Fruit Gummies since 2026-10-14
+- #85 Protein Fruit Gummies (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12; also in Fruit Gummies since 2026-10-14
 - #86 Spider Peanut Butter Oat Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #87 Strawberry Yogurt Ghost Hearts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #88 Jack-o'-Lantern Mango Stars (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #89 Blueberry Yogurt Bites (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 - #90 Chocolate Pumpkin Protein Tarts (1–3 y): owner's Halloween recipe, owner-reviewed 2026-10-12
 
-### Thanksgiving Table · 4 recipes
+### Thanksgiving Table · 6 recipes
 
 - #24 Mini Turkey & Apple Meatloaf Muffins (9 m–3 y): Turkey and apple: a small-hands Thanksgiving plate
 - #25 Pumpkin & Ricotta Gnocchi Pillows (8 m–4 y): Pumpkin
 - #42 Savory Corn & Cheddar Muffins (1–10 y): Corn muffins: a Thanksgiving side
 - #61 Cinnamon Sweet Potato Snack Fries with Yogurt Dip (1–4 y): Cinnamon sweet potato: a Thanksgiving flavour
+- #71 Banana Pumpkin Mini Donuts (1–3 y): Pumpkin and cinnamon: a fall flavour, like the sweet potato fries. Placed 2026-10-14
+- #74 Mini Pumpkin Cheesecake Bites (1–3 y): Pumpkin: a bite-size Thanksgiving dessert. Placed 2026-10-14
 
 ### Holiday Baking · 1 recipes
 
@@ -300,6 +335,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 6–18 m (catalog, checked). Blended rice and pear, strained for 6-7 m: fine.
 - **Tags:** 6-8m, 9-12m, 1-2y · breakfast, dinner · sick-days · freezes, make-ahead · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · puree
 - **Collections:** First Tastes, First Breakfasts, Batch & Freeze for Babies
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Catalog diet tags miss gluten-free; rice, pear and water are gluten-free.
 
 ### #3 Banana Avocado Breakfast Purée with Yogurt
@@ -308,6 +344,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 6–18 m (catalog, checked). Mashed and strained; yogurt fine from 6 m, recipe warns against cow's milk as a drink.
 - **Tags:** 6-8m, 9-12m, 1-2y · breakfast, snack · no goal · under-15-min, no-cook · egg-free, nut-free, gluten-free, vegetarian · puree
 - **Collections:** First Tastes, First Breakfasts
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 
 ### #4 Comforting Sweet Potato Lentil Khichdi Purée
 
@@ -344,6 +381,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 8–24 m (catalog, checked). Fully blended and strained: fine from 8 m.
 - **Tags:** 6-8m, 9-12m, 1-2y · lunch, dinner · iron, protein, fiber · freezes, make-ahead, one-pot · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · puree
 - **Collections:** Iron-Rich First Foods, Batch & Freeze for Babies
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Left out of First Tastes: a spiced bean purée from 8 m is a second-stage purée, not a first spoonful.
 
 ### #9 Silky Carrot Apple Starter Purée
@@ -352,6 +390,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 6–12 m (catalog, checked). Starter purée from 6 m.
 - **Tags:** 6-8m, 9-12m · lunch, snack · veg-packed · freezes, make-ahead · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · puree
 - **Collections:** First Tastes, Batch & Freeze for Babies
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Left out of Thanksgiving Table: a carrot-apple baby purée has no Thanksgiving link.
 
 ### #10 Zucchini Chickpea Mediterranean Purée
@@ -367,6 +406,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 6 m–10 y (catalog, checked). Puréed or mashed for babies, whole peas only for older children: fine.
 - **Tags:** 6-8m, 9-12m, 1-2y, 2-3y, 3-5y · dinner, lunch · veg-packed · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Freezer Dinners, Family Dinners, Meal Prep for Toddlers
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Fixed 2026-10-05: the internal reviewer note (step 9) was deleted.
 - Coconut milk: not a tree nut under current FDA guidance, but some parents avoid it; say 'contains coconut'.
 - Curry powder: check label for wheat fillers to keep gluten-free.
@@ -404,6 +444,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Fish flaked, tortillas cut small, slaw softened: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · dinner · protein · whole-family · egg-free, dairy-free, nut-free · finger-food
 - **Collections:** Family Dinners
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Fixed 2026-10-05: allergen list is now fish only, and the tortilla ingredient says to check the label for wheat.
 
 ### #16 Tofu and Vegetable Stir-Fry
@@ -445,6 +486,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Soft small squares: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · dinner · veg-packed, picky-friendly · freezes, make-ahead, whole-family · nut-free, vegetarian · bowl
 - **Collections:** Meal Prep for Toddlers, Freezer Dinners, Family Dinners, Picky Eater Favorites
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Catalog diet tags miss vegetarian; no meat in the recipe. Marinara: check label.
 
 ### #21 Avocado & Black Bean Quesadilla Strips
@@ -461,6 +503,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–5 y (catalog, checked). Crumbled or cut small under 12 m, no stems: fine.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner, snack · protein, veg-packed, picky-friendly · freezes, make-ahead, on-the-go · nut-free, gluten-free, vegetarian · bites
 - **Collections:** Meal Prep for Toddlers, First Finger Foods, On-the-Go Snacks
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - If cooked in broth (tip), check the broth label for gluten.
 
 ### #23 Mild Curried Red Lentil Cakes
@@ -486,6 +529,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 8 m–4 y (catalog, checked). Pressed flat and cut into strips for 8-12 m: fine.
 - **Tags:** 6-8m, 9-12m, 1-2y, 2-3y, 3-5y · dinner · picky-friendly · freezes, make-ahead · egg-free, nut-free · finger-food · halloween, thanksgiving
 - **Collections:** Halloween, First Finger Foods, Thanksgiving Table
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Parmesan usually uses animal rennet, so not tagged vegetarian.
 
 ### #26 Sesame Tofu & Veggie Cubes
@@ -509,6 +553,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: mashed for 9-12 m, skin removed under 2, beans mashed under 2 and flattened after, no salt in the child portion. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner · protein, iron, fiber, veg-packed · whole-family, make-ahead · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Iron-Rich First Foods
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Also fits Family Dinners, which is full at 12.
 
@@ -527,6 +572,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: blended for 9-12 m, no-salt broth, salt only for adults. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner · iron, protein, fiber, veg-packed, sick-days · freezes, make-ahead, one-pot, whole-family · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Freezer Dinners, Iron-Rich First Foods
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - The title still says 'Folate-Rich', a nutrition claim. Changing it needs a URL redirect.
 - Broth: check the label for gluten.
@@ -537,6 +583,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: no honey, almonds finely ground, berries flattened or quartered under 4, chia soaked. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · breakfast, snack · protein · no-cook · egg-free, gluten-free, vegetarian · bowl
 - **Collections:** Big-Kid Breakfasts
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Gluten-free relies on the certified gluten-free oats it names. A nut-free version is in the tips.
 
@@ -563,6 +610,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Rewritten: no honey or syrup (banana only), no almonds, berries flattened or quartered under 4. Fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · breakfast · fiber · make-ahead, no-cook · egg-free, nut-free, vegetarian · bowl
 - **Collections:** Toddler Breakfasts, Big-Kid Breakfasts
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 - Regular oats: not gluten-free.
 
@@ -581,6 +629,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: baked salmon checked for bones, mashed or soft pieces for 9-12 m, no kale under 2, no salt in the child portion. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · lunch, dinner · protein · whole-family · egg-free, dairy-free, nut-free, gluten-free · finger-food
 - **Collections:** First Finger Foods
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 
 ### #37 Spinach and Feta Egg Muffins
@@ -589,6 +638,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 9 m–10 y (catalog, checked). Rewritten: finger-length strips for 9-12 m, tomatoes finely diced, no added salt, less feta for babies. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · breakfast, snack · protein, veg-packed · freezes, make-ahead, on-the-go · nut-free, gluten-free, vegetarian · finger-food
 - **Collections:** First Breakfasts, Toddler Breakfasts, Big-Kid Breakfasts
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Rewritten for children on 2026-10-05 (was a pregnancy recipe): child portion taken out before salt, round foods flattened or quartered, texture step per age. Approved by the owner on 2026-10-06.
 
 ### #38 Baked Samosa Puffs
@@ -605,6 +655,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Cut into soft pieces, 165°F: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch, dinner · protein, picky-friendly · freezes, make-ahead, on-the-go · dairy-free, nut-free · finger-food · birthday
 - **Collections:** Protein Packs, Picky Eater Favorites, Lunchbox & Daycare, Birthday Party
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - In 4 collections.
 
 ### #40 Onigiri Rice Triangles
@@ -629,6 +680,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Corn finely mashed, small soft pieces under 4: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch, snack · picky-friendly · freezes, make-ahead, on-the-go · nut-free, vegetarian · finger-food · halloween, thanksgiving
 - **Collections:** Halloween, Lunchbox & Daycare, On-the-Go Snacks, Thanksgiving Table
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Left out of Holiday Baking: a savory corn muffin, not a festive bake.
 - In 4 collections.
 
@@ -662,6 +714,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–10 y (catalog, checked). Soft narrow strips, peppers cooked soft under 18 m: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch · no goal · under-15-min, no-cook, on-the-go · egg-free, nut-free, vegetarian · finger-food · back-to-school
 - **Collections:** Lunchbox & Daycare
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 
 ### #47 Mini Bean & Cheese Burritos
 
@@ -677,6 +730,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–4 y (catalog, checked). Cow's milk cooked in, soft oats: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · breakfast · fiber · make-ahead · egg-free, nut-free, vegetarian · bowl
 - **Collections:** Toddler Breakfasts
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Left out of Thanksgiving Table: an everyday porridge.
 - A tip suggests optional nut butter; still nut-free as written.
 
@@ -716,6 +770,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–4 y (catalog, checked). Bones removed, peas mashed, small soft flakes: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · lunch, dinner · protein · — · egg-free, nut-free, gluten-free · mash
 - **Collections:** Protein Packs
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Catalog diet tags miss gluten-free.
 
 ### #54 Soft Chicken Veggie Rice Bowl
@@ -732,6 +787,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–3 y (catalog, checked). Soft strips or crumbles, pieces under 1/2 inch: fine from 12 m.
 - **Tags:** 1-2y, 2-3y · lunch, dinner · protein, veg-packed · — · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · bowl
 - **Collections:** Protein Packs
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 
 ### #56 Turkey Veggie Mini Meatballs with Pasta
 
@@ -782,6 +838,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–4 y (catalog, checked). Soft-centre sticks, shortened for newer eaters: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · snack · veg-packed, picky-friendly · — · egg-free, nut-free, gluten-free, vegetarian · finger-food · halloween, thanksgiving
 - **Collections:** Halloween, Picky Eater Favorites, Thanksgiving Table
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Catalog diet tags miss gluten-free.
 - Left out of Birthday Party: a side dish.
 
@@ -798,6 +855,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–4 y (catalog, checked). Shavings in a bowl under 24 m, whole mini pop only from 24 m seated: fine.
 - **Tags:** 1-2y, 2-3y, 3-5y · snack, treat · no goal · freezes, make-ahead · egg-free, nut-free, gluten-free, vegetarian · bowl · summer, birthday
 - **Collections:** Halloween, Everyday Treats, Birthday Party
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Catalog diet tags miss gluten-free.
 
 ### #64 Soft Banana Oat Toddler Cookies
@@ -806,6 +864,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 1–4 y (catalog, checked). Soft, broken into 1/2-inch pieces: fine from 12 m.
 - **Tags:** 1-2y, 2-3y, 3-5y · snack, breakfast, treat · fiber · freezes, make-ahead, on-the-go · egg-free, dairy-free, nut-free, gluten-free, vegetarian, vegan · finger-food
 - **Collections:** Halloween, Everyday Treats, On-the-Go Snacks
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Left out of Holiday Baking: a plain everyday cookie, not a festive bake.
 - Coconut oil is an option: say 'may contain coconut'.
 
@@ -815,6 +874,7 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Age:** 2–6 y (catalog, checked). Flattened discs, cut to 1/2 inch under 4, never balls: fine from 24 m.
 - **Tags:** 2-3y, 3-5y · snack, treat · no goal · freezes, make-ahead · egg-free, dairy-free, gluten-free, vegetarian, vegan · bites · holidays
 - **Collections:** Halloween, Everyday Treats, Holiday Baking
+- Free since 2026-10-14: a free sample of its collections (three per collection).
 - Left out of Birthday Party: tree nuts at a shared party.
 - Holiday Baking fit is loose: no oven involved.
 
@@ -835,31 +895,31 @@ Allergens are what the ingredients contain (with the ingredient). "Age" is the c
 - **Tags:** 1-2y, 2-3y, 3-5y · snack, lunch · veg-packed, picky-friendly · make-ahead, on-the-go · dairy-free, nut-free, gluten-free, vegetarian · finger-food
 - **Collections:** On-the-Go Snacks, Picky Eater Favorites
 
-### #68 Sweet Potato & Spinach Frittata Fingers (free sample)
+### #68 Sweet Potato & Spinach Frittata Fingers (free until 2026-10-13)
 
 - **Allergens:** eggs: eggs; milk: milk, cheddar. Catalog list: eggs, milk.
 - **Age:** 6–24 m (catalog, checked). Soft strips 1x3 inch for grip, spinach finely chopped: fine from 6 m.
 - **Tags:** 6-8m, 9-12m, 1-2y · breakfast, lunch · protein, veg-packed · freezes, make-ahead · nut-free, gluten-free, vegetarian · finger-food
 - **Collections:** none
-- Free sample: tagged, kept out of paid collections.
+- Free from launch until 2026-10-13 (owner decision); still published, in no collection, so its page is locked with no book to buy.
 - Re-reviewed 2026-10-05 against the live text; the first review used an older copy.
 
-### #69 Soft-Baked Blueberry & Oat Bars (free sample)
+### #69 Soft-Baked Blueberry & Oat Bars (free until 2026-10-13)
 
 - **Allergens:** none of the top 9. Catalog list: none.
 - **Age:** 6 m–4 y (catalog, checked). Owner confirmed on 2026-10-05 that the recipe has been reviewed and is fine, including the 6-month minimum. Blueberries are flattened or quartered.
 - **Tags:** 6-8m, 9-12m, 1-2y, 2-3y, 3-5y · snack, breakfast, treat · fiber · freezes, make-ahead, on-the-go · egg-free, dairy-free, nut-free, vegetarian, vegan · finger-food
 - **Collections:** none
-- Free sample: tagged, kept out of paid collections.
+- Free from launch until 2026-10-13 (owner decision); still published, in no collection, so its page is locked with no book to buy.
 - Owner approval recorded in the review log on 2026-10-05; the review gate now passes.
 - Coconut oil: say 'contains coconut'.
 - Catalog diet tags miss vegan.
 
-### #70 Salmon & Pea Fish Cakes (free sample)
+### #70 Salmon & Pea Fish Cakes (free until 2026-10-13)
 
 - **Allergens:** fish: salmon; wheat: wheat flour (for dusting). Catalog list: fish, wheat.
 - **Age:** 9 m–5 y (catalog, checked). Flattening the peas is step 4 of the live recipe; bones checked; strips for younger babies. Fine from 9 m.
 - **Tags:** 9-12m, 1-2y, 2-3y, 3-5y · dinner · protein · freezes, make-ahead · egg-free, dairy-free, nut-free · finger-food
 - **Collections:** none
-- Free sample: tagged, kept out of paid collections.
+- Free from launch until 2026-10-13 (owner decision); still published, in no collection, so its page is locked with no book to buy.
 - Re-reviewed 2026-10-05 against the live text: the pea step is already there (the first review used an older copy).
