@@ -8,12 +8,13 @@ Mock the owner approved (private): https://claude.ai/artifact/T58b3YQzcSAeh4Krfc
 
 | # | Section | What it does |
 | --- | --- | --- |
-| 1 | Menu (first screen) | The pumpkin (tap three times to carve it), "Halloween, the not-scary way", and the Halloween menu: Ghost bark, Mummy pops, Spider bites (Ghost pops, Mummy scrolls and Pumpkin pillows until 2026-10-12). Each row opens the recipe's own page when it is free, otherwise the Halloween collection |
-| 2 | Make them Halloween | Ghost bark, Mummy pops and Spider bites (back on 2026-10-13 after the recipe swap hid it for a day), each a before-and-after slider (everyday on the left of the line, Halloween on the right; drag, tap or arrow keys; it nudges once on arrival), and the one small step that makes it Halloween |
-| 3 | Our plan for Saturday | Bhagyashree's plan, told before Halloween: the skeleton scare (last week), making ghosts (10:30), the walk (6:15, the rendered street), goodnight to the skeleton (7:30) |
-| 4 | Why we cook for Halloween | Three reasons. Hard candy, whole nuts and popcorn are choking risks under 4 (AAP) |
-| 5 | The Halloween collection | The cover opens to the contents (free recipes marked), the price and "See the Halloween collection" |
-| 6 | Closing | Back to the menu, all recipes |
+| 1 | Headline | The pumpkin (tap three times to carve it; the first recipe then glows once), "Halloween, the not-scary way" and "Three recipes for the big night" |
+| 2 | Make them Halloween (first screen) | The three recipes, Ghost bark, Mummy pops and Spider bites, each a before-and-after slider: everyday on the left of the line, Halloween on the right, resting half and half. The first time a slider comes into view it shows the whole everyday photo, then the whole Halloween one, then rests (not with reduced motion); drag, tap or arrow keys stop it. A chip on each photo says Free or In the book. Under it: when in the day, the recipe name, freezing and allergens, the one small step, and the link (the recipe's own page when free, otherwise the Halloween collection). Since 2026-10-13 this replaces the Halloween menu list that used to sit under the headline |
+| 3 | Book card | "All 20 recipes in one book", the price and "Get all 20", straight after the recipes |
+| 4 | Our plan for Saturday | Bhagyashree's plan, told before Halloween: the skeleton scare (last week), making ghosts (10:30), the walk (6:15, the rendered street), goodnight to the skeleton (7:30) |
+| 5 | Why we cook for Halloween | Three reasons. Hard candy, whole nuts and popcorn are choking risks under 4 (AAP) |
+| 6 | The Halloween collection | The cover opens to all 20 recipe photos (tap one to name it), the price, "Buy it once and it's yours. Any Halloween recipes we add later are included." and "See the Halloween collection" |
+| 7 | Closing | Back to the recipes, all recipes |
 
 A sticky time pill under the site header follows the story (Last week, 10:30 am, 6:15 pm, 7:30 pm). Behind the page a sky turns from morning to night; the moon rises with the walk.
 
@@ -40,7 +41,7 @@ The street (`HALLOWEEN_STREET` in `src/config/halloween.ts`) is five image layer
 | File | Role |
 | --- | --- |
 | `src/app/halloween/page.tsx` | The route. Cached for an hour, listed in the sitemap |
-| `src/config/halloween.ts` | All words and images that are ours: menu, tricks, story, street, reasons |
+| `src/config/halloween.ts` | All words and images that are ours: the three recipes (name, time, Halloween step), story, street, reasons |
 | `src/lib/data/load-halloween.ts` | Menu links (free or in the book), book contents, price |
 | `src/components/halloween/` | Sections (server), the client islands (pumpkin, photo swap, ghost, time pill) and the motion |
 | `src/styles/halloween.css` | Everything under `.hw`, still by default |
@@ -56,11 +57,10 @@ The street (`HALLOWEEN_STREET` in `src/config/halloween.ts`) is five image layer
 | Ghost pops before (`ghost-pops-before.webp`) | Higgsfield edit of the owner's ghost pops photo with only the eyes removed (2026-10-12), so the slider lines up |
 | Everyday scrolls (`everyday-pizza-scrolls.webp`) | The recipe's own catalog photo, a different shot, so the slider halves do not line up yet; the owner is making a matching before photo |
 | Everyday photos (`public/images/recipes/everyday/<slug>-1040.webp`, listed in `src/config/everyday-photos.ts`) | ChatGPT Images edits of each recipe's own photo with only the Halloween step removed (eyes, faces, webs, legs, stems, the pumpkin shape, the broom fringe), 2026-10-13, so the slider lines up. 15 of the 20 recipes; the banana pumpkin mini donuts, mini pumpkin cheesecake bites, candy corn parfaits, gummy worms and protein fruit gummies have no Halloween step to remove. They feed the three sliders here and the slider at the top of each recipe's own page (`/recipes/<slug>`), which prints as the Halloween photo alone. Originals in `docs/art/generated/` |
-| Menu thumbnails (`thumb-*.webp`) | 320px square crops of the recipe photos (2026-10-13; were 160px), shown at 96px |
 
 ## Analytics
 
-The page reuses the campaign tracker: `story_view` with `story_slug: "halloween"` and `story_series: "halloween-2026"`, `story_action_clicked` for menu, trick, collection and all-recipes taps (`campaign_recipe` for a free recipe, `collection` otherwise), and `story_section_viewed` for recipes, story, story_end, collection and closing.
+The page reuses the campaign tracker: `story_view` with `story_slug: "halloween"` and `story_series: "halloween-2026"`, `story_action_clicked` for recipe (placement `recipes`), book, collection and all-recipes taps (`campaign_recipe` for a free recipe, `collection` otherwise), and `story_section_viewed` for recipes, story, story_end, collection and closing.
 
 ## Selling the book (from 2026-10-13)
 

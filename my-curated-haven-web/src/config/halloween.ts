@@ -11,8 +11,6 @@
  * (docs/implementation/instagram-landing/HALLOWEEN.md lists their sources).
  */
 
-import { EVERYDAY_PHOTOS } from "./everyday-photos";
-
 const IMG = "/images/campaigns/halloween";
 
 export interface HalloweenImage {
@@ -29,18 +27,12 @@ export interface HalloweenDish {
   alias: string;
   /** When in the day it belongs, shown above the name. */
   when: string;
-  /** Leave the catalog time out when it would mislead (most of the ghost pops' time is the freezer). */
+  /** Leave the catalog time out when it would mislead (most of the ghost bark's time is the freezer). */
   hideMinutes?: boolean;
-  thumb: HalloweenImage;
-}
-
-export interface HalloweenTrick {
-  slug: string;
-  alias: string;
-  /** The one small step that makes it Halloween. */
+  /** The one small step that makes it Halloween, under the slider. */
   how: string;
-  dressed: HalloweenImage;
-  everyday: HalloweenImage;
+  /** Describes the recipe's own (Halloween) photo; the everyday photo's alt is in src/config/everyday-photos.ts. */
+  photoAlt: string;
 }
 
 export interface HalloweenMoment {
@@ -75,70 +67,34 @@ export const HALLOWEEN_SHARE_IMAGE = {
   alt: "Berry ghost yogurt bark: frozen yogurt with berries and chocolate-chip ghost faces",
 };
 
+/**
+ * The three recipes, first on the page under the headline ("Make them Halloween"). Each card is a
+ * before-and-after slider: the recipe's own photo, and the same shot with only the Halloween step
+ * taken out (src/config/everyday-photos.ts). A dish without an everyday photo shows its photo alone.
+ */
 export const HALLOWEEN_MENU: readonly HalloweenDish[] = [
   {
     slug: "berry-ghost-yogurt-bark",
     alias: "Ghost bark",
     when: "Morning · make ahead",
     hideMinutes: true,
-    thumb: { src: `${IMG}/thumb-ghost-bark.webp`, alt: "", width: 320, height: 320 },
+    how: "Before it goes in the freezer, press two mini chocolate chips onto each plain white patch. That's the ghosts.",
+    photoAlt: "Berry yogurt bark with chocolate-chip ghost faces on the white patches",
   },
   {
     slug: "mummy-banana-pops",
     alias: "Mummy pops",
     when: "Afternoon · make ahead",
     hideMinutes: true,
-    thumb: { src: `${IMG}/thumb-mummy-pops.webp`, alt: "", width: 320, height: 320 },
+    how: "After the first 30 minutes in the freezer, drizzle more yogurt back and forth for the wraps, then press on two chocolate chips for eyes.",
+    photoAlt: "Yogurt-dipped banana pops with drizzled mummy wraps and chocolate-chip eyes",
   },
   {
     slug: "spider-cracker-bites",
     alias: "Spider bites",
     when: "Before the doorbells",
-    thumb: { src: `${IMG}/thumb-spider-bites.webp`, alt: "", width: 320, height: 320 },
-  },
-];
-
-/**
- * Before-and-after sliders ("Make them Halloween"). The Halloween photo is the recipe's own; the
- * everyday photo is the same shot with only the Halloween step taken out (src/config/everyday-photos.ts).
- * The section hides itself while this list is empty.
- */
-export const HALLOWEEN_TRICKS: readonly HalloweenTrick[] = [
-  {
-    slug: "berry-ghost-yogurt-bark",
-    alias: "Ghost bark",
-    how: "Before it goes in the freezer, press two mini chocolate chips onto each plain white patch. That's the ghosts.",
-    dressed: {
-      src: "/images/recipes/berry-ghost-yogurt-bark-1040.webp",
-      alt: "Berry yogurt bark with chocolate-chip ghost faces on the white patches",
-      width: 1040,
-      height: 1040,
-    },
-    everyday: { ...EVERYDAY_PHOTOS["berry-ghost-yogurt-bark"], width: 1040, height: 1040 },
-  },
-  {
-    slug: "mummy-banana-pops",
-    alias: "Mummy pops",
-    how: "After the first 30 minutes in the freezer, drizzle more yogurt back and forth for the wraps, then press on two chocolate chips for eyes.",
-    dressed: {
-      src: "/images/recipes/mummy-banana-pops-1040.webp",
-      alt: "Yogurt-dipped banana pops with drizzled mummy wraps and chocolate-chip eyes",
-      width: 1040,
-      height: 1040,
-    },
-    everyday: { ...EVERYDAY_PHOTOS["mummy-banana-pops"], width: 1040, height: 1040 },
-  },
-  {
-    slug: "spider-cracker-bites",
-    alias: "Spider bites",
     how: "Press four short pretzel pieces into each side for legs, then two chocolate chips on top for eyes. Break the pretzels short and blunt.",
-    dressed: {
-      src: "/images/recipes/spider-cracker-bites-1040.webp",
-      alt: "Cream cheese cracker sandwiches with pretzel legs and chocolate-chip eyes, like spiders",
-      width: 1040,
-      height: 1040,
-    },
-    everyday: { ...EVERYDAY_PHOTOS["spider-cracker-bites"], width: 1040, height: 1040 },
+    photoAlt: "Cream cheese cracker sandwiches with pretzel legs and chocolate-chip eyes, like spiders",
   },
 ];
 

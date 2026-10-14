@@ -502,7 +502,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     forWhen: "For the week the costumes come out, and the party where you said you'd bring something.",
     cloth: "ember",
     cover: cover("halloween", 1412, "A pumpkin-orange cloth cookbook with a gold-foil pumpkin on its cover"),
-    refresh: "New recipes join each October, before the costumes come out.",
+    refresh: "Any Halloween recipes we add later are included.",
     // Shown only if the live offer can't be read. Owner moved the price from $6.99 to $5.99 on 2026-10-13.
     placeholderPrice: "$5.99",
     // Replaced on 2026-10-12 with the owner's 20 Halloween recipes (above the 8–12 guideline in COLLECTIONS.md, by choice).

@@ -14,7 +14,7 @@ import {
   HALLOWEEN_WALK,
   type HalloweenMoment,
 } from "@/config/halloween";
-import type { HalloweenBookData, HalloweenMenuItem, HalloweenTrickItem } from "@/lib/data/load-halloween";
+import type { HalloweenBookData, HalloweenMenuItem } from "@/lib/data/load-halloween";
 import { BeforeAfter, BookGrid, GhostPeek, PumpkinCarve } from "./HalloweenClient";
 
 /** The colour each part of the story hands to the sky behind the page, from morning to night. */
@@ -59,7 +59,7 @@ function Meta({ item }: { item: HalloweenMenuItem }) {
   return <span className="hw-dish-meta">{parts.join(" · ")}</span>;
 }
 
-export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; freeCount: number }) {
+export function HalloweenHero() {
   const { before, inserted, corrected, after } = HALLOWEEN_HERO.title;
   const beforeWords = before.split(" ").length;
 
@@ -88,55 +88,12 @@ export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; 
         <Words text={after} start={beforeWords + 1} />
       </h1>
       <p className="hw-lede">{HALLOWEEN_HERO.lede}</p>
-
-      <nav className="hw-menu" id="hw-menu" aria-label="Halloween menu" data-story-section="recipes">
-        <div className="hw-menu-head">
-          <h2>Halloween menu</h2>
-        </div>
-        {menu.map((item) => (
-          <Link
-            key={item.slug}
-            className="hw-dish"
-            href={item.href}
-            data-story-action={item.free ? "campaign_recipe" : "collection"}
-            data-story-placement="recipes"
-            {...(item.recipeId ? { "data-recipe-id": item.recipeId } : {})}
-            data-recipe-position={item.position}
-          >
-            <Image src={item.thumb.src} alt="" width={item.thumb.width} height={item.thumb.height} sizes="96px" priority={item.position === 1} />
-            <span className="hw-dish-text">
-              <span className="hw-dish-when">
-                {item.when}
-                {item.minutes && !item.hideMinutes ? ` · ${item.minutes} min` : ""}
-                {/* Each dish says what a tap opens: the whole recipe, or its page in the book. */}
-                {item.free ? (
-                  <span className="hw-tag" data-kind="free">Free</span>
-                ) : (
-                  <span className="hw-tag" data-kind="book">
-                    <Lock aria-hidden="true" />
-                    In the book
-                  </span>
-                )}
-              </span>
-              <span className="hw-dish-alias">{item.alias}</span>
-              <span className="hw-dish-name">{item.title}</span>
-              <Meta item={item} />
-            </span>
-            <span className="hw-go" aria-hidden="true">→</span>
-          </Link>
-        ))}
-        <p className="hw-menu-foot">
-          {freeCount > 0
-            ? "Free recipes open in full: ingredients, steps, allergens, print."
-            : "These three are inside the Halloween collection."}
-        </p>
-      </nav>
     </section>
   );
 }
 
 /**
- * The book, straight after the menu, for the parents who came for the recipes and will not
+ * The book, straight after the recipes, for the parents who came for the recipes and will not
  * scroll through the story. The full book section still closes the page.
  */
 export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; menu: HalloweenMenuItem[] }) {
@@ -168,36 +125,67 @@ export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; men
   );
 }
 
-export function HalloweenTricks({ tricks }: { tricks: HalloweenTrickItem[] }) {
-  if (tricks.length === 0) return null;
+/** What a tap opens: the whole recipe, or its page in the book. */
+function Tag({ free }: { free: boolean }) {
+  return free ? (
+    <span className="hw-tag" data-kind="free">Free</span>
+  ) : (
+    <span className="hw-tag" data-kind="book">
+      <Lock aria-hidden="true" />
+      In the book
+    </span>
+  );
+}
+
+/**
+ * The three recipes, first under the headline. Each is a before-and-after slider (everyday on the
+ * left of the line, Halloween on the right), marked Free or In the book on the photo itself so a
+ * parent knows what a tap opens before reading on, then the one small step and the link.
+ */
+export function HalloweenRecipes({ menu }: { menu: HalloweenMenuItem[] }) {
+  const sizes = "(max-width: 30rem) 100vw, 30rem";
   return (
-    <section className="hw-tricks" id="hw-tricks" data-hw-clock="Sat 31 Oct · Halloween">
+    <section className="hw-tricks" id="hw-recipes" aria-labelledby="hw-recipes-title" data-story-section="recipes" data-hw-clock="Sat 31 Oct · Halloween">
       <div className="hw-sec-head">
-        <span className="hw-eyebrow">Small Halloween tricks</span>
-        <h2>Make them Halloween</h2>
-        <p>The three from the menu, each with one small step at the end. Drag the line to see the difference.</p>
+        <h2 id="hw-recipes-title">Make them Halloween</h2>
+        <p>Same food, one small step. Drag the line.</p>
       </div>
-      {tricks.map((trick) => (
-        <article className="hw-trick" key={trick.slug}>
-          <BeforeAfter
-            after={<Image src={trick.dressed.src} alt={trick.dressed.alt} width={trick.dressed.width} height={trick.dressed.height} sizes="(max-width: 30rem) 100vw, 30rem" />}
-            before={<Image src={trick.everyday.src} alt={trick.everyday.alt} width={trick.everyday.width} height={trick.everyday.height} sizes="(max-width: 30rem) 100vw, 30rem" />}
-          />
-          <div className="hw-trick-body">
-            <h3>{trick.alias}</h3>
-            <p>{trick.how}</p>
-            <Link
-              className="hw-open"
-              href={trick.href}
-              data-story-action={trick.free ? "campaign_recipe" : "collection"}
-              data-story-placement="card"
-              {...(trick.recipeId ? { "data-recipe-id": trick.recipeId } : {})}
-            >
-              {trick.free ? `Open ${trick.title}` : "See it in the Halloween collection"} <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-        </article>
-      ))}
+      {menu.map((item) => {
+        const first = item.position === 1;
+        const photo = <Image src={item.image} alt={item.photoAlt} fill sizes={sizes} priority={first} />;
+        return (
+          <article className="hw-trick" key={item.slug}>
+            <div className="hw-trick-media">
+              {item.everyday ? (
+                <BeforeAfter after={photo} before={<Image src={item.everyday.src} alt={item.everyday.alt} fill sizes={sizes} loading={first ? "eager" : "lazy"} />} />
+              ) : (
+                <div className="hw-trick-photo">{photo}</div>
+              )}
+              <Tag free={item.free} />
+            </div>
+            <div className="hw-trick-body">
+              <span className="hw-dish-when">
+                {item.when}
+                {item.minutes && !item.hideMinutes ? ` · ${item.minutes} min` : ""}
+              </span>
+              <h3>{item.alias}</h3>
+              <span className="hw-dish-name">{item.title}</span>
+              <Meta item={item} />
+              <p>{item.how}</p>
+              <Link
+                className="hw-open"
+                href={item.href}
+                data-story-action={item.free ? "campaign_recipe" : "collection"}
+                data-story-placement="recipes"
+                {...(item.recipeId ? { "data-recipe-id": item.recipeId } : {})}
+                data-recipe-position={item.position}
+              >
+                {item.free ? `Open ${item.title}` : "See it in the Halloween collection"} <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 }
@@ -324,7 +312,7 @@ export function HalloweenReasons() {
 export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; freeCount: number }) {
   const lede =
     freeCount > 0
-      ? `Pumpkin, cocoa and berries, in food a toddler can hold. The free ones on the menu are a taste; the book has all ${book.recipes.length}.`
+      ? `Pumpkin, cocoa and berries, in food a toddler can hold. The free ones are a taste; the book has all ${book.recipes.length}.`
       : `Pumpkin, cocoa and berries, in food a toddler can hold. The book has all ${book.recipes.length}.`;
   return (
     <section className="hw-book-sec hw-late" data-story-section="collection" data-hw-clock="Sat 31 Oct · night">
@@ -351,7 +339,7 @@ export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; fr
           <span className="hw-price">{book.price}</span>
           <span className="hw-count">{book.onSale ? `${book.recipes.length} recipes · all ages` : "Opening soon"}</span>
         </div>
-        {book.refresh ? <p>{book.refresh}</p> : null}
+        {book.refresh ? <p>Buy it once and it&apos;s yours. {book.refresh}</p> : null}
         <Link className="hw-cta" href={book.href} data-story-action="collection" data-story-placement="collection">
           See the Halloween collection <span aria-hidden="true">→</span>
         </Link>
@@ -366,7 +354,7 @@ export function HalloweenClosing() {
       <h2>{HALLOWEEN_CLOSING.heading}</h2>
       <p>{HALLOWEEN_CLOSING.signature}</p>
       <div className="hw-closing-links">
-        <a className="hw-ghostlink" href="#hw-menu">Back to the menu</a>
+        <a className="hw-ghostlink" href="#hw-recipes">Back to the recipes</a>
         <Link className="hw-ghostlink" href="/recipes" data-story-action="recipes_index" data-story-placement="closing">
           Explore all recipes
         </Link>
