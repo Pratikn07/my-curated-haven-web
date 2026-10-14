@@ -10,6 +10,18 @@ const ATTEMPTS = 3;
 const RETRY_DELAY_MS = 10_000;
 const TIMEOUT_MS = 20_000;
 const UNAVAILABLE_TEXT = ["Temporarily Unavailable", "temporarily unavailable"];
+// Text that must never reach a visitor: the photo brief stored with a recipe image (it is data, so only a live
+// check sees it), copy from before the first book went on sale, and placeholder or staff-only wording.
+const LEAKED_TEXT = [
+  "no hands, no text",
+  "styled beside the dish",
+  "nothing to buy",
+  "no paid collection",
+  "test checkout",
+  "placeholder",
+  "admin access requires",
+  "nothing is for sale",
+];
 
 const originArg = process.argv.find((arg) => arg.startsWith("--origin="));
 const origin = (originArg ? originArg.slice("--origin=".length) : DEFAULT_ORIGIN).replace(/\/+$/, "");
@@ -53,10 +65,22 @@ async function check(name, url, assert, { redirect = "follow" } = {}) {
   return null;
 }
 
+/** Visible text only: scripts carry data the page never shows, and tags carry attributes like placeholder="". */
+function leakedText(body) {
+  const text = body
+    .replace(/<(script|style)\b[\s\S]*?<\/\1>/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  return LEAKED_TEXT.find((phrase) => text.includes(phrase)) ?? "";
+}
+
 function page(expectedStatus = 200) {
   return ({ status, body }) => {
     if (status !== expectedStatus) return `expected HTTP ${expectedStatus}, got ${status}`;
     if (UNAVAILABLE_TEXT.some((text) => body.includes(text))) return "page shows the unavailable state";
+    const leaked = leakedText(body);
+    if (leaked) return `page shows ${JSON.stringify(leaked)}`;
     return "";
   };
 }
@@ -81,7 +105,7 @@ const failures = [];
 
 console.log(`Production smoke check against ${origin}`);
 
-for (const path of ["/", "/recipes", "/about", "/support", "/privacy", "/terms", "/sign-in"]) {
+for (const path of ["/", "/recipes", "/about", "/support", "/privacy", "/terms", "/sign-in", "/halloween", "/collections", "/collections/halloween"]) {
   await check(`GET ${path}`, `${origin}${path}`, page());
 }
 

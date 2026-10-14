@@ -1,8 +1,8 @@
 /**
  * A collection as the showroom presents it: the book's cloth and cover, the
  * words, and the recipes inside. Commerce (the real price, checkout and
- * ownership) stays in the commerce database; a live offer replaces the
- * placeholder price whenever one exists for the same slug.
+ * ownership) stays in the commerce database; only a live offer's price is
+ * shown to visitors.
  */
 
 /** Each book's cloth. Values live in collections.css, never here. */
@@ -91,8 +91,9 @@ export interface ShowroomCollection {
   /** What "refreshed over time" means for this book. Owner approval pending (plan RC-05). */
   refresh: string;
   /**
-   * Shown until a live offer exists. PLACEHOLDER prices (owner approved
-   * placeholders on 2026-10-04); replace with the approved price (plan RC-01).
+   * The planned price (owner approved placeholders on 2026-10-04, plan RC-01).
+   * Public pages never show it: without a live offer they say "Opening soon".
+   * Only /halloween's fallback and the off-production showroom read it.
    */
   placeholderPrice: string;
   recipes: readonly CollectionRecipe[];

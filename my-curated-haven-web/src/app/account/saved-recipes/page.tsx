@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { getSavedRecipes } from "@/lib/data/saved-recipes";
+import { getFreeRecipeCatalog } from "@/lib/data/recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import SaveRecipeButton from "@/components/recipe/SaveRecipeButton";
 import { Bookmark, ArrowLeft } from "lucide-react";
@@ -24,7 +25,13 @@ export default async function SavedRecipesPage() {
   }
 
   const supabase = await createClient();
-  const result = await getSavedRecipes(supabase, user.id);
+  const [result, freeIds] = await Promise.all([
+    getSavedRecipes(supabase, user.id),
+    // Only free recipes get the "Free recipe" badge; if the list can't load, no card claims it.
+    getFreeRecipeCatalog(supabase)
+      .then((free) => new Set(free.map((recipe) => recipe.id)))
+      .catch(() => new Set<string>()),
+  ]);
 
   if (result.status !== "ok") {
     return (
@@ -102,7 +109,7 @@ export default async function SavedRecipesPage() {
           {items.map((item) =>
             item.isAvailable && item.catalog ? (
               <div key={item.id} className="relative flex flex-col">
-                <RecipeCard recipe={item.catalog} />
+                <RecipeCard recipe={item.catalog} free={freeIds.has(item.catalog.id)} />
                 <div className="mt-2 flex justify-end">
                   <SaveRecipeButton
                     recipeId={item.recipeId}

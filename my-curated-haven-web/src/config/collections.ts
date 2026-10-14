@@ -6,8 +6,8 @@ import type { CollectionRecipe, SeriesKey, ShelfKey, ShowroomCollection } from "
  * shelves and series come from docs/implementation/recipe-collections/
  * COLLECTIONS.md; each collection's recipes from recipe-tags.json.
  *
- * "Open" collections (an explicit per-collection choice) have a page, with a PLACEHOLDER
- * price and "Opening soon" until a commerce offer exists for the slug (plan
+ * "Open" collections (an explicit per-collection choice) have a page that says
+ * "Opening soon", with no price, until a commerce offer exists for the slug (plan
  * RC-01 to RC-05). The rest are "coming-soon": they stand on the shelf greyed
  * out and have no page. Halloween, Meal Prep and Protein Packs are also the
  * chapters of the first showroom, /collections/test.
@@ -49,8 +49,8 @@ export const SERIES: Record<SeriesKey, { title: string; heading: string; lede: s
     title: "Breakfast series",
     heading: "Breakfast, from first bites to big kids",
     lede: "Three volumes that grow with your child.",
-    // PLACEHOLDER bundle price (concept, 2026-10-06).
-    bundlePrice: "$19.99",
+    // No bundle offer exists, so no bundle price is shown (the $19.99 concept from 2026-10-06 was never sold).
+    bundlePrice: null,
   },
   "meal-prep": {
     title: "Meal Prep series",

@@ -290,6 +290,46 @@ test("about, support and legal pages describe the current site", async ({ page }
   await expect(page.locator("main")).toContainText("one-time code");
 });
 
+/**
+ * Text that must never reach a visitor: the photo brief stored with a recipe image, copy written before the
+ * first book went on sale, placeholder prices and staff-only wording.
+ */
+const leakedCopy = [
+  /no hands, no text/i,
+  /styled beside the dish/i,
+  /nothing is for sale/i,
+  /nothing to buy/i,
+  /no paid collection/i,
+  /\bplaceholder\b/i,
+  /test checkout/i,
+  /admin access/i,
+  /yes, to buy/i,
+  /\$19\.99/,
+];
+
+test("public pages show no photo briefs, stale sale copy or placeholder prices", async ({ page }) => {
+  for (const path of [
+    "/",
+    "/about",
+    "/support",
+    "/privacy",
+    "/terms",
+    "/recipes",
+    "/recipes/synth-free-oat-bake",
+    "/halloween",
+    "/collections",
+    "/collections/halloween",
+    "/collections/meal-prep",
+    "/collections/series/breakfast",
+  ]) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const text = await page.locator("body").innerText();
+    for (const pattern of leakedCopy) {
+      expect(text, `${path} contains ${pattern}`).not.toMatch(pattern);
+    }
+  }
+});
+
 // Page titles identify the site brand once, including pages with absolute titles.
 test("page titles name the brand once", async ({ page }) => {
   for (const path of ["/", "/recipes", "/recipes/synth-free-oat-bake", "/about", "/support", "/sign-in"]) {

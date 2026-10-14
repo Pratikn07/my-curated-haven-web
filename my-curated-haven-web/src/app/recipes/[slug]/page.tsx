@@ -338,9 +338,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
           )}
         </div>
       ) : null}
-      {catalog.imageDescription ? (
-        <p className="mb-8 text-sm text-text-muted">{catalog.imageDescription}</p>
-      ) : null}
+      {/* preview_image_description is the brief the photo was made from (staff only), never page copy. */}
 
       {/* Main Recipe Content Anchor */}
       <div
