@@ -28,6 +28,8 @@ import { loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import type { CollectionOfferDto } from "@/lib/payments/types";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
 import { HALLOWEEN_COLLECTION_SLUG } from "@/config/halloween";
+import { EVERYDAY_PHOTOS } from "@/config/everyday-photos";
+import { BeforeAfter } from "@/components/halloween/HalloweenClient";
 import { LockIcon, RecipeFog, RecipeRevealStage } from "@/components/recipe/RecipeLock";
 import ClearOpenedParam from "@/components/recipe/ClearOpenedParam";
 
@@ -114,6 +116,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
   const instructions = body ? normalizeInstructions(body.instructions) : [];
   const canonicalUrl = `${SITE_ORIGIN}/recipes/${catalog.slug}`;
   const imageSrc = usableImageSrc(catalog.previewImagePath);
+  const everyday = EVERYDAY_PHOTOS[catalog.slug];
 
   // Fetch auth and saved recipe state
   const isAdmin = await getCachedAdminStatus();
@@ -316,14 +319,23 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
       {/* Hero Image */}
       {imageSrc ? (
         <div className="recipe-print-figure relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface-muted">
-          <Image
-            src={imageSrc}
-            alt={catalog.imageAlt ?? catalog.title}
-            fill
-            sizes="(min-width: 1024px) 896px, 100vw"
-            priority
-            className="recipe-print-image object-cover"
-          />
+          {everyday ? (
+            /* A Halloween recipe with an everyday photo: drag to see what the Halloween step adds. */
+            <BeforeAfter
+              className="hw-compare-fill"
+              after={<Image src={imageSrc} alt={catalog.imageAlt ?? catalog.title} fill sizes="(min-width: 1024px) 896px, 100vw" priority />}
+              before={<Image src={everyday.src} alt={everyday.alt} fill sizes="(min-width: 1024px) 896px, 100vw" />}
+            />
+          ) : (
+            <Image
+              src={imageSrc}
+              alt={catalog.imageAlt ?? catalog.title}
+              fill
+              sizes="(min-width: 1024px) 896px, 100vw"
+              priority
+              className="recipe-print-image object-cover"
+            />
+          )}
         </div>
       ) : null}
       {catalog.imageDescription ? (

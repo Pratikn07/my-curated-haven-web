@@ -80,9 +80,10 @@ const clamp = (value: number) => Math.min(100, Math.max(0, value));
  * Before and after: the everyday recipe on the left of the line, the Halloween
  * one on the right. Drag the handle, tap anywhere on the photo, or use the arrow
  * keys. The line moves once when the photo first arrives, so people see it can.
- * A sideways drag moves it; an up or down drag still scrolls the page.
+ * A sideways drag moves it; an up or down drag still scrolls the page. Also used
+ * on a recipe's own page (src/app/recipes/[slug]/page.tsx), outside the .hw theme.
  */
-export function BeforeAfter({ before, after }: { before: ReactNode; after: ReactNode }) {
+export function BeforeAfter({ before, after, className }: { before: ReactNode; after: ReactNode; className?: string }) {
   const [position, setPosition] = useState(REST);
   const [settling, setSettling] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -119,7 +120,7 @@ export function BeforeAfter({ before, after }: { before: ReactNode; after: React
   return (
     <div
       ref={box}
-      className="hw-compare"
+      className={className ? `hw-compare ${className}` : "hw-compare"}
       data-settling={settling ? "" : undefined}
       style={{ "--pos": `${position}%` } as CSSProperties}
       onPointerDown={(event) => {

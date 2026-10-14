@@ -103,7 +103,7 @@ export function HalloweenHero({ menu, freeCount }: { menu: HalloweenMenuItem[]; 
             {...(item.recipeId ? { "data-recipe-id": item.recipeId } : {})}
             data-recipe-position={item.position}
           >
-            <Image src={item.thumb.src} alt="" width={item.thumb.width} height={item.thumb.height} sizes="68px" priority={item.position === 1} />
+            <Image src={item.thumb.src} alt="" width={item.thumb.width} height={item.thumb.height} sizes="96px" priority={item.position === 1} />
             <span className="hw-dish-text">
               <span className="hw-dish-when">
                 {item.when}
@@ -175,7 +175,7 @@ export function HalloweenTricks({ tricks }: { tricks: HalloweenTrickItem[] }) {
       <div className="hw-sec-head">
         <span className="hw-eyebrow">Small Halloween tricks</span>
         <h2>Make them Halloween</h2>
-        <p>Ghost pops and mummy scrolls from the menu, with one small step at the end.</p>
+        <p>The three from the menu, each with one small step at the end. Drag the line to see the difference.</p>
       </div>
       {tricks.map((trick) => (
         <article className="hw-trick" key={trick.slug}>

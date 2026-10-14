@@ -11,6 +11,8 @@
  * (docs/implementation/instagram-landing/HALLOWEEN.md lists their sources).
  */
 
+import { EVERYDAY_PHOTOS } from "./everyday-photos";
+
 const IMG = "/images/campaigns/halloween";
 
 export interface HalloweenImage {
@@ -79,28 +81,66 @@ export const HALLOWEEN_MENU: readonly HalloweenDish[] = [
     alias: "Ghost bark",
     when: "Morning · make ahead",
     hideMinutes: true,
-    thumb: { src: `${IMG}/thumb-ghost-bark.webp`, alt: "", width: 160, height: 160 },
+    thumb: { src: `${IMG}/thumb-ghost-bark.webp`, alt: "", width: 320, height: 320 },
   },
   {
     slug: "mummy-banana-pops",
     alias: "Mummy pops",
     when: "Afternoon · make ahead",
     hideMinutes: true,
-    thumb: { src: `${IMG}/thumb-mummy-pops.webp`, alt: "", width: 160, height: 160 },
+    thumb: { src: `${IMG}/thumb-mummy-pops.webp`, alt: "", width: 320, height: 320 },
   },
   {
     slug: "spider-cracker-bites",
     alias: "Spider bites",
     when: "Before the doorbells",
-    thumb: { src: `${IMG}/thumb-spider-bites.webp`, alt: "", width: 160, height: 160 },
+    thumb: { src: `${IMG}/thumb-spider-bites.webp`, alt: "", width: 320, height: 320 },
   },
 ];
 
 /**
- * Before-and-after sliders ("Make them Halloween"). Empty since the 2026-10-12 recipe swap: the
- * slider photos were of the old ghost pops and mummy scrolls. The section hides itself while empty.
+ * Before-and-after sliders ("Make them Halloween"). The Halloween photo is the recipe's own; the
+ * everyday photo is the same shot with only the Halloween step taken out (src/config/everyday-photos.ts).
+ * The section hides itself while this list is empty.
  */
-export const HALLOWEEN_TRICKS: readonly HalloweenTrick[] = [];
+export const HALLOWEEN_TRICKS: readonly HalloweenTrick[] = [
+  {
+    slug: "berry-ghost-yogurt-bark",
+    alias: "Ghost bark",
+    how: "Before it goes in the freezer, press two mini chocolate chips onto each plain white patch. That's the ghosts.",
+    dressed: {
+      src: "/images/recipes/berry-ghost-yogurt-bark-1040.webp",
+      alt: "Berry yogurt bark with chocolate-chip ghost faces on the white patches",
+      width: 1040,
+      height: 1040,
+    },
+    everyday: { ...EVERYDAY_PHOTOS["berry-ghost-yogurt-bark"], width: 1040, height: 1040 },
+  },
+  {
+    slug: "mummy-banana-pops",
+    alias: "Mummy pops",
+    how: "After the first 30 minutes in the freezer, drizzle more yogurt back and forth for the wraps, then press on two chocolate chips for eyes.",
+    dressed: {
+      src: "/images/recipes/mummy-banana-pops-1040.webp",
+      alt: "Yogurt-dipped banana pops with drizzled mummy wraps and chocolate-chip eyes",
+      width: 1040,
+      height: 1040,
+    },
+    everyday: { ...EVERYDAY_PHOTOS["mummy-banana-pops"], width: 1040, height: 1040 },
+  },
+  {
+    slug: "spider-cracker-bites",
+    alias: "Spider bites",
+    how: "Press four short pretzel pieces into each side for legs, then two chocolate chips on top for eyes. Break the pretzels short and blunt.",
+    dressed: {
+      src: "/images/recipes/spider-cracker-bites-1040.webp",
+      alt: "Cream cheese cracker sandwiches with pretzel legs and chocolate-chip eyes, like spiders",
+      width: 1040,
+      height: 1040,
+    },
+    everyday: { ...EVERYDAY_PHOTOS["spider-cracker-bites"], width: 1040, height: 1040 },
+  },
+];
 
 export const HALLOWEEN_STORY = {
   kicker: "Our plan for Saturday",
