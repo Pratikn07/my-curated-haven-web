@@ -8,7 +8,7 @@ const HINTS = ["Tap the pumpkin to carve it", "Tap again", "One more tap", "Happ
 
 /**
  * The hero pumpkin. Each tap carves a little more (eyes, grin, candle); after
- * the third the menu glows once to point at the recipes. A ring, a small hop
+ * the third the first recipe glows once to point at it. A ring, a small hop
  * and the label invite the tap. Nothing on the page needs it.
  */
 export function PumpkinCarve() {
@@ -20,7 +20,7 @@ export function PumpkinCarve() {
     if (stage >= 3) return;
     const next = stage + 1;
     setStage(next);
-    if (next === 3) document.getElementById("hw-menu")?.classList.add("hw-menu-ready");
+    if (next === 3) document.querySelector("#hw-recipes .hw-trick")?.classList.add("hw-pointed");
   };
 
   return (
@@ -75,13 +75,15 @@ export function PumpkinCarve() {
   );
 }
 
-const REST = 78;
+const REST = 50;
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
 /**
  * Before and after: the everyday recipe on the left of the line, the Halloween
- * one on the right. Drag the handle, tap anywhere on the photo, or use the arrow
- * keys. The line moves once when the photo first arrives, so people see it can.
+ * one on the right, resting half and half. The first time the photo comes into
+ * view the line shows the whole everyday photo, then the whole Halloween one,
+ * then settles in the middle (not with reduced motion). Drag the handle, tap
+ * anywhere on the photo, or use the arrow keys; any of these stops the sweep.
  * A sideways drag moves it; an up or down drag still scrolls the page. Also used
  * on a recipe's own page (src/app/recipes/[slug]/page.tsx), outside the .hw theme.
  */
@@ -90,27 +92,39 @@ export function BeforeAfter({ before, after, className }: { before: ReactNode; a
   const [settling, setSettling] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const stopSweep = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setSettling(false);
+  };
 
   useEffect(() => {
     const element = box.current;
     if (!element || typeof IntersectionObserver === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    const pending = timers.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
         setSettling(true);
-        timers.push(setTimeout(() => setPosition(40), 300));
-        timers.push(setTimeout(() => setPosition(REST), 1200));
-        timers.push(setTimeout(() => setSettling(false), 2000));
+        const steps: [number, () => void][] = [
+          [300, () => setPosition(100)],
+          [1500, () => setPosition(0)],
+          [2700, () => setPosition(REST)],
+          [3600, () => setSettling(false)],
+        ];
+        timers.current = steps.map(([delay, step]) => setTimeout(step, delay));
       },
       { threshold: 0.6 }
     );
     observer.observe(element);
     return () => {
       observer.disconnect();
-      timers.forEach(clearTimeout);
+      pending.forEach(clearTimeout);
+      timers.current.forEach(clearTimeout);
     };
   }, []);
 
@@ -127,7 +141,7 @@ export function BeforeAfter({ before, after, className }: { before: ReactNode; a
       style={{ "--pos": `${position}%` } as CSSProperties}
       onPointerDown={(event) => {
         dragging.current = true;
-        setSettling(false);
+        stopSweep();
         event.currentTarget.setPointerCapture(event.pointerId);
         fromPointer(event.clientX);
       }}
@@ -155,7 +169,7 @@ export function BeforeAfter({ before, after, className }: { before: ReactNode; a
           const step = event.key === "ArrowLeft" ? -5 : event.key === "ArrowRight" ? 5 : 0;
           if (!step) return;
           event.preventDefault();
-          setSettling(false);
+          stopSweep();
           setPosition((value) => clamp(value + step));
         }}
       >

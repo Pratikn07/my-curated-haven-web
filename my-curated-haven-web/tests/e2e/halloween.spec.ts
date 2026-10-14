@@ -1,16 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
-import { HALLOWEEN_TRICKS } from "../../src/config/halloween";
 
 /**
  * The Halloween landing page. Runs against the local database, where the
- * Halloween recipes are not free, so every menu link must go to the Halloween
+ * Halloween recipes are not free, so every recipe link must go to the Halloween
  * collection instead of a recipe page that would not open. The same checks hold
  * once the recipes are free: then each link goes to /recipes/<slug>.
  */
 const PAGE = "/halloween";
 const FROM_DM = `${PAGE}?utm_source=instagram&utm_medium=organic_social&utm_campaign=comment_dm`;
-/** The before-and-after section is empty until new photos exist (src/config/halloween.ts). */
-const HAS_TRICKS = HALLOWEEN_TRICKS.length > 0;
+const SLIDER = "Compare the everyday and Halloween versions";
 
 type RecordedEvent = { event_name: string; properties: Record<string, unknown> };
 
@@ -22,36 +20,36 @@ function recordedEvents(page: Page): Promise<RecordedEvent[]> {
   });
 }
 
-test("[halloween] the first screen is the menu, and every dish opens a page that exists", async ({ page }) => {
+test("[halloween] the recipes come first as sliders, each marked Free or In the book, and every link opens", async ({ page }) => {
   // An iPhone screen minus Instagram's own bars.
   await page.setViewportSize({ width: 390, height: 664 });
   await page.goto(FROM_DM);
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Halloween, the not-scary way\./);
-  const menu = page.getByRole("navigation", { name: "Halloween menu" });
-  const dishes = menu.getByRole("link");
-  await expect(dishes).toHaveCount(3);
-  // Each dish says what a tap opens, instead of a count in the header.
-  await expect(menu.getByText(/^(Free|In the book)$/)).toHaveCount(3);
+  const recipes = page.locator("#hw-recipes");
+  await expect(recipes.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
+  await expect(recipes.locator(".hw-trick")).toHaveCount(3);
+  // Each photo says what a tap opens.
+  await expect(recipes.locator(".hw-trick-media").getByText(/^(Free|In the book)$/)).toHaveCount(3);
 
-  const first = await dishes.first().boundingBox();
-  expect(first, "the first dish is laid out").not.toBeNull();
-  expect(first!.y + first!.height, "and sits on the first screen").toBeLessThanOrEqual(664);
+  const first = await recipes.getByRole("slider", { name: SLIDER }).first().evaluate((knob) => knob.closest(".hw-compare")!.getBoundingClientRect().top);
+  expect(first + 80, "the first photo starts on the first screen").toBeLessThanOrEqual(664);
 
-  for (const href of await dishes.evaluateAll((links) => links.map((link) => link.getAttribute("href")))) {
+  const links = recipes.locator("a.hw-open");
+  await expect(links).toHaveCount(3);
+  for (const href of await links.evaluateAll((all) => all.map((link) => link.getAttribute("href")))) {
     expect(href).toMatch(/^\/(recipes\/[a-z0-9-]+|collections\/halloween)$/);
     const response = await page.request.get(href!);
     expect(response.status(), href!).toBe(200);
   }
 });
 
-test("[halloween] the book sits under the menu, and the buy bar follows once it scrolls away", async ({ page }) => {
+test("[halloween] the book follows the recipes, and the buy bar follows once it scrolls away", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 664 });
   await page.goto(PAGE);
 
-  const card = page.locator("#hw-bookcard");
-  const top = await card.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
-  expect(top, "the book starts by the second screen").toBeLessThan(2 * 664);
+  const card = page.locator("#hw-recipes + #hw-bookcard");
+  await expect(card, "the book card comes straight after the recipes").toHaveCount(1);
   await expect(card.getByRole("link")).toHaveAttribute("href", /^\/collections\/halloween(#buy)?$/);
 
   const dock = page.locator(".hw-dock");
@@ -110,7 +108,7 @@ test("[halloween] without script the whole page is there to read", async ({ brow
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(PAGE);
-  if (HAS_TRICKS) await expect(page.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How we're doing Halloween this year" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Three doorbells, then home" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Why we cook for Halloween" })).toBeVisible();
@@ -125,17 +123,17 @@ test("[halloween] the visit is counted as the Halloween story", async ({ page })
   expect(view.properties).toMatchObject({ story_slug: "halloween", room: "kitchen", story_series: "halloween-2026" });
 });
 
-test("[halloween] the before-and-after slider shows more of the everyday version as it moves left", async ({ page }) => {
-  test.skip(!HAS_TRICKS, "No before-and-after photos on the page right now");
+test("[halloween] the before-and-after slider rests half and half, and the arrow keys or a tap move the line", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(PAGE);
-  const knob = page.getByRole("slider", { name: "Compare the everyday and Halloween versions" }).first();
-  await knob.scrollIntoViewIfNeeded();
-  await expect(knob).toHaveAttribute("aria-valuenow", "78");
+  const knob = page.getByRole("slider", { name: SLIDER }).first();
+  // The whole photo in the middle of the screen, so the tap below lands on it.
+  await page.locator(".hw-compare").first().evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await expect(knob).toHaveAttribute("aria-valuenow", "50");
   await knob.focus();
   await page.keyboard.press("ArrowLeft");
   await page.keyboard.press("ArrowLeft");
-  await expect(knob).toHaveAttribute("aria-valuenow", "68");
+  await expect(knob).toHaveAttribute("aria-valuenow", "40");
 
   // A tap on the photo moves the line there.
   const compare = page.locator(".hw-compare").first();
@@ -144,4 +142,19 @@ test("[halloween] the before-and-after slider shows more of the everyday version
   const value = Number(await knob.getAttribute("aria-valuenow"));
   expect(value).toBeGreaterThan(20);
   expect(value).toBeLessThan(30);
+});
+
+test("[halloween] the first time a slider is seen it shows the whole everyday photo, then the whole Halloween one, then rests", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  // Short enough that the first slider is not yet in view, so the sweep starts on the scroll below.
+  await page.setViewportSize({ width: 390, height: 664 });
+  await page.goto(PAGE);
+  const knob = page.getByRole("slider", { name: SLIDER }).first();
+  await knob.evaluate((element) => {
+    const seen: string[] = [];
+    (window as unknown as { seen: string[] }).seen = seen;
+    new MutationObserver(() => seen.push(element.getAttribute("aria-valuenow")!)).observe(element, { attributes: true, attributeFilter: ["aria-valuenow"] });
+  });
+  await page.locator(".hw-compare").first().evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await expect.poll(() => page.evaluate(() => (window as unknown as { seen: string[] }).seen.join(" ")), { timeout: 8000 }).toBe("100 0 50");
 });

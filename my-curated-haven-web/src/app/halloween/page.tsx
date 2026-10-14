@@ -9,18 +9,18 @@ import {
   HalloweenClosing,
   HalloweenHero,
   HalloweenReasons,
+  HalloweenRecipes,
   HalloweenSky,
   HalloweenStory,
-  HalloweenTricks,
 } from "@/components/halloween/HalloweenSections";
 import { HALLOWEEN_PATH, HALLOWEEN_SHARE_IMAGE, HALLOWEEN_SLUG } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { loadHalloweenPage } from "@/lib/data/load-halloween";
 
 /**
- * The Halloween landing page, where Instagram posts send parents. The first
- * screen is the menu of three recipes, with the book right under it and a buy bar
- * on phones once it scrolls away; the plan for the day (with the rendered street),
+ * The Halloween landing page, where Instagram posts send parents. Under the
+ * headline come the three recipes as before-and-after sliders (each marked Free
+ * or In the book), then the book, and a buy bar on phones once it scrolls away; the plan for the day (with the rendered street),
  * the reasons and the full book section follow for anyone who keeps scrolling. No account features, so it is built once and served from the cache,
  * which keeps the first screen fast inside Instagram's in-app browser.
  */
@@ -59,9 +59,9 @@ export default async function HalloweenPage() {
       />
       <ClockPill initial="Sat 31 Oct · Halloween" />
       <div className="hw-column">
-        <HalloweenHero menu={data.menu} freeCount={data.freeCount} />
+        <HalloweenHero />
+        <HalloweenRecipes menu={data.menu} />
         <HalloweenBookCard book={data.book} menu={data.menu} />
-        <HalloweenTricks tricks={data.tricks} />
         <HalloweenStory />
         <HalloweenReasons />
         <HalloweenBook book={data.book} freeCount={data.freeCount} />

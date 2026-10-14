@@ -1,10 +1,5 @@
-import {
-  HALLOWEEN_COLLECTION_SLUG,
-  HALLOWEEN_MENU,
-  HALLOWEEN_TRICKS,
-  type HalloweenDish,
-  type HalloweenTrick,
-} from "@/config/halloween";
+import { EVERYDAY_PHOTOS, type EverydayPhoto } from "@/config/everyday-photos";
+import { HALLOWEEN_COLLECTION_SLUG, HALLOWEEN_MENU, type HalloweenDish } from "@/config/halloween";
 import type { CollectionRecipe } from "@/lib/collections/types";
 import { getPublishedCollection, loadLiveOffer } from "@/lib/data/collections-showroom";
 import { getFreeRecipeCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
@@ -25,10 +20,10 @@ export interface HalloweenMenuItem extends HalloweenDish, HalloweenLink {
   minutes: number | null;
   allergens: readonly string[];
   freezes: string | null;
-}
-
-export interface HalloweenTrickItem extends HalloweenTrick, HalloweenLink {
-  title: string;
+  /** The recipe's own photo (the Halloween half of the slider): a site path or Storage URL. */
+  image: string;
+  /** The same shot without the Halloween step, or null to show the photo alone. */
+  everyday: EverydayPhoto | null;
 }
 
 export interface HalloweenBookData {
@@ -45,7 +40,6 @@ export interface HalloweenBookData {
 
 export interface HalloweenPageData {
   menu: HalloweenMenuItem[];
-  tricks: HalloweenTrickItem[];
   freeCount: number;
   book: HalloweenBookData;
 }
@@ -86,14 +80,10 @@ export async function loadHalloweenPage(): Promise<HalloweenPageData | null> {
       minutes: recipe.minutes,
       allergens: recipe.allergens,
       freezes: recipe.freezes,
+      image: recipe.image,
+      everyday: EVERYDAY_PHOTOS[dish.slug] ?? null,
     });
   }
-
-  const tricks: HalloweenTrickItem[] = HALLOWEEN_TRICKS.filter((trick) => inBook.has(trick.slug)).map((trick) => ({
-    ...trick,
-    ...linkFor(trick.slug),
-    title: inBook.get(trick.slug)!.title,
-  }));
 
   const live = await loadLiveOffer(collection.slug);
   const offer = live.ok ? live.offer : null;
@@ -103,7 +93,6 @@ export async function loadHalloweenPage(): Promise<HalloweenPageData | null> {
 
   return {
     menu,
-    tricks,
     freeCount: menu.filter((item) => item.free).length,
     book: {
       href: bookHref,
