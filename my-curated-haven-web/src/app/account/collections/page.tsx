@@ -6,7 +6,7 @@ import { getUserPurchasedCollections } from "@/lib/payments/repository";
 import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 import Badge from "@/components/ui/Badge";
 import StatePanel from "@/components/ui/StatePanel";
-import { BookOpen, ShoppingBag, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "My Recipe Collections",
@@ -91,6 +91,7 @@ export default async function AccountCollectionsPage() {
         </div>
       ) : (
         <div className="space-y-8">
+          {/* One card per book; its page lists every recipe, so the library doesn't repeat them. */}
           {collections.map((coll) => (
             <div
               key={coll.collectionId}
@@ -99,10 +100,7 @@ export default async function AccountCollectionsPage() {
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="collection">Active Access</Badge>
-                    <span className="text-xs text-text-muted">Release v{coll.releaseVersion}</span>
-                  </div>
+                  <Badge variant="collection">Active Access</Badge>
                   <h2 className="mt-2 text-2xl font-bold text-foreground">
                     {coll.title}
                   </h2>
@@ -115,30 +113,10 @@ export default async function AccountCollectionsPage() {
                   href={`/collections/${coll.slug}`}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-5 py-2.5 text-sm font-semibold text-white hover:bg-action-hover"
                 >
-                  <ShoppingBag className="h-4 w-4" />
+                  <BookOpen className="h-4 w-4" aria-hidden="true" />
                   <span>Open Collection</span>
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
-              </div>
-
-              {/* Recipe List */}
-              <div className="mt-6 border-t border-border pt-6">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-text-muted">
-                  Included Recipes ({coll.recipes.length})
-                </h3>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {coll.recipes.map((recipe) => (
-                    <Link
-                      key={recipe.id}
-                      href={`/recipes/${recipe.slug}`}
-                      className="group flex items-center justify-between rounded-xl border border-border bg-surface-muted p-3 transition hover:border-action/40 hover:bg-surface"
-                    >
-                      <span className="truncate text-sm font-medium text-foreground group-hover:text-action">
-                        {recipe.title}
-                      </span>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-text-muted group-hover:text-action" />
-                    </Link>
-                  ))}
-                </div>
               </div>
             </div>
           ))}

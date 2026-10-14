@@ -287,7 +287,9 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("My Recipe Collections");
     await expect(page.getByText("The Comfort Haven Collection")).toBeVisible();
     await expect(page.getByText("Active Access")).toBeVisible();
-    await expect(page.getByText("Synthetic Paid Golden Lentil Soup")).toBeVisible();
+    // The library shows the book, not its recipe list, and sends the buyer to the book's page.
+    await expect(page.getByText("Synthetic Paid Golden Lentil Soup")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Open Collection" })).toHaveAttribute("href", "/collections/comfort-haven-collection");
   });
 
   test("[QA-J22:partial] V31: Forged or unrelated session ID reveals no private data", async ({ page }) => {
