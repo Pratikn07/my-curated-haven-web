@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, Clock, Lock, Snowflake } from "lucide-react";
 import { BookCover } from "@/components/collections/Book";
+import { MakeAheadPlanCard } from "@/components/collections/MakeAheadPlan";
 import { FreeRecipeCard, MaskedWords } from "@/components/collections/Showroom";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
+import type { MakeAheadPlanEntry } from "@/config/halloween";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 import { collectionFacts, recipeCount, rowAccess } from "@/lib/collections/visibility";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
@@ -26,6 +28,8 @@ export interface DetailModel {
   /** The commerce lookup failed: say so instead of "Opening soon", and infer nothing about price or ownership. */
   commerceUnavailable?: boolean;
   recipes: readonly CollectionRecipe[];
+  /** The book's make-ahead plan (Halloween only): a card for buyers, one line in the buy box for everyone else. */
+  makeAheadPlan?: MakeAheadPlanEntry | null;
 }
 
 function minutesLabel(minutes: number | null): string | null {
@@ -37,6 +41,8 @@ function minutesLabel(minutes: number | null): string | null {
 
 export function DetailHero({ model }: { model: DetailModel }) {
   const { offer } = model;
+  const owned = offer?.ownershipState === "owned";
+  const plan = model.makeAheadPlan ?? null;
   // This book's own free recipes sit further down the page; otherwise the recipe list has the free ones.
   const tryFreeHref = model.recipes.some((recipe) => recipe.free) ? "#free-samples" : "/recipes";
   return (
@@ -55,6 +61,8 @@ export function DetailHero({ model }: { model: DetailModel }) {
             <li aria-current="page">{model.title}</li>
           </ol>
         </nav>
+
+        {plan && owned ? <MakeAheadPlanCard entry={plan} /> : null}
 
         <div className="cl-dhero-grid">
           <div className="cl-dhero-book">
@@ -89,6 +97,12 @@ export function DetailHero({ model }: { model: DetailModel }) {
                   {model.recipes.length === 1 ? "The recipe" : `All ${model.recipes.length} recipes`}, each with ingredients, steps, storage and allergens
                 </span>
               </li>
+              {plan && !owned ? (
+                <li>
+                  <Check aria-hidden="true" />
+                  <span>{plan.buyLine}</span>
+                </li>
+              ) : null}
               <li>
                 <Check aria-hidden="true" />
                 <span>Includes printable recipe pages</span>
@@ -118,7 +132,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
               )}
             </div>
             <p className="cl-buy-hint">
-              {offer?.ownershipState === "owned" ? (
+              {owned ? (
                 "You own this collection. Every recipe below is open to you."
               ) : offer ? (
                 <>

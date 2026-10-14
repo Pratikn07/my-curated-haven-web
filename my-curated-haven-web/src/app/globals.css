@@ -7,6 +7,7 @@
 @import "../styles/admin.css";
 @import "../styles/collections.css";
 @import "../styles/halloween.css";
+@import "../styles/make-ahead.css";
 
 @theme inline {
   --color-background: var(--canvas);

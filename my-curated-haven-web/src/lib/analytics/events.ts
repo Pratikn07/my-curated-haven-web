@@ -181,6 +181,11 @@ export interface PurchasedLibraryOpenPayload {
   collection_release_id?: string;
 }
 
+/** A buyer opened a book's make-ahead plan (/collections/<slug>/plan). */
+export interface MakeAheadPlanOpenPayload {
+  collection_release_id: string;
+}
+
 export interface HomepageCtaClickedPayload {
   placement: HomepagePlacement;
   destination: HomepageDestination;
@@ -243,6 +248,7 @@ export type AnalyticsEventMap = {
   purchase_access_activated: PurchaseAccessActivatedPayload;
   refund_confirmed: RefundConfirmedPayload;
   purchased_library_open: PurchasedLibraryOpenPayload;
+  make_ahead_plan_open: MakeAheadPlanOpenPayload;
   homepage_cta_clicked: HomepageCtaClickedPayload;
   homepage_preview_opened: HomepagePreviewOpenedPayload;
   homepage_preview_viewed: HomepagePreviewViewedPayload;

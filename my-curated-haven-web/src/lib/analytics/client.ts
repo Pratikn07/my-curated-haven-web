@@ -21,6 +21,7 @@ const VIEW_EVENTS = new Set([
   "recipe_open",
   "collection_view",
   "purchased_library_open",
+  "make_ahead_plan_open",
 ]);
 const recentViews = new Map<string, number>();
 

@@ -41,6 +41,14 @@
   --room-library-wash: #eee9f6;
   --room-library-accent: #6a5b92;
 
+  /* Make-ahead plan pills: where a dish waits until it's eaten. Each wash has its own ink (5.96:1 to 7.62:1). */
+  --plan-freezer: #e4eef5;
+  --plan-freezer-ink: #2f5670;
+  --plan-fridge: #e8efe6;
+  --plan-fridge-ink: #46603f;
+  --plan-fresh: #fbf1d3;
+  --plan-fresh-ink: #5c4a12;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;

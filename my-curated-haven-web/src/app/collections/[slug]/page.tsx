@@ -10,6 +10,7 @@ import {
   type DetailModel,
 } from "@/components/collections/CollectionDetail";
 import CollectionsMotion from "@/components/collections/CollectionsMotion";
+import { makeAheadPlanFor } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import type { ShowroomCollection } from "@/lib/collections/types";
 import {
@@ -142,7 +143,11 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
   // Every published recipe opens its own page (free, or locked with the way to buy); this book's free ones say so.
   const freeSlugs = new Set(access.free.map((recipe) => recipe.slug));
-  const model: DetailModel = { ...built, recipes: withCatalogAccess(built.recipes, access.published, freeSlugs) };
+  const model: DetailModel = {
+    ...built,
+    recipes: withCatalogAccess(built.recipes, access.published, freeSlugs),
+    makeAheadPlan: makeAheadPlanFor(slug),
+  };
   const ownFree = access.free.filter((recipe) => model.recipes.some((member) => member.slug === recipe.slug));
 
   const shelf = (await listOpenPublishedCollections()).map((entry) => entry.collection);

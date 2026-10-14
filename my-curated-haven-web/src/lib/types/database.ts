@@ -202,6 +202,38 @@ export type Database = {
           },
         ]
       }
+      collection_extras: {
+        Row: {
+          collection_id: string
+          content: Json
+          created_at: string
+          kind: string
+          updated_at: string
+        }
+        Insert: {
+          collection_id: string
+          content: Json
+          created_at?: string
+          kind: string
+          updated_at?: string
+        }
+        Update: {
+          collection_id?: string
+          content?: Json
+          created_at?: string
+          kind?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_extras_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_publication_projection: {
         Row: {
           availability: string

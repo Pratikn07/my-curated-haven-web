@@ -30,6 +30,7 @@ Allowed common dimensions: registered campaign code, canonical route category, c
 | `purchase_access_activated` | Server, paid order's access first becomes available | opaque `order_ref`, release, `activation_delay_bucket` |
 | `refund_confirmed` | Server, successful refund adjustment committed | opaque `refund_ref`, `order_ref`, `currency`, `refunded_minor` |
 | `purchased_library_open` | Browser, owned collection library rendered | `collection_release_id` |
+| `make_ahead_plan_open` | Browser, a buyer's full make-ahead plan rendered (`/collections/halloween/plan`, added 2026-10-14). Not sent for the locked preview or for admins | `collection_release_id` |
 
 Browser sign-in and save events are observations for UX reporting, not an audit trail. Server payment events exported to optional analytics require eligible consent and a valid anonymous attribution link. Their authoritative counterparts always remain in the Phase 8 ledger. Opaque analytics references are random mappings, not emails or reversible provider IDs, and remain restricted.
 
