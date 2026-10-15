@@ -223,12 +223,12 @@ export const HALLOWEEN_MAKE_AHEAD_PLAN: MakeAheadPlanEntry = {
   preview: {
     byline: "Inside the Halloween book",
     title: "Your Halloween make-ahead plan",
-    lede: "A party menu of 6 recipes, made across three short sessions so Saturday is calm. About 1 hour 40 minutes of cooking in all, and one shopping list.",
+    lede: "A party menu of 6 recipes, made across three short sessions so Saturday is calm. About 1 hour 45 minutes of cooking in all, and one shopping list.",
     menuHeading: "The party menu",
     menu: [
       { slug: "berry-ghost-yogurt-bark", name: "Berry Ghost Yogurt Bark" },
       { slug: "mummy-banana-pops", name: "Mummy Banana Pops" },
-      { slug: "gummy-worms", name: "Gummy Worms" },
+      { slug: "protein-fruit-gummies", name: "Protein Fruit Gummies" },
       { slug: "witchs-broomsticks", name: "Witch’s Broomsticks" },
       { slug: "spider-cracker-bites", name: "Spider Cracker Bites" },
       { slug: "mandarin-orange-pumpkins", name: "Mandarin Orange Pumpkins" },
@@ -236,7 +236,7 @@ export const HALLOWEEN_MAKE_AHEAD_PLAN: MakeAheadPlanEntry = {
     daysHeading: "Three short sessions",
     days: [
       { dow: "Thu", dom: "29", mon: "Oct", heading: "Freezer night", time: "About 45 min", pill: "freezer" },
-      { dow: "Fri", dom: "30", mon: "Oct", heading: "Fridge day", time: "About 15 min", pill: "fridge" },
+      { dow: "Fri", dom: "30", mon: "Oct", heading: "Fridge day", time: "About 20 min", pill: "fridge" },
       { dow: "Sat", dom: "31", mon: "Oct", heading: "Halloween", time: "About 40 min", pill: "fresh" },
     ],
   },

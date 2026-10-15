@@ -466,7 +466,7 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     cover: cover("fruit-gummies", 1412, "A berry-red cloth cookbook with a gold-foil gummy mould, heart and star gummies and a strawberry on its cover"),
     refresh: "",
     placeholderPrice: "$6.99",
-    // Placed 2026-10-14: both are also in the Halloween book.
+    // Placed 2026-10-14: both are in the Halloween book's release (Gummy Worms no longer shows on its page).
     recipes: recipes(["gummy-worms", "protein-fruit-gummies"]),
   },
   {
@@ -514,7 +514,13 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
     // Shown only if the live offer can't be read. Owner moved the price from $6.99 to $5.99 on 2026-10-13.
     placeholderPrice: "$5.99",
     // Replaced on 2026-10-12 with the owner's 20 Halloween recipes (above the 8–12 guideline in COLLECTIONS.md, by choice).
+    // 2026-10-14, owner: the four most Halloween-looking photos lead, and Gummy Worms is off this page. Release 1
+    // still holds it (two paid orders), so buyers keep it in their library.
     recipes: recipes([
+      "strawberry-yogurt-ghost-hearts",
+      "jack-o-lantern-mango-stars",
+      "blueberry-yogurt-bites",
+      "chocolate-pumpkin-protein-tarts",
       "berry-ghost-yogurt-bark",
       "mummy-banana-pops",
       "spider-cracker-bites",
@@ -528,13 +534,8 @@ export const SHOWROOM_COLLECTIONS: readonly ShowroomCollection[] = [
       "apple-peanut-butter-smiles",
       "monster-energy-balls",
       "candy-corn-parfaits",
-      "gummy-worms",
       "protein-fruit-gummies",
       "spider-peanut-butter-oat-bites",
-      "strawberry-yogurt-ghost-hearts",
-      "jack-o-lantern-mango-stars",
-      "blueberry-yogurt-bites",
-      "chocolate-pumpkin-protein-tarts",
     ]),
   },
   {

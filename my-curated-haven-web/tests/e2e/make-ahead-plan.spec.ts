@@ -65,7 +65,7 @@ async function expectPreviewOnly(page: Page) {
   await expect(page.getByText("Spider Cracker Bites")).toBeVisible();
   await expect(page.getByRole("heading", { name: "In the Halloween book" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Buy (now|Collection)/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: "See all 20 recipes" })).toHaveAttribute("href", "/collections/halloween");
+  await expect(page.getByRole("link", { name: "See all 19 recipes" })).toHaveAttribute("href", "/collections/halloween");
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   const rendered = await page.content();
   for (const paid of PAID) expect(rendered, paid).not.toContain(paid);
