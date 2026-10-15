@@ -99,7 +99,12 @@ export function DetailHero({ model }: { model: DetailModel }) {
               {plan && !owned ? (
                 <li>
                   <Check aria-hidden="true" />
-                  <span>{plan.buyLine}</span>
+                  <span>
+                    {plan.buyLine}{" "}
+                    <Link className="cl-buy-plan" href={plan.path}>
+                      See the plan
+                    </Link>
+                  </span>
                 </li>
               ) : null}
               <li>

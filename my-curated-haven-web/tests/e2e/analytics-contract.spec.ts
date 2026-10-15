@@ -215,13 +215,14 @@ test("[stories] campaign page events add only fixed values and small counts", ()
     ["recipes_index", "closing"],
     ["recipe_jump", "hero"],
     ["more_recipe", "related"],
+    ["make_ahead_plan", "plan"],
   ]) {
     expect(
       validateAnalyticsEvent("story_action_clicked", { story_slug: "halloween-treats", story_action, story_placement }).ok,
       `${story_action}/${story_placement}`
     ).toBe(true);
   }
-  for (const story_section of ["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing"]) {
+  for (const story_section of ["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing", "plan"]) {
     expect(validateAnalyticsEvent("story_section_viewed", { story_slug: "halloween-treats", story_section }).ok).toBe(true);
   }
 

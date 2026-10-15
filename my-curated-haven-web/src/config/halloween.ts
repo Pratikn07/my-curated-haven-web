@@ -245,6 +245,20 @@ export const HALLOWEEN_MAKE_AHEAD_PLAN: MakeAheadPlanEntry = {
   },
 };
 
+/**
+ * The make-ahead plan on /halloween (owner decision 2026-10-14): a strip under the book card with the three days
+ * from the public preview, a line that the plan comes with the book and a link to the plan page, where a buyer finds
+ * the whole plan. The book card and the buy bar name the plan next to the price. Nothing paid is shown here.
+ */
+export const HALLOWEEN_PLAN_STRIP = {
+  eyebrow: "Halloween weekend, made ahead",
+  heading: "Three short sessions, so Saturday is calm",
+  locked: "The full plan, the party menu and one shopping list come with the book.",
+  link: "See the plan",
+  /** After "$5.99 · 20 recipes" in the buy bar. */
+  dock: "+ plan",
+};
+
 /** The book's make-ahead plan, or null for every book without one. */
 export function makeAheadPlanFor(collectionSlug: string): MakeAheadPlanEntry | null {
   return collectionSlug === HALLOWEEN_MAKE_AHEAD_PLAN.collectionSlug ? HALLOWEEN_MAKE_AHEAD_PLAN : null;

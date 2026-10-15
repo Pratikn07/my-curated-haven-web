@@ -5,8 +5,10 @@ import {
   HALLOWEEN_BOOK,
   HALLOWEEN_CLOSING,
   HALLOWEEN_HERO,
+  HALLOWEEN_MAKE_AHEAD_PLAN,
   HALLOWEEN_MORNING,
   HALLOWEEN_NIGHT,
+  HALLOWEEN_PLAN_STRIP,
   HALLOWEEN_REASONS,
   HALLOWEEN_STORY,
   HALLOWEEN_STREET,
@@ -88,6 +90,7 @@ export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; men
         <span className="hw-eyebrow">{HALLOWEEN_BOOK.eyebrow}</span>
         <h2 className="hw-bookcard-title" id="hw-bookcard-title">All {count} recipes in one book</h2>
         <p className="hw-bookcard-contents">{contents.charAt(0).toUpperCase() + contents.slice(1)}</p>
+        <p className="hw-bookcard-plan">{HALLOWEEN_MAKE_AHEAD_PLAN.buyLine}</p>
         <div className="hw-bookcard-row">
           <span className="hw-bookcard-price">{book.price}</span>
           <Link
@@ -101,6 +104,40 @@ export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; men
         </div>
         <span className="hw-bookcard-note">{book.onSale ? "One-time purchase" : "Opening soon"}</span>
       </div>
+    </section>
+  );
+}
+
+/**
+ * The make-ahead plan, under the book card: the three days from the plan's public preview and a link to the plan
+ * page, which shows a buyer the whole plan and everyone else the preview and the way to buy.
+ */
+export function HalloweenPlanStrip() {
+  const { path, preview } = HALLOWEEN_MAKE_AHEAD_PLAN;
+  return (
+    <section className="hw-plan" id="hw-plan" aria-labelledby="hw-plan-title" data-story-section="plan">
+      <div className="hw-sec-head">
+        <span className="hw-eyebrow">{HALLOWEEN_PLAN_STRIP.eyebrow}</span>
+        <h2 id="hw-plan-title">{HALLOWEEN_PLAN_STRIP.heading}</h2>
+      </div>
+      <ol className="hw-plan-days">
+        {preview.days.map((day) => (
+          <li key={day.dow}>
+            <span className="hw-plan-date">
+              <small>{day.dow}</small> {day.dom} <small>{day.mon}</small>
+            </span>
+            <strong>{day.heading}</strong>
+            <span>{day.time}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="hw-plan-lock">
+        <Lock aria-hidden="true" />
+        {HALLOWEEN_PLAN_STRIP.locked}
+      </p>
+      <Link className="hw-open" href={path} data-story-action="make_ahead_plan" data-story-placement="plan">
+        {HALLOWEEN_PLAN_STRIP.link} <span aria-hidden="true">→</span>
+      </Link>
     </section>
   );
 }
@@ -319,7 +356,10 @@ export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; fr
           <span className="hw-price">{book.price}</span>
           <span className="hw-count">{book.onSale ? `${book.recipes.length} recipes · all ages` : "Opening soon"}</span>
         </div>
-        {book.refresh ? <p>Buy it once and it&apos;s yours. {book.refresh}</p> : null}
+        <p>
+          Buy it once and it&apos;s yours. {HALLOWEEN_MAKE_AHEAD_PLAN.buyLine}
+          {book.refresh ? ` ${book.refresh}` : ""}
+        </p>
         <Link className="hw-cta" href={book.href} data-story-action="collection" data-story-placement="collection">
           See the Halloween collection <span aria-hidden="true">→</span>
         </Link>

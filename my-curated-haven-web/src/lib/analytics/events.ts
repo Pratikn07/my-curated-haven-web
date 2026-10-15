@@ -39,7 +39,8 @@ export type StoryAction =
   | "pack"
   | "instagram"
   | "recipes_index"
-  | "home";
+  | "home"
+  | "make_ahead_plan";
 export type StoryPlacement =
   | "card"
   | "sticky"
@@ -53,7 +54,8 @@ export type StoryPlacement =
   | "pack"
   | "collection"
   | "related"
-  | "closing";
+  | "closing"
+  | "plan";
 /** Which paid options the campaign page showed. */
 export type StoryOfferState = "none" | "pack" | "collection" | "both";
 /** Parts of a campaign page, in page order. story_end is the last moment of the kitchen story. */
@@ -65,7 +67,8 @@ export type StorySection =
   | "collection"
   | "related"
   | "questions"
-  | "closing";
+  | "closing"
+  | "plan";
 
 export type CanonicalRouteKey =
   | "home"

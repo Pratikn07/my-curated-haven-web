@@ -236,7 +236,7 @@ export function ClockPill({ initial }: { initial: string }) {
  * page's dock, because a jump (a link, the back button) can skip an observer's crossing.
  * While it is off screen it is inert, so it is never focused or read out.
  */
-export function HalloweenDock({ title, price, count, href, onSale }: { title: string; price: string; count: number; href: string; onSale: boolean }) {
+export function HalloweenDock({ title, price, count, extra, href, onSale }: { title: string; price: string; count: number; extra?: string; href: string; onSale: boolean }) {
   const dock = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -272,7 +272,7 @@ export function HalloweenDock({ title, price, count, href, onSale }: { title: st
       <p className="hw-dock-text">
         <strong>{title}</strong>
         <span>
-          {price} · {count} recipes
+          {price} · {count} recipes{extra ? ` ${extra}` : ""}
         </span>
       </p>
       <a className="hw-dock-cta" href={href} data-story-action="collection" data-story-placement="sticky">
