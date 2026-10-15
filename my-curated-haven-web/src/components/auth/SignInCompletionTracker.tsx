@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { coarseEntryPoint, pathToCanonicalRouteKey } from "@/lib/analytics/schema";
 import { isAdminPath } from "@/lib/analytics/private-paths";
-import { SIGN_IN_METHOD_COOKIE, isOAuthProvider } from "@/lib/auth/oauth";
+import { SIGN_IN_METHOD_COOKIE, isSignInMethodMarker } from "@/lib/auth/oauth";
 
 function readAndClearMethodMarker(): string | null {
   try {
@@ -20,23 +20,21 @@ function readAndClearMethodMarker(): string | null {
 }
 
 /**
- * Google sign-in completes in /auth/callback and redirects, so the tab that
- * started it never sees a success response and cannot close the funnel the way
- * the email-code form does. The callback leaves a short-lived marker cookie;
- * this reads it once on the destination page and emits sign_in_completed.
+ * Both sign-in methods complete on the server and redirect: Google in
+ * /auth/callback, the email code in verifyOtpAction. Each leaves a short-lived
+ * marker cookie; this reads and clears it on the destination page and emits
+ * sign_in_completed. Clearing the cookie is what keeps it to one event, so a
+ * second sign-in in the same tab is counted too.
  */
 export default function SignInCompletionTracker() {
   const pathname = usePathname();
-  const firedRef = useRef(false);
 
   useEffect(() => {
-    if (firedRef.current) return;
     if (pathname && isAdminPath(pathname)) return;
 
     const method = readAndClearMethodMarker();
-    if (!isOAuthProvider(method)) return;
+    if (!isSignInMethodMarker(method)) return;
 
-    firedRef.current = true;
     trackAnalyticsEvent(
       "sign_in_completed",
       { entry_point: coarseEntryPoint(pathname), method },

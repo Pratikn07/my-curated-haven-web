@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
-import { SIGN_IN_METHOD_COOKIE } from "@/lib/auth/oauth";
+import { SIGN_IN_METHOD_COOKIE, signInMethodCookieOptions } from "@/lib/auth/oauth";
 import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 
 export const dynamic = "force-dynamic";
@@ -64,11 +64,6 @@ export async function GET(request: Request) {
   }
 
   const response = authRedirect(next);
-  response.cookies.set(SIGN_IN_METHOD_COOKIE, "google", {
-    path: "/",
-    maxAge: 120,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+  response.cookies.set(SIGN_IN_METHOD_COOKIE, "google", signInMethodCookieOptions());
   return response;
 }

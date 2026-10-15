@@ -32,7 +32,7 @@ These efforts sit outside the numbered roadmap. They keep their own task IDs, sc
 | Haven house redesign | Interactive illustrated house homepage, time-of-day light, room samples and Instagram landing pages | [Haven house design system](haven-house/DESIGN-SYSTEM.md) | Proposed, owner decisions open |
 | Instagram landing pages | One page per post at `/stories/<slug>`: the recipe first, Bhagyashree's note, one honest collection offer | [Landing page plan](instagram-landing/PLAN.md) | First page built for review, owner facts and photos pending |
 | Recipe collections | `/collections` showroom, 7–10 free sample recipes, customer library with purchases, collection updates, later subscription | [Recipe collections plan](recipe-collections/README.md) | Plan documented, owner decisions pending, nothing implemented |
-| Site tracking | Labelled clicks on every link and button, page context, scroll and time milestones, offer views, sign-in and purchase funnels, purchases tied to the visitor and their Instagram link | [Tracking plan](tracking/PLAN.md) | Plan documented, four PRs, nothing implemented |
+| Site tracking | Labelled clicks on every link and button, page context, scroll and time milestones, offer views, sign-in and purchase funnels, purchases tied to the visitor and their Instagram link | [Tracking plan](tracking/PLAN.md) | PR 1 built (fixes and purchases tied to the visitor); PRs 2 to 4 pending |
 
 The homepage effort does not implement the previewed features, replace Phase 12 or create Phase 13. Its release state follows verified recipe and commerce readiness.
 

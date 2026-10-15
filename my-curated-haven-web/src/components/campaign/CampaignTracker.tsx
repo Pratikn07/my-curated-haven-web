@@ -9,9 +9,9 @@ import type {
   StoryRoomKey,
   StorySection,
 } from "@/lib/analytics/events";
+import { ENTRY_STORY_STORAGE_KEY as ENTRY_STORY_KEY } from "@/lib/analytics/consent";
 import { isPostHogActive, posthog } from "@/lib/analytics/posthog";
 
-const ENTRY_STORY_KEY = "mch_entry_story";
 const ACTIONS: readonly StoryAction[] = [
   "recipe_jump",
   "full_recipe",

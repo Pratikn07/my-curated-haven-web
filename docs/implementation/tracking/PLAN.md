@@ -1,6 +1,6 @@
 # Site tracking plan
 
-Updated 2026-10-14. Covers the public site at mycuratedhaven.com and the PostHog project 630160. Nothing in this plan is built yet.
+Updated 2026-10-14. Covers the public site at mycuratedhaven.com and the PostHog project 630160. PR 1 is built; PRs 2 to 4 are not.
 
 Today PostHog records page views and raw clicks, but a click doesn't say which part of the page it came from, its position, or what it opened. 147 of the 529 clicks recorded in the 30 days to 2026-10-14 (28%) carry no text at all. No purchase reaches PostHog, and the database drops 3 of the 4 Instagram campaign codes. This plan adds one labelled click event, page context on every event, scroll and time milestones, offer views, and a purchase funnel that ends in a server-side purchase tied to the visitor who bought.
 
@@ -84,7 +84,7 @@ Example: a parent taps Buy on `/collections/halloween`.
 | Event | Change | PR |
 | --- | --- | --- |
 | `page_view` | New route keys `halloween`, `collections`, `collection_plan`, `collection_series`. Plan pages were labelled `collection_detail` before this change | 1 |
-| `checkout_clicked` | Always fires. Adds `collection_slug`* and `surface`*. `collection_release_id` becomes optional | 1 |
+| `checkout_clicked` | Always fires. Adds `collection_slug`* and `surface`*. `collection_release_id` becomes optional. `entry_point` is dropped (the event never fired, so no history is lost) | 1 |
 | `collection_view` | Mounted on the collection page. Adds `collection_slug`* and `ownership_state`. `collection_release_id` becomes optional | 1 |
 | `purchased_library_open` | Mounted on `/account/collections` | 1 |
 | `sign_in_completed` | Email-code sign-ins are recorded too. Today all 7 recorded completions are Google | 1 |
@@ -110,7 +110,7 @@ Example: a parent taps Buy on `/collections/halloween`.
 | `target_slug`, `collection_slug`, `content_slug`, `question_key`, `choice` | The slug pattern |
 | `access_state` | `free`, `locked`, `owned`, `preview` |
 | `surface`, `checkout_surface` | `lock_card`, `buy_box`, `sticky_bar`, `book_card`, `story_offer` (checkout only happens from `lock_card` and `buy_box`) |
-| `ownership_state` | `owned`, `not_owned`, `unauthenticated`, `unavailable` (the existing `OwnershipStatus`) |
+| `ownership_state` | `owned`, `not_owned`, `unauthenticated`, `pending_payment`, `unavailable` (the existing `OwnershipStatus`) |
 | `price_minor` | Integer above 0 |
 | `depth` | 25, 50, 75, 100 |
 | `seconds` | 15, 30, 60 |
@@ -265,13 +265,13 @@ Today `checkout_created` and `purchase_confirmed` are written to `private.analyt
 3. **Library.** `lib/payments/checkout.ts` passes these values and `campaign.utm_content` to `recordCheckoutMeasurement` in `lib/payments/repository.ts:154`, which calls the new SQL function signature.
 4. **Migration** `supabase/migrations/20261015090000_tracking_purchase_link.sql`:
    - New columns on `private.purchase_orders`: `analytics_distinct_id uuid`, `analytics_session_id uuid`, `checkout_surface text` (check: `lock_card`, `buy_box`), `campaign_content text` (check: `^[a-z0-9][a-z0-9_-]{0,39}$`), `entry_story text` (check: the slug pattern).
-   - Replace `purchase_orders_campaign_code_check` so it also accepts `story_link`, `instagram_dm` and `comment_dm`. Keep the old codes so existing rows still pass.
-   - Drop `private.record_checkout_measurement(UUID, TEXT, BOOLEAN, TEXT)` and create it again with the new optional parameters and the same campaign list. Re-apply the `REVOKE ALL … FROM PUBLIC, anon, authenticated` line for the new signature, as in `20260924010000_phase9_measurement.sql:482`.
+   - One function, `private.is_registered_campaign_code(text)`, owns the campaign list. It adds `story_link`, `instagram_dm` and `comment_dm` and keeps the old codes so existing rows still pass. The order check and the measurement function both call it; `service_role` may execute it because it may write orders.
+   - Add a nine-argument `private.record_checkout_measurement` with the new values. The original four-argument signature stays and forwards to it, so code deployed before or after the migration keeps recording checkouts. Both are closed to `anon` and `authenticated`.
    - Replace `private.capture_optional_analytics()` so the `checkout_created` and `purchase_confirmed` payloads also carry `campaign_code`, `campaign_content`, `checkout_surface`, `entry_story`, `collection_slug` (joined from the release) and `$session_id`.
 5. **Drain.** `lib/analytics/drain.ts` selects `po.analytics_distinct_id` and `po.user_id`.
    - It uses the visitor's id as `distinct_id` when present, else `attempt_ref` (orders placed before this change).
    - It keeps `$process_person_profile: false` for guest buyers and drops it when the order has a `user_id`, so the purchase lands on the buyer's PostHog profile.
-6. **Return page.** `OrderSummaryDto` in `lib/payments/types.ts` gets `analyticsRef` (the order's `analytics_attempt_ref`) for `purchase_confirmation_viewed` in PR 3.
+6. **Return page.** Moved to PR 3: `OrderSummaryDto` in `lib/payments/types.ts` gets `analyticsRef` (the order's `analytics_attempt_ref`) for `purchase_confirmation_viewed`.
 7. **Account closure.** Closing an account sets `analytics_distinct_id` and `analytics_session_id` to null. Add this step to `ops/ACCOUNT-CLOSURE.md`.
 8. **Privacy page.** Add one line saying a purchase is linked to the analytics visit that started it. Add the storage keys `mch_entry_story` (in use but not listed today) and `mch_internal`. The owner approves the wording.
 
@@ -290,7 +290,7 @@ Target: 2026-10-15, before the Halloween posts on about 2026-10-16. Size: medium
 | 5 | Email-code sign-in completion. `verifyOtpAction` sets the `mch_signin_method=email_code` cookie (120 s, same options as the Google callback) before it redirects. `SignInCompletionTracker` accepts any `SignInMethod`, not only OAuth providers. Remove the unreachable call | `app/sign-in/actions.ts`, `lib/auth/oauth.ts`, `components/auth/SignInCompletionTracker.tsx`, `components/auth/SignInForm.tsx:136-141` |
 | 6 | Route keys `halloween`, `collections`, `collection_plan`, `collection_series` | `events.ts` (`CanonicalRouteKey`), `schema.ts` (`ALLOWED_ROUTE_KEYS`, `pathToCanonicalRouteKey`), `sanitize.ts` (`ROUTE_KEYS`) |
 | 7 | Search and filter events read the result count after the new results load. Remember the pending submit in a ref and send it from an effect on `totalCount` and the search params, like `RecipeCatalogTracker` | `components/recipe/RecipeFilters.tsx` |
-| 8 | Admin browsers stay tracked but marked internal. `syncAdminPrivacy` stops calling `opt_out_capturing()` and only sets `localStorage.mch_internal = "1"`. On public pages `AnalyticsProvider` checks that flag or `has_opted_out_capturing()` (only admin ever opted out). If either is set, it calls `opt_in_capturing()` once, `register({ is_internal: true })`, and `setPersonProperties({ is_internal: true })` when signed in | `lib/analytics/posthog.ts`, `components/analytics/AnalyticsProvider.tsx` |
+| 8 | Admin browsers stay tracked on public pages, marked internal. Admin pages still switch capture off while they are open, and also set `localStorage.mch_internal = "1"`. On public pages, `syncInternalBrowser()` opts a browser back in if it was opted out (only admin pages ever opt out), and registers the event property `is_internal: true` when the flag is set | `lib/analytics/posthog.ts`, `components/analytics/AnalyticsProvider.tsx` |
 | 9 | Record the new server variables and the privacy line | `ops/PRODUCTION-CONFIG.md`, `ops/ACCOUNT-CLOSURE.md`, `app/privacy/page.tsx` |
 
 Tests:
@@ -313,7 +313,9 @@ Done when: a live test purchase made from a `comment_dm` link shows in PostHog a
 1. Set `ANALYTICS_EXPORT_ENABLED=true`, `POSTHOG_SERVER_KEY` (the project token) and `POSTHOG_HOST=https://us.i.posthog.com` on the production Vercel project, using the repo's `ops/vercel` login.
 2. Switch the database export on: `UPDATE private.analytics_settings SET optional_export_enabled = true, updated_at = now() WHERE singleton = true;`
 3. Redeploy, make one live guest test purchase, and check PostHog's live events for `purchase_confirmed`.
-4. In PostHog, turn on the internal-users filter (`is_internal = true`) as the default for insights.
+4. In PostHog, turn on the internal-users filter (event property `is_internal` = `true`) as the default for insights.
+
+The migration can be applied before or after the code deploys: the old function signature stays, and the server export catches its own errors. Applying it first is still the cleaner order.
 
 ### PR 2: labelled clicks, page context, milestones and views
 

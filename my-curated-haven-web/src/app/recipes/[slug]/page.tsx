@@ -411,6 +411,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                     formattedPrice={saleOffer.formattedPrice}
                     ownershipState={saleOffer.ownershipState}
                     expected={saleOffer.expected}
+                    surface="lock_card"
                     signInHint={false}
                     fromRecipeSlug={catalog.slug}
                   />

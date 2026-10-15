@@ -6,10 +6,31 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
-import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
+import type { CheckoutAnalyticsInput } from "@/lib/analytics/checkout-analytics";
+import { ENTRY_STORY_STORAGE_KEY, isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
+import type { CheckoutSurface } from "@/lib/analytics/events";
+import { isPostHogActive, posthog } from "@/lib/analytics/posthog";
+import { pathToCanonicalRouteKey } from "@/lib/analytics/schema";
 import { rememberBoughtFrom } from "@/lib/recipes/bought-from";
 
 const CHECKOUT_FAILED = "We couldn't start checkout. Please refresh the page and try again.";
+
+/** The visit behind this tap, so the order and the server's purchase event can name it. */
+function checkoutAnalytics(surface: CheckoutSurface): CheckoutAnalyticsInput | undefined {
+  if (!isAnalyticsPermitted()) return undefined;
+  const input: CheckoutAnalyticsInput = { surface };
+  try {
+    if (isPostHogActive()) {
+      input.distinct_id = posthog.get_distinct_id();
+      input.session_id = posthog.get_session_id();
+    }
+    const story = sessionStorage.getItem(ENTRY_STORY_STORAGE_KEY);
+    if (story) input.entry_story = story;
+  } catch {
+    // Analytics must never stop a purchase.
+  }
+  return input;
+}
 
 interface CheckoutButtonProps {
   collectionSlug: string;
@@ -17,7 +38,8 @@ interface CheckoutButtonProps {
   ownershipState: OwnershipStatus;
   /** What this page shows for sale; checkout refuses a stale expectation and asks for a refresh. */
   expected: CheckoutExpectation | null;
-  releaseId?: string;
+  /** Which Buy button this is, for checkout_clicked and the order: a lock card or a collection's buy box. */
+  surface: CheckoutSurface;
   className?: string;
   /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
   appearance?: "default" | "cloth";
@@ -32,7 +54,7 @@ export default function CheckoutButton({
   formattedPrice,
   ownershipState,
   expected,
-  releaseId,
+  surface,
   className = "",
   appearance = "default",
   signInHint = true,
@@ -73,16 +95,16 @@ export default function CheckoutButton({
     setIsLoading(true);
     setErrorMessage(null);
 
-    if (releaseId) {
-      trackAnalyticsEvent(
-        "checkout_clicked",
-        {
-          collection_release_id: releaseId,
-          entry_point: "collection_page",
-        },
-        "collection_detail"
-      );
-    }
+    const releaseId = expected?.releaseId;
+    void trackAnalyticsEvent(
+      "checkout_clicked",
+      {
+        collection_slug: collectionSlug,
+        surface,
+        ...(releaseId ? { collection_release_id: releaseId } : {}),
+      },
+      pathToCanonicalRouteKey(window.location.pathname) ?? undefined
+    );
 
     try {
       const campaign = getSessionCampaign();
@@ -98,6 +120,7 @@ export default function CheckoutButton({
               utm_content: campaign.utm_content,
             }
           : undefined,
+        analytics: checkoutAnalytics(surface),
       };
 
       const res = await fetch("/api/checkout", {

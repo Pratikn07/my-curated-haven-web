@@ -127,6 +127,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
                   formattedPrice={offer.formattedPrice}
                   ownershipState={offer.ownershipState}
                   expected={offer.expected}
+                  surface="buy_box"
                   appearance="cloth"
                 />
               ) : (

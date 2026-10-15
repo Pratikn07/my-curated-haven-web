@@ -3,10 +3,11 @@ import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { createCheckoutSession } from "@/lib/payments/checkout";
 import { acceptCampaignInput } from "@/lib/analytics/campaigns";
+import { acceptCheckoutAnalytics } from "@/lib/analytics/checkout-analytics";
 import type { CheckoutExpectation } from "@/lib/payments/types";
 import { GUEST_COOKIE, isGuestPrincipal } from "@/lib/payments/guest-checkout";
 
-const CHECKOUT_FIELDS = new Set(["collectionSlug", "analyticsConsent", "attribution", "expected"]);
+const CHECKOUT_FIELDS = new Set(["collectionSlug", "analyticsConsent", "attribution", "expected", "analytics"]);
 const ATTRIBUTION_FIELDS = new Set([
   "utm_source",
   "utm_medium",
@@ -105,6 +106,8 @@ export async function POST(request: Request) {
       requestOrigin,
       analyticsConsent: record.analyticsConsent === true,
       attribution,
+      // Malformed visit details are dropped, never refused: analytics must not block a purchase.
+      analytics: acceptCheckoutAnalytics(record.analytics),
     });
 
     if (result.status === "already_owned") {

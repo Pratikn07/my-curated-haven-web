@@ -8,7 +8,7 @@ export default function Privacy() {
         <div className="bg-canvas py-8">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-text-muted mb-12">Last updated: October 14, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: October 15, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
@@ -53,7 +53,7 @@ export default function Privacy() {
                                 <li><strong>Sign-in cookies.</strong> If you sign in, our authentication provider sets cookies that keep you signed in. The website needs them for accounts, saved recipes and the collections you buy.</li>
                                 <li><strong>Checkout cookie.</strong> If you start a purchase without signing in, we set a cookie (<code>mch_guest</code>) holding a random identifier for 30 days, so tapping buy again returns you to the same checkout instead of starting a second one.</li>
                                 <li>
-                                    <strong>Analytics.</strong> We use PostHog to measure how the website is used. It stores a random identifier in a cookie and in your browser storage, and records the pages you visit, the links and buttons you click, the website that sent you, and your device and browser type. Our own code also stores a browser and session identifier (<code>mch_browser_id</code>, <code>mch_session_id</code>) and the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>).
+                                    <strong>Analytics.</strong> We use PostHog to measure how the website is used. It stores a random identifier in a cookie and in your browser storage, and records the pages you visit, the links and buttons you click, the website that sent you, and your device and browser type. Our own code also stores a browser and session identifier (<code>mch_browser_id</code>, <code>mch_session_id</code>) the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>), and the Instagram page your visit started on (<code>mch_entry_story</code>).
                                 </li>
                                 <li>
                                     <strong>Session recordings.</strong> PostHog records how pages look and respond while you use them, so we can see where the website is confusing. Anything you type is hidden in the recording. We do not record the sign-in, account or checkout pages.
@@ -75,6 +75,9 @@ export default function Privacy() {
                             </p>
                             <p className="leading-relaxed">
                                 We keep purchase records to give you access to what you bought, to handle payment disputes (chargebacks), and to meet tax and accounting obligations.
+                            </p>
+                            <p className="leading-relaxed">
+                                With each purchase we also keep the analytics identifier of the visit that started it, which Buy button you used, and the Tiny Soho link or Instagram page the visit came from. That lets us see which pages and posts lead to a purchase. If you close your account, we remove the analytics identifier from your purchase records.
                             </p>
                         </section>
 

@@ -154,13 +154,28 @@ export async function markPurchaseOrderForReview(orderId: string): Promise<void>
 export async function recordCheckoutMeasurement(params: {
   orderId: string;
   campaignCode: string | null;
+  campaignContent?: string | null;
   analyticsConsent: boolean;
   environment: string;
+  distinctId?: string | null;
+  sessionId?: string | null;
+  checkoutSurface?: string | null;
+  entryStory?: string | null;
 }): Promise<string | null> {
   const pool = getCommercePool();
   const { rows } = await pool.query(
-    `SELECT private.record_checkout_measurement($1, $2, $3, $4) AS attempt_ref`,
-    [params.orderId, params.campaignCode, params.analyticsConsent, params.environment]
+    `SELECT private.record_checkout_measurement($1, $2, $3, $4, $5::uuid, $6::uuid, $7::text, $8::text, $9::text) AS attempt_ref`,
+    [
+      params.orderId,
+      params.campaignCode,
+      params.analyticsConsent,
+      params.environment,
+      params.distinctId ?? null,
+      params.sessionId ?? null,
+      params.checkoutSurface ?? null,
+      params.entryStory ?? null,
+      params.campaignContent ?? null,
+    ]
   );
   const ref = rows[0]?.attempt_ref;
   return typeof ref === "string" ? ref : null;

@@ -1,8 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isInAppBrowser, OPEN_IN_BROWSER_HINT } from "@/lib/auth/in-app-browser";
+import { SIGN_IN_METHOD_COOKIE, signInMethodCookieOptions } from "@/lib/auth/oauth";
 import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
 import { OTP_SEND_FAILED, otpRequestErrorMessage, otpVerifyErrorMessage } from "@/lib/auth/otp-errors";
@@ -85,6 +86,9 @@ export async function verifyOtpAction(
 
   // Pay first: anything bought before signing in with this (now confirmed) email joins the account.
   if (data.user) await claimGuestOrders(data.user.id);
+
+  // The redirect below means the form never hears back; the destination page records sign_in_completed.
+  (await cookies()).set(SIGN_IN_METHOD_COOKIE, "email_code", signInMethodCookieOptions());
 
   const destination = sanitizeReturnTo(returnTo);
   revalidatePath("/", "layout");

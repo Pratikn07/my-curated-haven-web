@@ -33,6 +33,10 @@ const ROUTE_KEYS = new Set([
   "about",
   "terms",
   "story",
+  "halloween",
+  "collections",
+  "collection_plan",
+  "collection_series",
 ]);
 
 const DEVICE_CLASSES = new Set(["mobile", "desktop", "tablet"]);
@@ -59,6 +63,10 @@ const HOMEPAGE_DESTINATIONS = new Set([
 ]);
 const HOMEPAGE_PRESENTATION_STATES = new Set(["preparation", "free_ready", "collection_ready"]);
 const STORY_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,63}$/;
+/** Public slugs of books, recipes and landing pages. */
+const SLUG_REGEX = STORY_SLUG_REGEX;
+const CHECKOUT_SURFACES = new Set(["lock_card", "buy_box"]);
+const OWNERSHIP_STATES = new Set(["owned", "not_owned", "unauthenticated", "pending_payment", "unavailable"]);
 const STORY_ROOMS = new Set(["kitchen"]);
 const STORY_ACTIONS = new Set([
   "recipe_jump",
@@ -152,6 +160,9 @@ function checkString(key: string, value: string): string | ValidationFailure {
     return fail("presentation_state");
   }
   if (key === "story_slug" && !STORY_SLUG_REGEX.test(value)) return fail("story_slug");
+  if (key === "collection_slug" && !SLUG_REGEX.test(value)) return fail("collection_slug");
+  if (key === "surface" && !CHECKOUT_SURFACES.has(value)) return fail("surface");
+  if (key === "ownership_state" && !OWNERSHIP_STATES.has(value)) return fail("ownership_state");
   if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
   if (key === "story_action" && !STORY_ACTIONS.has(value)) return fail("story_action");
   if (key === "story_placement" && !STORY_PLACEMENTS.has(value)) return fail("story_placement");

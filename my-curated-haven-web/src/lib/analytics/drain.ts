@@ -25,7 +25,7 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
   const environment = trustedAnalyticsEnvironment();
   const pool = getCommercePool();
   const { rows } = await pool.query(
-    `SELECT e.id, e.event_name, e.payload, po.analytics_consent
+    `SELECT e.id, e.event_name, e.payload, po.analytics_consent, po.analytics_distinct_id, po.user_id
      FROM private.analytics_exports e
      JOIN private.purchase_orders po ON po.id = e.order_id
      WHERE e.delivery_state = 'pending'
@@ -50,12 +50,18 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
     }
 
     const properties = row.payload ?? {};
+    // The visitor who tapped Buy, so the purchase joins their visit in PostHog. Orders placed before the
+    // checkout passed it along fall back to their random attempt reference.
     const distinctId =
-      typeof properties.attempt_ref === "string"
-        ? properties.attempt_ref
-        : typeof properties.order_ref === "string"
-          ? properties.order_ref
-          : "server";
+      typeof row.analytics_distinct_id === "string"
+        ? row.analytics_distinct_id
+        : typeof properties.attempt_ref === "string"
+          ? properties.attempt_ref
+          : typeof properties.order_ref === "string"
+            ? properties.order_ref
+            : "server";
+    // A signed-in buyer already has a PostHog profile; a guest's anonymous visit stays without one.
+    const personless = row.user_id === null || typeof row.analytics_distinct_id !== "string";
 
     try {
       const controller = new AbortController();
@@ -71,7 +77,7 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
             ...properties,
             environment,
             source: "server",
-            $process_person_profile: false,
+            ...(personless ? { $process_person_profile: false } : {}),
           },
           timestamp: new Date().toISOString(),
         }),

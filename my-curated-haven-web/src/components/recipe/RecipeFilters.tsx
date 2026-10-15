@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
@@ -26,6 +26,37 @@ interface RecipeFiltersProps {
   totalCount: number;
 }
 
+/** The query string for a filter state, in one fixed order, so two states can be compared. */
+function filterQuery(state: RecipeFilterState): string {
+  const params = new URLSearchParams();
+  if (state.q) params.set("q", state.q);
+  state.meals.forEach((m) => params.append("meal", m));
+  state.diets.forEach((d) => params.append("diet", d));
+  if (state.maxTime) params.set("maxTime", state.maxTime.toString());
+  return params.toString();
+}
+
+/** A search or filter waiting for its results, so its event reports the new count, not the old one. */
+type PendingResultEvent =
+  | { kind: "search"; query: string }
+  | { kind: "filter"; query: string; activeFilterCount: number };
+
+function sendResultEvent(pending: PendingResultEvent, count: number) {
+  if (pending.kind === "search") {
+    trackAnalyticsEvent(
+      "recipe_search_submit",
+      { result_count_bucket: toResultCountBucket(count), zero_results: count === 0 },
+      "recipes"
+    );
+  } else {
+    trackAnalyticsEvent(
+      "recipe_filter_apply",
+      { active_filter_count: pending.activeFilterCount, result_count_bucket: toResultCountBucket(count) },
+      "recipes"
+    );
+  }
+}
+
 export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -37,6 +68,25 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const titleId = useId();
 
   const currentFilters = parseFilterParams(searchParams);
+  const currentQuery = filterQuery(currentFilters);
+  const pendingRef = useRef<PendingResultEvent | null>(null);
+
+  // The URL and the new results arrive together; send the waiting event once they match what was asked for.
+  useEffect(() => {
+    const pending = pendingRef.current;
+    if (!pending || pending.query !== currentQuery) return;
+    pendingRef.current = null;
+    sendResultEvent(pending, totalCount);
+  }, [currentQuery, totalCount]);
+
+  /** Results are already on screen when nothing changed; otherwise wait for them. */
+  const queueResultEvent = (pending: PendingResultEvent) => {
+    if (pending.query === currentQuery) {
+      sendResultEvent(pending, totalCount);
+    } else {
+      pendingRef.current = pending;
+    }
+  };
 
   // Uncontrolled search input: text typed before hydration survives, and the
   // key below resets it whenever the URL's q changes (Phase 6 audit R6-05).
@@ -47,36 +97,25 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const [draftDiets, setDraftDiets] = useState<string[]>(currentFilters.diets);
   const [draftMaxTime, setDraftMaxTime] = useState<number | null>(currentFilters.maxTime);
 
-  const updateFilters = (next: Partial<RecipeFilterState>) => {
+  /** Pushes the new filters and returns their query string. */
+  const updateFilters = (next: Partial<RecipeFilterState>): string => {
     const merged: RecipeFilterState = {
       ...currentFilters,
       ...next,
     };
 
-    const params = new URLSearchParams();
-    if (merged.q) params.set("q", merged.q);
-    merged.meals.forEach((m) => params.append("meal", m));
-    merged.diets.forEach((d) => params.append("diet", d));
-    if (merged.maxTime) params.set("maxTime", merged.maxTime.toString());
-
-    const qs = params.toString();
+    const qs = filterQuery(merged);
     startTransition(() => {
       router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
+    return qs;
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const q = String(new FormData(e.currentTarget as HTMLFormElement).get("q") ?? "");
-    updateFilters({ q: q.trim().slice(0, 120) });
-    trackAnalyticsEvent(
-      "recipe_search_submit",
-      {
-        result_count_bucket: toResultCountBucket(totalCount),
-        zero_results: totalCount === 0,
-      },
-      "recipes"
-    );
+    const query = updateFilters({ q: q.trim().slice(0, 120) });
+    queueResultEvent({ kind: "search", query });
   };
 
   const openDialog = () => {
@@ -94,19 +133,12 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const applyDialogFilters = () => {
     const activeFilterCount =
       draftMeals.length + draftDiets.length + (draftMaxTime ? 1 : 0);
-    updateFilters({
+    const query = updateFilters({
       meals: draftMeals,
       diets: draftDiets,
       maxTime: draftMaxTime,
     });
-    trackAnalyticsEvent(
-      "recipe_filter_apply",
-      {
-        active_filter_count: activeFilterCount,
-        result_count_bucket: toResultCountBucket(totalCount),
-      },
-      "recipes"
-    );
+    queueResultEvent({ kind: "filter", query, activeFilterCount });
     closeDialog();
   };
 

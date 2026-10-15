@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { remoteAnalyticsAllowed } from "./environment";
+import { INTERNAL_BROWSER_STORAGE_KEY } from "./consent";
 import { isAdminPath, isPrivatePath } from "./private-paths";
 
 let initialized = false;
@@ -51,9 +52,19 @@ export function syncSessionRecording(pathname: string): void {
   }
 }
 
+/**
+ * Nothing is captured while an admin page is open. The browser is also marked internal, so when it goes back to
+ * public pages syncInternalBrowser turns capture on again with is_internal set, instead of the browser going
+ * silent for good.
+ */
 export function syncAdminPrivacy(pathname: string): void {
   if (typeof window === "undefined") return;
   if (!isAdminPath(pathname)) return;
+  try {
+    localStorage.setItem(INTERNAL_BROWSER_STORAGE_KEY, "1");
+  } catch {
+    // Storage can be blocked; the opt-out below still protects admin.
+  }
   try {
     if (initialized) {
       posthog.stopSessionRecording();
@@ -61,6 +72,26 @@ export function syncAdminPrivacy(pathname: string): void {
     }
   } catch {
     // Privacy must never break admin.
+  }
+}
+
+/**
+ * On public pages: an admin's browser keeps being measured, tagged is_internal so PostHog's internal-user filter
+ * leaves it out of reports. Only admin pages ever opt a browser out, so an opted-out browser is an admin's
+ * (including those opted out before 2026-10-15, when admin pages switched capture off for good).
+ */
+export function syncInternalBrowser(): void {
+  if (!initialized || typeof window === "undefined") return;
+  try {
+    let internal = localStorage.getItem(INTERNAL_BROWSER_STORAGE_KEY) === "1";
+    if (posthog.has_opted_out_capturing()) {
+      internal = true;
+      localStorage.setItem(INTERNAL_BROWSER_STORAGE_KEY, "1");
+      posthog.opt_in_capturing({ captureEventName: null });
+    }
+    if (internal) posthog.register({ is_internal: true });
+  } catch {
+    // Analytics must never interrupt the page.
   }
 }
 

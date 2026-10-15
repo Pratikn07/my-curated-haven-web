@@ -24,6 +24,7 @@ Owner of every row: the site owner (the only operator). Backup operator: none ye
 | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | PostHog project key, `https://us.i.posthog.com` | No (public by design) |
 | `NEXT_PUBLIC_APP_ENV` | `production`; gates remote analytics | No |
 | `NEXT_PUBLIC_ANALYTICS_ENABLED` | `true`; set `false` and redeploy to switch analytics off | No |
+| `ANALYTICS_EXPORT_ENABLED`, `POSTHOG_SERVER_KEY`, `POSTHOG_HOST` | Server purchase events to PostHog: `true`, the project token, `https://us.i.posthog.com`. **Not set yet.** Set with owner approval after migration `20261015090000_tracking_purchase_link` is applied, together with `UPDATE private.analytics_settings SET optional_export_enabled = true, updated_at = now() WHERE singleton = true;` (docs/implementation/tracking/PLAN.md) | Key: no (public by design) |
 | `VERCEL_FORCE_NO_BUILD_CACHE` | `1`; the build cache once shipped stale CSS | No |
 | `STRIPE_SECRET_KEY` | Live restricted key (`rk_live_`, full access except sensitive operations), set 2026-10-12 | Yes |
 | `STRIPE_WEBHOOK_SECRET` | Signing secret of live endpoint `we_1UPkTMPLtGCDwKKM62HXoTUg` | Yes |
