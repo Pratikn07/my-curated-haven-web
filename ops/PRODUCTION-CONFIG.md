@@ -67,7 +67,7 @@ The live webhook endpoint (`https://mycuratedhaven.com/api/stripe/webhook`, 8 ev
 | --- | --- |
 | Project | `Default project`, US Cloud (`us.i.posthog.com`), project 630160, Free plan (1M events, 5K recordings a month) |
 | Captured | Page views, clicks, identified signed-in users, session recordings (inputs masked, none on sign-in, account, checkout) |
-| Server purchase export | `checkout_created` and `purchase_confirmed` sent from the Stripe webhook under the buyer's own PostHog id, with `campaign_code`. Migration `20261014220000` applied 2026-10-14. Also needs `ANALYTICS_EXPORT_ENABLED=true` in Vercel production (key and host fall back to the `NEXT_PUBLIC_POSTHOG_*` values) and `private.analytics_settings.optional_export_enabled = true`. Off until both are done |
+| Server purchase export | `checkout_created` and `purchase_confirmed` sent from the Stripe webhook under the buyer's own PostHog id, with `campaign_code`. Migration `20261014220000` applied, `ANALYTICS_EXPORT_ENABLED=true` set in Vercel production (key and host fall back to the `NEXT_PUBLIC_POSTHOG_*` values) and `private.analytics_settings.optional_export_enabled = true`, all on 2026-10-14. Sends once PR #147 is deployed; code before it needs `POSTHOG_SERVER_KEY`/`POSTHOG_HOST`, which are not set. Switch off with `optional_export_enabled = false` |
 | Warehouse source | GitHub `pratikn07/my-curated-haven-web` (`pull_requests`, `commits`), read-only token |
 
 ## Monitoring
