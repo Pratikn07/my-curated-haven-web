@@ -1,8 +1,6 @@
 import Link from "next/link";
 import Container from "@/components/layout/Container";
 import RecipeCard from "@/components/recipe/RecipeCard";
-import TrackedHomepageLink from "@/components/home/TrackedHomepageLink";
-import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import type { HomepageRecipes } from "@/lib/data/load-homepage-recipes";
 
 export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
@@ -51,19 +49,13 @@ export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
               <p className="font-display text-lg text-text-muted italic">
                 If half ends up on the floor, the other half still counts.
               </p>
-              <TrackedHomepageLink
+              <Link
                 href="/recipes"
-                tracking={{
-                  type: "cta",
-                  destination: "recipes_index",
-                  placement: "final",
-                  presentationState: HOMEPAGE_RECIPE_STATE.mode,
-                }}
                 className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
                 data-track-cta="see_all_recipes"
               >
                 See all recipes
-              </TrackedHomepageLink>
+              </Link>
             </div>
           </>
         ) : (

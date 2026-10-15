@@ -55,55 +55,16 @@ const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
 const SIGN_IN_METHODS = new Set(["email_code", "google"]);
 const HOMEPAGE_FEATURE_KEYS = new Set(["kitchen", "library", "nursery", "shelf"]);
 const HOMEPAGE_PLACEMENTS = new Set(["hero", "house", "overview", "preview", "footer", "final"]);
-const HOMEPAGE_DESTINATIONS = new Set([
-  "recipes_index",
-  "recipe_detail",
-  "collection_detail",
-  "previews",
-  "about",
-  "support",
-]);
-const HOMEPAGE_PRESENTATION_STATES = new Set(["preparation", "free_ready", "collection_ready"]);
 const STORY_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,63}$/;
 /** Public slugs of books, recipes and landing pages. */
 const SLUG_REGEX = STORY_SLUG_REGEX;
 const CHECKOUT_SURFACES = new Set(["lock_card", "buy_box"]);
 const OWNERSHIP_STATES = new Set(["owned", "not_owned", "unauthenticated", "pending_payment", "unavailable"]);
 const STORY_ROOMS = new Set(["kitchen"]);
-const STORY_ACTIONS = new Set([
-  "recipe_jump",
-  "full_recipe",
-  "more_recipe",
-  "collection",
-  "about",
-  "campaign_recipe",
-  "pack",
-  "instagram",
-  "recipes_index",
-  "home",
-  "make_ahead_plan",
-]);
-const STORY_PLACEMENTS = new Set([
-  "card",
-  "sticky",
-  "recipe",
-  "next",
-  "offer",
-  "about",
-  "hero",
-  "recipes",
-  "story",
-  "pack",
-  "collection",
-  "related",
-  "closing",
-  "plan",
-]);
 const STORY_OFFER_STATES = new Set(["none", "pack", "collection", "both"]);
-const STORY_SECTIONS = new Set(["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing", "plan"]);
 const STORY_SERIES_REGEX = /^[a-z0-9][a-z0-9-]{0,39}$/;
 /** Small counts on campaign pages; anything larger is a bug, not data. */
-const SMALL_COUNT_FIELDS: Record<string, [number, number]> = { recipe_count: [0, 50], recipe_position: [1, 50] };
+const SMALL_COUNT_FIELDS: Record<string, [number, number]> = { recipe_count: [0, 50] };
 
 const UUID_FIELDS = new Set([
   "recipe_id",
@@ -191,20 +152,13 @@ function checkString(key: string, value: string): string | ValidationFailure {
   }
   if (key === "feature_key" && !HOMEPAGE_FEATURE_KEYS.has(value)) return fail("feature_key");
   if (key === "placement" && !HOMEPAGE_PLACEMENTS.has(value)) return fail("placement");
-  if (key === "destination" && !HOMEPAGE_DESTINATIONS.has(value)) return fail("destination");
-  if (key === "presentation_state" && !HOMEPAGE_PRESENTATION_STATES.has(value)) {
-    return fail("presentation_state");
-  }
   if (key === "story_slug" && !STORY_SLUG_REGEX.test(value)) return fail("story_slug");
   if (key === "collection_slug" && !SLUG_REGEX.test(value)) return fail("collection_slug");
   if (key === "surface" && !OFFER_SURFACES.has(value)) return fail("surface");
   if (key === "ownership_state" && !OWNERSHIP_STATES.has(value)) return fail("ownership_state");
   if (key === "primary_ux" && !isPrimaryUx(value)) return fail("primary_ux");
   if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
-  if (key === "story_action" && !STORY_ACTIONS.has(value)) return fail("story_action");
-  if (key === "story_placement" && !STORY_PLACEMENTS.has(value)) return fail("story_placement");
   if (key === "offer_state" && !STORY_OFFER_STATES.has(value)) return fail("offer_state");
-  if (key === "story_section" && !STORY_SECTIONS.has(value)) return fail("story_section");
   if (key === "story_series" && !STORY_SERIES_REGEX.test(value)) return fail("story_series");
   if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");

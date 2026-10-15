@@ -31,7 +31,7 @@ function offerPayload(element: HTMLElement): OfferViewedPayload | null {
 /**
  * Views, once per page view:
  * - section_viewed for a block marked data-track-view, when its top passes two thirds of the way up the screen
- *   (the rule CampaignTracker uses for story sections); primary_ux is its own or its module's label.
+ *   (the rule story_section_viewed used before it retired); primary_ux is its own or its module's label.
  * - offer_viewed for a block marked data-track-offer once half of it is on screen (or it fills half the screen),
  *   once per surface and book.
  * Two observers, because the section rule shrinks the screen from below and a phone buy bar fixed to the bottom

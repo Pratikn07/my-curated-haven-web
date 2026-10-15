@@ -144,8 +144,6 @@ export function BookGrid({ recipes }: { recipes: { slug: string; title: string; 
             <span>{recipe.title}</span>
             <Link
               href={recipe.href}
-              data-story-action={recipe.free ? "campaign_recipe" : "collection"}
-              data-story-placement="collection"
               data-track-cta={recipe.free ? "open_recipe" : "see_collection"}
             >
               {recipe.free ? "Free · open the recipe" : "In the book · see it"} <span aria-hidden="true">→</span>
@@ -254,7 +252,7 @@ export function HalloweenDock({ title, price, count, extra, href, onSale }: { ti
   useEffect(() => {
     const element = dock.current;
     const card = document.getElementById("hw-bookcard");
-    const end = document.querySelector<HTMLElement>('[data-story-section="collection"]');
+    const end = document.getElementById("hw-collection");
     if (!element || !card) return;
     let frame = 0;
     const update = () => {
@@ -293,7 +291,7 @@ export function HalloweenDock({ title, price, count, extra, href, onSale }: { ti
           {price} · {count} recipes{extra ? ` ${extra}` : ""}
         </span>
       </p>
-      <a className="hw-dock-cta" href={href} data-story-action="collection" data-story-placement="sticky" data-track-cta="get_book">
+      <a className="hw-dock-cta" href={href} data-track-cta="get_book">
         {onSale ? "Get it" : "See it"} <span aria-hidden="true">→</span>
       </a>
     </div>

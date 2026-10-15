@@ -65,7 +65,7 @@ https://mycuratedhaven.com/recipes/soft-baked-blueberry-and-oat-bars?utm_source=
 
 PostHog → **Web analytics** → the **UTM campaign** or **Channels** breakdown. Or PostHog → **Activity**, filter on the property `campaign_code`.
 
-For post pages: the event `story_view` names the post (`story_slug`) and how many recipes and offers it showed, `story_action_clicked` records taps on its buttons (which promised recipe was opened, the pack or collection, back to Instagram), `story_section_viewed` shows how far down the page parents got, and the session property `entry_story` ties a later recipe open or purchase back to the post.
+For post pages: the event `story_view` names the post (`story_slug`) and how many recipes and offers it showed, `cta_clicked` records taps on its buttons (the part of the page in `primary_ux`, the button in `cta`, which promised recipe in `cta_position` and `target_slug`), `section_viewed` shows how far down the page parents got, and the session property `entry_story` ties a later recipe open or purchase back to the post. Before tracking PR 4 they were `story_action_clicked` and `story_section_viewed`; the old-to-new table is in that PR.
 
 ## Adding a new place
 

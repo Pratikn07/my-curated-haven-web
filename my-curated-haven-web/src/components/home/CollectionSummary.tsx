@@ -1,6 +1,6 @@
+import Link from "next/link";
 import type { HomepageRecipePresentationState } from "@/config/homepage-content";
 import Container from "@/components/layout/Container";
-import TrackedHomepageLink from "./TrackedHomepageLink";
 
 export default function CollectionSummary({
   state,
@@ -18,19 +18,13 @@ export default function CollectionSummary({
             A collection from Tiny Soho
           </h2>
           <p className="mt-2 max-w-[65ch] text-text-muted">{state.collection.summary}</p>
-          <TrackedHomepageLink
+          <Link
             href={state.collection.href}
-            tracking={{
-              type: "cta",
-              destination: "collection_detail",
-              placement: "final",
-              presentationState: "collection_ready",
-            }}
             className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
             data-track-cta="see_collection"
           >
             View the recipe collection
-          </TrackedHomepageLink>
+          </Link>
         </div>
       </Container>
     </section>
