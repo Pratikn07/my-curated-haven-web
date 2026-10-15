@@ -33,9 +33,15 @@ export function initPostHog(): boolean {
     session_recording: {
       maskAllInputs: true,
     },
-    // Tracking PR 2: the Stripe checkout session in /checkout/return?session_id=… never reaches PostHog.
-    before_send: withoutCheckoutSession,
-    // Tracking PR 3: uncaught errors arrive as $exception (PostHog error tracking), so reports can show what breaks.
+    // The Stripe checkout session (/checkout/return?session_id=…) and search text (/recipes?q=…) never reach
+    // PostHog: removed from every address on an event before it is sent.
+    before_send: withoutPrivateQueryParams,
+    // Ad click ids (fbclid, gclid, igshid, …) are masked wherever PostHog records them (addresses, campaign
+    // properties, first-visit person properties); CampaignCapture keeps only whether one was present. The same
+    // masking covers the private parameters in places before_send never sees (heatmaps, recordings).
+    mask_personal_data_properties: true,
+    custom_personal_data_properties: [...PRIVATE_QUERY_PARAMS],
+    // Uncaught errors arrive as $exception (PostHog error tracking), so reports can show what breaks.
     capture_exceptions: true,
   });
   initialized = true;
@@ -99,7 +105,6 @@ export function syncInternalBrowser(): void {
   }
 }
 
-// Tracking PR 2
 /** Event and person properties that hold a full address. */
 const URL_PROPERTIES = [
   "$current_url",
@@ -110,25 +115,33 @@ const URL_PROPERTIES = [
   "$session_entry_referrer",
 ];
 
-/** The address without its session_id query parameter (the Stripe checkout session). Anything else is unchanged. */
-export function stripCheckoutSessionId(value: unknown): unknown {
-  if (typeof value !== "string" || !/[?&]session_id=/.test(value)) return value;
+/** Query parameters that never reach PostHog: the Stripe checkout session (session_id) and search text (q). */
+export const PRIVATE_QUERY_PARAMS = ["session_id", "q"] as const;
+const PRIVATE_PARAM = new RegExp(`[?&](?:${PRIVATE_QUERY_PARAMS.join("|")})=`);
+
+/** The address without its private query parameters. Anything else is unchanged. */
+export function stripPrivateQueryParams(value: unknown): unknown {
+  if (typeof value !== "string" || !PRIVATE_PARAM.test(value)) return value;
   try {
     const url = new URL(value);
-    url.searchParams.delete("session_id");
+    for (const param of PRIVATE_QUERY_PARAMS) url.searchParams.delete(param);
     return url.toString();
   } catch {
-    return value.replace(/([?&])session_id=[^&#]*&?/g, "$1").replace(/[?&](?=#|$)/, "");
+    let stripped = value;
+    for (const param of PRIVATE_QUERY_PARAMS) {
+      stripped = stripped.replace(new RegExp(`([?&])${param}=[^&#]*&?`, "g"), "$1");
+    }
+    return stripped.replace(/[?&](?=#|$)/, "");
   }
 }
 
-/** PostHog before_send hook: removes session_id from every address on the event before it is sent. */
-export function withoutCheckoutSession(event: CaptureResult | null): CaptureResult | null {
+/** PostHog before_send hook: removes the private query parameters from every address on the event. */
+export function withoutPrivateQueryParams(event: CaptureResult | null): CaptureResult | null {
   if (!event) return event;
   for (const bag of [event.properties, event.$set, event.$set_once]) {
     if (!bag) continue;
     for (const key of URL_PROPERTIES) {
-      if (key in bag) bag[key] = stripCheckoutSessionId(bag[key]);
+      if (key in bag) bag[key] = stripPrivateQueryParams(bag[key]);
     }
   }
   return event;

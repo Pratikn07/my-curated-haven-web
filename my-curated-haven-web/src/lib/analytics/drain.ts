@@ -2,6 +2,13 @@ import { getCommercePool } from "@/lib/payments/repository";
 import { trustedAnalyticsEnvironment } from "./environment";
 
 const QUEUE_LIMIT = 20;
+/**
+ * The drain runs inside the Stripe webhook, after the payment is recorded, so a slow PostHog must not hold the
+ * webhook's answer: no new send starts after this budget, and each send gives up after REQUEST_TIMEOUT_MS. Rows
+ * left pending go out on the next drain.
+ */
+const DRAIN_BUDGET_MS = 2_500;
+const REQUEST_TIMEOUT_MS = 2_000;
 
 /**
  * The capture key is PostHog's public project key, the same one the browser uses, so the server falls back to the
@@ -49,8 +56,10 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
   );
 
   const { host, apiKey } = posthogTarget();
+  const startedAt = Date.now();
 
   for (const row of rows) {
+    if (Date.now() - startedAt > DRAIN_BUDGET_MS) break;
     if (row.analytics_consent !== true) {
       await pool.query(
         `UPDATE private.analytics_exports
@@ -78,7 +87,7 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
       const response = await fetch(`${host}/capture/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

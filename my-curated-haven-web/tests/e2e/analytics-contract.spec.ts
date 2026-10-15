@@ -3,7 +3,7 @@ import { acceptCampaignInput } from "../../src/lib/analytics/campaigns";
 import { acceptCheckoutAnalytics, checkoutErrorFor } from "../../src/lib/analytics/checkout-analytics";
 import { remoteAnalyticsAllowed, trustedAnalyticsEnvironment } from "../../src/lib/analytics/environment";
 import { describeLink } from "../../src/lib/analytics/links";
-import { stripCheckoutSessionId, withoutCheckoutSession } from "../../src/lib/analytics/posthog";
+import { stripPrivateQueryParams, withoutPrivateQueryParams } from "../../src/lib/analytics/posthog";
 import { buildAnalyticsEnvelope, validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
 import {
   contentSlugFromPath,
@@ -512,30 +512,40 @@ test("page context: the slug comes from the address, and bad values are dropped 
   expect(dropped && "access_state" in dropped).toBe(false);
 });
 
-test("the Stripe session id is removed from every address PostHog would send", () => {
-  expect(stripCheckoutSessionId("https://mycuratedhaven.com/checkout/return?session_id=cs_test_a1b2")).toBe(
+test("the Stripe session id and search text are removed from every address PostHog would send", () => {
+  expect(stripPrivateQueryParams("https://mycuratedhaven.com/checkout/return?session_id=cs_test_a1b2")).toBe(
     "https://mycuratedhaven.com/checkout/return"
   );
-  expect(stripCheckoutSessionId("https://mycuratedhaven.com/checkout/return?utm_source=instagram&session_id=cs_test_a1b2")).toBe(
+  expect(stripPrivateQueryParams("https://mycuratedhaven.com/checkout/return?utm_source=instagram&session_id=cs_test_a1b2")).toBe(
     "https://mycuratedhaven.com/checkout/return?utm_source=instagram"
   );
-  expect(stripCheckoutSessionId("https://mycuratedhaven.com/recipes?q=soup")).toBe("https://mycuratedhaven.com/recipes?q=soup");
-  expect(stripCheckoutSessionId("$direct")).toBe("$direct");
-  expect(stripCheckoutSessionId(undefined)).toBeUndefined();
+  expect(stripPrivateQueryParams("https://mycuratedhaven.com/recipes?q=soup")).toBe("https://mycuratedhaven.com/recipes");
+  expect(stripPrivateQueryParams("https://mycuratedhaven.com/recipes?q=oat+bars&meal=Snack")).toBe(
+    "https://mycuratedhaven.com/recipes?meal=Snack"
+  );
+  // Only whole parameter names: a campaign tag or a filter is kept.
+  expect(stripPrivateQueryParams("https://mycuratedhaven.com/recipes?meal=Snack&utm_campaign=story_link")).toBe(
+    "https://mycuratedhaven.com/recipes?meal=Snack&utm_campaign=story_link"
+  );
+  expect(stripPrivateQueryParams("/recipes?q=soup&meal=Snack")).toBe("/recipes?meal=Snack");
+  expect(stripPrivateQueryParams("$direct")).toBe("$direct");
+  expect(stripPrivateQueryParams(undefined)).toBeUndefined();
 
-  const event = withoutCheckoutSession({
+  const event = withoutPrivateQueryParams({
     uuid: "0199",
     event: "$pageview",
     properties: {
       $current_url: "https://mycuratedhaven.com/checkout/return?session_id=cs_live_x",
       $referrer: "https://mycuratedhaven.com/checkout/return?session_id=cs_live_x&b=2",
+      $session_entry_url: "https://mycuratedhaven.com/recipes?q=peanut%20free%20lunch",
       $pathname: "/checkout/return",
     },
     $set_once: { $initial_current_url: "https://mycuratedhaven.com/checkout/return?session_id=cs_live_x" },
   });
   expect(JSON.stringify(event)).not.toContain("cs_live_x");
+  expect(JSON.stringify(event)).not.toContain("peanut");
   expect(event?.properties.$referrer).toBe("https://mycuratedhaven.com/checkout/return?b=2");
-  expect(withoutCheckoutSession(null)).toBeNull();
+  expect(withoutPrivateQueryParams(null)).toBeNull();
 });
 
 test("entry_app names Instagram's and Facebook's browsers with the sign-in pattern", () => {

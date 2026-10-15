@@ -85,7 +85,11 @@ export default function ViewTracker() {
       });
     };
     let frame = 0;
-    const added = new MutationObserver(() => {
+    // Only nodes being added can bring a new block; text and attribute changes from animations never rescan.
+    const added = new MutationObserver((mutations) => {
+      if (!mutations.some((mutation) => Array.from(mutation.addedNodes).some((node) => node.nodeType === Node.ELEMENT_NODE))) {
+        return;
+      }
       if (!frame) {
         frame = window.requestAnimationFrame(() => {
           frame = 0;

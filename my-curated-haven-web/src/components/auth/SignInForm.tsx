@@ -33,9 +33,10 @@ interface SignInFormProps {
 const PENDING_KEY = "mch-sign-in-pending";
 const PENDING_MS = 10 * 60 * 1000; // the code's lifetime
 
-function rememberPending(email: string | null) {
+/** `at` is when the code being typed was sent, so the step (and sign_in_failed's expired_code) follows its lifetime. */
+function rememberPending(email: string | null, at = Date.now()) {
   try {
-    if (email) window.sessionStorage.setItem(PENDING_KEY, JSON.stringify({ email, at: Date.now() }));
+    if (email) window.sessionStorage.setItem(PENDING_KEY, JSON.stringify({ email, at }));
     else window.sessionStorage.removeItem(PENDING_KEY);
   } catch {
     // Storage can be blocked; the form still works, it just forgets on reload.
@@ -161,7 +162,8 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
       const res = await verifyOtpAction(email, code, returnTo);
       if (!res.success) {
         trackSignInFailed("verify_code", signInCodeFailure(res.failure ?? "unknown", codeSentAtRef.current));
-        rememberPending(email.trim().toLowerCase());
+        // Keep the send time: a refused attempt does not make the code any younger.
+        rememberPending(email.trim().toLowerCase(), codeSentAtRef.current ?? Date.now());
         setError(res.error || "Invalid or expired verification code.");
       }
     });
@@ -199,6 +201,7 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
       if (res.success) {
         // A resend is not a new sign-in, so it sends no sign_in_code_sent; the new code's age starts now.
         codeSentAtRef.current = Date.now();
+        rememberPending(email.trim().toLowerCase(), codeSentAtRef.current);
         setResendNotice("A fresh verification code has been sent.");
       } else {
         trackSignInFailed("send_code", res.failure);

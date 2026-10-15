@@ -40,6 +40,8 @@ export default function PageEngagementTracker() {
         depthSent = depth;
         void trackAnalyticsEvent("page_scroll_reached", { depth }, routeKey);
       }
+      // Every depth is sent: stop reading the page's height on each scroll.
+      if (depthSent === DEPTHS[DEPTHS.length - 1]) window.removeEventListener("scroll", onScroll);
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(readDepth);

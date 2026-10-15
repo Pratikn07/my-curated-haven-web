@@ -40,9 +40,15 @@ Check `~/MyCuratedHavenBackups/backup.log` for `done:`.
 First, while the user id still identifies their orders, remove the analytics link from their purchase records (orders are kept for accounting; the privacy policy promises this):
 
 ```sql
+BEGIN;
+-- The PostHog session also sits in the queued purchase events (private.analytics_exports.payload).
+UPDATE private.analytics_exports
+SET payload = payload - '$session_id'
+WHERE order_id IN (SELECT id FROM private.purchase_orders WHERE user_id = '<user id>');
 UPDATE private.purchase_orders
 SET analytics_distinct_id = NULL, analytics_session_id = NULL, updated_at = now()
 WHERE user_id = '<user id>';
+COMMIT;
 ```
 
 Then:
