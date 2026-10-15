@@ -156,11 +156,21 @@ export async function recordCheckoutMeasurement(params: {
   campaignCode: string | null;
   analyticsConsent: boolean;
   environment: string;
+  /** The buyer's PostHog ids, so the server purchase event joins their visit. The database drops malformed ones. */
+  analyticsDistinctId?: string | null;
+  analyticsSessionId?: string | null;
 }): Promise<string | null> {
   const pool = getCommercePool();
   const { rows } = await pool.query(
-    `SELECT private.record_checkout_measurement($1, $2, $3, $4) AS attempt_ref`,
-    [params.orderId, params.campaignCode, params.analyticsConsent, params.environment]
+    `SELECT private.record_checkout_measurement($1, $2, $3, $4, $5, $6) AS attempt_ref`,
+    [
+      params.orderId,
+      params.campaignCode,
+      params.analyticsConsent,
+      params.environment,
+      params.analyticsDistinctId ?? null,
+      params.analyticsSessionId ?? null,
+    ]
   );
   const ref = rows[0]?.attempt_ref;
   return typeof ref === "string" ? ref : null;

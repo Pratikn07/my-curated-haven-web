@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { acceptCampaignInput } from "../../src/lib/analytics/campaigns";
 import { remoteAnalyticsAllowed, trustedAnalyticsEnvironment } from "../../src/lib/analytics/environment";
+import { acceptAnalyticsIdentity } from "../../src/lib/analytics/identity";
 import { validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
 import { pathToCanonicalRouteKey } from "../../src/lib/analytics/schema";
 
@@ -121,6 +122,29 @@ test("keeps only registered campaign values", () => {
       utm_campaign: "bio_link",
     })
   ).toBeNull();
+});
+
+test("[tracking] checkout_clicked names the page it came from, and /halloween has its own route", () => {
+  const releaseId = "a0000000-0000-0000-0000-000000000001";
+  for (const entry_point of ["collection_page", "recipe_page", "plan_page"]) {
+    const clicked = validateAnalyticsEvent("checkout_clicked", { collection_release_id: releaseId, entry_point });
+    expect(clicked.ok, entry_point).toBe(true);
+  }
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_release_id: releaseId, entry_point: "homepage" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_release_id: "halloween", entry_point: "plan_page" }).ok).toBe(false);
+
+  expect(pathToCanonicalRouteKey("/halloween")).toBe("halloween");
+  expect(validateAnalyticsEvent("page_view", { route_key: "halloween", device_class: "mobile" }).ok).toBe(true);
+});
+
+test("[tracking] checkout keeps only well-formed PostHog ids", () => {
+  const distinctId = "0192f3a1-7b2c-7d4e-8f90-123456789abc";
+  const sessionId = "0192f3a1-7b2c-7d4e-8f90-cba987654321";
+  expect(acceptAnalyticsIdentity({ distinctId, sessionId })).toEqual({ distinctId, sessionId });
+  expect(acceptAnalyticsIdentity({ distinctId, sessionId: "not-a-session" })).toEqual({ distinctId, sessionId: null });
+  expect(acceptAnalyticsIdentity({ distinctId: "parent@example.com", sessionId: "x" })).toBeNull();
+  expect(acceptAnalyticsIdentity(distinctId)).toBeNull();
+  expect(acceptAnalyticsIdentity(null)).toBeNull();
 });
 
 test("remote analytics stays off without an explicit environment", () => {

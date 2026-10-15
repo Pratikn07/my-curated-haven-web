@@ -40,6 +40,7 @@ export const ALLOWED_ROUTE_KEYS: Record<string, CanonicalRouteKey> = {
   "/support": "support",
   "/about": "about",
   "/terms": "terms",
+  "/halloween": "halloween",
 };
 
 export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey | null {

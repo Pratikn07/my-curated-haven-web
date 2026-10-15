@@ -7,6 +7,7 @@ import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types"
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
 import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
+import { getAnalyticsIdentity } from "@/lib/analytics/posthog";
 import { rememberBoughtFrom } from "@/lib/recipes/bought-from";
 
 const CHECKOUT_FAILED = "We couldn't start checkout. Please refresh the page and try again.";
@@ -17,7 +18,10 @@ interface CheckoutButtonProps {
   ownershipState: OwnershipStatus;
   /** What this page shows for sale; checkout refuses a stale expectation and asks for a refresh. */
   expected: CheckoutExpectation | null;
+  /** Defaults to the release this page shows for sale (expected.releaseId). */
   releaseId?: string;
+  /** Which page the buy button sits on, for the checkout_clicked event. */
+  entryPoint?: "collection_page" | "recipe_page" | "plan_page";
   className?: string;
   /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
   appearance?: "default" | "cloth";
@@ -33,6 +37,7 @@ export default function CheckoutButton({
   ownershipState,
   expected,
   releaseId,
+  entryPoint = "collection_page",
   className = "",
   appearance = "default",
   signInHint = true,
@@ -73,23 +78,27 @@ export default function CheckoutButton({
     setIsLoading(true);
     setErrorMessage(null);
 
-    if (releaseId) {
+    const trackedReleaseId = releaseId ?? expected?.releaseId;
+    if (trackedReleaseId) {
       trackAnalyticsEvent(
         "checkout_clicked",
         {
-          collection_release_id: releaseId,
-          entry_point: "collection_page",
+          collection_release_id: trackedReleaseId,
+          entry_point: entryPoint,
         },
-        "collection_detail"
+        entryPoint === "recipe_page" ? "recipe_detail" : "collection_detail"
       );
     }
 
     try {
       const campaign = getSessionCampaign();
+      const analyticsConsent = isAnalyticsPermitted();
       const bodyPayload = {
         collectionSlug,
         expected,
-        analyticsConsent: isAnalyticsPermitted(),
+        analyticsConsent,
+        // Lets the server's purchase event land on this visitor, with their campaign and pages.
+        analyticsIdentity: analyticsConsent ? (getAnalyticsIdentity() ?? undefined) : undefined,
         attribution: campaign
           ? {
               utm_source: campaign.utm_source,

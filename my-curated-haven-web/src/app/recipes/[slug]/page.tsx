@@ -413,6 +413,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                     expected={saleOffer.expected}
                     signInHint={false}
                     fromRecipeSlug={catalog.slug}
+                    entryPoint="recipe_page"
                   />
                 ) : null}
                 <Link

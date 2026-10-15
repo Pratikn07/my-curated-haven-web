@@ -6,6 +6,7 @@ import { findCollectionIdBySlug, reserveCollectionOrder, reserveGuestCollectionO
 import type { CheckoutExpectation, CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
+import type { AnalyticsIdentity } from "@/lib/analytics/identity";
 import { reusableCheckoutUrl } from "./guardrails";
 
 export interface CreateCheckoutParams {
@@ -22,6 +23,8 @@ export interface CreateCheckoutParams {
   requestOrigin?: string;
   analyticsConsent?: boolean;
   attribution?: CampaignInput | null;
+  /** The buyer's PostHog distinct and session ids, so the purchase export lands on their visit. */
+  analyticsIdentity?: AnalyticsIdentity | null;
 }
 
 export async function createCheckoutSession({
@@ -32,6 +35,7 @@ export async function createCheckoutSession({
   requestOrigin,
   analyticsConsent = false,
   attribution = null,
+  analyticsIdentity = null,
 }: CreateCheckoutParams): Promise<CheckoutResult> {
   const config = getStripeConfig();
 
@@ -187,6 +191,8 @@ export async function createCheckoutSession({
       campaignCode: campaign?.utm_campaign ?? null,
       analyticsConsent: analyticsConsent === true,
       environment: trustedAnalyticsEnvironment(),
+      analyticsDistinctId: analyticsIdentity?.distinctId ?? null,
+      analyticsSessionId: analyticsIdentity?.sessionId ?? null,
     });
   } catch {
     analyticsAttemptRef = null;

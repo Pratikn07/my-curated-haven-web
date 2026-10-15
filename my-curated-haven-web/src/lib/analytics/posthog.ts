@@ -1,6 +1,7 @@
 import posthog from "posthog-js";
 import { remoteAnalyticsAllowed } from "./environment";
 import { isAdminPath, isPrivatePath } from "./private-paths";
+import { acceptAnalyticsIdentity, type AnalyticsIdentity } from "./identity";
 
 let initialized = false;
 
@@ -40,6 +41,19 @@ export function initPostHog(): boolean {
 
 export function isPostHogActive(): boolean {
   return initialized;
+}
+
+/** The visitor's PostHog distinct and session ids for checkout, or null while PostHog is off. */
+export function getAnalyticsIdentity(): AnalyticsIdentity | null {
+  try {
+    if (!initPostHog()) return null;
+    return acceptAnalyticsIdentity({
+      distinctId: posthog.get_distinct_id(),
+      sessionId: posthog.get_session_id(),
+    });
+  } catch {
+    return null;
+  }
 }
 
 export function syncSessionRecording(pathname: string): void {

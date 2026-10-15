@@ -33,6 +33,7 @@ const ROUTE_KEYS = new Set([
   "about",
   "terms",
   "story",
+  "halloween",
 ]);
 
 const DEVICE_CLASSES = new Set(["mobile", "desktop", "tablet"]);
@@ -44,6 +45,8 @@ const ENTRY_POINTS = new Set([
   "account",
   "other",
   "collection_page",
+  "recipe_page",
+  "plan_page",
 ]);
 const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
 const SIGN_IN_METHODS = new Set(["email_code", "google"]);

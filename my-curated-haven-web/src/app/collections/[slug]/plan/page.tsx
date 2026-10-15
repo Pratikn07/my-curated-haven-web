@@ -169,6 +169,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
               ownershipState={saleOffer.ownershipState}
               expected={saleOffer.expected}
               signInHint={false}
+              entryPoint="plan_page"
             />
           ) : null}
           <Link

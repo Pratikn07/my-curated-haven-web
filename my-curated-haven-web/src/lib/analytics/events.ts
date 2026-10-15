@@ -85,7 +85,8 @@ export type CanonicalRouteKey =
   | "support"
   | "about"
   | "terms"
-  | "story";
+  | "story"
+  | "halloween";
 
 export interface AnalyticsEnvelope {
   event_id: string;

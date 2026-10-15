@@ -24,7 +24,7 @@ Allowed common dimensions: registered campaign code, canonical route category, c
 | `sign_in_completed` | Browser, verified server success response | `entry_point`, `method` (`email_code` \| `google`) |
 | `recipe_save_changed` | Browser, successful server mutation response | `recipe_id`, `action=saved/removed` |
 | `collection_view` | Browser, actual saleable collection detail rendered | `collection_release_id` |
-| `checkout_clicked` | Browser, explicit buy action | `collection_release_id`, `entry_point` |
+| `checkout_clicked` | Browser, explicit buy action | `collection_release_id`, `entry_point` (`collection_page` \| `recipe_page` \| `plan_page`) |
 | `checkout_created` | Server, Phase 8 checkout session stored successfully | `collection_release_id`, opaque analytics `attempt_ref` |
 | `purchase_confirmed` | Server, validated paid transition committed | opaque `order_ref`, release, `currency`, `paid_minor` |
 | `purchase_access_activated` | Server, paid order's access first becomes available | opaque `order_ref`, release, `activation_delay_bucket` |
@@ -33,6 +33,8 @@ Allowed common dimensions: registered campaign code, canonical route category, c
 | `make_ahead_plan_open` | Browser, a buyer's full make-ahead plan rendered (`/collections/halloween/plan`, added 2026-10-14). Not sent for the locked preview or for admins | `collection_release_id` |
 
 Browser sign-in and save events are observations for UX reporting, not an audit trail. Server payment events exported to optional analytics require eligible consent and a valid anonymous attribution link. Their authoritative counterparts always remain in the Phase 8 ledger. Opaque analytics references are random mappings, not emails or reversible provider IDs, and remain restricted.
+
+Since 2026-10-14 the buy button sends the visitor's PostHog distinct and session ids (UUIDs only) with checkout. They are stored on the order, and server events are sent under that distinct id with `$session_id` and the order's `campaign_code`, so a purchase lands on the same visitor as their page views. Orders without stored ids fall back to the opaque reference.
 
 Do not implement `recipe_cooked`, `print_completed`, `meal_eaten` or a child's preference. The current app does not observe these outcomes. A locked preview does not produce `recipe_open`. A future explicit feedback feature requires a separate contract.
 
