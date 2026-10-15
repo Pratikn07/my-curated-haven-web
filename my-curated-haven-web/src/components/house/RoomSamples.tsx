@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
+// `key` names the keepsake in sample_interacted.
 const KEEPSAKES = [
-  { moment: "First word", detail: "“Ba”, for banana." },
-  { moment: "First food", detail: "Two bites of pear, then a big no." },
-  { moment: "First steps", detail: "Three steps, then a very proud sit-down." },
+  { key: "first-word", moment: "First word", detail: "“Ba”, for banana." },
+  { key: "first-food", moment: "First food", detail: "Two bites of pear, then a big no." },
+  { key: "first-steps", moment: "First steps", detail: "Three steps, then a very proud sit-down." },
 ] as const;
 
 /** Shows how the Nursery will keep small moments. Nothing is stored. */
@@ -14,11 +16,17 @@ export function NurserySample() {
   const keepsake = index === null ? null : KEEPSAKES[index];
   const today = new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
 
+  const stamp = () => {
+    const next = index === null ? 0 : (index + 1) % KEEPSAKES.length;
+    setIndex(next);
+    void trackAnalyticsEvent("sample_interacted", { sample: "nursery_stamp", choice: KEEPSAKES[next].key }, "home");
+  };
+
   return (
     <div className="grid gap-3">
       <button
         type="button"
-        onClick={() => setIndex((current) => (current === null ? 0 : (current + 1) % KEEPSAKES.length))}
+        onClick={stamp}
         data-track-cta="stamp_sample"
         className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl border border-border-control bg-surface px-4 font-semibold hover:bg-surface-muted"
       >
@@ -63,7 +71,10 @@ export function ShelfSample() {
         type="button"
         aria-expanded={open}
         aria-controls="shelf-sample-why"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpen(!open);
+          if (!open) void trackAnalyticsEvent("sample_interacted", { sample: "shelf_reveal" }, "home");
+        }}
         data-track-cta="why_we_pick"
         className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl border border-border-control bg-surface px-4 font-semibold hover:bg-surface-muted"
       >

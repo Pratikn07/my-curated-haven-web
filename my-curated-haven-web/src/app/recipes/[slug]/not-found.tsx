@@ -1,8 +1,10 @@
 import Link from "next/link";
+import NotFoundTracker from "@/components/analytics/NotFoundTracker";
 
 export default function RecipeNotFound() {
   return (
     <div className="mx-auto flex min-h-[50vh] max-w-xl flex-col items-center justify-center px-4 py-16 text-center" data-track-ux="error_page">
+      <NotFoundTracker />
       <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         Recipe Not Found
       </h1>

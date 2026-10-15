@@ -4,7 +4,9 @@ import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
 import { requestOtpAction, verifyOtpAction } from "@/app/sign-in/actions";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import type { SignInStep } from "@/lib/analytics/events";
 import { coarseEntryPoint } from "@/lib/analytics/schema";
+import { signInCodeFailure, type SignInFailure } from "@/lib/auth/otp-errors";
 import { createClient } from "@/lib/supabase/browser";
 import { oauthCallbackUrl } from "@/lib/auth/oauth";
 import { EMAIL_OTP_LENGTH } from "@/lib/auth/otp";
@@ -40,14 +42,21 @@ function rememberPending(email: string | null) {
   }
 }
 
-function readPending(): string | null {
+function readPending(): { email: string; at: number } | null {
   try {
     const saved = JSON.parse(window.sessionStorage.getItem(PENDING_KEY) ?? "null") as { email?: unknown; at?: unknown } | null;
-    if (saved && typeof saved.email === "string" && typeof saved.at === "number" && Date.now() - saved.at < PENDING_MS) return saved.email;
+    if (saved && typeof saved.email === "string" && typeof saved.at === "number" && Date.now() - saved.at < PENDING_MS) {
+      return { email: saved.email, at: saved.at };
+    }
   } catch {
     // Unreadable or blocked: start at the email step.
   }
   return null;
+}
+
+/** sign_in_failed: the step and a fixed reason. The email is never sent. */
+function trackSignInFailed(step: SignInStep, failure: SignInFailure | undefined) {
+  void trackAnalyticsEvent("sign_in_failed", { sign_in_step: step, sign_in_error: failure ?? "unknown" }, "sign_in");
 }
 
 function GoogleMark() {
@@ -88,11 +97,16 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
   const [isPending, startTransition] = useTransition();
 
   const startedTrackedRef = useRef(false);
+  const callbackFailureTrackedRef = useRef(false);
+  // When the code being typed was sent, so a refused code can be told apart as expired or mistyped.
+  const codeSentAtRef = useRef<number | null>(null);
+  const entryPoint = coarseEntryPoint(returnTo);
 
   useEffect(() => {
     const pending = readPending();
     if (!pending) return;
-    setEmail(pending);
+    codeSentAtRef.current = pending.at;
+    setEmail(pending.email);
     setStep("code");
   }, []);
 
@@ -106,18 +120,30 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
     );
   }, [returnTo]);
 
+  // Google sign-in that was cancelled or failed comes back here as ?authError=cancelled|failed.
+  useEffect(() => {
+    if (callbackFailureTrackedRef.current) return;
+    if (authError !== "cancelled" && authError !== "failed") return;
+    callbackFailureTrackedRef.current = true;
+    trackSignInFailed("google", authError === "cancelled" ? "cancelled" : "unknown");
+  }, [authError]);
+
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setResendNotice(null);
+    void trackAnalyticsEvent("sign_in_method_chosen", { method: "email_code", entry_point: entryPoint }, "sign_in");
 
     startTransition(async () => {
       const res = await requestOtpAction(email, captchaToken ?? undefined);
       spendCaptchaToken();
       if (res.success) {
+        codeSentAtRef.current = Date.now();
+        void trackAnalyticsEvent("sign_in_code_sent", { entry_point: entryPoint }, "sign_in");
         setStep("code");
         rememberPending(email.trim().toLowerCase());
       } else {
+        trackSignInFailed("send_code", res.failure);
         setError(res.error || "Failed to send verification code. Please try again.");
       }
     });
@@ -134,6 +160,7 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
       // Success redirects; the destination page records sign_in_completed (SignInCompletionTracker).
       const res = await verifyOtpAction(email, code, returnTo);
       if (!res.success) {
+        trackSignInFailed("verify_code", signInCodeFailure(res.failure ?? "unknown", codeSentAtRef.current));
         rememberPending(email.trim().toLowerCase());
         setError(res.error || "Invalid or expired verification code.");
       }
@@ -144,6 +171,7 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
     setError(null);
     setResendNotice(null);
     setIsGooglePending(true);
+    void trackAnalyticsEvent("sign_in_method_chosen", { method: "google", entry_point: entryPoint }, "sign_in");
 
     try {
       const { error: oauthError } = await createClient().auth.signInWithOAuth({
@@ -155,6 +183,7 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
       if (oauthError) throw oauthError;
       // The browser is navigating to Google; leave the button busy.
     } catch {
+      trackSignInFailed("google", "unknown");
       setError("We couldn't open Google sign-in. Please use your email instead.");
       setIsGooglePending(false);
     }
@@ -168,8 +197,11 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
       const res = await requestOtpAction(email, captchaToken ?? undefined);
       spendCaptchaToken();
       if (res.success) {
+        // A resend is not a new sign-in, so it sends no sign_in_code_sent; the new code's age starts now.
+        codeSentAtRef.current = Date.now();
         setResendNotice("A fresh verification code has been sent.");
       } else {
+        trackSignInFailed("send_code", res.failure);
         setError(res.error || "Could not resend code. Please try again later.");
       }
     });

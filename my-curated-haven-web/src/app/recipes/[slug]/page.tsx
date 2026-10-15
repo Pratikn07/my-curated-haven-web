@@ -38,6 +38,7 @@ import { LockIcon, RecipeFog, RecipeRevealStage } from "@/components/recipe/Reci
 import ClearOpenedParam from "@/components/recipe/ClearOpenedParam";
 import TrackPageState from "@/components/analytics/TrackPageState";
 import { offerAttributes } from "@/lib/analytics/track-markup";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 
 const getCachedRecipe = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -358,6 +359,10 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
         {isAccessDenied ? (
           /* Gated / Locked Recipe Presentation: the fog teaser, with the buy card over its lower half */
           <div className="recipe-locked">
+            <PageEventTracker
+              event="paywall_viewed"
+              payload={{ recipe_id: catalog.id, ...(book ? { collection_slug: book.collection.slug } : {}) }}
+            />
             <RecipeFog ghost={ghost} />
             <div
               className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm"

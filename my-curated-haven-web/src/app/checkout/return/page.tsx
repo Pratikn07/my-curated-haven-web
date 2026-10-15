@@ -136,6 +136,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
           <Card>
             <ClaimPurchaseForm
               sessionId={sessionId}
+              collectionSlug={guest.collectionSlug}
               maskedEmail={guest.maskedEmail}
               collectionTitle={guest.collectionTitle}
               supportReference={guest.supportReference}
@@ -218,6 +219,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
             formattedAmount={orderSummary.formattedAmount}
             email={user.email ?? null}
             recipes={book?.recipes.map((recipe) => ({ slug: recipe.slug, title: recipe.title })) ?? []}
+            analyticsRef={orderSummary.analyticsRef}
           />
         ) : (
           <div>

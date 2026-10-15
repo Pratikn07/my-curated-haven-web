@@ -204,6 +204,7 @@ export async function getOrderSummaryBySessionId(
       po.attempt_state,
       po.release_id,
       po.session_id,
+      po.analytics_attempt_ref::text as analytics_ref,
       c.slug as collection_slug,
       c.title as collection_title,
       co.base_minor_amount,
@@ -265,6 +266,7 @@ export async function getOrderSummaryBySessionId(
     formattedAmount: formatPrice(amountMinor, currency),
     isEntitled: Boolean(r.is_entitled),
     statusDisplay,
+    analyticsRef: r.analytics_ref ?? null,
   };
 }
 

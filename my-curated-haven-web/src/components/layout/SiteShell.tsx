@@ -6,6 +6,7 @@ import ClickTracker from "@/components/analytics/ClickTracker";
 import PageEngagementTracker from "@/components/analytics/PageEngagementTracker";
 import ViewTracker from "@/components/analytics/ViewTracker";
 import SignInCompletionTracker from "@/components/auth/SignInCompletionTracker";
+import FaqTracker from "@/components/analytics/FaqTracker";
 import { footerLinks, headerLinks, linksFor } from "@/config/site-navigation";
 import { hasShowroomCollections } from "@/lib/collections/visibility";
 
@@ -25,6 +26,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
         <ClickTracker />
         <PageEngagementTracker />
         <ViewTracker />
+        <FaqTracker />
       </AnalyticsProvider>
     </>
   );

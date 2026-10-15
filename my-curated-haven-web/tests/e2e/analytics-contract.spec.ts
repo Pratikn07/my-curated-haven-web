@@ -1,16 +1,22 @@
 import { expect, test } from "@playwright/test";
 import { acceptCampaignInput } from "../../src/lib/analytics/campaigns";
+import { acceptCheckoutAnalytics, checkoutErrorFor } from "../../src/lib/analytics/checkout-analytics";
 import { remoteAnalyticsAllowed, trustedAnalyticsEnvironment } from "../../src/lib/analytics/environment";
-import { validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
-import { pathToCanonicalRouteKey } from "../../src/lib/analytics/schema";
-import { acceptCheckoutAnalytics } from "../../src/lib/analytics/checkout-analytics";
-import { isSignInMethodMarker } from "../../src/lib/auth/oauth";
-// Tracking PR 2
 import { describeLink } from "../../src/lib/analytics/links";
-import { buildAnalyticsEnvelope } from "../../src/lib/analytics/sanitize";
-import { contentSlugFromPath } from "../../src/lib/analytics/schema";
 import { stripCheckoutSessionId, withoutCheckoutSession } from "../../src/lib/analytics/posthog";
+import { buildAnalyticsEnvelope, validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
+import {
+  contentSlugFromPath,
+  isTrackingSlug,
+  pathToCanonicalRouteKey,
+  routeClassFromPath,
+  toSecondsBucket,
+} from "../../src/lib/analytics/schema";
+import { PRIMARY_UX_VALUES } from "../../src/lib/analytics/ux";
 import { inAppBrowserName, isInAppBrowser } from "../../src/lib/auth/in-app-browser";
+import { isSignInMethodMarker } from "../../src/lib/auth/oauth";
+import { otpRequestFailure, otpVerifyFailure, signInCodeFailure } from "../../src/lib/auth/otp-errors";
+import { RECIPE_FILTER_VALUE_SLUGS, recipeFilterAnalyticsValues } from "../../src/lib/recipes/filters";
 
 const RECIPE_ID = "10000000-0000-0000-0000-000000000001";
 
@@ -92,12 +98,13 @@ test("[haven-house] accepts bounded room events and rejects raw destinations", (
     }).ok,
   ).toBe(false);
 
+  // Removed in tracking PR 3: never sent after 2026-10-02.
   expect(
     validateAnalyticsEvent("homepage_preview_viewed", {
       feature_key: "nursery",
       content_version: "hh-2026-10-02",
-    }).ok,
-  ).toBe(true);
+    }),
+  ).toEqual({ ok: false, reason: "event_name" });
 });
 
 test("keeps only registered campaign values", () => {
@@ -543,4 +550,186 @@ test("entry_app names Instagram's and Facebook's browsers with the sign-in patte
   for (const agent of [instagram, facebook, safari]) {
     expect(isInAppBrowser(agent), agent).toBe(inAppBrowserName(agent) !== "browser");
   }
+});
+
+// Tracking PR 3: every new property accepts its fixed values and rejects anything else.
+
+const ORDER_REF = "01990000-0000-7000-8000-00000000b001";
+const NOT_ALLOWED = ["parent@example.com", "https://x.test", "two words", "", "a?b"];
+
+test("[tracking-pr3] paywall, checkout failure, cancel, confirmation and claim name only fixed values", () => {
+  expect(validateAnalyticsEvent("paywall_viewed", { recipe_id: RECIPE_ID }).ok).toBe(true);
+  expect(validateAnalyticsEvent("paywall_viewed", { recipe_id: RECIPE_ID, collection_slug: "halloween" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("paywall_viewed", { collection_slug: "halloween" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("paywall_viewed", { recipe_id: "golden-soup" }).ok).toBe(false);
+
+  for (const checkout_error of ["already_owned", "refresh_required", "unavailable", "network", "server"]) {
+    expect(
+      validateAnalyticsEvent("checkout_failed", { collection_slug: "halloween", surface: "buy_box", checkout_error }).ok,
+      checkout_error
+    ).toBe(true);
+  }
+  for (const checkout_error of ["timeout", "CHECKOUT_DISABLED", ...NOT_ALLOWED]) {
+    expect(
+      validateAnalyticsEvent("checkout_failed", { collection_slug: "halloween", surface: "lock_card", checkout_error }).ok,
+      checkout_error
+    ).toBe(false);
+  }
+  expect(validateAnalyticsEvent("checkout_failed", { collection_slug: "halloween", checkout_error: "server" }).ok).toBe(false);
+  // `reason` is not a checkout_failed property; the failure has its own name.
+  expect(validateAnalyticsEvent("checkout_failed", { collection_slug: "halloween", surface: "buy_box", reason: "server" }).ok).toBe(false);
+
+  expect(checkoutErrorFor(409, "already_owned")).toBe("already_owned");
+  expect(checkoutErrorFor(409, "refresh_required")).toBe("refresh_required");
+  expect(checkoutErrorFor(400, "CHECKOUT_DISABLED")).toBe("unavailable");
+  expect(checkoutErrorFor(409, undefined)).toBe("server");
+  expect(checkoutErrorFor(400, "OFFER_NOT_FOUND")).toBe("server");
+  expect(checkoutErrorFor(500, undefined)).toBe("server");
+
+  expect(validateAnalyticsEvent("checkout_cancelled", {}).ok).toBe(true);
+  expect(validateAnalyticsEvent("checkout_cancelled", { collection_slug: "halloween" }).ok).toBe(true);
+  for (const value of ["Halloween Book", "../x", "parent@example.com"]) {
+    expect(isTrackingSlug(value), value).toBe(false);
+    expect(validateAnalyticsEvent("checkout_cancelled", { collection_slug: value }).ok, value).toBe(false);
+  }
+  expect(isTrackingSlug("comfort-haven-collection")).toBe(true);
+  expect(isTrackingSlug(["halloween"])).toBe(false);
+
+  expect(validateAnalyticsEvent("purchase_confirmation_viewed", { order_ref: ORDER_REF, collection_slug: "halloween" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("purchase_confirmation_viewed", { order_ref: ORDER_REF }).ok).toBe(false);
+  expect(validateAnalyticsEvent("purchase_confirmation_viewed", { order_ref: "MCH-1234", collection_slug: "halloween" }).ok).toBe(false);
+
+  expect(validateAnalyticsEvent("purchase_claimed", {}).ok).toBe(true);
+  expect(validateAnalyticsEvent("purchase_claimed", { collection_slug: "halloween" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("purchase_claimed", { collection_slug: "halloween", email: "parent@example.com" }).ok).toBe(false);
+});
+
+test("[tracking-pr3] sign-in events carry a method, a step and a fixed reason, never an address", () => {
+  for (const method of ["email_code", "google"]) {
+    expect(validateAnalyticsEvent("sign_in_method_chosen", { method, entry_point: "collection" }).ok, method).toBe(true);
+  }
+  expect(validateAnalyticsEvent("sign_in_method_chosen", { method: "apple", entry_point: "collection" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("sign_in_method_chosen", { method: "google" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("sign_in_code_sent", { entry_point: "recipe" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("sign_in_code_sent", { entry_point: "parent@example.com" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("sign_in_code_sent", { entry_point: "recipe", email: "parent@example.com" }).ok).toBe(false);
+
+  for (const sign_in_step of ["send_code", "verify_code", "google"]) {
+    for (const sign_in_error of ["invalid_code", "expired_code", "rate_limited", "bot_check", "cancelled", "unknown"]) {
+      expect(validateAnalyticsEvent("sign_in_failed", { sign_in_step, sign_in_error }).ok, `${sign_in_step}/${sign_in_error}`).toBe(true);
+    }
+  }
+  for (const value of ["captcha_failed", "otp_expired", ...NOT_ALLOWED]) {
+    expect(validateAnalyticsEvent("sign_in_failed", { sign_in_step: "send_code", sign_in_error: value }).ok, value).toBe(false);
+    expect(validateAnalyticsEvent("sign_in_failed", { sign_in_step: value, sign_in_error: "unknown" }).ok, value).toBe(false);
+  }
+
+  // Supabase's answers, mapped to the fixed reasons. The texts are Supabase's own.
+  const wait = "For security purposes, you can only request this after 42 seconds.";
+  expect(otpRequestFailure({ code: "over_email_send_rate_limit", message: wait })).toBe("rate_limited");
+  expect(otpRequestFailure({ code: "over_request_rate_limit", message: wait })).toBe("rate_limited");
+  expect(otpRequestFailure({ message: "email rate limit exceeded" })).toBe("rate_limited");
+  expect(otpRequestFailure({ code: "captcha_failed", message: "captcha protection: request disallowed" })).toBe("bot_check");
+  expect(otpRequestFailure({ code: "email_address_not_authorized", message: "Email address not authorized" })).toBe("unknown");
+  expect(otpRequestFailure({ code: "unexpected_failure", message: "Database error saving new user" })).toBe("unknown");
+
+  expect(otpVerifyFailure({ code: "otp_expired", message: "Token has expired or is invalid" })).toBe("invalid_code");
+  expect(otpVerifyFailure({ code: "over_request_rate_limit", message: "Request rate limit reached" })).toBe("rate_limited");
+  expect(otpVerifyFailure({ code: "unexpected_failure", message: "Database error" })).toBe("unknown");
+
+  // Supabase can't tell a mistyped code from an expired one; the code's age (10 minutes) can.
+  const sentAt = Date.parse("2026-10-14T10:00:00Z");
+  expect(signInCodeFailure("invalid_code", sentAt, sentAt + 9 * 60_000)).toBe("invalid_code");
+  expect(signInCodeFailure("invalid_code", sentAt, sentAt + 10 * 60_000)).toBe("expired_code");
+  expect(signInCodeFailure("invalid_code", null, sentAt)).toBe("invalid_code");
+  expect(signInCodeFailure("rate_limited", sentAt, sentAt + 60 * 60_000)).toBe("rate_limited");
+});
+
+test("[tracking-pr3] filter values come only from the fixed meal, diet and time lists", () => {
+  expect(RECIPE_FILTER_VALUE_SLUGS).toEqual({
+    meal: ["breakfast", "lunch", "dinner", "snack"],
+    diet: ["vegetarian", "dairy-free", "nut-free", "gluten-free", "soy-free"],
+    time: ["under-15-min", "under-30-min", "under-45-min"],
+  });
+  for (const [filter_kind, values] of Object.entries(RECIPE_FILTER_VALUE_SLUGS)) {
+    for (const filter_value of values) {
+      expect(validateAnalyticsEvent("recipe_filter_value_applied", { filter_kind, filter_value }).ok, filter_value).toBe(true);
+    }
+  }
+  for (const filter_value of ["Breakfast", "brunch", "pumpkin", "under-20-min", ...NOT_ALLOWED]) {
+    expect(validateAnalyticsEvent("recipe_filter_value_applied", { filter_kind: "meal", filter_value }).ok, filter_value).toBe(false);
+  }
+  expect(validateAnalyticsEvent("recipe_filter_value_applied", { filter_kind: "allergen", filter_value: "nut-free" }).ok).toBe(false);
+
+  // Case from the address is normalised, duplicates go, and values off the lists are dropped.
+  expect(
+    recipeFilterAnalyticsValues({ meals: ["breakfast", "Breakfast", "Brunch"], diets: ["DAIRY-FREE"], maxTime: 30 })
+  ).toEqual([
+    { kind: "meal", value: "breakfast" },
+    { kind: "diet", value: "dairy-free" },
+    { kind: "time", value: "under-30-min" },
+  ]);
+  expect(recipeFilterAnalyticsValues({ meals: [], diets: [], maxTime: 20 })).toEqual([]);
+});
+
+test("[tracking-pr3] FAQ, rooms and samples send fixed keys only", () => {
+  expect(validateAnalyticsEvent("faq_opened", { primary_ux: "faq", question_key: "subscription" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("faq_opened", { primary_ux: "faq", question_key: "future-recipes" }).ok).toBe(true);
+  for (const question_key of ["Is this a subscription?", "future_recipes", ...NOT_ALLOWED]) {
+    expect(validateAnalyticsEvent("faq_opened", { primary_ux: "faq", question_key }).ok, question_key).toBe(false);
+  }
+  expect(validateAnalyticsEvent("faq_opened", { primary_ux: "questions", question_key: "account" }).ok).toBe(false);
+
+  for (const seconds_bucket of ["under_10s", "10_to_30s", "over_30s"]) {
+    expect(validateAnalyticsEvent("room_closed", { feature_key: "library", seconds_bucket }).ok, seconds_bucket).toBe(true);
+  }
+  expect(validateAnalyticsEvent("room_closed", { feature_key: "library", seconds_bucket: "12" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("room_closed", { feature_key: "garage", seconds_bucket: "under_10s" }).ok).toBe(false);
+  expect([0, 9.9, 10, 30, 30.1, 600].map(toSecondsBucket)).toEqual([
+    "under_10s",
+    "under_10s",
+    "10_to_30s",
+    "10_to_30s",
+    "over_30s",
+    "over_30s",
+  ]);
+
+  for (const sample of ["storybook_story", "storybook_style", "nursery_stamp", "shelf_reveal"]) {
+    expect(validateAnalyticsEvent("sample_interacted", { sample }).ok, sample).toBe(true);
+  }
+  expect(validateAnalyticsEvent("sample_interacted", { sample: "storybook_story", choice: "moon" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("sample_interacted", { sample: "nursery_stamp", choice: "first-word" }).ok).toBe(true);
+  // A typed child's name is never a choice: names are capitalised, may hold spaces, and are not on any list.
+  for (const choice of ["Maya", "Maya Rose", ...NOT_ALLOWED]) {
+    expect(validateAnalyticsEvent("sample_interacted", { sample: "storybook_story", choice }).ok, choice).toBe(false);
+  }
+  expect(validateAnalyticsEvent("sample_interacted", { sample: "storybook_name", choice: "moon" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("sample_interacted", { sample: "storybook_story", name: "maya" }).ok).toBe(false);
+});
+
+test("[tracking-pr3] errors and empty states name the kind of page, never the address", () => {
+  for (const route_class of ["recipe", "collection", "story", "other"]) {
+    expect(validateAnalyticsEvent("not_found_viewed", { route_class }).ok, route_class).toBe(true);
+  }
+  expect(validateAnalyticsEvent("not_found_viewed", { route_class: "/recipes/missing" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("not_found_viewed", {}).ok).toBe(false);
+  expect(routeClassFromPath("/recipes/no-such-recipe")).toBe("recipe");
+  expect(routeClassFromPath("/collections/no-such-book")).toBe("collection");
+  expect(routeClassFromPath("/collections/series/none")).toBe("collection");
+  expect(routeClassFromPath("/stories/no-such-post")).toBe("story");
+  expect(routeClassFromPath("/no-such-page")).toBe("other");
+  expect(routeClassFromPath("/recipes")).toBe("other");
+
+  for (const primary_ux of ["recipe_grid", "error_page", "buy_box"]) {
+    expect(validateAnalyticsEvent("load_failed", { primary_ux }).ok, primary_ux).toBe(true);
+  }
+  expect(validateAnalyticsEvent("load_failed", { primary_ux: "database" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("load_failed", { primary_ux: "recipe_grid", message: "timeout" }).ok).toBe(false);
+  expect(PRIMARY_UX_VALUES).toContain("empty_state");
+  expect(validateAnalyticsEvent("empty_state_viewed", { primary_ux: "empty_state" }).ok).toBe(true);
+  expect(validateAnalyticsEvent("empty_state_viewed", { primary_ux: "nothing" }).ok).toBe(false);
+
+  expect(validateAnalyticsEvent("save_failed", { recipe_id: RECIPE_ID }).ok).toBe(true);
+  expect(validateAnalyticsEvent("save_failed", { recipe_id: "synth-free-oat-bake" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("save_failed", {}).ok).toBe(false);
 });

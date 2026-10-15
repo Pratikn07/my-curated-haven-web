@@ -9,6 +9,7 @@ import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeFilters from "@/components/recipe/RecipeFilters";
 import RecipeCatalogTracker from "@/components/recipe/RecipeCatalogTracker";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 import { parseFilterParams } from "@/lib/recipes/filters";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
@@ -165,6 +166,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
       {/* Service Error State */}
       {fetchError ? (
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center" data-track-ux="empty_state">
+          <PageEventTracker event="load_failed" payload={{ primary_ux: "recipe_grid" }} />
           <h2 className="text-2xl font-bold text-foreground">
             Recipes Temporarily Unavailable
           </h2>
@@ -212,6 +214,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
             </section>
           ) : (
             <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center" data-track-ux="empty_state">
+              {!isAdmin && <PageEventTracker event="empty_state_viewed" payload={{ primary_ux: "empty_state" }} />}
               <h2 className="text-xl font-bold text-foreground">
                 No matching recipes found
               </h2>

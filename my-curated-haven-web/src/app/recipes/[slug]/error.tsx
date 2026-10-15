@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 
 export default function RecipeError({
   reset,
@@ -11,6 +12,7 @@ export default function RecipeError({
 }) {
   return (
     <div className="mx-auto flex min-h-[50vh] max-w-xl flex-col items-center justify-center px-4 py-16 text-center" data-track-ux="error_page">
+      <PageEventTracker event="load_failed" payload={{ primary_ux: "error_page" }} />
       <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         Unable to Load Recipe
       </h1>

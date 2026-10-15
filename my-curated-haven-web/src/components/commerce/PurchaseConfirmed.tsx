@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import OpenBoughtRecipe from "@/components/commerce/OpenBoughtRecipe";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 import { bookNameStart } from "@/lib/collections/book-name";
 
 export interface PurchaseConfirmedProps {
@@ -15,6 +16,8 @@ export interface PurchaseConfirmedProps {
   email: string | null;
   /** The book's recipes, so a parent who bought from a recipe page can go straight back to it. */
   recipes?: readonly { slug: string; title: string }[];
+  /** The order's analytics reference, for purchase_confirmation_viewed; without one the screen sends nothing. */
+  analyticsRef?: string | null;
 }
 
 /**
@@ -30,10 +33,18 @@ export default function PurchaseConfirmed({
   formattedAmount,
   email,
   recipes: bookRecipes = [],
+  analyticsRef = null,
 }: PurchaseConfirmedProps) {
   const recipes = recipeCount ? `All ${recipeCount} recipes are` : "Every recipe is";
   return (
     <div data-track-ux="confirmation">
+      {/* Sent on every showing; reports count distinct order_ref, so a reload is not a second sale. */}
+      {analyticsRef ? (
+        <PageEventTracker
+          event="purchase_confirmation_viewed"
+          payload={{ order_ref: analyticsRef, collection_slug: collectionSlug }}
+        />
+      ) : null}
       {cover ? (
         <Image
           src={cover.src}

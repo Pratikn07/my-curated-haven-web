@@ -35,6 +35,8 @@ export function initPostHog(): boolean {
     },
     // Tracking PR 2: the Stripe checkout session in /checkout/return?session_id=… never reaches PostHog.
     before_send: withoutCheckoutSession,
+    // Tracking PR 3: uncaught errors arrive as $exception (PostHog error tracking), so reports can show what breaks.
+    capture_exceptions: true,
   });
   initialized = true;
   syncSessionRecording(window.location.pathname);

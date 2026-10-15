@@ -44,7 +44,15 @@ export default function SaveRecipeButton({
     setError(null);
 
     startTransition(async () => {
-      const res = await toggleSaveRecipeAction(recipeId, nextSavedState);
+      let res: Awaited<ReturnType<typeof toggleSaveRecipeAction>>;
+      try {
+        res = await toggleSaveRecipeAction(recipeId, nextSavedState);
+      } catch {
+        // The request never got an answer (connection dropped, server down).
+        void trackAnalyticsEvent("save_failed", { recipe_id: recipeId });
+        setError("We couldn't update your saved recipes. Check your connection and try again.");
+        return;
+      }
       if (res.status === "ok") {
         setIsSaved(res.isSaved);
         onSavedChange?.(res.isSaved);
@@ -56,6 +64,7 @@ export default function SaveRecipeButton({
         const returnTarget = `/recipes/${recipeSlug}`;
         router.push(`/sign-in?returnTo=${encodeURIComponent(returnTarget)}`);
       } else {
+        void trackAnalyticsEvent("save_failed", { recipe_id: recipeId });
         setError(res.message || "Failed to update recipe bookmark");
       }
     });

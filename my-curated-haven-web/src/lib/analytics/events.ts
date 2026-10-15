@@ -222,11 +222,6 @@ export interface HomepagePreviewOpenedPayload {
   content_version: string;
 }
 
-export interface HomepagePreviewViewedPayload {
-  feature_key: HomepageFeatureKey;
-  content_version: string;
-}
-
 /** An Instagram landing page was shown. The slug names the post. */
 export interface StoryViewPayload {
   story_slug: string;
@@ -274,7 +269,6 @@ export type AnalyticsEventMap = {
   make_ahead_plan_open: MakeAheadPlanOpenPayload;
   homepage_cta_clicked: HomepageCtaClickedPayload;
   homepage_preview_opened: HomepagePreviewOpenedPayload;
-  homepage_preview_viewed: HomepagePreviewViewedPayload;
   story_view: StoryViewPayload;
   story_action_clicked: StoryActionClickedPayload;
   story_section_viewed: StorySectionViewedPayload;
@@ -284,6 +278,23 @@ export type AnalyticsEventMap = {
   offer_viewed: OfferViewedPayload;
   page_scroll_reached: PageScrollReachedPayload;
   page_time_reached: PageTimeReachedPayload;
+  // Tracking PR 3
+  paywall_viewed: PaywallViewedPayload;
+  checkout_failed: CheckoutFailedPayload;
+  checkout_cancelled: CheckoutCancelledPayload;
+  purchase_confirmation_viewed: PurchaseConfirmationViewedPayload;
+  purchase_claimed: PurchaseClaimedPayload;
+  sign_in_method_chosen: SignInMethodChosenPayload;
+  sign_in_code_sent: SignInCodeSentPayload;
+  sign_in_failed: SignInFailedPayload;
+  recipe_filter_value_applied: RecipeFilterValueAppliedPayload;
+  faq_opened: FaqOpenedPayload;
+  room_closed: RoomClosedPayload;
+  sample_interacted: SampleInteractedPayload;
+  not_found_viewed: NotFoundViewedPayload;
+  load_failed: LoadFailedPayload;
+  save_failed: SaveFailedPayload;
+  empty_state_viewed: EmptyStateViewedPayload;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;
@@ -345,4 +356,102 @@ export interface PageScrollReachedPayload {
 /** Seconds the page was visible (time in a background tab does not count). */
 export interface PageTimeReachedPayload {
   seconds: VisibleSeconds;
+}
+
+// Tracking PR 3: funnel detail, sign-in, filters, FAQ, home samples and errors (docs/implementation/tracking/PLAN.md).
+
+/** Why Buy failed before Stripe opened. */
+export type CheckoutError = "already_owned" | "refresh_required" | "unavailable" | "network" | "server";
+/** The sign-in step that failed. */
+export type SignInStep = "send_code" | "verify_code" | "google";
+/** Why it failed, in fixed words. Never the email or the provider's own text. */
+export type SignInError = "invalid_code" | "expired_code" | "rate_limited" | "bot_check" | "cancelled" | "unknown";
+export type RecipeFilterKind = "meal" | "diet" | "time";
+/** How long a room on the home page stayed open. */
+export type RoomSecondsBucket = "under_10s" | "10_to_30s" | "over_30s";
+/** The try-it samples on the home page. */
+export type HomepageSample = "storybook_story" | "storybook_style" | "nursery_stamp" | "shelf_reveal";
+/** Which kind of address a 404 was for. */
+export type NotFoundRouteClass = "recipe" | "collection" | "story" | "other";
+
+/** A locked recipe page loaded. collection_slug is the open book it is in, when there is one. */
+export interface PaywallViewedPayload {
+  recipe_id: string;
+  collection_slug?: string;
+}
+
+export interface CheckoutFailedPayload {
+  collection_slug: string;
+  surface: CheckoutSurface;
+  checkout_error: CheckoutError;
+}
+
+/** /checkout/cancel loaded. The book is named only when the address carries a well-formed slug. */
+export interface CheckoutCancelledPayload {
+  collection_slug?: string;
+}
+
+/** "You're in" was shown. order_ref is the order's analytics reference, the same one purchase_confirmed carries. */
+export interface PurchaseConfirmationViewedPayload {
+  order_ref: string;
+  collection_slug: string;
+}
+
+/** A guest unlocked a paid order with the emailed code. */
+export interface PurchaseClaimedPayload {
+  collection_slug?: string;
+}
+
+export interface SignInMethodChosenPayload {
+  method: SignInMethod;
+  entry_point: string;
+}
+
+export interface SignInCodeSentPayload {
+  entry_point: string;
+}
+
+export interface SignInFailedPayload {
+  sign_in_step: SignInStep;
+  sign_in_error: SignInError;
+}
+
+/** One event per filter value applied; the value is a slug from the fixed lists in lib/recipes/filters.ts. */
+export interface RecipeFilterValueAppliedPayload {
+  filter_kind: RecipeFilterKind;
+  filter_value: string;
+}
+
+export interface FaqOpenedPayload {
+  primary_ux: import("./ux").PrimaryUx;
+  question_key: string;
+}
+
+export interface RoomClosedPayload {
+  feature_key: HomepageFeatureKey;
+  seconds_bucket: RoomSecondsBucket;
+}
+
+/** choice is the story, style or keepsake picked, as a fixed slug; never the child's name typed into the sample. */
+export interface SampleInteractedPayload {
+  sample: HomepageSample;
+  choice?: string;
+}
+
+export interface NotFoundViewedPayload {
+  route_class: NotFoundRouteClass;
+}
+
+/** A list or page failed to load: recipe_grid for a recipe list, error_page for the error screen. */
+export interface LoadFailedPayload {
+  primary_ux: import("./ux").PrimaryUx;
+}
+
+export interface SaveFailedPayload {
+  recipe_id: string;
+}
+
+/** No search results, an empty bookcase, or a book that is not on sale yet. */
+export interface EmptyStateViewedPayload {
+  primary_ux: "empty_state";
 }

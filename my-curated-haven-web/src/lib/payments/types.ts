@@ -124,6 +124,8 @@ export interface OrderSummaryDto {
     | "expired"
     | "review"
     | "not_found";
+  /** The order's analytics reference (analytics_attempt_ref): the order_ref on purchase_confirmed. Null until set. */
+  analyticsRef: string | null;
 }
 
 /** What the collection page showed for sale; checkout refuses a stale expectation instead of charging for it. */
