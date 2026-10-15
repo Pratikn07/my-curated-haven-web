@@ -212,6 +212,8 @@ export interface MakeAheadPlanEntry {
   libraryLink: string;
   /** The picture a shared link to the plan shows. */
   shareImage: { src: string; alt: string };
+  /** The photo grid under the plan, in this order: the book's prettiest Halloween recipes beyond the party menu. */
+  moreRecipes: readonly string[];
   preview: MakeAheadPlanPreview;
 }
 
@@ -223,6 +225,21 @@ export const HALLOWEEN_MAKE_AHEAD_PLAN: MakeAheadPlanEntry = {
   buyLine: "Comes with a make-ahead plan and one shopping list for Halloween weekend.",
   libraryLink: "Make-ahead plan",
   shareImage: HALLOWEEN_SHARE_IMAGE,
+  // Owner, 2026-10-14: the most Halloween-looking first; Banana Pumpkin Mini Donuts and Sweet Potato Jack-O'-Lantern
+  // Cupcakes are left out of the grid.
+  moreRecipes: [
+    "strawberry-yogurt-ghost-hearts",
+    "jack-o-lantern-mango-stars",
+    "blueberry-yogurt-bites",
+    "chocolate-pumpkin-protein-tarts",
+    "candy-corn-parfaits",
+    "jack-o-lantern-peanut-butter-tart",
+    "monster-energy-balls",
+    "mini-pumpkin-cheesecake-bites",
+    "spider-peanut-butter-oat-bites",
+    "apple-peanut-butter-smiles",
+    "apple-pie-halloween-pockets",
+  ],
   preview: {
     byline: "Inside the Halloween book",
     title: "Your Halloween make-ahead plan",
