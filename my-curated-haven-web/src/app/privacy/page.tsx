@@ -5,7 +5,7 @@ const list = "list-disc pl-6 space-y-2 my-4";
 
 export default function Privacy() {
     return (
-        <div className="bg-canvas py-8">
+        <div className="bg-canvas py-8" data-track-ux="static_page">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
                     <p className="text-text-muted mb-12">Last updated: October 15, 2026</p>

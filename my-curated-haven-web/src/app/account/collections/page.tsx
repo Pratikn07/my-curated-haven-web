@@ -35,10 +35,10 @@ export default async function AccountCollectionsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8" data-track-ux="library">
       {/* Header */}
       <header className="mb-8">
-        <nav aria-label="Breadcrumb" className="mb-4">
+        <nav aria-label="Breadcrumb" className="mb-4" data-track-ux="breadcrumb">
           <ol className="flex items-center gap-2 text-sm text-text-muted">
             <li>
               <Link href="/account" className="hover:text-foreground hover:underline">
@@ -118,6 +118,7 @@ export default async function AccountCollectionsPage() {
                     <Link
                       href={`/collections/${coll.slug}`}
                       className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-5 py-2.5 text-sm font-semibold text-white hover:bg-action-hover"
+                      data-track-cta="open_collection"
                     >
                       <BookOpen className="h-4 w-4" aria-hidden="true" />
                       <span>Open Collection</span>
@@ -128,6 +129,7 @@ export default async function AccountCollectionsPage() {
                       <Link
                         href={plan.path}
                         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted"
+                        data-track-cta="see_plan"
                       >
                         <ListChecks className="h-4 w-4 text-action" aria-hidden="true" />
                         <span>{plan.libraryLink}</span>

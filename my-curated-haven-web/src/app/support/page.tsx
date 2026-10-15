@@ -18,7 +18,7 @@ export default function Support() {
   };
 
   return (
-    <Container reading className="py-8 sm:py-12">
+    <Container reading className="py-8 sm:py-12" trackUx="support">
       <h1 className="text-[2rem] font-semibold sm:text-5xl">Support</h1>
       <p className="mt-4 text-lg text-text-muted">
         Email is the way to reach Nibble &amp; Nurture about this website. The button below opens your email app. This website does not store the message and does not create a support ticket.
@@ -26,7 +26,7 @@ export default function Support() {
       <section className="mt-8 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
         <h2 className="text-2xl font-semibold">Email</h2>
         <p className="mt-3 break-all text-lg">
-          <a className="font-semibold text-action underline" href={`mailto:${SUPPORT_EMAIL}`}>
+          <a className="font-semibold text-action underline" href={`mailto:${SUPPORT_EMAIL}`} data-track-cta="email">
             {SUPPORT_EMAIL}
           </a>
         </p>
@@ -34,10 +34,11 @@ export default function Support() {
           <a
             className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 font-semibold text-action-foreground"
             href={`mailto:${SUPPORT_EMAIL}`}
+            data-track-cta="email_button"
           >
             Email support
           </a>
-          <Button variant="secondary" onClick={copyEmail}>
+          <Button variant="secondary" onClick={copyEmail} data-track-cta="copy">
             Copy address
           </Button>
         </div>

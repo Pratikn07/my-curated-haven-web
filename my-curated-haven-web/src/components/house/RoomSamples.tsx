@@ -19,6 +19,7 @@ export function NurserySample() {
       <button
         type="button"
         onClick={() => setIndex((current) => (current === null ? 0 : (current + 1) % KEEPSAKES.length))}
+        data-track-cta="stamp_sample"
         className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl border border-border-control bg-surface px-4 font-semibold hover:bg-surface-muted"
       >
         {keepsake ? "Stamp another sample" : "Stamp a sample keepsake"}
@@ -63,6 +64,7 @@ export function ShelfSample() {
         aria-expanded={open}
         aria-controls="shelf-sample-why"
         onClick={() => setOpen((value) => !value)}
+        data-track-cta="why_we_pick"
         className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl border border-border-control bg-surface px-4 font-semibold hover:bg-surface-muted"
       >
         {open ? "Hide why we'd pick it" : "See why we'd pick it"}

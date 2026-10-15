@@ -54,9 +54,9 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
   const allOpen = volumes.every((volume) => volume.availability === "open");
 
   return (
-    <div className="cl bk bk-seriespage">
-      <nav className="bk-crumbs" aria-label="Breadcrumb">
-        <Link href="/collections">Collections</Link>
+    <div className="cl bk bk-seriespage" data-track-ux="bookcase">
+      <nav className="bk-crumbs" aria-label="Breadcrumb" data-track-ux="breadcrumb">
+        <Link href="/collections" data-track-cta="collections">Collections</Link>
         <span aria-hidden="true">/</span>
         <span aria-current="page">{info.title}</span>
       </nav>
@@ -81,9 +81,9 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
             </>
           );
           return (
-            <li key={volume.slug} className="bk-volume" data-volume={volume.series?.volume} data-soon={open ? undefined : ""}>
+            <li key={volume.slug} className="bk-volume" data-volume={volume.series?.volume} data-soon={open ? undefined : ""} data-track-pos={index + 1}>
               {open ? (
-                <Link className="bk-volume-link" href={`/collections/${volume.slug}`}>
+                <Link className="bk-volume-link" href={`/collections/${volume.slug}`} data-track-cta="open_book">
                   {body}
                 </Link>
               ) : (
@@ -107,7 +107,7 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
             ? "Each volume is a one-time purchase. Opening soon."
             : "Some volumes are still being written. The set opens when all of them are ready."}
         </p>
-        <a className="bk-bundle-cta" href="#volumes">
+        <a className="bk-bundle-cta" href="#volumes" data-track-cta="choose_volume">
           Choose a volume <span aria-hidden="true">→</span>
         </a>
       </section>

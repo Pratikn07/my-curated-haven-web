@@ -10,7 +10,7 @@ export default function CollectionSummary({
   if (state.mode !== "collection_ready") return null;
 
   return (
-    <section id="recipe-collection" aria-labelledby="collection-summary-title" className="pb-14">
+    <section id="recipe-collection" aria-labelledby="collection-summary-title" className="pb-14" data-track-ux="collection_band">
       <Container>
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 sm:p-8">
           <p className="text-sm font-semibold text-accent-strong">Recipe collection</p>
@@ -27,6 +27,7 @@ export default function CollectionSummary({
               presentationState: "collection_ready",
             }}
             className="mt-5 inline-flex min-h-12 items-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+            data-track-cta="see_collection"
           >
             View the recipe collection
           </TrackedHomepageLink>

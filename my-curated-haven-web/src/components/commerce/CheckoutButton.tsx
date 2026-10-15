@@ -68,6 +68,7 @@ export default function CheckoutButton({
     return (
       <a
         href="#collection-recipes"
+        data-track-cta="open_collection"
         className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-surface-muted px-6 py-3 text-base font-semibold text-action border border-action/20 hover:bg-action/5 focus-visible:outline-2 focus-visible:outline-action")} ${className}`}
       >
         <CheckCircle2 className="h-4 w-4 text-action" aria-hidden="true" />
@@ -166,6 +167,8 @@ export default function CheckoutButton({
       <button
         onClick={handleCheckout}
         disabled={isLoading}
+        data-track-cta="buy"
+        data-track-dest="checkout"
         data-checkout-expected={expected ? JSON.stringify(expected) : undefined}
         aria-busy={isLoading}
         className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:opacity-75 text-center")} ${className}`}
@@ -186,7 +189,7 @@ export default function CheckoutButton({
           {signInHint ? (
             <>
               {" "}Already bought it?{" "}
-              <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground">
+              <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground" data-track-cta="sign_in">
                 Sign in
               </Link>
             </>

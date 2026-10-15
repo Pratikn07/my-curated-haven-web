@@ -32,7 +32,7 @@ export default function OpenBoughtRecipe({ collectionSlug, recipes, openLabel }:
   const book = `/collections/${collectionSlug}`;
   if (!recipe) {
     return (
-      <Link href={book} className={BUTTON}>
+      <Link href={book} className={BUTTON} data-track-cta="open_collection">
         <span>{openLabel}</span>
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>
@@ -40,12 +40,12 @@ export default function OpenBoughtRecipe({ collectionSlug, recipes, openLabel }:
   }
   return (
     <>
-      <Link href={`/recipes/${recipe.slug}?opened=1`} className={BUTTON} onClick={forgetBoughtFrom}>
+      <Link href={`/recipes/${recipe.slug}?opened=1`} className={BUTTON} onClick={forgetBoughtFrom} data-track-cta="open_recipe">
         <span>Open {recipe.title}</span>
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </Link>
       <p className="mt-3 text-sm">
-        <Link href={book} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+        <Link href={book} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover" data-track-cta="open_collection">
           Or see all your recipes
         </Link>
       </p>

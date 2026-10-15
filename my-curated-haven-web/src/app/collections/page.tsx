@@ -60,24 +60,24 @@ export default async function CollectionsPage() {
   }));
 
   return (
-    <div className="cl bk">
+    <div className="cl bk" data-track-ux="bookcase">
       <header className="bk-head">
         <h1 className="bk-title">Collections</h1>
         <p className="bk-lede">Little cookbooks for every stage.</p>
       </header>
       <Bookcase entries={entries} shelves={shelves} series={series} featured={featuredSlug(new Date())} />
-      <section className="bk-note" aria-labelledby="bk-note-title">
+      <section className="bk-note" aria-labelledby="bk-note-title" data-track-ux="intro">
         <h2 id="bk-note-title">How the books work</h2>
         <p>
           Each book is a one-time purchase: pay once, keep it, and get the recipes added later.{" "}
           {onSaleList ? (
             <>
               {onSaleList} {onSale.length > 1 ? "are" : "is"} open now, and the other books are opening soon. Not sure yet? Cook
-              one of our <Link href="/recipes">free recipes</Link> first.
+              one of our <Link href="/recipes" data-track-cta="free_recipe">free recipes</Link> first.
             </>
           ) : (
             <>
-              Books are opening soon; until then, you can cook from our <Link href="/recipes">free recipes</Link>.
+              Books are opening soon; until then, you can cook from our <Link href="/recipes" data-track-cta="free_recipe">free recipes</Link>.
             </>
           )}
         </p>

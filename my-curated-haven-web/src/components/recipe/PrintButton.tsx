@@ -30,6 +30,7 @@ export default function PrintButton({ recipeId, accessKind = "free" }: PrintButt
       onClick={handlePrint}
       className="no-print inline-flex w-full items-center justify-center gap-2 sm:w-auto"
       aria-label="Print this recipe"
+      data-track-cta="print"
     >
       <svg
         className="h-5 w-5"

@@ -35,7 +35,7 @@ export default async function SavedRecipesPage() {
 
   if (result.status !== "ok") {
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8" data-track-ux="saved_recipes">
         <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center">
           <h1 className="text-2xl font-bold text-foreground">
             Saved Recipes Unavailable
@@ -59,9 +59,9 @@ export default async function SavedRecipesPage() {
   const { items } = result;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8" data-track-ux="saved_recipes">
       {/* Back to Account / Header */}
-      <nav aria-label="Breadcrumb" className="mb-6">
+      <nav aria-label="Breadcrumb" className="mb-6" data-track-ux="breadcrumb">
         <Link
           href="/account"
           className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-text-muted hover:text-foreground transition-colors"
@@ -106,9 +106,9 @@ export default async function SavedRecipesPage() {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) =>
+          {items.map((item, index) =>
             item.isAvailable && item.catalog ? (
-              <div key={item.id} className="relative flex flex-col">
+              <div key={item.id} className="relative flex flex-col" data-track-pos={index + 1}>
                 <RecipeCard recipe={item.catalog} free={freeIds.has(item.catalog.id)} />
                 <div className="mt-2 flex justify-end">
                   <SaveRecipeButton

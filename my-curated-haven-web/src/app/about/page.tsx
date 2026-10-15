@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function About() {
   return (
-    <Container reading className="py-8 sm:py-12">
+    <Container reading className="py-8 sm:py-12" trackUx="static_page">
       <p className="font-semibold text-text-muted">
         About Nibble &amp; Nurture
       </p>

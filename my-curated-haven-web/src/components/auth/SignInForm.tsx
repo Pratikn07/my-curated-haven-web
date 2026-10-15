@@ -176,7 +176,7 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
   };
 
   return (
-    <div className="w-full max-w-md rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-sm sm:p-8">
+    <div className="w-full max-w-md rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-sm sm:p-8" data-track-ux="sign_in">
       {step === "email" ? (
         <form onSubmit={handleRequestOtp} className="space-y-6">
           <div>

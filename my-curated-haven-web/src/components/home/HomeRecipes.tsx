@@ -7,7 +7,7 @@ import type { HomepageRecipes } from "@/lib/data/load-homepage-recipes";
 
 export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
   return (
-    <section id="recipes" aria-labelledby="recipes-title" className="bg-[var(--room-kitchen-wash)] py-14 sm:py-20">
+    <section id="recipes" aria-labelledby="recipes-title" className="bg-[var(--room-kitchen-wash)] py-14 sm:py-20" data-track-ux="recipe_grid" data-track-view>
       <Container>
         <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr] lg:items-end lg:gap-6">
           <div>
@@ -36,15 +36,15 @@ export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
             <p className="mt-2 text-text-muted">
               We couldn&apos;t load the current free recipe list. Please try the recipe index again in a little while.
             </p>
-            <Link href="/recipes" className="mt-4 inline-flex min-h-11 items-center font-semibold text-action underline underline-offset-4">
+            <Link href="/recipes" className="mt-4 inline-flex min-h-11 items-center font-semibold text-action underline underline-offset-4" data-track-cta="browse_recipes">
               Try the recipe index
             </Link>
           </div>
         ) : data.recipes.length > 0 ? (
           <>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {data.recipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} showSaveButton={false} />
+              {data.recipes.map((recipe, index) => (
+                <RecipeCard key={recipe.id} recipe={recipe} showSaveButton={false} position={index + 1} />
               ))}
             </div>
             <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
@@ -60,6 +60,7 @@ export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
                   presentationState: HOMEPAGE_RECIPE_STATE.mode,
                 }}
                 className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+                data-track-cta="see_all_recipes"
               >
                 See all recipes
               </TrackedHomepageLink>
@@ -71,7 +72,7 @@ export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
             <p className="mt-2 text-text-muted">
               No approved free recipes are available to show here yet. The recipe index has the current public listing.
             </p>
-            <Link href="/recipes" className="mt-4 inline-flex min-h-11 items-center font-semibold text-action underline underline-offset-4">
+            <Link href="/recipes" className="mt-4 inline-flex min-h-11 items-center font-semibold text-action underline underline-offset-4" data-track-cta="browse_recipes">
               Visit Recipes
             </Link>
           </div>

@@ -93,7 +93,7 @@ export default function ClaimPurchaseForm({ sessionId, maskedEmail, collectionTi
   };
 
   return (
-    <div className="text-left">
+    <div className="text-left" data-track-ux="claim_form">
       <p className="text-center text-sm font-semibold uppercase tracking-wider text-action">Payment received</p>
       <h1 className="mt-2 text-center text-3xl font-extrabold text-foreground">One last step</h1>
       <p className="mx-auto mt-3 max-w-sm text-center text-base text-text-muted">

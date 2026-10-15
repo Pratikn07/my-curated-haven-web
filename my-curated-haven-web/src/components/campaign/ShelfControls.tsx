@@ -35,10 +35,10 @@ export default function ShelfControls({ targetId }: { targetId: string }) {
   if (!state.overflow) return null;
   return (
     <div className="cp-shelf-controls">
-      <button type="button" onClick={() => move(-1)} disabled={state.atStart} aria-controls={targetId} aria-label="Previous recipes">
+      <button type="button" onClick={() => move(-1)} disabled={state.atStart} aria-controls={targetId} aria-label="Previous recipes" data-track-cta="previous">
         <span aria-hidden="true">←</span>
       </button>
-      <button type="button" onClick={() => move(1)} disabled={state.atEnd} aria-controls={targetId} aria-label="Next recipes">
+      <button type="button" onClick={() => move(1)} disabled={state.atEnd} aria-controls={targetId} aria-label="Next recipes" data-track-cta="next">
         <span aria-hidden="true">→</span>
       </button>
     </div>

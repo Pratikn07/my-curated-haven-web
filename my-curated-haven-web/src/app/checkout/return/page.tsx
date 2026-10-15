@@ -24,7 +24,7 @@ const BUTTON = "inline-flex min-h-11 items-center justify-center rounded-xl bg-a
 
 function SupportLink() {
   return (
-    <a className="font-semibold text-foreground underline underline-offset-4" href={`mailto:${SUPPORT_EMAIL}`}>
+    <a className="font-semibold text-foreground underline underline-offset-4" href={`mailto:${SUPPORT_EMAIL}`} data-track-cta="email">
       {SUPPORT_EMAIL}
     </a>
   );
@@ -32,7 +32,7 @@ function SupportLink() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-xl px-4 py-16">
+    <div className="mx-auto w-full max-w-xl px-4 py-16" data-track-ux="checkout_status">
       <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 text-center shadow-sm">{children}</div>
     </div>
   );
@@ -63,7 +63,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
               <SupportLink /> from the address you paid with.
             </p>
             <div className="mt-6">
-              <Link href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`} className={BUTTON}>
+              <Link href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`} className={BUTTON} data-track-cta="refresh">
                 Refresh
               </Link>
             </div>
@@ -90,6 +90,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
                 <Link
                   href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`}
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
+                  data-track-cta="refresh"
                 >
                   Refresh
                 </Link>
@@ -123,6 +124,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
                 <Link
                   href={`/sign-in?returnTo=${encodeURIComponent("/account/collections")}`}
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
+                  data-track-cta="sign_in"
                 >
                   Sign in with email
                 </Link>
@@ -152,13 +154,13 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
 
   if (!sessionId) {
     return (
-      <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
+      <div className="mx-auto w-full max-w-lg px-4 py-16 text-center" data-track-ux="checkout_status">
         <h1 className="text-2xl font-bold text-foreground">We couldn&apos;t find that checkout</h1>
         <p className="mt-2 text-sm text-text-muted">
           If you just paid, your book is in My Library.
         </p>
         <div className="mt-6">
-          <Link href="/account/collections" className={BUTTON}>
+          <Link href="/account/collections" className={BUTTON} data-track-cta="library">
             Go to My Library
           </Link>
         </div>
@@ -171,7 +173,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
 
   if (!orderSummary) {
     return (
-      <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
+      <div className="mx-auto w-full max-w-lg px-4 py-16 text-center" data-track-ux="checkout_status">
         <AlertCircle className="mx-auto h-12 w-12 text-yellow-600" />
         <h1 className="mt-4 text-2xl font-bold text-foreground">We couldn&apos;t find this order in your account</h1>
         <p className="mt-2 text-sm text-text-muted">
@@ -181,12 +183,14 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
           <Link
             href="/recipes"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
+            data-track-cta="browse_recipes"
           >
             Browse free recipes
           </Link>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-surface-muted px-6 py-3 font-semibold text-foreground border border-border hover:bg-surface"
+            data-track-cta="email"
           >
             Email support
           </a>
@@ -202,7 +206,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
     : null;
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 py-16">
+    <div className="mx-auto w-full max-w-xl px-4 py-16" data-track-ux="checkout_status">
       <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 text-center shadow-sm">
         {isConfirmed ? (
           <PurchaseConfirmed
@@ -229,6 +233,7 @@ export default async function CheckoutReturnPage({ searchParams }: ReturnPagePro
               <Link
                 href={`/checkout/return?session_id=${encodeURIComponent(sessionId)}`}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
+                data-track-cta="refresh"
               >
                 Refresh
               </Link>

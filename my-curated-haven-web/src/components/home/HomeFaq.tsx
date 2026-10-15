@@ -29,7 +29,7 @@ export default function HomeFaq({ state }: { state: HomepageRecipePresentationSt
   ];
 
   return (
-    <section id="questions" aria-labelledby="questions-title" className="bg-surface-muted py-14 sm:py-20">
+    <section id="questions" aria-labelledby="questions-title" className="bg-surface-muted py-14 sm:py-20" data-track-ux="faq" data-track-view>
       <Container>
         <h2 id="questions-title" className="font-display text-[2rem] font-normal sm:text-[2.6rem]">Questions</h2>
         <dl className="mt-8 grid gap-6 md:grid-cols-2">
@@ -41,7 +41,7 @@ export default function HomeFaq({ state }: { state: HomepageRecipePresentationSt
                 {index === questions.length - 1 ? (
                   <>
                     {" "}
-                    <Link href="/support" className="font-semibold text-action underline underline-offset-4">Support</Link>.
+                    <Link href="/support" className="font-semibold text-action underline underline-offset-4" data-track-cta="support">Support</Link>.
                   </>
                 ) : null}
               </dd>

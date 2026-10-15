@@ -78,6 +78,7 @@ export default function SaveRecipeButton({
         aria-pressed={isSaved}
         aria-label={label}
         title={label}
+        data-track-cta="save"
         className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border transition-colors ${
           isSaved
             ? "border-action bg-action/10 text-action hover:bg-action/20"
@@ -98,6 +99,7 @@ export default function SaveRecipeButton({
         onClick={handleClick}
         disabled={isPending}
         aria-pressed={isSaved}
+        data-track-cta="save"
         className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
           isSaved
             ? "border-action bg-action/10 text-action hover:bg-action/20"

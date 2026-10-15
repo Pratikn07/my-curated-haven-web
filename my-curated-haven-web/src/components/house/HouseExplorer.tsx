@@ -98,6 +98,7 @@ function LibraryBookLink({ onLeaveRoom }: { onLeaveRoom: (after: () => void) => 
       href="#library"
       onClick={onClick}
       data-opening={opening ? "" : undefined}
+      data-track-cta="sample_page"
       className="library-book-link inline-flex min-h-12 items-center gap-4 justify-self-start rounded-xl border border-border-control bg-surface py-2 pr-5 pl-3 font-semibold hover:bg-surface-muted"
     >
       <span className="library-book" aria-hidden="true">
@@ -125,10 +126,11 @@ function RoomCardBody({
       <>
         {kitchenRecipes.length > 0 ? (
           <ul className="grid gap-2">
-            {kitchenRecipes.map((recipe) => (
-              <li key={recipe.slug}>
+            {kitchenRecipes.map((recipe, index) => (
+              <li key={recipe.slug} data-track-pos={index + 1}>
                 <Link
                   href={`/recipes/${recipe.slug}`}
+                  data-track-cta="open_recipe"
                   className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-2 font-semibold hover:bg-surface-muted"
                 >
                   <span>{recipe.title}</span>
@@ -145,6 +147,7 @@ function RoomCardBody({
             <Link
               href="/recipes"
               className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+              data-track-cta="browse_recipes"
             >
               Browse recipes
             </Link>
@@ -152,6 +155,7 @@ function RoomCardBody({
               <Link
                 href={COLLECTIONS_HREF}
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-border-control bg-surface px-5 py-3 font-semibold hover:bg-surface-muted"
+                data-track-cta="browse_collections"
               >
                 Browse collections
               </Link>
@@ -369,6 +373,7 @@ export default function HouseExplorer({
       <div
         ref={frameRef}
         className="house-frame"
+        data-track-ux="house"
         data-active={active ?? undefined}
         data-hover={hover ?? undefined}
         style={frameStyle}
@@ -383,6 +388,7 @@ export default function HouseExplorer({
             tabIndex={-1}
             className="house-hotspot"
             data-room={room.id}
+            data-track-cta={`room_${room.id}`}
             style={toFrame(room.area)}
             onClick={onRoomClick(room.id)}
             onPointerEnter={() => setHover(room.id)}
@@ -412,6 +418,7 @@ export default function HouseExplorer({
                 onPointerLeave={() => setHover(null)}
                 className="house-tag"
                 data-room={room.id}
+                data-track-cta={`room_${room.id}`}
                 data-status={room.status}
                 style={{ "--intro-order": room.introOrder } as CSSProperties}
               >
@@ -427,7 +434,7 @@ export default function HouseExplorer({
         </ul>
       </div>
 
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-muted">
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-muted" data-track-ux="house">
         <span>Or pick a room:</span>
         <span className="inline-flex flex-wrap items-center gap-x-1">
           {LIST_ROOMS.map((room, index) => (
@@ -437,6 +444,7 @@ export default function HouseExplorer({
                 href={`#room-${room.id}`}
                 onClick={onRoomClick(room.id)}
                 className="inline-flex min-h-11 items-center font-semibold text-foreground underline decoration-1 underline-offset-4"
+                data-track-cta={`room_${room.id}`}
               >
                 {room.name}
               </a>
@@ -455,6 +463,7 @@ export default function HouseExplorer({
       <div
         ref={viewRef}
         className="room-view"
+        data-track-ux="room_dialog"
         data-open={active ? "" : undefined}
         data-room={active ?? undefined}
         role={active ? "dialog" : undefined}
@@ -505,6 +514,7 @@ export default function HouseExplorer({
                         href={`#room-${room.id}`}
                         onClick={onRoomClick(room.id)}
                         className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border-control bg-surface px-4 text-sm font-semibold hover:bg-surface-muted"
+                        data-track-cta={`room_${room.id}`}
                       >
                         {room.name}
                         <span className="font-normal text-text-muted">· {HOUSE_STATUS_LABEL[room.status]}</span>
@@ -516,7 +526,7 @@ export default function HouseExplorer({
             ) : null}
           </div>
           {active ? (
-            <button type="button" onClick={() => closeRoom()} className="room-view-back">
+            <button type="button" onClick={() => closeRoom()} className="room-view-back" data-track-cta="back">
               <span aria-hidden="true">←</span> Back to the house
             </button>
           ) : null}

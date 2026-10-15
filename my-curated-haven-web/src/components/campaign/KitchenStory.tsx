@@ -30,6 +30,8 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
       className="cp-story"
       aria-labelledby="cp-story-title"
       data-story-section="story"
+      data-track-ux="story"
+      data-track-view
       style={{ "--cp-moments": count } as CSSProperties}
     >
       <div className="cp-story-track">
@@ -91,6 +93,8 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
                     type="button"
                     className="cp-story-tick"
                     data-moment={momentIndex}
+                    data-track-cta="story_moment"
+                    data-track-pos={momentIndex + 1}
                     data-active={momentIndex === 0 ? "true" : undefined}
                     aria-current={momentIndex === 0 ? "step" : undefined}
                     aria-label={`Moment ${momentIndex + 1} of ${count}: ${moment.label}`}

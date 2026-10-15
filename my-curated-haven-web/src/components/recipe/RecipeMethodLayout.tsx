@@ -80,7 +80,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
   return (
     <>
       {showAges ? (
-        <section className="rm-ages no-print" aria-labelledby={`${uid}-age`}>
+        <section className="rm-ages no-print" aria-labelledby={`${uid}-age`} data-track-ux="recipe_method">
           <p id={`${uid}-age`} className="rm-ages-label">
             Your child’s age
           </p>
@@ -158,7 +158,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
         ) : null}
       </section>
 
-      <section aria-labelledby="instructions-heading" className={CARD}>
+      <section aria-labelledby="instructions-heading" className={CARD} data-track-ux="recipe_method">
         <h2 id="instructions-heading" className="mb-3 text-2xl font-bold text-foreground">
           Method
         </h2>
@@ -193,7 +193,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
       </section>
 
       {method.madeIt ? (
-        <section className="rm-made no-print" aria-label="We made it">
+        <section className="rm-made no-print" aria-label="We made it" data-track-ux="recipe_method">
           <span key={wiggles} className={`rm-ghost${wiggles > 0 ? " rm-wiggle" : ""}`} aria-hidden="true">
             <svg viewBox="0 0 64 72" width="56" height="63" focusable="false">
               <path className="gb" d="M8 66V32a24 24 0 0 1 48 0v34l-8-6-8 6-8-6-8 6-8-6-8 6z" />
@@ -371,6 +371,7 @@ function PhotoViewer({ photo, supabaseUrl, onClose }: { photo: Photo; supabaseUr
   return createPortal(
     <div
       className="rm-viewer no-print"
+      data-track-ux="recipe_method"
       role="dialog"
       aria-modal="true"
       aria-label="Step photo"

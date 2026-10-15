@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import type { CampaignCollectionCopy, CampaignPackCopy } from "@/lib/campaigns/types";
 import { recipeCountLabel } from "@/lib/campaigns/validate";
 import type { CampaignOfferData } from "@/lib/data/load-campaign";
+import { offerAttributes } from "@/lib/analytics/track-markup";
 import { usableImageSrc } from "@/lib/recipes/format";
 import { Kicker, SplitTitle } from "./CampaignParts";
 
@@ -105,7 +106,14 @@ export function CampaignPack({
   index?: string;
 }) {
   return (
-    <section className="cp-pack" aria-labelledby="cp-pack-title" data-story-section="pack">
+    <section
+      className="cp-pack"
+      aria-labelledby="cp-pack-title"
+      data-story-section="pack"
+      data-track-ux="story_offer"
+      data-track-view
+      {...offerAttributes("story_offer", offer.collectionSlug)}
+    >
       <div className="cp-pack-inner">
         <div className="cp-pack-copy">
           <Kicker index={index}>{copy.eyebrow}</Kicker>
@@ -131,6 +139,7 @@ export function CampaignPack({
               data-magnetic
               data-story-action="pack"
               data-story-placement="pack"
+              data-track-cta="see_collection"
             >
               <span className="cp-button-label">See what’s inside</span>
               <span className="cp-button-icon" aria-hidden="true">
@@ -172,7 +181,14 @@ export function CampaignCollection({
   index?: string;
 }) {
   return (
-    <section className="cp-collection" aria-labelledby="cp-collection-title" data-story-section="collection">
+    <section
+      className="cp-collection"
+      aria-labelledby="cp-collection-title"
+      data-story-section="collection"
+      data-track-ux="story_offer"
+      data-track-view
+      {...offerAttributes("story_offer", offer.collectionSlug)}
+    >
       <div className="cp-collection-inner">
         <div className="cp-collection-copy">
           <Kicker tone="light" index={index}>
@@ -206,6 +222,7 @@ export function CampaignCollection({
               data-magnetic
               data-story-action="collection"
               data-story-placement="collection"
+              data-track-cta="see_collection"
             >
               <span className="cp-button-label">See the collection</span>
               <span className="cp-button-icon" aria-hidden="true">
