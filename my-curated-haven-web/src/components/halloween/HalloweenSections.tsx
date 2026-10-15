@@ -63,12 +63,7 @@ export function HalloweenHero() {
       <span className="hw-eyebrow">{HALLOWEEN_HERO.eyebrow}</span>
       <h1 className="hw-title">
         {before}{" "}
-        <em>
-          {emphasis}
-          <svg className="hw-marker" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M4 14 C 60 4, 140 4, 196 12" />
-          </svg>
-        </em>{" "}
+        <em>{emphasis}</em>{" "}
         {after}
       </h1>
       <p className="hw-lede">{HALLOWEEN_HERO.lede}</p>

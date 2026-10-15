@@ -55,7 +55,7 @@ export const HALLOWEEN_PATH = "/halloween";
 
 export const HALLOWEEN_HERO = {
   eyebrow: "Tiny Soho · Halloween 2026",
-  /** The headline, with the emphasis underlined in pumpkin. */
+  /** The headline, with the emphasis in pumpkin italic. */
   title: { before: "Halloween, the", emphasis: "not-scary", after: "way." },
   lede: "Three recipes for the big night, made for little hands.",
 };
