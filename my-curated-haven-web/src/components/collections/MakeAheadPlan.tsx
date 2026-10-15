@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { MakeAheadPlanEntry } from "@/config/halloween";
+import type { CollectionRecipe } from "@/lib/collections/types";
 import type {
   MakeAheadPlan,
   MakeAheadPlanPreview,
@@ -100,6 +101,54 @@ export function PlanMenu({ plan }: { plan: MakeAheadPlan | MakeAheadPlanPreview 
         ))}
       </ul>
       {full ? <p className="mp-free-of">{full.freeOf}</p> : null}
+    </section>
+  );
+}
+
+/**
+ * The rest of the book under the plan: each recipe's photo and name, opening its own page (the whole recipe when
+ * free or owned, otherwise its locked page with the way to buy). Recipes without a page show without a link.
+ */
+export function PlanMoreRecipes({
+  heading,
+  sub,
+  recipes,
+}: {
+  heading: string;
+  sub: string;
+  recipes: readonly Pick<CollectionRecipe, "slug" | "title" | "image" | "href" | "free">[];
+}) {
+  if (recipes.length === 0) return null;
+  return (
+    <section className="mp-card" aria-labelledby="mp-more-h">
+      <h2 className="mp-h2" id="mp-more-h">
+        {heading}
+      </h2>
+      <p className="mp-sub">{sub}</p>
+      <ul className="mp-menu" style={{ marginTop: "0.875rem" }}>
+        {recipes.map((recipe) => {
+          const tile = (
+            <>
+              <div className="mp-dish-photo">
+                <Image src={recipe.image} alt={recipe.title} fill sizes="(min-width: 560px) 14rem, 45vw" />
+              </div>
+              <span className="mp-dish-name">{recipe.title}</span>
+            </>
+          );
+          return (
+            <li key={recipe.slug} className="mp-dish">
+              {recipe.href ? (
+                <Link href={recipe.href} className="mp-dish-link">
+                  {tile}
+                  {recipe.free ? <span className="mp-dish-free">Free</span> : null}
+                </Link>
+              ) : (
+                tile
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
