@@ -3,11 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
+import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 import {
   PlanDayHeadings,
   PlanDays,
   PlanHeader,
   PlanMenu,
+  PlanMoreRecipes,
   PlanTiers,
 } from "@/components/collections/MakeAheadPlan";
 import MakeAheadPlanTracker from "@/components/collections/MakeAheadPlanTracker";
@@ -17,11 +19,11 @@ import { makeAheadPlanFor } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { bookName } from "@/lib/collections/book-name";
 import { shoppingListText } from "@/lib/collections/make-ahead";
-import { recipeCount } from "@/lib/collections/visibility";
+import { recipeCount, withCatalogAccess } from "@/lib/collections/visibility";
 import { isRecipeAdmin } from "@/lib/data/access";
 import { getPublishedCollection, loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
 import { readMakeAheadPlan, type PlanRead } from "@/lib/data/make-ahead-plan";
-import { getFreeRecipeCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
+import { getFreeRecipeCatalog, getPublishedCatalog, type RecipeCatalogItem } from "@/lib/data/recipes";
 import { createPublicClient } from "@/lib/supabase/public";
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 
@@ -83,6 +85,21 @@ async function loadBookFreeRecipe(bookSlugs: ReadonlySet<string>): Promise<Recip
   }
 }
 
+/**
+ * The book's other recipes, for the photo grid under the plan (owner decision 2026-10-14: show every pretty
+ * Halloween recipe here, not only the party menu). Each opens its page; a lookup failure shows them without links.
+ */
+async function loadMoreRecipes(book: ShowroomCollection, menuSlugs: ReadonlySet<string>): Promise<CollectionRecipe[]> {
+  const rest = book.recipes.filter((recipe) => !menuSlugs.has(recipe.slug));
+  try {
+    const client = createPublicClient();
+    const [published, free] = await Promise.all([getPublishedCatalog(client), getFreeRecipeCatalog(client)]);
+    return withCatalogAccess(rest, new Set(published.map((recipe) => recipe.slug)), new Set(free.map((recipe) => recipe.slug)));
+  } catch {
+    return rest;
+  }
+}
+
 export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
   const { slug } = await params;
   const view = await loadView(slug);
@@ -91,6 +108,8 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
   if (!published) notFound();
   const book = published.collection;
   const { entry, user, live, offer, owned, isAdmin, read } = view;
+  const more = await loadMoreRecipes(book, new Set(entry.preview.menu.map((dish) => dish.slug)));
+  const moreSub = `${more.length} more ${more.length === 1 ? "recipe" : "recipes"} in ${bookName(book.title, "book")}.`;
 
   if (read.status === "ok") {
     const { plan } = read;
@@ -108,6 +127,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
           aisles={plan.shopping.aisles}
         />
         <PlanTiers plan={plan} />
+        <PlanMoreRecipes heading="The rest of your book" sub={`${recipeCount(more.length)}, ready to open.`} recipes={more} />
       </div>
     );
   }
@@ -139,6 +159,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
             </Link>
           </p>
         </div>
+        <PlanMoreRecipes heading="The rest of your book" sub={`${recipeCount(more.length)}, ready to open.`} recipes={more} />
       </div>
     );
   }
@@ -203,6 +224,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
           </p>
         ) : null}
       </div>
+      <PlanMoreRecipes heading="More from the book" sub={moreSub} recipes={more} />
     </div>
   );
 }

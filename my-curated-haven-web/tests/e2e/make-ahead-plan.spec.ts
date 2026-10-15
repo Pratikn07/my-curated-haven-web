@@ -67,6 +67,11 @@ async function expectPreviewOnly(page: Page) {
   await expect(page.getByRole("button", { name: /Buy (now|Collection)/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "See all 19 recipes" })).toHaveAttribute("href", "/collections/halloween");
   await expect(page.getByRole("checkbox")).toHaveCount(0);
+  // The rest of the book follows as photos; the party menu's recipes are not repeated.
+  const more = page.getByRole("region", { name: "More from the book" });
+  await expect(more).toBeVisible();
+  await expect(more.getByText("Strawberry Yogurt Ghost Hearts", { exact: true })).toBeVisible();
+  await expect(more.getByText("Spider Cracker Bites", { exact: true })).toHaveCount(0);
   const rendered = await page.content();
   for (const paid of PAID) expect(rendered, paid).not.toContain(paid);
 }
