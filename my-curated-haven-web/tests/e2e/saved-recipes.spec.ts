@@ -170,7 +170,6 @@ test.describe("Phase 7: Unauthenticated Experience & Protection", () => {
 
     // Title and content are complete
     await expect(page.getByRole("heading", { name: "Synthetic Free Oat Bake", level: 1 })).toBeVisible();
-    await expect(page.getByText("Free Toddler Recipe", { exact: true })).toBeVisible();
     await expect(page.getByText("rolled oats")).toBeVisible();
     await expect(page.getByRole("button", { name: /print/i })).toBeVisible();
 

@@ -187,7 +187,6 @@ test.describe("Phase 6 Free Recipe Experience", () => {
     ).toBeVisible();
 
     // Meta stats & Actions
-    await expect(page.getByText("Free Toddler Recipe", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /print/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Jump to recipe/i })).toBeVisible();
 

@@ -8,6 +8,7 @@ import {
   METHOD_AGES,
   hasPerAgeContent,
   isMethodAge,
+  methodTime,
   numberedSections,
   pickForAge,
   stepPhotoSrc,
@@ -75,6 +76,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
   const safety = [...method.safety.all, method.safety.byAge[age]].filter((line): line is string => Boolean(line));
   const sections = numberedSections(method);
   const named = sections.some((section) => section.name);
+  const { wait } = methodTime(method);
   let ingredientIndex = 0;
 
   return (
@@ -162,6 +164,7 @@ export default function RecipeMethodLayout({ method, allergenLine }: RecipeMetho
         <h2 id="instructions-heading" className="mb-3 text-2xl font-bold text-foreground">
           Method
         </h2>
+        {wait ? <p className="rm-wait-note">{wait}</p> : null}
         {sections.map((section) => (
           <Fragment key={section.start}>
             {section.name ? <h3 className="rm-section-head">{section.name}</h3> : null}
