@@ -11,6 +11,7 @@ import {
 import { isAllowedCampaign } from "./campaigns";
 import { trustedAnalyticsEnvironment } from "./environment";
 import { EVENT_ALLOWED_PROPERTIES, EVENT_REQUIRED_PROPERTIES } from "./schema";
+import { isPrimaryUx } from "./ux";
 
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const UUID_REGEX =
@@ -163,6 +164,7 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "collection_slug" && !SLUG_REGEX.test(value)) return fail("collection_slug");
   if (key === "surface" && !CHECKOUT_SURFACES.has(value)) return fail("surface");
   if (key === "ownership_state" && !OWNERSHIP_STATES.has(value)) return fail("ownership_state");
+  if (key === "primary_ux" && !isPrimaryUx(value)) return fail("primary_ux");
   if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
   if (key === "story_action" && !STORY_ACTIONS.has(value)) return fail("story_action");
   if (key === "story_placement" && !STORY_PLACEMENTS.has(value)) return fail("story_placement");
