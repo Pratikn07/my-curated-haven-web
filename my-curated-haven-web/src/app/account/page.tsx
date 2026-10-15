@@ -29,7 +29,7 @@ export default async function AccountPage() {
           Account Overview
         </h1>
         <p className="mt-2 text-base text-text-muted">
-          Manage your saved recipe collection, purchased collections, and account settings.
+          Your saved recipes, your library and your account settings.
         </p>
       </header>
 
@@ -62,14 +62,14 @@ export default async function AccountPage() {
                 <ShoppingBag className="h-6 w-6" />
               </div>
               <h2 className="text-xl font-bold text-foreground group-hover:text-action transition-colors">
-                My Collections
+                My Library
               </h2>
               <p className="mt-2 text-sm text-text-muted">
-                Access your purchased recipe collections and printables.
+                The recipe books you bought, ready to read and print.
               </p>
             </div>
             <div className="mt-6 flex items-center font-semibold text-action text-sm">
-              <span>View collections &rarr;</span>
+              <span>Open My Library &rarr;</span>
             </div>
           </Link>
 

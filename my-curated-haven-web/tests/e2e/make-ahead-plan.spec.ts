@@ -132,6 +132,7 @@ test.describe("[make-ahead] Halloween make-ahead plan", () => {
   test("a visitor sees the buy-box line, and the plan page is only a preview with the way to buy", async ({ page }) => {
     await page.goto("/collections/halloween");
     await expect(page.getByText(BUY_LINE)).toBeVisible();
+    await expect(page.locator("#buy").getByRole("link", { name: "See the plan" })).toHaveAttribute("href", PLAN);
     await expect(page.getByRole("link", { name: /Your make-ahead plan/ })).toHaveCount(0);
 
     await expectPreviewOnly(page);

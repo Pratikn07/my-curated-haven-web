@@ -11,6 +11,11 @@ import { maskEmail } from "./mask-email";
  * claims it, so a parent who closes the page after paying never loses the book.
  */
 
+/** Local fixtures only: a mock checkout session id, which has no Stripe page to collect the buyer's email. */
+export function isMockCheckoutSession(sessionId: string): boolean {
+  return sessionId.startsWith("cs_test_mock_");
+}
+
 /** The browser cookie holding a signed-out buyer's random id, so a second tap reuses their open checkout. */
 export const GUEST_COOKIE = "mch_guest";
 
@@ -92,7 +97,7 @@ export async function loadGuestCheckout(sessionId: string): Promise<GuestCheckou
 
   let paid = await isPaid(order.id);
   let email = order.buyer_email;
-  const mock = sessionId.startsWith("cs_test_mock_");
+  const mock = isMockCheckoutSession(sessionId);
 
   if (!mock && isStripeConfigured()) {
     // With an approved policy the shared writer records the payment (and any refund) from Stripe's own answer.
@@ -163,7 +168,7 @@ export async function guestBuyerEmail(sessionId: string): Promise<string | null>
 
 /** Local fixtures only: a mock session has no Stripe page, so the parent types the email Stripe would collect. */
 export async function recordMockGuestEmail(sessionId: string, email: string): Promise<boolean> {
-  if (!sessionId.startsWith("cs_test_mock_") || !canUseMockCheckout()) return false;
+  if (!isMockCheckoutSession(sessionId) || !canUseMockCheckout()) return false;
   const order = await loadGuestOrder(sessionId);
   if (!order || !(await isPaid(order.id))) return false;
   return recordGuestBuyerEmail(order.id, email);

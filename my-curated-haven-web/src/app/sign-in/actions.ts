@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isInAppBrowser, OPEN_IN_BROWSER_HINT } from "@/lib/auth/in-app-browser";
 import { claimGuestOrders } from "@/lib/payments/guest-checkout";
 import { sanitizeReturnTo } from "@/lib/auth/redirects";
-import { otpRequestErrorMessage } from "@/lib/auth/otp-errors";
+import { OTP_SEND_FAILED, otpRequestErrorMessage, otpVerifyErrorMessage } from "@/lib/auth/otp-errors";
 import { isTurnstileEnabled } from "@/lib/auth/turnstile";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -55,10 +55,8 @@ export async function requestOtpAction(
 
     return { success: true };
   } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Failed to send verification code.",
-    };
+    console.error("[sign-in] sending the code failed", err instanceof Error ? err.message : err);
+    return { success: false, error: OTP_SEND_FAILED };
   }
 }
 
@@ -82,7 +80,7 @@ export async function verifyOtpAction(
   });
 
   if (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: otpVerifyErrorMessage() };
   }
 
   // Pay first: anything bought before signing in with this (now confirmed) email joins the account.

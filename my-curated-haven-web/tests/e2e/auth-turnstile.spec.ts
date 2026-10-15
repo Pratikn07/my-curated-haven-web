@@ -43,10 +43,10 @@ test("the widget is rendered explicitly, so it can be reset per request", () => 
   expect(TURNSTILE_SCRIPT_URL.startsWith("https://challenges.cloudflare.com/")).toBe(true);
 });
 
-test("a rejected challenge explains itself and points at Google", () => {
+test("a rejected challenge explains itself and never points at Google, which fails inside Instagram", () => {
   expect(
     otpRequestErrorMessage({ code: "captcha_failed", message: "captcha protection: request disallowed" })
-  ).toContain("Continue with Google");
+  ).not.toContain("Google");
   expect(
     otpRequestErrorMessage({ message: "captcha verification process failed" })
   ).toContain("verification check");

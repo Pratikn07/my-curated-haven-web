@@ -71,6 +71,7 @@ const STORY_ACTIONS = new Set([
   "instagram",
   "recipes_index",
   "home",
+  "make_ahead_plan",
 ]);
 const STORY_PLACEMENTS = new Set([
   "card",
@@ -86,9 +87,10 @@ const STORY_PLACEMENTS = new Set([
   "collection",
   "related",
   "closing",
+  "plan",
 ]);
 const STORY_OFFER_STATES = new Set(["none", "pack", "collection", "both"]);
-const STORY_SECTIONS = new Set(["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing"]);
+const STORY_SECTIONS = new Set(["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing", "plan"]);
 const STORY_SERIES_REGEX = /^[a-z0-9][a-z0-9-]{0,39}$/;
 /** Small counts on campaign pages; anything larger is a bug, not data. */
 const SMALL_COUNT_FIELDS: Record<string, [number, number]> = { recipe_count: [0, 50], recipe_position: [1, 50] };

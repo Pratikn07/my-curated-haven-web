@@ -9,6 +9,8 @@ import { getSessionCampaign } from "@/lib/analytics/campaigns";
 import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
 import { rememberBoughtFrom } from "@/lib/recipes/bought-from";
 
+const CHECKOUT_FAILED = "We couldn't start checkout. Please refresh the page and try again.";
+
 interface CheckoutButtonProps {
   collectionSlug: string;
   formattedPrice: string;
@@ -104,7 +106,8 @@ export default function CheckoutButton({
         body: JSON.stringify(bodyPayload),
       });
 
-      const data = await res.json();
+      // A timeout or proxy error can answer with HTML; never show the browser's parse error to a parent.
+      const data = await res.json().catch(() => null);
 
       if (!res.ok) {
         if (res.status === 409) {
@@ -112,22 +115,25 @@ export default function CheckoutButton({
           window.location.reload();
           return;
         }
-        throw new Error(data.error || "Failed to start checkout session.");
+        // Checkout's own answers carry a code and are written for parents; anything else is technical.
+        setErrorMessage(typeof data?.code === "string" && typeof data?.error === "string" ? data.error : CHECKOUT_FAILED);
+        setIsLoading(false);
+        return;
       }
 
-      if (data.analyticsAttemptRef) {
+      if (data?.analyticsAttemptRef) {
         rememberAttemptRef(data.analyticsAttemptRef);
       }
 
-      if (data.checkoutUrl) {
+      if (data?.checkoutUrl) {
         if (fromRecipeSlug) rememberBoughtFrom(collectionSlug, fromRecipeSlug);
         window.location.href = data.checkoutUrl;
       } else {
-        throw new Error("Missing checkout destination URL.");
+        setErrorMessage(CHECKOUT_FAILED);
+        setIsLoading(false);
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Something went wrong.";
-      setErrorMessage(msg);
+    } catch {
+      setErrorMessage("We couldn't reach checkout. Check your connection and try again.");
       setIsLoading(false);
     }
   }

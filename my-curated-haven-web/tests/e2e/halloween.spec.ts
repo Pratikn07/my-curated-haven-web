@@ -56,11 +56,26 @@ test("[halloween] the book follows the recipes, and the buy bar follows once it 
   await expect(dock).not.toHaveAttribute("data-on");
   await page.locator("#hw-walk").scrollIntoViewIfNeeded();
   await expect(dock).toHaveAttribute("data-on", "");
+  await expect(dock).toContainText(/\d+ recipes \+ plan/);
   await expect(dock.getByRole("link")).toHaveAttribute("href", /^\/collections\/halloween(#buy)?$/);
 
   // The full book section near the end takes over from the bar.
   await page.locator('[data-story-section="collection"]').scrollIntoViewIfNeeded();
   await expect(dock).not.toHaveAttribute("data-on");
+});
+
+test("[halloween] the make-ahead plan follows the book card: three days, what comes with the book, and the plan page", async ({ page }) => {
+  await page.goto(PAGE);
+  await expect(page.locator("#hw-bookcard")).toContainText("Comes with a make-ahead plan and one shopping list for Halloween weekend.");
+
+  const strip = page.locator("#hw-bookcard + #hw-plan");
+  await expect(strip, "the plan comes straight after the book card").toHaveCount(1);
+  await expect(strip.getByRole("listitem")).toHaveCount(3);
+  for (const day of ["Freezer night", "Fridge day", "Halloween"]) {
+    await expect(strip.getByText(day, { exact: true })).toBeVisible();
+  }
+  await expect(strip).toContainText("The full plan, the party menu and one shopping list come with the book.");
+  await expect(strip.getByRole("link", { name: /See the plan/ })).toHaveAttribute("href", "/collections/halloween/plan");
 });
 
 test("[halloween] the open book shows every recipe as a photo, and a tap names it", async ({ page }) => {
@@ -107,7 +122,9 @@ test("[halloween] with reduced motion the street stands still with every light o
 test("[halloween] without script the whole page is there to read", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto(PAGE);
+  // The checks below read text and links only. Waiting for every photo made this flaky: under load the image
+  // resizer could stall one request and the page's load event never came.
+  await page.goto(PAGE, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "Make them Halloween" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How we're doing Halloween this year" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Three doorbells, then home" })).toBeVisible();

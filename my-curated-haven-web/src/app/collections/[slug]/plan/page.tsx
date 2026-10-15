@@ -64,7 +64,13 @@ export async function generateMetadata({ params }: PlanPageProps): Promise<Metad
     alternates: { canonical: canonicalUrl },
     // Same rule as recipe pages: an admin's view is never indexed; a locked view is indexed like a locked recipe.
     ...(isAdmin ? { robots: { index: false, follow: false } } : {}),
-    openGraph: { title: entry.metadataTitle, description: entry.preview.lede, url: canonicalUrl, type: "article" },
+    openGraph: {
+      title: entry.metadataTitle,
+      description: entry.preview.lede,
+      url: canonicalUrl,
+      type: "article",
+      images: [{ url: entry.shareImage.src, alt: entry.shareImage.alt }],
+    },
   };
 }
 
@@ -150,7 +156,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
         <h2 className="mt-4 text-2xl font-bold text-foreground">In {bookName(book.title, "book")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-base leading-relaxed text-text-muted">
           {saleOffer
-            ? `Get this plan and all ${recipeCount(book.recipes.length)}, each with steps, storage tips and a page you can print. One payment, yours to keep.`
+            ? `Get this plan and all ${recipeCount(book.recipes.length)}, each with steps, storage tips and a page you can print. One payment, yours to keep. All sales are final.`
             : !live.ok
               ? "We could not load checkout just now. Please refresh in a moment."
               : "This book opens soon. Until then, try one of our free recipes."}

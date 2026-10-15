@@ -2,7 +2,8 @@ import { test, expect, type Page } from "@playwright/test";
 import { sanitizeReturnTo } from "../../src/lib/auth/redirects";
 import { EMAIL_OTP_LENGTH } from "../../src/lib/auth/otp";
 
-const MAILPIT_URL = "http://127.0.0.1:54324";
+// The local Supabase mail inbox; set MAILPIT_URL when the test stack runs on other ports.
+const MAILPIT_URL = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 
 async function overflow(page: Page) {
   return page.evaluate(

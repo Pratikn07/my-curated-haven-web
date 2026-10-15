@@ -23,6 +23,7 @@ const ACTIONS: readonly StoryAction[] = [
   "instagram",
   "recipes_index",
   "home",
+  "make_ahead_plan",
 ];
 const PLACEMENTS: readonly StoryPlacement[] = [
   "card",
@@ -38,8 +39,9 @@ const PLACEMENTS: readonly StoryPlacement[] = [
   "collection",
   "related",
   "closing",
+  "plan",
 ];
-const SECTIONS: readonly StorySection[] = ["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing"];
+const SECTIONS: readonly StorySection[] = ["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing", "plan"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface CampaignTrackerProps {

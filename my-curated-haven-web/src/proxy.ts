@@ -26,7 +26,7 @@ function unavailableHtml() {
 <body>
   <main>
     <h1>This page is not available</h1>
-    <p>That address is not part of the public site. You can go home or email support.</p>
+    <p>We couldn't find that page. It may have moved. You can go home or email support.</p>
     <div class="actions">
       <a class="home" href="/">Home</a>
       <a class="support" href="/support">Support</a>

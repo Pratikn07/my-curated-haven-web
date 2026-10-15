@@ -22,6 +22,11 @@ test("sign-in email errors explain what to do", () => {
   // Production returned this same code for a 17-second per-address wait,
   // which the helper previously mislabeled as the project-wide hourly cap.
   expect(otpRequestErrorMessage({ code: "over_email_send_rate_limit", message: wait })).toBe(wait);
+
+  // Anything unrecognised gets a plain retry message, never Supabase's own text.
+  expect(otpRequestErrorMessage({ code: "unexpected_failure", message: "Database error saving new user" })).toBe(
+    "We couldn't send a code just now. Please try again in a minute."
+  );
 });
 
 // The sign-in form once hard-coded maxLength={6} while Supabase's

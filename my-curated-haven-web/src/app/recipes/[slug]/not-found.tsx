@@ -7,7 +7,7 @@ export default function RecipeNotFound() {
         Recipe Not Found
       </h1>
       <p className="mt-4 text-base leading-relaxed text-text-muted">
-        We couldn&rsquo;t find the recipe you&rsquo;re looking for. It may have been updated, moved, or is not currently available for free public viewing.
+        We couldn&rsquo;t find that recipe. It may have moved or been taken down.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <Link

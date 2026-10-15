@@ -67,7 +67,7 @@ export function RecipeStorageNotes({
         )}
         {reviewedNotes && (
           <div>
-            <h3 className="font-semibold text-foreground">Helpful Toddler Feeding Tips:</h3>
+            <h3 className="font-semibold text-foreground">Tips:</h3>
             <p className="mt-1 whitespace-pre-line break-words">{reviewedNotes}</p>
           </div>
         )}

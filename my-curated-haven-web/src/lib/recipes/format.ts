@@ -45,3 +45,16 @@ export function usableImageSrc(path: string | null | undefined): string | null {
   }
   return /^https?:\/\//.test(trimmed) || trimmed.startsWith("/") ? trimmed : null;
 }
+
+/** A cooking time a parent reads at a glance: 25 → "25 min", 60 → "1 hr", 165 → "2 hr 45 min". */
+export function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0 ? `${hours} hr` : `${hours} hr ${rest} min`;
+}
+
+/** A catalog tag as a label: "gluten-free" → "Gluten-free", "snack" → "Snack". */
+export function tagLabel(tag: string): string {
+  return tag.charAt(0).toUpperCase() + tag.slice(1);
+}
