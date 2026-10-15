@@ -72,6 +72,9 @@ async function expectPreviewOnly(page: Page) {
   await expect(more).toBeVisible();
   await expect(more.getByText("Strawberry Yogurt Ghost Hearts", { exact: true })).toBeVisible();
   await expect(more.getByText("Spider Cracker Bites", { exact: true })).toHaveCount(0);
+  // The owner left these two out of the grid.
+  await expect(more.getByText("Banana Pumpkin Mini Donuts", { exact: true })).toHaveCount(0);
+  await expect(more.getByText("Sweet Potato Jack-O'-Lantern Cupcakes", { exact: true })).toHaveCount(0);
   const rendered = await page.content();
   for (const paid of PAID) expect(rendered, paid).not.toContain(paid);
 }

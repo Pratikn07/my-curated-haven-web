@@ -86,11 +86,12 @@ async function loadBookFreeRecipe(bookSlugs: ReadonlySet<string>): Promise<Recip
 }
 
 /**
- * The book's other recipes, for the photo grid under the plan (owner decision 2026-10-14: show every pretty
- * Halloween recipe here, not only the party menu). Each opens its page; a lookup failure shows them without links.
+ * The photo grid under the plan (owner decision 2026-10-14: the book's prettiest Halloween recipes, not only the
+ * party menu), in the plan entry's order and only for recipes still in the book. Each opens its page; a lookup
+ * failure shows them without links.
  */
-async function loadMoreRecipes(book: ShowroomCollection, menuSlugs: ReadonlySet<string>): Promise<CollectionRecipe[]> {
-  const rest = book.recipes.filter((recipe) => !menuSlugs.has(recipe.slug));
+async function loadMoreRecipes(book: ShowroomCollection, slugs: readonly string[]): Promise<CollectionRecipe[]> {
+  const rest = slugs.flatMap((slug) => book.recipes.filter((recipe) => recipe.slug === slug));
   try {
     const client = createPublicClient();
     const [published, free] = await Promise.all([getPublishedCatalog(client), getFreeRecipeCatalog(client)]);
@@ -108,8 +109,8 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
   if (!published) notFound();
   const book = published.collection;
   const { entry, user, live, offer, owned, isAdmin, read } = view;
-  const more = await loadMoreRecipes(book, new Set(entry.preview.menu.map((dish) => dish.slug)));
-  const moreSub = `${more.length} more ${more.length === 1 ? "recipe" : "recipes"} in ${bookName(book.title, "book")}.`;
+  const more = await loadMoreRecipes(book, entry.moreRecipes);
+  const moreSub = `More treats from ${bookName(book.title, "book")}.`;
 
   if (read.status === "ok") {
     const { plan } = read;
@@ -127,7 +128,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
           aisles={plan.shopping.aisles}
         />
         <PlanTiers plan={plan} />
-        <PlanMoreRecipes heading="The rest of your book" sub={`${recipeCount(more.length)}, ready to open.`} recipes={more} />
+        <PlanMoreRecipes heading="More from your book" sub="Ready to open whenever you are." recipes={more} />
       </div>
     );
   }
@@ -159,7 +160,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
             </Link>
           </p>
         </div>
-        <PlanMoreRecipes heading="The rest of your book" sub={`${recipeCount(more.length)}, ready to open.`} recipes={more} />
+        <PlanMoreRecipes heading="More from your book" sub="Ready to open whenever you are." recipes={more} />
       </div>
     );
   }
