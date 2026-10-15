@@ -193,10 +193,15 @@ test("[halloween] reading to the end sends section_viewed for each part, and twi
   await page.goto(PAGE);
   await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
   // Small steps, so every part passes the line the observer uses.
-  for (let y = 0; ; y += 250) {
+  // Each step waits two frames, so the browser has rendered the position and run its intersection checks: a fixed
+  // pause was too short for WebKit under CI load, which then skipped a part as if it had never been on screen.
+  for (let y = 0; ; y += 200) {
     const height = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
-    await page.evaluate((top) => window.scrollTo(0, top), Math.min(y, height));
-    await page.waitForTimeout(60);
+    await page.evaluate(async (top) => {
+      window.scrollTo(0, top);
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }, Math.min(y, height));
+    await page.waitForTimeout(30);
     if (y >= height) break;
   }
   const tally = async () => {
