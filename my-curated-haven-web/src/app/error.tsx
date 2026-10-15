@@ -15,14 +15,14 @@ export default function SiteError({ error, reset }: { error: Error & { digest?: 
   }, [error]);
 
   return (
-    <Container reading className="py-16 text-center">
+    <Container reading className="py-16 text-center" trackUx="error_page">
       <h1 className="text-[2rem] font-semibold">This page didn&apos;t load</h1>
       <p className="mt-4 text-lg text-text-muted">
         Something went wrong on our side. Please try again in a moment. Your recipes and anything you bought are safe.
       </p>
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-        <Button onClick={() => reset()}>Try again</Button>
-        <ButtonLink href="/" variant="secondary">
+        <Button onClick={() => reset()} data-track-cta="retry">Try again</Button>
+        <ButtonLink href="/" variant="secondary" data-track-cta="home">
           Home
         </ButtonLink>
       </div>

@@ -81,7 +81,7 @@ export default function StorybookSample() {
   const story = STORIES.find((item) => item.id === storyId) ?? STORIES[0];
 
   return (
-    <div className="grid min-w-0 gap-5">
+    <div className="grid min-w-0 gap-5" data-track-ux="storybook" data-track-view>
       <figure className="storybook-book m-0 max-sm:-mx-3">
         <div className="storybook-page-left" aria-hidden="true">
           <svg viewBox="0 0 300 340" className="block h-full w-full">
@@ -140,10 +140,12 @@ export default function StorybookSample() {
         <fieldset className="grid gap-2">
           <legend className="mb-2 text-sm font-semibold text-text-muted">Pick a story</legend>
           <div className="flex flex-wrap gap-2">
-            {STORIES.map((item) => (
+            {STORIES.map((item, index) => (
               <button
                 key={item.id}
                 type="button"
+                data-track-cta="pick_story"
+                data-track-pos={index + 1}
                 aria-pressed={item.id === storyId}
                 onClick={() => setStoryId(item.id)}
                 className="min-h-11 rounded-full border border-border-control bg-surface px-4 text-sm font-semibold aria-pressed:border-[var(--room-library-accent)] aria-pressed:bg-[var(--room-library-accent)] aria-pressed:text-white"
@@ -161,6 +163,8 @@ export default function StorybookSample() {
               <button
                 key={style.id}
                 type="button"
+                data-track-cta="pick_style"
+                data-track-pos={index + 1}
                 aria-pressed={index === styleIndex}
                 onClick={() => setPickedStyle(index)}
                 className="min-h-11 rounded-full border border-border-control bg-surface px-4 text-sm font-semibold aria-pressed:border-[var(--room-library-accent)] aria-pressed:bg-[var(--room-library-accent)] aria-pressed:text-white"

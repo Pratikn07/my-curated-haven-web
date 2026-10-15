@@ -20,6 +20,20 @@ function identifyUser(user: { id: string; email?: string }) {
 }
 
 /**
+ * Tracking PR 2: the signed_in super property on every later event, from the auth state on each page.
+ * null clears it (sign-out), until the next page reads the session again.
+ */
+function setSignedIn(signedIn: boolean | null) {
+  try {
+    if (typeof window !== "undefined" && isAdminNavigationContext(window.location.href)) return;
+    if (signedIn === null) posthog.unregister("signed_in");
+    else posthog.register({ signed_in: signedIn });
+  } catch {
+    // Analytics must never interrupt the page.
+  }
+}
+
+/**
  * Starts analytics for every visitor (no consent step; see the Privacy Policy).
  * With PostHog configured: automatic page views, clicks and session recordings
  * (typed text masked, never on sign-in, account or checkout pages), and
@@ -43,8 +57,10 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
     } = createClient().auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         identifyUser(session.user);
+        setSignedIn(true);
       } else if (event === "SIGNED_OUT") {
         posthog.reset();
+        setSignedIn(null);
       }
     });
 
@@ -67,6 +83,7 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
           return;
         }
         if (session?.user) identifyUser(session.user);
+        setSignedIn(Boolean(session?.user));
       })
       .catch(() => {
         // Analytics must never interrupt the page.

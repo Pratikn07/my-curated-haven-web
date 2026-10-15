@@ -50,6 +50,8 @@ export default function HavenHero({
                 presentationState: HOMEPAGE_RECIPE_STATE.mode,
               }}
               className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+              data-track-ux="hero"
+              data-track-cta="browse_recipes"
             >
               Browse recipes
             </TrackedHomepageLink>

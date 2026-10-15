@@ -33,7 +33,7 @@ export default function PurchaseConfirmed({
 }: PurchaseConfirmedProps) {
   const recipes = recipeCount ? `All ${recipeCount} recipes are` : "Every recipe is";
   return (
-    <div>
+    <div data-track-ux="confirmation">
       {cover ? (
         <Image
           src={cover.src}
@@ -62,7 +62,7 @@ export default function PurchaseConfirmed({
           </>
         ) : (
           <>
-            Your recipes are saved in <Link href="/account/collections" className="underline hover:text-foreground">My Library</Link>.
+            Your recipes are saved in <Link href="/account/collections" className="underline hover:text-foreground" data-track-cta="library">My Library</Link>.
           </>
         )}
       </p>

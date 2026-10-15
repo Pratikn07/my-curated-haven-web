@@ -110,6 +110,12 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   story_view: ["story_slug", "room", "recipe_count", "offer_state", "story_series"],
   story_action_clicked: ["story_slug", "story_action", "story_placement", "recipe_id", "recipe_position"],
   story_section_viewed: ["story_slug", "story_section"],
+  // Tracking PR 2
+  cta_clicked: ["primary_ux", "link_type", "cta", "cta_position", "destination_kind", "target_kind", "target_slug"],
+  section_viewed: ["primary_ux"],
+  offer_viewed: ["surface", "collection_slug", "ownership_state", "price_minor", "currency"],
+  page_scroll_reached: ["depth"],
+  page_time_reached: ["seconds"],
 };
 
 export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
@@ -136,4 +142,31 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   story_view: ["story_slug", "room"],
   story_action_clicked: ["story_slug", "story_action", "story_placement"],
   story_section_viewed: ["story_slug", "story_section"],
+  // Tracking PR 2
+  cta_clicked: ["primary_ux", "link_type"],
+  section_viewed: ["primary_ux"],
+  offer_viewed: ["surface", "collection_slug"],
+  page_scroll_reached: ["depth"],
+  page_time_reached: ["seconds"],
 };
+
+// Tracking PR 2: page context.
+const CONTENT_SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
+const CONTENT_PATHS = [
+  /^\/recipes\/([^/]+)\/?$/,
+  /^\/collections\/(?!series(?:\/|$))([^/]+)(?:\/plan)?\/?$/,
+  /^\/stories\/([^/]+)\/?$/,
+];
+
+/**
+ * The recipe, book, plan or story a page is about, from its address: /recipes/<slug>, /collections/<slug>,
+ * /collections/<slug>/plan and /stories/<slug> give the slug, /halloween gives "halloween". Other pages have none.
+ */
+export function contentSlugFromPath(pathname: string): string | undefined {
+  if (pathname === "/halloween" || pathname === "/halloween/") return "halloween";
+  for (const pattern of CONTENT_PATHS) {
+    const match = pattern.exec(pathname);
+    if (match) return CONTENT_SLUG.test(match[1]) ? match[1] : undefined;
+  }
+  return undefined;
+}

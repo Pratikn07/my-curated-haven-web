@@ -109,6 +109,7 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
                 type="button"
                 className="bk-stage-option"
                 aria-pressed={stage === option.key}
+                data-track-cta="stage"
                 onClick={() => update(option.key, filters)}
               >
                 {option.label}
@@ -129,6 +130,7 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
                 type="button"
                 className="bk-chip"
                 aria-pressed={active}
+                data-track-cta="filter_chip"
                 disabled={empty}
                 onClick={() => toggleFilter(filter.key)}
               >
@@ -151,13 +153,13 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
             <h2 id="bk-results-title" aria-live="polite">
               {visible.length === 1 ? "1 collection matches" : `${visible.length} collections match`}
             </h2>
-            <button type="button" className="bk-clear" onClick={() => update(stage, [])}>
+            <button type="button" className="bk-clear" onClick={() => update(stage, [])} data-track-cta="clear_filters">
               Clear all
             </button>
           </div>
           <ul className="bk-grid">
             {visible.map((entry, index) => (
-              <li key={entry.slug} style={{ "--i": index } as CSSProperties}>
+              <li key={entry.slug} style={{ "--i": index } as CSSProperties} data-track-pos={index + 1}>
                 <BookTile entry={entry} />
               </li>
             ))}
@@ -181,7 +183,7 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
                   aria-labelledby={`bk-shelf-${shelf.key}`}
                 >
                   {books.map((entry, index) => (
-                    <li key={entry.slug} style={{ "--i": index } as CSSProperties}>
+                    <li key={entry.slug} style={{ "--i": index } as CSSProperties} data-track-pos={index + 1}>
                       <BookTile entry={entry} />
                     </li>
                   ))}
@@ -200,7 +202,7 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
         <ul className="bk-series-list">
           {series.map((item) => (
             <li key={item.key}>
-              <Link className="bk-series-card" href={`/collections/series/${item.key}${stage === "all" ? "" : `?stage=${stage}`}`}>
+              <Link className="bk-series-card" href={`/collections/series/${item.key}${stage === "all" ? "" : `?stage=${stage}`}`} data-track-cta="series">
                 <span className="bk-series-name">{item.title}</span>
                 <span className="bk-series-lede">{item.lede}</span>
                 <span className="bk-series-volumes">{item.volumes.join(" · ")}</span>
@@ -260,7 +262,7 @@ function BookTile({ entry }: { entry: BookcaseEntry }) {
     );
   }
   return (
-    <Link className="bk-book" href={`/collections/${entry.slug}`} {...opener}>
+    <Link className="bk-book" href={`/collections/${entry.slug}`} {...opener} data-track-cta="open_book">
       <span className="bk-book-cover">
         <BookCover book={book} sizes="(min-width: 768px) 10rem, 34vw" tilt />
       </span>
@@ -276,7 +278,7 @@ function Featured({ entry }: { entry: BookcaseEntry }) {
   const opener = useOpenBook(entry);
   return (
     <section className="bk-featured" data-cloth={entry.cloth} aria-labelledby="bk-featured-title">
-      <Link className="bk-featured-link" href={`/collections/${entry.slug}`} {...opener}>
+      <Link className="bk-featured-link" href={`/collections/${entry.slug}`} {...opener} data-track-cta="featured_book">
         <span className="bk-featured-cover">
           <BookCover book={{ title: entry.title, cover: entry.cover, cloth: entry.cloth }} sizes="(min-width: 768px) 12rem, 38vw" priority />
         </span>

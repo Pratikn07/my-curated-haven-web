@@ -14,7 +14,7 @@ export default function CampaignClosing({ data }: { data: CampaignPageData }) {
   const wayBack = campaign.wayBackKeyword && (pack || collection) ? campaign.wayBackKeyword : null;
 
   return (
-    <section className="cp-closing" aria-labelledby="cp-closing-title" data-story-section="closing">
+    <section className="cp-closing" aria-labelledby="cp-closing-title" data-story-section="closing" data-track-ux="closing" data-track-view>
       <div className="cp-closing-mark" data-reveal="pop">
         <Orbit id="cp-orbit-closing" className="cp-closing-orbit" text={`${signers} · Tiny Soho · cooked at home · `} />
         {portrait ? (
@@ -38,6 +38,7 @@ export default function CampaignClosing({ data }: { data: CampaignPageData }) {
           data-magnetic
           data-story-action="recipes_index"
           data-story-placement="closing"
+          data-track-cta="see_all_recipes"
         >
           <span className="cp-button-label">Explore all recipes</span>
           <span className="cp-button-icon" aria-hidden="true">
@@ -51,11 +52,12 @@ export default function CampaignClosing({ data }: { data: CampaignPageData }) {
             rel="noopener"
             data-story-action="instagram"
             data-story-placement="closing"
+            data-track-cta="instagram"
           >
             Back to {instagram.handle} on Instagram
           </a>
         ) : null}
-        <Link href="/" className="cp-link" data-story-action="home" data-story-placement="closing">
+        <Link href="/" className="cp-link" data-story-action="home" data-story-placement="closing" data-track-cta="home">
           Visit My Curated Haven
         </Link>
       </nav>

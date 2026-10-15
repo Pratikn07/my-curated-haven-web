@@ -36,6 +36,8 @@ import { EVERYDAY_PHOTOS } from "@/config/everyday-photos";
 import { BeforeAfter } from "@/components/halloween/HalloweenClient";
 import { LockIcon, RecipeFog, RecipeRevealStage } from "@/components/recipe/RecipeLock";
 import ClearOpenedParam from "@/components/recipe/ClearOpenedParam";
+import TrackPageState from "@/components/analytics/TrackPageState";
+import { offerAttributes } from "@/lib/analytics/track-markup";
 
 const getCachedRecipe = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -228,17 +230,20 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Analytics: free, locked, or open because this parent owns it. Admins are left out. */}
+      {!isAdmin ? <TrackPageState accessState={isAccessDenied ? "locked" : accessKind === "free" ? "free" : "owned"} /> : null}
+
       {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="no-print mb-6">
+      <nav aria-label="Breadcrumb" className="no-print mb-6" data-track-ux="breadcrumb">
         <ol className="flex flex-wrap items-center gap-2 text-sm text-text-muted">
           <li>
-            <Link href="/" className="hover:text-foreground hover:underline">
+            <Link href="/" className="hover:text-foreground hover:underline" data-track-cta="home">
               Home
             </Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/recipes" className="hover:text-foreground hover:underline">
+            <Link href="/recipes" className="hover:text-foreground hover:underline" data-track-cta="recipes">
               Recipes
             </Link>
           </li>
@@ -279,7 +284,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
             )}
           </div>
 
-          <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0">
+          <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0" data-track-ux="recipe_toolbar">
             {!isAccessDenied && (
               <>
                 <div className="no-print flex-1 sm:flex-initial">
@@ -292,6 +297,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                 </div>
                 <a
                   href="#recipe-content"
+                  data-track-cta="jump"
                   className="no-print inline-flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-xl border border-border-control bg-surface px-4 text-sm font-semibold text-foreground hover:bg-surface-muted focus-visible:outline-2 sm:flex-initial"
                 >
                   Jump to recipe
@@ -353,7 +359,17 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
           /* Gated / Locked Recipe Presentation: the fog teaser, with the buy card over its lower half */
           <div className="recipe-locked">
             <RecipeFog ghost={ghost} />
-            <div className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm">
+            <div
+              className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm"
+              data-track-ux="lock_card"
+              {...(saleOffer && book
+                ? offerAttributes("lock_card", book.collection.slug, {
+                    ownershipState: saleOffer.ownershipState,
+                    priceMinor: saleOffer.priceMinor,
+                    currency: saleOffer.currency,
+                  })
+                : {})}
+            >
               <div className="recipe-lock-badge mx-auto flex h-14 w-14 items-center justify-center rounded-full">
                 <LockIcon className="h-7 w-7" />
               </div>
@@ -392,6 +408,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                 <Link
                   href={book ? `/collections/${book.collection.slug}` : "/recipes"}
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
+                  data-track-cta={book ? "see_collection" : "browse_recipes"}
                 >
                   {book ? `See all ${recipeCount(book.collection.recipes.length)}` : "Browse the free recipes"}
                 </Link>
@@ -399,7 +416,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
               {bookFreeRecipe ? (
                 <p className="mt-5 text-sm text-text-muted">
                   Not sure yet? Try{" "}
-                  <Link href={`/recipes/${bookFreeRecipe.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+                  <Link href={`/recipes/${bookFreeRecipe.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover" data-track-cta="free_recipe">
                     {bookFreeRecipe.title}
                   </Link>{" "}
                   from the same book, free.
@@ -408,7 +425,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
               {!user && (
                 <p className="mt-3 text-sm text-text-muted">
                   Bought it already?{" "}
-                  <Link href={`/sign-in?returnTo=/recipes/${catalog.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+                  <Link href={`/sign-in?returnTo=/recipes/${catalog.slug}`} className="font-semibold text-action underline underline-offset-4 hover:text-action-hover" data-track-cta="sign_in">
                     Sign in
                   </Link>{" "}
                   to open it.
@@ -454,7 +471,7 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
 
       {/* Sibling Free Recipes Discovery Section */}
       {otherRecipes.length > 0 && (
-        <section aria-labelledby="other-recipes-heading" className="no-print mt-14 border-t border-border pt-10">
+        <section aria-labelledby="other-recipes-heading" className="no-print mt-14 border-t border-border pt-10" data-track-ux="more_recipes">
           <h2 id="other-recipes-heading" className="text-2xl font-bold text-foreground">
             More Free Toddler Recipes
           </h2>
@@ -462,13 +479,14 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
             Explore more simple, reviewed recipes from Tiny Soho.
           </p>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
-            {otherRecipes.map((other) => (
+            {otherRecipes.map((other, index) => (
               <RecipeCard
                 key={other.id}
                 recipe={other}
                 isSaved={savedIds.has(other.id)}
                 isAuthenticated={Boolean(user)}
                 showSaveButton={true}
+                position={index + 1}
               />
             ))}
           </div>

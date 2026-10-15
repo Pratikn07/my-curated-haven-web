@@ -67,7 +67,7 @@ export default async function CollectionsPage() {
   }));
 
   return (
-    <div className="cl">
+    <div className="cl" data-track-ux="bookcase">
       <ShowroomHero entries={entries} />
       <div className="cl-chapters" data-cloth={entries[0].collection.cloth}>
         <span className="cl-cloth" aria-hidden="true">

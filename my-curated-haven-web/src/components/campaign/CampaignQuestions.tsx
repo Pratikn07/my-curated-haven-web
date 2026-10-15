@@ -52,7 +52,7 @@ export default function CampaignQuestions({ data, index }: { data: CampaignPageD
   }
 
   return (
-    <section className="cp-questions" aria-labelledby="cp-questions-title" data-story-section="questions">
+    <section className="cp-questions" aria-labelledby="cp-questions-title" data-story-section="questions" data-track-ux="faq" data-track-view>
       <div className="cp-questions-inner">
         <div className="cp-questions-head">
           <Kicker index={index}>Practical questions</Kicker>
