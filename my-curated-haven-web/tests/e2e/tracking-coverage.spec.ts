@@ -41,11 +41,32 @@ function unlabelledControls(page: Page): Promise<string[]> {
   });
 }
 
+/**
+ * The page is hydrated (analytics has started, which happens in an effect) and its links and buttons have stopped
+ * changing. Not network-idle: /collections and the series pages never reach it in CI.
+ */
+async function settled(page: Page): Promise<void> {
+  await page.waitForLoadState("load");
+  await page.waitForFunction(() => Boolean((window as unknown as { __mch_analytics_provider?: unknown }).__mch_analytics_provider));
+  let previous = -1;
+  await expect
+    .poll(
+      async () => {
+        const count = await page.locator("a, button").count();
+        const steady = count === previous;
+        previous = count;
+        return steady;
+      },
+      { intervals: [400], timeout: 15_000 }
+    )
+    .toBe(true);
+}
+
 for (const [path, status = 200] of PAGES) {
   test(`every visible link and button on ${path} is labelled`, async ({ page }) => {
     const response = await page.goto(path);
     expect(response?.status(), `${path} renders`).toBe(status);
-    await page.waitForLoadState("networkidle");
+    await settled(page);
     expect(await unlabelledControls(page)).toEqual([]);
 
     // The phone menu's links only exist once it opens.

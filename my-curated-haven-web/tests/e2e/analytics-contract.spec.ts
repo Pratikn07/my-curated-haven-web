@@ -3,7 +3,8 @@ import { acceptCampaignInput } from "../../src/lib/analytics/campaigns";
 import { acceptCheckoutAnalytics, checkoutErrorFor } from "../../src/lib/analytics/checkout-analytics";
 import { remoteAnalyticsAllowed, trustedAnalyticsEnvironment } from "../../src/lib/analytics/environment";
 import { describeLink } from "../../src/lib/analytics/links";
-import { stripPrivateQueryParams, withoutPrivateQueryParams } from "../../src/lib/analytics/posthog";
+import { stripPrivateQueryParams, withoutNotFoundAddress, withoutPrivateQueryParams } from "../../src/lib/analytics/posthog";
+import { clearNotFoundPage, markNotFoundPage } from "../../src/lib/analytics/not-found";
 import { buildAnalyticsEnvelope, validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
 import {
   contentSlugFromPath,
@@ -14,7 +15,7 @@ import {
 } from "../../src/lib/analytics/schema";
 import { PRIMARY_UX_VALUES } from "../../src/lib/analytics/ux";
 import { inAppBrowserName, isInAppBrowser } from "../../src/lib/auth/in-app-browser";
-import { isSignInMethodMarker } from "../../src/lib/auth/oauth";
+import { isSignInMethodMarker, signInMethodCookieOptions } from "../../src/lib/auth/oauth";
 import { otpRequestFailure, otpVerifyFailure, signInCodeFailure } from "../../src/lib/auth/otp-errors";
 import { RECIPE_FILTER_VALUE_SLUGS, recipeFilterAnalyticsValues } from "../../src/lib/recipes/filters";
 
@@ -301,6 +302,25 @@ test("checkout keeps well-formed visit details and drops the rest without refusi
   }
 });
 
+test("the sign-in marker cookie is Secure on every deployed host, not on a local http build", () => {
+  const env = process.env as Record<string, string | undefined>;
+  const previous = env.NODE_ENV;
+  try {
+    env.NODE_ENV = "production";
+    for (const host of ["mycuratedhaven.com", "www.mycuratedhaven.com", "my-curated-haven-web-git-x.vercel.app", null]) {
+      expect(signInMethodCookieOptions(host).secure, String(host)).toBe(true);
+    }
+    for (const host of ["127.0.0.1:3105", "localhost:3000", "[::1]:3000", "app.localhost"]) {
+      expect(signInMethodCookieOptions(host).secure, host).toBe(false);
+    }
+    env.NODE_ENV = "development";
+    expect(signInMethodCookieOptions("mycuratedhaven.com").secure).toBe(false);
+  } finally {
+    env.NODE_ENV = previous;
+  }
+  expect(signInMethodCookieOptions("mycuratedhaven.com")).toMatchObject({ path: "/", maxAge: 120, sameSite: "lax" });
+});
+
 test("both sign-in methods leave a completion marker; nothing else does", () => {
   expect(isSignInMethodMarker("email_code")).toBe(true);
   expect(isSignInMethodMarker("google")).toBe(true);
@@ -529,6 +549,35 @@ test("the Stripe session id and search text are removed from every address PostH
   expect(JSON.stringify(event)).not.toContain("peanut");
   expect(event?.properties.$referrer).toBe("https://mycuratedhaven.com/checkout/return?b=2");
   expect(withoutPrivateQueryParams(null)).toBeNull();
+});
+
+test("while a 404 shows, PostHog's address properties name /404, never the typed address", () => {
+  const typed = "/recipes/no-such-recipe-for-maya";
+  expect(withoutNotFoundAddress(`https://mycuratedhaven.com${typed}?utm_source=instagram#x`, typed)).toBe("https://mycuratedhaven.com/404");
+  expect(withoutNotFoundAddress(typed, typed)).toBe("/404");
+  // Other addresses, and every address when no 404 shows, are left alone.
+  expect(withoutNotFoundAddress("https://www.instagram.com/", typed)).toBe("https://www.instagram.com/");
+  expect(withoutNotFoundAddress("https://mycuratedhaven.com/recipes", typed)).toBe("https://mycuratedhaven.com/recipes");
+  expect(withoutNotFoundAddress(`https://mycuratedhaven.com${typed}`, null)).toBe(`https://mycuratedhaven.com${typed}`);
+
+  markNotFoundPage(typed);
+  try {
+    const event = withoutPrivateQueryParams({
+      uuid: "0199",
+      event: "$pageview",
+      properties: {
+        $current_url: `https://mycuratedhaven.com${typed}?q=soup`,
+        $pathname: typed,
+        $referrer: "https://www.instagram.com/",
+      },
+      $set_once: { $initial_current_url: `https://mycuratedhaven.com${typed}` },
+    });
+    expect(JSON.stringify(event)).not.toContain("maya");
+    expect(event?.properties.$pathname).toBe("/404");
+    expect(event?.properties.$referrer).toBe("https://www.instagram.com/");
+  } finally {
+    clearNotFoundPage(typed);
+  }
 });
 
 test("entry_app names Instagram's and Facebook's browsers with the sign-in pattern", () => {

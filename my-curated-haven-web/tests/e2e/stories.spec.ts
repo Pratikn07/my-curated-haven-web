@@ -376,7 +376,7 @@ test("[stories] reading to the end sends section_viewed for each part, and twice
   ] as const) {
     await page.goto(path);
     await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
-    // Small steps, so every part (and the story's zero-height end marker) passes the line the observer uses.
+    // Small steps, so every part (and the note that ends the story) passes the line the observer uses.
     for (let y = 0; ; y += 250) {
       const height = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
       await page.evaluate((top) => window.scrollTo(0, top), Math.min(y, height));

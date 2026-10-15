@@ -301,7 +301,8 @@ test.describe("section and offer views", () => {
     await expect(page.locator(".cl-dock")).toHaveAttribute("data-on", "");
     const offer = await waitForEvent(page, (event) => event.event_name === "offer_viewed" && event.properties.surface === "sticky_bar");
     expect(offer.properties).toMatchObject({ collection_slug: BOOK, price_minor: 1500 });
-    await page.mouse.wheel(0, 400);
+    // Scrolled by script: mobile WebKit has no mouse wheel.
+    await page.evaluate(() => window.scrollBy(0, 400));
     await page.waitForTimeout(300);
     expect((await eventsNamed(page, "offer_viewed")).filter((event) => event.properties.surface === "sticky_bar")).toHaveLength(1);
   });

@@ -98,7 +98,7 @@ export async function verifyOtpAction(
   if (data.user) await claimGuestOrders(data.user.id);
 
   // The redirect below means the form never hears back; the destination page records sign_in_completed.
-  (await cookies()).set(SIGN_IN_METHOD_COOKIE, "email_code", signInMethodCookieOptions());
+  (await cookies()).set(SIGN_IN_METHOD_COOKIE, "email_code", signInMethodCookieOptions((await headers()).get("host")));
 
   const destination = sanitizeReturnTo(returnTo);
   revalidatePath("/", "layout");

@@ -372,7 +372,7 @@ Tests: one recorder test per new event, and contract tests for every new propert
 
 Shipped 2026-10-15 with the release (#153), not after a 2026-11-30 overlap: the owner dropped the wait. Before removing them, PR 4 checked that `cta_clicked` and `section_viewed` carry the same taps and sections, then:
 
-- added the labels the old events carried and PR 2 missed: `section_viewed {story}` for the Halloween story and its end (and the story page's end sentinel), `cta_position: 1` on the story dock's single recipe, and `see_pack` for the pack button so pack and collection taps differ by `cta`;
+- added the labels the old events carried and PR 2 missed: `section_viewed {story}` for the Halloween story and its end (on story pages, the note after the last moment), `cta_position: 1` on the story dock's single recipe, and `see_pack` for the pack button so pack and collection taps differ by `cta`;
 - removed `story_action_clicked` and `homepage_cta_clicked`, the click handling and section observer in `CampaignTracker.tsx` (it keeps `story_view` and `entry_story`), and `TrackedHomepageLink.tsx` (its links are plain links with their labels);
 - replaced `story_section_viewed` with `section_viewed`, and removed the `data-story-*` and `data-recipe-*` attributes.
 
@@ -419,6 +419,9 @@ Audit of the combined release:
 - The export drain runs inside the Stripe webhook and becomes live with this release, so it is time-boxed (2.5 s, 2 s per send).
 - Scroll milestones stop listening once 100% is sent; `ViewTracker` rescans only when elements are added.
 - The sign-in form keeps the code's send time across failed attempts, resends and reloads, so `expired_code` follows the code's real age.
+- A 404's address was typed or forwarded and can hold anything, so while a 404 shows (`lib/analytics/not-found.ts`, set by `NotFoundTracker`) no event carries anything read from it: no `content_slug`, no `route_key`, no `page_view` (a missing recipe was counted as a recipe page view), and PostHog's own address properties say `/404`.
+- On story pages, the end of the story is marked by the note after the last moment (a tall block) instead of a 1px marker, which mobile WebKit could scroll past without reporting.
+- The sign-in marker cookie is Secure on every deployed host and not on a production build served over plain http from 127.0.0.1, where WebKit refuses Secure cookies.
 
 ## PostHog setup after PR 2
 

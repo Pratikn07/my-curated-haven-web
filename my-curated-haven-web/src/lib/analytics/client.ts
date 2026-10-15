@@ -12,6 +12,7 @@ import {
 import { parseAndRecordCampaign } from "./campaigns";
 import { buildAnalyticsEnvelope } from "./sanitize";
 import { getAnalyticsProvider } from "./provider";
+import { isNotFoundPage } from "./not-found";
 import { isAdminNavigationContext } from "./private-paths";
 import { contentSlugFromPath } from "./schema";
 
@@ -98,6 +99,8 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
     const sessionId = getOrCreateSessionId();
     // Read the URL too, so the very first event of a campaign visit is tagged.
     const campaign = parseAndRecordCampaign(new URLSearchParams(window.location.search));
+    // A 404's address can hold anything, so nothing is read from it (lib/analytics/not-found).
+    const notFound = isNotFoundPage(window.location.pathname);
 
     const envelope = buildAnalyticsEnvelope({
       eventName,
@@ -105,10 +108,10 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
       source: "browser",
       browserId,
       sessionId,
-      routeKey,
+      routeKey: notFound ? undefined : routeKey,
       campaignCode: campaign?.utm_campaign,
       // Tracking PR 2: page context, read from the page this event happens on.
-      contentSlug: contentSlugFromPath(window.location.pathname),
+      contentSlug: notFound ? undefined : contentSlugFromPath(window.location.pathname),
       accessState: pageAccessState(window.location.pathname),
     });
 

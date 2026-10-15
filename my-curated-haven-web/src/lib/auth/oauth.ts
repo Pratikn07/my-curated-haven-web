@@ -25,13 +25,24 @@ export function isSignInMethodMarker(value: unknown): value is SignInMethodMarke
   return typeof value === "string" && (SIGN_IN_METHOD_MARKERS as readonly string[]).includes(value);
 }
 
-/** Readable by the page (not httpOnly), gone after two minutes. */
-export function signInMethodCookieOptions() {
+/** The request's host is this machine (a local production build served over plain http). */
+function isLoopbackHost(host: string | null | undefined): boolean {
+  if (!host) return false;
+  const name = host.replace(/:\d+$/, "").toLowerCase();
+  return name === "localhost" || name === "127.0.0.1" || name === "[::1]" || name.endsWith(".localhost");
+}
+
+/**
+ * Readable by the page (not httpOnly), gone after two minutes. Secure in every deployed build; a production build
+ * served from this machine over http leaves Secure off, because WebKit refuses a Secure cookie on a plain-http
+ * 127.0.0.1 page (Chromium accepts it), so the marker would never arrive.
+ */
+export function signInMethodCookieOptions(host: string | null | undefined) {
   return {
     path: "/",
     maxAge: 120,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" && !isLoopbackHost(host),
   };
 }
 

@@ -1,6 +1,7 @@
 import posthog, { type CaptureResult } from "posthog-js";
 import { remoteAnalyticsAllowed } from "./environment";
 import { INTERNAL_BROWSER_STORAGE_KEY } from "./consent";
+import { currentNotFoundPath, NOT_FOUND_PATH } from "./not-found";
 import { isAdminPath, isPrivatePath } from "./private-paths";
 
 let initialized = false;
@@ -135,14 +136,32 @@ export function stripPrivateQueryParams(value: unknown): unknown {
   }
 }
 
-/** PostHog before_send hook: removes the private query parameters from every address on the event. */
+/** On a 404, an address of that page says NOT_FOUND_PATH, with no query or fragment. Any other address is unchanged. */
+export function withoutNotFoundAddress(value: unknown, notFoundPath: string | null): unknown {
+  if (typeof value !== "string" || notFoundPath === null) return value;
+  if (value === notFoundPath) return NOT_FOUND_PATH;
+  try {
+    const url = new URL(value);
+    if (url.pathname !== notFoundPath) return value;
+    return `${url.origin}${NOT_FOUND_PATH}`;
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * PostHog before_send hook: removes the private query parameters from every address on the event, and while a 404
+ * shows, replaces that page's address (it was typed or forwarded and can hold anything; lib/analytics/not-found).
+ */
 export function withoutPrivateQueryParams(event: CaptureResult | null): CaptureResult | null {
   if (!event) return event;
+  const notFoundPath = currentNotFoundPath();
   for (const bag of [event.properties, event.$set, event.$set_once]) {
     if (!bag) continue;
     for (const key of URL_PROPERTIES) {
-      if (key in bag) bag[key] = stripPrivateQueryParams(bag[key]);
+      if (key in bag) bag[key] = withoutNotFoundAddress(stripPrivateQueryParams(bag[key]), notFoundPath);
     }
+    if ("$pathname" in bag) bag.$pathname = withoutNotFoundAddress(bag.$pathname, notFoundPath);
   }
   return event;
 }

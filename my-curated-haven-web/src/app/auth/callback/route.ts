@@ -64,6 +64,6 @@ export async function GET(request: Request) {
   }
 
   const response = authRedirect(next);
-  response.cookies.set(SIGN_IN_METHOD_COOKIE, "google", signInMethodCookieOptions());
+  response.cookies.set(SIGN_IN_METHOD_COOKIE, "google", signInMethodCookieOptions(url.host));
   return response;
 }

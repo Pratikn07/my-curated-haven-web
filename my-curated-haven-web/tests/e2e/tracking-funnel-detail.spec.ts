@@ -434,8 +434,14 @@ test("404 pages record not_found_viewed with the kind of address only", async ({
     expect(response?.status(), path).toBe(404);
     const viewed = await waitForEvent(page, (event) => event.event_name === "not_found_viewed");
     expect(viewed.properties, path).toEqual({ route_class: routeClass });
-    expect(JSON.stringify(viewed)).not.toContain("no-such");
     expect(await eventsNamed(page, "not_found_viewed")).toHaveLength(1);
+    // Nothing read from the typed address, on any event there: no content_slug, no route_key, no page_view.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await waitForEvent(page, (event) => event.event_name === "page_scroll_reached");
+    const events = await recordedEvents(page);
+    expect(JSON.stringify(events), path).not.toContain("no-such");
+    expect(events.filter((event) => "route_key" in event && event.route_key !== undefined), path).toEqual([]);
+    expect(await eventsNamed(page, "page_view"), path).toEqual([]);
   }
 });
 

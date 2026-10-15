@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getAnalyticsProvider } from "@/lib/analytics/provider";
 import { isPostHogActive, posthog, syncInternalBrowser, syncSessionRecording } from "@/lib/analytics/posthog";
+import { isNotFoundPage } from "@/lib/analytics/not-found";
 import { isAdminNavigationContext, isAdminPath } from "@/lib/analytics/private-paths";
 import { pathToCanonicalRouteKey, toDeviceClass } from "@/lib/analytics/schema";
 
@@ -95,6 +96,8 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
     if (!pathname) return;
     if (isAdminPath(pathname)) return;
     syncSessionRecording(pathname);
+    // A 404 sends not_found_viewed instead: a page_view there would count a missing recipe as a recipe page.
+    if (isNotFoundPage(pathname)) return;
 
     const routeKey = pathToCanonicalRouteKey(pathname);
     if (!routeKey) return;

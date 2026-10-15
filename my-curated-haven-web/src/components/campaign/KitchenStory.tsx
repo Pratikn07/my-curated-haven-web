@@ -111,11 +111,11 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
           </div>
           <Motif motif={motif} placement="story" />
         </div>
-        {/* Reached when the last moment has been seen, in either layout. */}
-        <span className="cp-story-sentinel" data-track-view aria-hidden="true" />
       </div>
 
-      <figure className="cp-story-note" data-reveal="rise">
+      {/* The note follows the last moment in either layout, so reaching it is reaching the end of the story: a
+          second section_viewed {story}. A tall block, not a 1px marker, so a fast scroll can't skip past it. */}
+      <figure className="cp-story-note" data-reveal="rise" data-track-view>
         <p className="cp-note-kicker" aria-hidden="true">
           A note from the kitchen
         </p>
