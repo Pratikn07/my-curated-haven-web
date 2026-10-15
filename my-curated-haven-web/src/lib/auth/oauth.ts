@@ -11,13 +11,29 @@ export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 export const AUTH_CALLBACK_PATH = "/auth/callback";
 
 /**
- * Short-lived marker the callback leaves for the destination page.
- * Google sign-in finishes in a server route and redirects, so the tab that
- * started it never sees the success and cannot close the funnel on its own.
+ * Short-lived marker left for the destination page. Both sign-in methods finish
+ * on the server and redirect (Google in /auth/callback, the email code in a
+ * server action), so the page that started them never sees the success and
+ * cannot close the funnel on its own.
  */
 export const SIGN_IN_METHOD_COOKIE = "mch_signin_method";
 
-export type SignInMethodMarker = OAuthProvider;
+export const SIGN_IN_METHOD_MARKERS = ["email_code", ...OAUTH_PROVIDERS] as const;
+export type SignInMethodMarker = (typeof SIGN_IN_METHOD_MARKERS)[number];
+
+export function isSignInMethodMarker(value: unknown): value is SignInMethodMarker {
+  return typeof value === "string" && (SIGN_IN_METHOD_MARKERS as readonly string[]).includes(value);
+}
+
+/** Readable by the page (not httpOnly), gone after two minutes. */
+export function signInMethodCookieOptions() {
+  return {
+    path: "/",
+    maxAge: 120,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+  };
+}
 
 export function isOAuthProvider(value: unknown): value is OAuthProvider {
   return typeof value === "string" && (OAUTH_PROVIDERS as readonly string[]).includes(value);

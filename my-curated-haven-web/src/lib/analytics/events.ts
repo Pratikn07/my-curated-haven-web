@@ -14,6 +14,10 @@ export type ResultCountBucket = "0" | "1-5" | "6-10" | "11+";
 export type RecipeAccessKind = "free" | "paid";
 export type RecipeSaveAction = "saved" | "removed";
 export type SignInMethod = "email_code" | "google";
+/** The Buy button a checkout started from: the lock card on a locked recipe or plan page, or a collection's buy box. */
+export type CheckoutSurface = "lock_card" | "buy_box";
+/** The visitor's relationship to a collection, as the collection page shows it. */
+export type CollectionOwnershipState = "owned" | "not_owned" | "unauthenticated" | "pending_payment" | "unavailable";
 export type HomepageFeatureKey = "kitchen" | "library" | "nursery" | "shelf";
 export type HomepagePlacement = "hero" | "house" | "overview" | "preview" | "footer" | "final";
 export type HomepageDestination =
@@ -86,7 +90,10 @@ export type CanonicalRouteKey =
   | "about"
   | "terms"
   | "story"
-  | "halloween";
+  | "halloween"
+  | "collections"
+  | "collection_plan"
+  | "collection_series";
 
 export interface AnalyticsEnvelope {
   event_id: string;
@@ -148,12 +155,17 @@ export interface RecipeSaveChangedPayload {
 }
 
 export interface CollectionViewPayload {
-  collection_release_id: string;
+  collection_slug: string;
+  /** Absent while nothing is on sale. */
+  collection_release_id?: string;
+  ownership_state?: CollectionOwnershipState;
 }
 
+/** Buy was tapped, before the request to start checkout. */
 export interface CheckoutClickedPayload {
-  collection_release_id: string;
-  entry_point: string;
+  collection_slug: string;
+  surface: CheckoutSurface;
+  collection_release_id?: string;
 }
 
 export interface CheckoutCreatedPayload {

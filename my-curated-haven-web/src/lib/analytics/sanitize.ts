@@ -11,6 +11,7 @@ import {
 import { isAllowedCampaign } from "./campaigns";
 import { trustedAnalyticsEnvironment } from "./environment";
 import { EVENT_ALLOWED_PROPERTIES, EVENT_REQUIRED_PROPERTIES } from "./schema";
+import { isPrimaryUx } from "./ux";
 
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const UUID_REGEX =
@@ -34,6 +35,9 @@ const ROUTE_KEYS = new Set([
   "terms",
   "story",
   "halloween",
+  "collections",
+  "collection_plan",
+  "collection_series",
 ]);
 
 const DEVICE_CLASSES = new Set(["mobile", "desktop", "tablet"]);
@@ -44,9 +48,6 @@ const ENTRY_POINTS = new Set([
   "collection",
   "account",
   "other",
-  "collection_page",
-  "recipe_page",
-  "plan_page",
 ]);
 const DELAY_BUCKETS = new Set(["under_1m", "1m_to_5m", "over_5m"]);
 const SIGN_IN_METHODS = new Set(["email_code", "google"]);
@@ -62,6 +63,10 @@ const HOMEPAGE_DESTINATIONS = new Set([
 ]);
 const HOMEPAGE_PRESENTATION_STATES = new Set(["preparation", "free_ready", "collection_ready"]);
 const STORY_SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,63}$/;
+/** Public slugs of books, recipes and landing pages. */
+const SLUG_REGEX = STORY_SLUG_REGEX;
+const CHECKOUT_SURFACES = new Set(["lock_card", "buy_box"]);
+const OWNERSHIP_STATES = new Set(["owned", "not_owned", "unauthenticated", "pending_payment", "unavailable"]);
 const STORY_ROOMS = new Set(["kitchen"]);
 const STORY_ACTIONS = new Set([
   "recipe_jump",
@@ -155,6 +160,10 @@ function checkString(key: string, value: string): string | ValidationFailure {
     return fail("presentation_state");
   }
   if (key === "story_slug" && !STORY_SLUG_REGEX.test(value)) return fail("story_slug");
+  if (key === "collection_slug" && !SLUG_REGEX.test(value)) return fail("collection_slug");
+  if (key === "surface" && !CHECKOUT_SURFACES.has(value)) return fail("surface");
+  if (key === "ownership_state" && !OWNERSHIP_STATES.has(value)) return fail("ownership_state");
+  if (key === "primary_ux" && !isPrimaryUx(value)) return fail("primary_ux");
   if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
   if (key === "story_action" && !STORY_ACTIONS.has(value)) return fail("story_action");
   if (key === "story_placement" && !STORY_PLACEMENTS.has(value)) return fail("story_placement");

@@ -131,15 +131,10 @@ export default function SignInForm({ returnTo, authError, inAppBrowser = false }
       // A successful verify redirects and never returns here, so forget the pending code first
       // and remember it again only if the code was wrong.
       rememberPending(null);
+      // Success redirects; the destination page records sign_in_completed (SignInCompletionTracker).
       const res = await verifyOtpAction(email, code, returnTo);
-      if (!res.success) rememberPending(email.trim().toLowerCase());
-      if (res.success) {
-        trackAnalyticsEvent(
-          "sign_in_completed",
-          { entry_point: coarseEntryPoint(returnTo), method: "email_code" },
-          "sign_in"
-        );
-      } else {
+      if (!res.success) {
+        rememberPending(email.trim().toLowerCase());
         setError(res.error || "Invalid or expired verification code.");
       }
     });

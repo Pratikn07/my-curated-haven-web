@@ -154,22 +154,29 @@ export async function markPurchaseOrderForReview(orderId: string): Promise<void>
 export async function recordCheckoutMeasurement(params: {
   orderId: string;
   campaignCode: string | null;
+  campaignContent?: string | null;
   analyticsConsent: boolean;
   environment: string;
   /** The buyer's PostHog ids, so the server purchase event joins their visit. The database drops malformed ones. */
-  analyticsDistinctId?: string | null;
-  analyticsSessionId?: string | null;
+  distinctId?: string | null;
+  sessionId?: string | null;
+  checkoutSurface?: string | null;
+  entryStory?: string | null;
 }): Promise<string | null> {
   const pool = getCommercePool();
+  // The nine-argument signature from 20261015090000_tracking_purchase_link.sql.
   const { rows } = await pool.query(
-    `SELECT private.record_checkout_measurement($1, $2, $3, $4, $5, $6) AS attempt_ref`,
+    `SELECT private.record_checkout_measurement($1, $2, $3, $4, $5::text, $6::text, $7::text, $8::text, $9::text) AS attempt_ref`,
     [
       params.orderId,
       params.campaignCode,
       params.analyticsConsent,
       params.environment,
-      params.analyticsDistinctId ?? null,
-      params.analyticsSessionId ?? null,
+      params.distinctId ?? null,
+      params.sessionId ?? null,
+      params.checkoutSurface ?? null,
+      params.entryStory ?? null,
+      params.campaignContent ?? null,
     ]
   );
   const ref = rows[0]?.attempt_ref;

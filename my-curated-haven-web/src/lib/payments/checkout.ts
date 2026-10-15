@@ -5,8 +5,8 @@ import { bindSessionToOrder, closeExpiredCheckoutAttempt, recordCheckoutMeasurem
 import { findCollectionIdBySlug, reserveCollectionOrder, reserveGuestCollectionOrder } from "./collection-reservation";
 import type { CheckoutExpectation, CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
+import type { CheckoutAnalytics } from "@/lib/analytics/checkout-analytics";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
-import type { AnalyticsIdentity } from "@/lib/analytics/identity";
 import { reusableCheckoutUrl } from "./guardrails";
 
 export interface CreateCheckoutParams {
@@ -23,8 +23,8 @@ export interface CreateCheckoutParams {
   requestOrigin?: string;
   analyticsConsent?: boolean;
   attribution?: CampaignInput | null;
-  /** The buyer's PostHog distinct and session ids, so the purchase export lands on their visit. */
-  analyticsIdentity?: AnalyticsIdentity | null;
+  /** The visit behind the tap: PostHog visitor and session, Buy button, Instagram landing page. */
+  analytics?: CheckoutAnalytics | null;
 }
 
 export async function createCheckoutSession({
@@ -35,7 +35,7 @@ export async function createCheckoutSession({
   requestOrigin,
   analyticsConsent = false,
   attribution = null,
-  analyticsIdentity = null,
+  analytics = null,
 }: CreateCheckoutParams): Promise<CheckoutResult> {
   const config = getStripeConfig();
 
@@ -189,10 +189,13 @@ export async function createCheckoutSession({
     analyticsAttemptRef = await recordCheckoutMeasurement({
       orderId: order.id,
       campaignCode: campaign?.utm_campaign ?? null,
+      campaignContent: campaign?.utm_content ?? null,
       analyticsConsent: analyticsConsent === true,
       environment: trustedAnalyticsEnvironment(),
-      analyticsDistinctId: analyticsIdentity?.distinctId ?? null,
-      analyticsSessionId: analyticsIdentity?.sessionId ?? null,
+      distinctId: analytics?.distinctId ?? null,
+      sessionId: analytics?.sessionId ?? null,
+      checkoutSurface: analytics?.surface ?? null,
+      entryStory: analytics?.entryStory ?? null,
     });
   } catch {
     analyticsAttemptRef = null;

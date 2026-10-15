@@ -8,6 +8,7 @@ import Badge from "@/components/ui/Badge";
 import StatePanel from "@/components/ui/StatePanel";
 import { BookOpen, ArrowRight, ListChecks } from "lucide-react";
 import { makeAheadPlanFor } from "@/config/halloween";
+import PurchasedLibraryTracker from "@/components/commerce/PurchasedLibraryTracker";
 
 export const metadata: Metadata = {
   title: "My Library",
@@ -92,6 +93,7 @@ export default async function AccountCollectionsPage() {
         </div>
       ) : (
         <div className="space-y-8">
+          <PurchasedLibraryTracker />
           {/* One card per book; its page lists every recipe, so the library doesn't repeat them. */}
           {collections.map((coll) => {
             const plan = makeAheadPlanFor(coll.slug);

@@ -10,6 +10,7 @@ import {
   type DetailModel,
 } from "@/components/collections/CollectionDetail";
 import CollectionsMotion from "@/components/collections/CollectionsMotion";
+import CollectionViewTracker from "@/components/commerce/CollectionViewTracker";
 import { makeAheadPlanFor } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import type { ShowroomCollection } from "@/lib/collections/types";
@@ -163,6 +164,11 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {next && next.slug !== slug ? <NextBook next={next} /> : <span data-dock-end />}
       <BuyDock model={model} />
       <CollectionsMotion />
+      <CollectionViewTracker
+        collectionSlug={slug}
+        releaseId={model.offer?.releaseId}
+        ownershipState={model.offer?.ownershipState}
+      />
     </div>
   );
 }

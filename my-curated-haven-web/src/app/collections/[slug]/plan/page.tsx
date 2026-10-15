@@ -190,8 +190,8 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
               formattedPrice={saleOffer.formattedPrice}
               ownershipState={saleOffer.ownershipState}
               expected={saleOffer.expected}
+              surface="lock_card"
               signInHint={false}
-              entryPoint="plan_page"
             />
           ) : null}
           <Link

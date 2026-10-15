@@ -41,6 +41,7 @@ export const ALLOWED_ROUTE_KEYS: Record<string, CanonicalRouteKey> = {
   "/about": "about",
   "/terms": "terms",
   "/halloween": "halloween",
+  "/collections": "collections",
 };
 
 export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey | null {
@@ -49,6 +50,12 @@ export function pathToCanonicalRouteKey(pathname: string): CanonicalRouteKey | n
   }
   if (pathname.startsWith("/recipes/")) {
     return "recipe_detail";
+  }
+  if (pathname.startsWith("/collections/series/")) {
+    return "collection_series";
+  }
+  if (/^\/collections\/[^/]+\/plan\/?$/.test(pathname)) {
+    return "collection_plan";
   }
   if (pathname.startsWith("/collections/")) {
     return "collection_detail";
@@ -89,8 +96,8 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   sign_in_started: ["entry_point"],
   sign_in_completed: ["entry_point", "method"],
   recipe_save_changed: ["recipe_id", "action"],
-  collection_view: ["collection_release_id"],
-  checkout_clicked: ["collection_release_id", "entry_point"],
+  collection_view: ["collection_slug", "collection_release_id", "ownership_state"],
+  checkout_clicked: ["collection_slug", "surface", "collection_release_id"],
   checkout_created: ["collection_release_id", "attempt_ref"],
   purchase_confirmed: ["order_ref", "collection_release_id", "currency", "paid_minor"],
   purchase_access_activated: ["order_ref", "collection_release_id", "activation_delay_bucket"],
@@ -115,8 +122,8 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   sign_in_started: ["entry_point"],
   sign_in_completed: ["entry_point", "method"],
   recipe_save_changed: ["recipe_id", "action"],
-  collection_view: ["collection_release_id"],
-  checkout_clicked: ["collection_release_id", "entry_point"],
+  collection_view: ["collection_slug"],
+  checkout_clicked: ["collection_slug", "surface"],
   checkout_created: ["collection_release_id", "attempt_ref"],
   purchase_confirmed: ["order_ref", "collection_release_id", "currency", "paid_minor"],
   purchase_access_activated: ["order_ref", "collection_release_id", "activation_delay_bucket"],

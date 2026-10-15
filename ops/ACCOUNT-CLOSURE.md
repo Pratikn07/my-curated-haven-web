@@ -37,6 +37,16 @@ Check `~/MyCuratedHavenBackups/backup.log` for `done:`.
 
 ## 4. Delete the account
 
+First, while the user id still identifies their orders, remove the analytics link from their purchase records (orders are kept for accounting; the privacy policy promises this):
+
+```sql
+UPDATE private.purchase_orders
+SET analytics_distinct_id = NULL, analytics_session_id = NULL, updated_at = now()
+WHERE user_id = '<user id>';
+```
+
+Then:
+
 Supabase → **Authentication → Users** → the user → **Delete user**.
 
 What this deletes, in one step (verified by `supabase/tests/database/09_phase7_save_access.test.sql`):

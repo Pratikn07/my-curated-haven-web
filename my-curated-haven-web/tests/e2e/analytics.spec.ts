@@ -119,13 +119,15 @@ test("[tracking] tapping buy records checkout_clicked for the release on sale", 
         (event) =>
           event.event_name === "checkout_clicked" &&
           event.properties.collection_release_id === expected.releaseId &&
-          event.properties.entry_point === "collection_page"
+          event.properties.collection_slug === "comfort-haven-collection" &&
+          event.properties.surface === "buy_box" &&
+          !("entry_point" in event.properties)
       )
     )
     .toBe(1);
-  // PostHog is off in tests, so no analytics ids travel with the checkout request.
+  // PostHog is off in tests, so only the button travels with the checkout request, never PostHog ids.
   expect(checkoutBodies).toHaveLength(1);
-  expect(checkoutBodies[0]).not.toHaveProperty("analyticsIdentity");
+  expect(checkoutBodies[0].analytics).toEqual({ surface: "buy_box" });
 });
 
 test("an unknown campaign is not stored", async ({ page }) => {

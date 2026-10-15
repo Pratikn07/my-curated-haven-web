@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getAnalyticsProvider } from "@/lib/analytics/provider";
-import { isPostHogActive, posthog, syncSessionRecording } from "@/lib/analytics/posthog";
+import { isPostHogActive, posthog, syncInternalBrowser, syncSessionRecording } from "@/lib/analytics/posthog";
 import { isAdminNavigationContext, isAdminPath } from "@/lib/analytics/private-paths";
 import { pathToCanonicalRouteKey, toDeviceClass } from "@/lib/analytics/schema";
 
@@ -35,6 +35,8 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
     if (pathname && isAdminPath(pathname)) return;
     getAnalyticsProvider();
     if (!isPostHogActive()) return;
+    // Before this page's events: an admin's browser comes back opted in and tagged internal.
+    syncInternalBrowser();
 
     const {
       data: { subscription },

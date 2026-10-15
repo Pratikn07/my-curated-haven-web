@@ -37,7 +37,7 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
   const environment = trustedAnalyticsEnvironment();
   const pool = getCommercePool();
   const { rows } = await pool.query(
-    `SELECT e.id, e.event_name, e.payload, e.occurred_at, po.analytics_consent,
+    `SELECT e.id, e.event_name, e.payload, e.occurred_at, po.analytics_consent, po.user_id,
             po.analytics_distinct_id, po.analytics_session_id, po.campaign_code
      FROM private.analytics_exports e
      JOIN private.purchase_orders po ON po.id = e.order_id
@@ -73,6 +73,8 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
             ? properties.order_ref
             : "server";
     const occurredAt = row.occurred_at ? new Date(row.occurred_at) : new Date();
+    // A signed-in buyer already has a PostHog profile; a guest's anonymous visit stays without one.
+    const personless = row.user_id === null || typeof row.analytics_distinct_id !== "string";
 
     try {
       const controller = new AbortController();
@@ -90,9 +92,10 @@ export async function drainOptionalAnalyticsExports(): Promise<void> {
             ...properties,
             environment,
             source: "server",
-            $process_person_profile: false,
+            ...(personless ? { $process_person_profile: false } : {}),
+            // Read from the order too, so exports queued before 20261015090000 added them to the payload carry
+            // them as well. Same property names the browser events use.
             ...(typeof row.analytics_session_id === "string" ? { $session_id: row.analytics_session_id } : {}),
-            // Same property the browser events carry, so sales split by Instagram placement in one chart.
             ...(typeof row.campaign_code === "string" ? { campaign_code: row.campaign_code } : {}),
           },
           timestamp: occurredAt.toISOString(),

@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { acceptCampaignInput } from "../../src/lib/analytics/campaigns";
 import { remoteAnalyticsAllowed, trustedAnalyticsEnvironment } from "../../src/lib/analytics/environment";
-import { acceptAnalyticsIdentity } from "../../src/lib/analytics/identity";
 import { validateAnalyticsEvent } from "../../src/lib/analytics/sanitize";
 import { pathToCanonicalRouteKey } from "../../src/lib/analytics/schema";
+import { acceptCheckoutAnalytics } from "../../src/lib/analytics/checkout-analytics";
+import { isSignInMethodMarker } from "../../src/lib/auth/oauth";
 
 const RECIPE_ID = "10000000-0000-0000-0000-000000000001";
 
@@ -122,29 +123,6 @@ test("keeps only registered campaign values", () => {
       utm_campaign: "bio_link",
     })
   ).toBeNull();
-});
-
-test("[tracking] checkout_clicked names the page it came from, and /halloween has its own route", () => {
-  const releaseId = "a0000000-0000-0000-0000-000000000001";
-  for (const entry_point of ["collection_page", "recipe_page", "plan_page"]) {
-    const clicked = validateAnalyticsEvent("checkout_clicked", { collection_release_id: releaseId, entry_point });
-    expect(clicked.ok, entry_point).toBe(true);
-  }
-  expect(validateAnalyticsEvent("checkout_clicked", { collection_release_id: releaseId, entry_point: "homepage" }).ok).toBe(false);
-  expect(validateAnalyticsEvent("checkout_clicked", { collection_release_id: "halloween", entry_point: "plan_page" }).ok).toBe(false);
-
-  expect(pathToCanonicalRouteKey("/halloween")).toBe("halloween");
-  expect(validateAnalyticsEvent("page_view", { route_key: "halloween", device_class: "mobile" }).ok).toBe(true);
-});
-
-test("[tracking] checkout keeps only well-formed PostHog ids", () => {
-  const distinctId = "0192f3a1-7b2c-7d4e-8f90-123456789abc";
-  const sessionId = "0192f3a1-7b2c-7d4e-8f90-cba987654321";
-  expect(acceptAnalyticsIdentity({ distinctId, sessionId })).toEqual({ distinctId, sessionId });
-  expect(acceptAnalyticsIdentity({ distinctId, sessionId: "not-a-session" })).toEqual({ distinctId, sessionId: null });
-  expect(acceptAnalyticsIdentity({ distinctId: "parent@example.com", sessionId: "x" })).toBeNull();
-  expect(acceptAnalyticsIdentity(distinctId)).toBeNull();
-  expect(acceptAnalyticsIdentity(null)).toBeNull();
 });
 
 test("remote analytics stays off without an explicit environment", () => {
@@ -270,4 +248,67 @@ test("[stories] campaign page events add only fixed values and small counts", ()
       recipe_id: "sweet-potato-frittata",
     }).ok
   ).toBe(false);
+});
+
+test("landing, bookcase, plan and series pages have their own route names", () => {
+  expect(pathToCanonicalRouteKey("/halloween")).toBe("halloween");
+  expect(pathToCanonicalRouteKey("/collections")).toBe("collections");
+  expect(pathToCanonicalRouteKey("/collections/halloween")).toBe("collection_detail");
+  expect(pathToCanonicalRouteKey("/collections/halloween/plan")).toBe("collection_plan");
+  expect(pathToCanonicalRouteKey("/collections/series/seasons")).toBe("collection_series");
+  for (const route_key of ["halloween", "collections", "collection_plan", "collection_series"]) {
+    expect(validateAnalyticsEvent("page_view", { route_key, device_class: "mobile" }).ok, route_key).toBe(true);
+  }
+});
+
+test("checkout_clicked and collection_view name the book and the Buy button", () => {
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_slug: "halloween", surface: "buy_box" }).ok).toBe(true);
+  expect(
+    validateAnalyticsEvent("checkout_clicked", {
+      collection_slug: "halloween",
+      surface: "lock_card",
+      collection_release_id: RECIPE_ID,
+    }).ok
+  ).toBe(true);
+  // The phone buy bar only scrolls to the buy box; it never starts checkout itself.
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_slug: "halloween", surface: "sticky_bar" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_slug: "halloween" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_slug: "Halloween Book", surface: "buy_box" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("checkout_clicked", { collection_slug: "halloween", surface: "buy_box", entry_point: "collection_page" }).ok).toBe(false);
+
+  expect(validateAnalyticsEvent("collection_view", { collection_slug: "halloween" }).ok).toBe(true);
+  for (const ownership_state of ["owned", "not_owned", "unauthenticated", "pending_payment", "unavailable"]) {
+    expect(validateAnalyticsEvent("collection_view", { collection_slug: "halloween", ownership_state }).ok, ownership_state).toBe(true);
+  }
+  expect(validateAnalyticsEvent("collection_view", { collection_slug: "halloween", ownership_state: "gifted" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("collection_view", { collection_release_id: RECIPE_ID }).ok).toBe(false);
+});
+
+test("checkout keeps well-formed visit details and drops the rest without refusing", () => {
+  const visitor = "01990000-0000-7000-8000-000000000001";
+  const session = "01990000-0000-7000-8000-000000000002";
+  expect(acceptCheckoutAnalytics({ distinct_id: visitor, session_id: session, surface: "buy_box", entry_story: "halloween" })).toEqual({
+    distinctId: visitor,
+    sessionId: session,
+    surface: "buy_box",
+    entryStory: "halloween",
+  });
+  expect(acceptCheckoutAnalytics({ distinct_id: "parent@example.com", surface: "sticky_bar", entry_story: "https://x.test" })).toBeNull();
+  expect(acceptCheckoutAnalytics({ distinct_id: "not-a-uuid", surface: "lock_card" })).toEqual({
+    distinctId: null,
+    sessionId: null,
+    surface: "lock_card",
+    entryStory: null,
+  });
+  for (const raw of [undefined, null, "buy_box", ["buy_box"], 7]) {
+    expect(acceptCheckoutAnalytics(raw), String(raw)).toBeNull();
+  }
+});
+
+test("both sign-in methods leave a completion marker; nothing else does", () => {
+  expect(isSignInMethodMarker("email_code")).toBe(true);
+  expect(isSignInMethodMarker("google")).toBe(true);
+  for (const value of ["apple", "", null, undefined, "EMAIL_CODE"]) {
+    expect(isSignInMethodMarker(value), String(value)).toBe(false);
+  }
 });
