@@ -257,29 +257,23 @@ export function hasPerAgeContent(method: RecipeMethod): boolean {
 
 export interface MethodTime {
   handsOn: string;
-  total: string;
-  /** Share of the bar filled as hands-on, 6 to 100. */
-  handsOnPercent: number;
-  sentence: string;
+  /** Null when there is no waiting. */
+  wait: string | null;
 }
 
-/** "15 min of work, then 2 hr 30 min in the freezer." or "All 15 min is hands-on. No waiting." */
+/**
+ * The header shows hands-on time only, so a "2 hr" headline never scares a parent off. The wait is told inside the
+ * recipe, just above step 1: "Along the way it needs 2 hr 30 min in the freezer. Nothing for you to do then."
+ */
 export function methodTime(method: Pick<RecipeMethod, "handsOnMinutes" | "totalMinutes" | "waitLabel">): MethodTime {
-  const wait = method.totalMinutes - method.handsOnMinutes;
-  const handsOn = formatMinutes(method.handsOnMinutes);
-  let sentence = `All ${handsOn} is hands-on. No waiting.`;
-  if (wait > 0) {
-    sentence = method.waitLabel
-      ? `${handsOn} of work, then ${formatMinutes(wait)} in the ${method.waitLabel}.`
-      : `${handsOn} of work, then ${formatMinutes(wait)} of waiting.`;
+  const minutes = method.totalMinutes - method.handsOnMinutes;
+  let wait: string | null = null;
+  if (minutes > 0) {
+    wait = method.waitLabel
+      ? `Along the way it needs ${formatMinutes(minutes)} in the ${method.waitLabel}. Nothing for you to do then.`
+      : `Along the way it needs ${formatMinutes(minutes)} of waiting. Nothing for you to do then.`;
   }
-  const share = Math.round((method.handsOnMinutes / method.totalMinutes) * 100);
-  return {
-    handsOn,
-    total: formatMinutes(method.totalMinutes),
-    handsOnPercent: wait <= 0 ? 100 : Math.min(100, Math.max(6, share)),
-    sentence,
-  };
+  return { handsOn: formatMinutes(method.handsOnMinutes), wait };
 }
 
 /** Sections with the number of their first step: steps run 1 to n straight through every section. */

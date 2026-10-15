@@ -36,7 +36,6 @@ test.afterAll(async () => { await f?.dispose(); });
 
 async function expectReadable(page: Page, slug: string) {
   await page.goto(`/recipes/${slug}`);
-  await expect(page.getByText("In your library", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ingredients" })).toBeVisible();
 }
 

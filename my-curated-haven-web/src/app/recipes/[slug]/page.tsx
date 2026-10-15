@@ -25,7 +25,7 @@ import Badge from "@/components/ui/Badge";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import { listOpenPublishedCollections } from "@/lib/collections/publication";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
-import { bookName, bookNameStart } from "@/lib/collections/book-name";
+import { bookName } from "@/lib/collections/book-name";
 import { chocolateNote } from "@/config/allergen-notes";
 import { recipeCount } from "@/lib/collections/visibility";
 import { loadLiveOffer, offerOrNull } from "@/lib/data/collections-showroom";
@@ -268,8 +268,6 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
               <>
                 <InfoStat label="Hands-on" value={time.handsOn} />
                 <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
-                <InfoStat label="Total" value={time.total} />
-                <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
                 <InfoStat label="Makes" value={method.makes} />
               </>
             ) : (
@@ -279,31 +277,6 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
                 <InfoStat label="Yield" value={body ? body.yield : "Toddler portions"} />
               </>
             )}
-            <div className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
-            <div>
-              <span className="block text-xs font-bold uppercase tracking-wider text-text-muted">
-                Access
-              </span>
-              <span className={`text-base font-semibold ${isAccessDenied ? "text-text-muted" : "text-action"}`}>
-                {isAdmin
-                  ? "Admin access"
-                  : isAccessDenied
-                    ? book
-                      ? bookNameStart(book.collection.title).replace(/^The /, "In the ")
-                      : "In a recipe book"
-                    : accessKind === "free"
-                      ? "Free Toddler Recipe"
-                      : "In your library"}
-              </span>
-            </div>
-            {time ? (
-              <div className="rm-time">
-                <div className="rm-timebar" role="img" aria-label={`${time.handsOn} hands-on out of ${time.total} total`}>
-                  <span style={{ width: `${time.handsOnPercent}%` }} />
-                </div>
-                <p>{time.sentence}</p>
-              </div>
-            ) : null}
           </div>
 
           <div className="flex w-full flex-wrap items-center gap-3 pt-2 sm:ml-auto sm:w-auto sm:pt-0">

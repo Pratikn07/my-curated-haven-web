@@ -1,27 +1,10 @@
 /* The recipe page's method layout, shown only when a
    recipe has method content. Mobile first: every rule is written for a 390px screen. */
 
-/* Header: hands-on share of the total time */
-.rm-time {
-  flex-basis: 100%;
-  display: grid;
-  gap: 6px;
-}
-.rm-timebar {
-  height: 8px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: repeating-linear-gradient(135deg, var(--surface-muted) 0 6px, var(--border-subtle) 6px 8px);
-}
-.rm-timebar span {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--action);
-}
-.rm-time p {
-  margin: 0;
-  font-size: 0.8125rem;
+/* Method: the waiting time, told just above step 1 rather than in the header */
+.rm-wait-note {
+  margin: 0 0 12px;
+  font-size: 0.9375rem;
   color: var(--text-muted);
 }
 
@@ -503,9 +486,6 @@
 /* Print: every step as text with the chosen age's lines. The age switch, photos, viewer, "We made it" and
    the hint carry .no-print; tick boxes print as bullets. */
 @media print {
-  .rm-timebar {
-    display: none !important;
-  }
   .rm-ing label {
     min-height: 0;
     padding: 3px 0;
