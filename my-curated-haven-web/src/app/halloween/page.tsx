@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Cormorant_Garamond } from "next/font/google";
 import { notFound } from "next/navigation";
 import CampaignTracker from "@/components/campaign/CampaignTracker";
 import { ClockPill, HalloweenDock } from "@/components/halloween/HalloweenClient";
@@ -27,6 +28,15 @@ import { loadHalloweenPage } from "@/lib/data/load-halloween";
  */
 export const revalidate = 3600;
 
+// The page's editorial serif (headlines, recipe names, prices). Loaded here, not in the root layout,
+// so only /halloween downloads it; halloween.css points --font-display at it inside .hw.
+const display = Cormorant_Garamond({
+  variable: "--font-hw-display",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
 const TITLE = "Not-Scary Halloween Recipes for Toddlers";
 const DESCRIPTION =
   "Ghost bark, mummy pops and spider bites: Halloween food little hands can hold, and our plan for a Halloween that isn't scary.";
@@ -49,7 +59,7 @@ export default async function HalloweenPage() {
   if (!data || data.menu.length === 0) notFound();
 
   return (
-    <div className="hw">
+    <div className={`hw ${display.variable}`}>
       <HalloweenSky />
       <CampaignTracker
         slug={HALLOWEEN_SLUG}
