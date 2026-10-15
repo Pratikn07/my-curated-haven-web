@@ -7,7 +7,8 @@ export interface AnalyticsProviderAdapter {
   getRecordedEvents?(): AnalyticsEnvelope[];
 }
 
-const QUEUE_LIMIT = 20;
+/** The in-memory recorder keeps the latest events for tests: enough for a page of clicks, milestones and views. */
+const QUEUE_LIMIT = 200;
 
 class MockAnalyticsProvider implements AnalyticsProviderAdapter {
   private events: AnalyticsEnvelope[] = [];
@@ -40,6 +41,9 @@ class PostHogAnalyticsProvider implements AnalyticsProviderAdapter {
     if (envelope.campaign_code) {
       properties.campaign_code = envelope.campaign_code;
     }
+    // Tracking PR 2: page context.
+    if (envelope.content_slug) properties.content_slug = envelope.content_slug;
+    if (envelope.access_state) properties.access_state = envelope.access_state;
     posthog.capture(envelope.event_name, properties);
   }
 

@@ -1,4 +1,4 @@
-import posthog from "posthog-js";
+import posthog, { type CaptureResult } from "posthog-js";
 import { remoteAnalyticsAllowed } from "./environment";
 import { INTERNAL_BROWSER_STORAGE_KEY } from "./consent";
 import { isAdminPath, isPrivatePath } from "./private-paths";
@@ -33,6 +33,8 @@ export function initPostHog(): boolean {
     session_recording: {
       maskAllInputs: true,
     },
+    // Tracking PR 2: the Stripe checkout session in /checkout/return?session_id=… never reaches PostHog.
+    before_send: withoutCheckoutSession,
   });
   initialized = true;
   syncSessionRecording(window.location.pathname);
@@ -93,6 +95,41 @@ export function syncInternalBrowser(): void {
   } catch {
     // Analytics must never interrupt the page.
   }
+}
+
+// Tracking PR 2
+/** Event and person properties that hold a full address. */
+const URL_PROPERTIES = [
+  "$current_url",
+  "$referrer",
+  "$initial_current_url",
+  "$initial_referrer",
+  "$session_entry_url",
+  "$session_entry_referrer",
+];
+
+/** The address without its session_id query parameter (the Stripe checkout session). Anything else is unchanged. */
+export function stripCheckoutSessionId(value: unknown): unknown {
+  if (typeof value !== "string" || !/[?&]session_id=/.test(value)) return value;
+  try {
+    const url = new URL(value);
+    url.searchParams.delete("session_id");
+    return url.toString();
+  } catch {
+    return value.replace(/([?&])session_id=[^&#]*&?/g, "$1").replace(/[?&](?=#|$)/, "");
+  }
+}
+
+/** PostHog before_send hook: removes session_id from every address on the event before it is sent. */
+export function withoutCheckoutSession(event: CaptureResult | null): CaptureResult | null {
+  if (!event) return event;
+  for (const bag of [event.properties, event.$set, event.$set_once]) {
+    if (!bag) continue;
+    for (const key of URL_PROPERTIES) {
+      if (key in bag) bag[key] = stripCheckoutSessionId(bag[key]);
+    }
+  }
+  return event;
 }
 
 export { posthog };

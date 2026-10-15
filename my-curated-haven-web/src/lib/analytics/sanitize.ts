@@ -1,6 +1,7 @@
 import {
   ANALYTICS_SCHEMA_VERSION,
   CURRENT_CONSENT_POLICY_VERSION,
+  type AccessState,
   type AnalyticsEnvelope,
   type AnalyticsEventMap,
   type AnalyticsEventName,
@@ -112,6 +113,40 @@ const UUID_FIELDS = new Set([
   "refund_ref",
 ]);
 
+// Tracking PR 2: labelled clicks, page context, milestones and views.
+const LINK_TYPES = new Set(["internal", "external", "anchor", "action"]);
+const DESTINATION_KINDS = new Set([
+  ...ROUTE_KEYS,
+  "checkout",
+  "anchor",
+  "email",
+  "instagram",
+  "stripe",
+  "external",
+  "other_page",
+  "none",
+]);
+const TARGET_KINDS = new Set(["recipe", "collection", "plan", "series", "story"]);
+const ACCESS_STATES = new Set(["free", "locked", "owned", "preview"]);
+const CTA_REGEX = /^[a-z][a-z0-9_]{0,31}$/;
+/** Where an offer is shown. surface is checked by name, so it holds all of them; checkout events allow only CHECKOUT_SURFACES. */
+const OFFER_SURFACES = new Set(["lock_card", "buy_box", "sticky_bar", "book_card", "story_offer"]);
+/** Events whose surface is the Buy button checkout started from. checkout_failed arrives in tracking PR 3. */
+const CHECKOUT_EVENTS = new Set(["checkout_clicked", "checkout_failed"]);
+const SCROLL_DEPTHS = new Set([25, 50, 75, 100]);
+const VISIBLE_SECONDS = new Set([15, 30, 60]);
+/** Fields with one type only: a number sent as text (or text as a number) is a bug, not data. */
+const NUMBER_ONLY_FIELDS = new Set(["cta_position", "price_minor", "depth", "seconds"]);
+const STRING_ONLY_FIELDS = new Set([
+  "primary_ux",
+  "link_type",
+  "cta",
+  "destination_kind",
+  "target_kind",
+  "target_slug",
+  "surface",
+]);
+
 export type ValidationFailure = { ok: false; reason: string };
 export type ValidationSuccess = { ok: true; properties: Record<string, unknown> };
 export type ValidationResult = ValidationSuccess | ValidationFailure;
@@ -162,7 +197,7 @@ function checkString(key: string, value: string): string | ValidationFailure {
   }
   if (key === "story_slug" && !STORY_SLUG_REGEX.test(value)) return fail("story_slug");
   if (key === "collection_slug" && !SLUG_REGEX.test(value)) return fail("collection_slug");
-  if (key === "surface" && !CHECKOUT_SURFACES.has(value)) return fail("surface");
+  if (key === "surface" && !OFFER_SURFACES.has(value)) return fail("surface");
   if (key === "ownership_state" && !OWNERSHIP_STATES.has(value)) return fail("ownership_state");
   if (key === "primary_ux" && !isPrimaryUx(value)) return fail("primary_ux");
   if (key === "room" && !STORY_ROOMS.has(value)) return fail("room");
@@ -174,6 +209,13 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");
   }
+  // Tracking PR 2
+  if (NUMBER_ONLY_FIELDS.has(key)) return fail(key);
+  if (key === "link_type" && !LINK_TYPES.has(value)) return fail("link_type");
+  if (key === "cta" && !CTA_REGEX.test(value)) return fail("cta");
+  if (key === "destination_kind" && !DESTINATION_KINDS.has(value)) return fail("destination_kind");
+  if (key === "target_kind" && !TARGET_KINDS.has(value)) return fail("target_kind");
+  if (key === "target_slug" && !SLUG_REGEX.test(value)) return fail("target_slug");
   return value;
 }
 
@@ -223,6 +265,12 @@ export function validateAnalyticsEvent(
       }
       const range = SMALL_COUNT_FIELDS[key];
       if (range && (value < range[0] || value > range[1])) return fail(key);
+      // Tracking PR 2
+      if (STRING_ONLY_FIELDS.has(key)) return fail(key);
+      if (key === "cta_position" && (value < 1 || value > 50)) return fail(key);
+      if (key === "price_minor" && value <= 0) return fail(key);
+      if (key === "depth" && !SCROLL_DEPTHS.has(value)) return fail(key);
+      if (key === "seconds" && !VISIBLE_SECONDS.has(value)) return fail(key);
       sanitized[key] = value;
     } else if (typeof value === "boolean") {
       if (key !== "zero_results") return fail(key);
@@ -234,6 +282,11 @@ export function validateAnalyticsEvent(
 
   for (const key of required) {
     if (sanitized[key] === undefined) return fail(`missing:${key}`);
+  }
+
+  // Tracking PR 2: a phone buy bar or a book card can be seen, but checkout only starts from a Buy button.
+  if (CHECKOUT_EVENTS.has(name) && sanitized.surface !== undefined && !CHECKOUT_SURFACES.has(String(sanitized.surface))) {
+    return fail("surface");
   }
 
   return { ok: true, properties: sanitized };
@@ -248,6 +301,9 @@ export interface BuildEnvelopeOptions<T extends AnalyticsEventName> {
   sessionId?: string;
   routeKey?: CanonicalRouteKey;
   campaignCode?: string;
+  // Tracking PR 2: page context. Invalid values are left out; they never drop the event.
+  contentSlug?: string;
+  accessState?: string;
 }
 
 export function buildAnalyticsEnvelope<T extends AnalyticsEventName>(
@@ -276,6 +332,16 @@ export function buildAnalyticsEnvelope<T extends AnalyticsEventName>(
     route_key: options.routeKey,
     campaign_code: campaignCode,
     properties: validated.properties,
+    // Tracking PR 2
+    ...pageContext(options.contentSlug, options.accessState),
+  };
+}
+
+// Tracking PR 2
+function pageContext(contentSlug: string | undefined, accessState: string | undefined): Pick<AnalyticsEnvelope, "content_slug" | "access_state"> {
+  return {
+    ...(contentSlug && SLUG_REGEX.test(contentSlug) ? { content_slug: contentSlug } : {}),
+    ...(accessState && ACCESS_STATES.has(accessState) ? { access_state: accessState as AccessState } : {}),
   };
 }
 

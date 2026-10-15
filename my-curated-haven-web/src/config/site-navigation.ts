@@ -42,6 +42,11 @@ export const indexableRoutes: {
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
 ];
 
+/** The fixed click label (data-track-cta) for a header or footer link: "/" is home, "/recipes" is recipes. */
+export function navCta(href: string): string {
+  return href === "/" ? "home" : href.replace(/^\//, "").replace(/[^a-z0-9]+/g, "_");
+}
+
 /** Drops the collections link where no collection is visible yet (production until one is approved). */
 export function linksFor<T extends { href?: string; path?: string }>(links: readonly T[], showCollections: boolean): T[] {
   return showCollections ? [...links] : links.filter((link) => (link.href ?? link.path) !== COLLECTIONS_HREF);

@@ -3,6 +3,8 @@
  * Discriminated event union and envelope definitions.
  */
 
+import type { PrimaryUx } from "./ux";
+
 export const ANALYTICS_SCHEMA_VERSION = 1;
 export const CURRENT_CONSENT_POLICY_VERSION = "2026-09-24";
 
@@ -108,6 +110,11 @@ export interface AnalyticsEnvelope {
   route_key?: CanonicalRouteKey;
   campaign_code?: string;
   properties: Record<string, unknown>;
+  // Tracking PR 2: page context on every browser event.
+  /** The recipe, book, plan or story the page is about, from its address (contentSlugFromPath). */
+  content_slug?: string;
+  /** What this visitor can open on the page, set by TrackPageState on recipe, collection and plan pages. */
+  access_state?: AccessState;
 }
 
 export interface PageViewPayload {
@@ -271,6 +278,71 @@ export type AnalyticsEventMap = {
   story_view: StoryViewPayload;
   story_action_clicked: StoryActionClickedPayload;
   story_section_viewed: StorySectionViewedPayload;
+  // Tracking PR 2
+  cta_clicked: CtaClickedPayload;
+  section_viewed: SectionViewedPayload;
+  offer_viewed: OfferViewedPayload;
+  page_scroll_reached: PageScrollReachedPayload;
+  page_time_reached: PageTimeReachedPayload;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;
+
+// Tracking PR 2: labelled clicks, page context, milestones and views (docs/implementation/tracking/PLAN.md).
+
+/** internal: one of our pages; external: another site; anchor: a part of the same page; action: a button with no link. */
+export type LinkType = "internal" | "external" | "anchor" | "action";
+/** Where a tap goes: a route key for our own pages, else a fixed kind. Never a URL. */
+export type DestinationKind =
+  | CanonicalRouteKey
+  | "checkout"
+  | "anchor"
+  | "email"
+  | "instagram"
+  | "stripe"
+  | "external"
+  | "other_page"
+  | "none";
+export type TargetKind = "recipe" | "collection" | "plan" | "series" | "story";
+/** free: open to all; locked: needs the book; owned: this visitor has the book; preview: a plan's public preview. */
+export type AccessState = "free" | "locked" | "owned" | "preview";
+/** Where an offer is shown. Checkout only starts from lock_card and buy_box (CheckoutSurface). */
+export type OfferSurface = CheckoutSurface | "sticky_bar" | "book_card" | "story_offer";
+export type ScrollDepth = 25 | 50 | 75 | 100;
+export type VisibleSeconds = 15 | 30 | 60;
+
+/** Any link or button was tapped. Labels come from data-track-* attributes in the markup (ClickTracker). */
+export interface CtaClickedPayload {
+  primary_ux: PrimaryUx;
+  link_type: LinkType;
+  /** A fixed key written in code, never the visible text. */
+  cta?: string;
+  /** 1 to 50, counted inside its module. */
+  cta_position?: number;
+  destination_kind?: DestinationKind;
+  target_kind?: TargetKind;
+  target_slug?: string;
+}
+
+/** A block marked data-track-view reached two thirds of the way up the screen, once per page view. */
+export interface SectionViewedPayload {
+  primary_ux: PrimaryUx;
+}
+
+/** An offer was at least half on screen, once per surface per page view. */
+export interface OfferViewedPayload {
+  surface: OfferSurface;
+  collection_slug: string;
+  ownership_state?: CollectionOwnershipState;
+  price_minor?: number;
+  currency?: string;
+}
+
+export interface PageScrollReachedPayload {
+  depth: ScrollDepth;
+}
+
+/** Seconds the page was visible (time in a background tab does not count). */
+export interface PageTimeReachedPayload {
+  seconds: VisibleSeconds;
+}
