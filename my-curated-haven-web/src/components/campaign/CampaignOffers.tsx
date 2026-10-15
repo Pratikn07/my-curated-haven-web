@@ -139,7 +139,7 @@ export function CampaignPack({
               data-magnetic
               data-story-action="pack"
               data-story-placement="pack"
-              data-track-cta="see_collection"
+              data-track-cta="see_pack"
             >
               <span className="cp-button-label">See what’s inside</span>
               <span className="cp-button-icon" aria-hidden="true">

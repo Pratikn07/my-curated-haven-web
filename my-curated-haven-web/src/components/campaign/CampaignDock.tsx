@@ -18,7 +18,7 @@ export default function CampaignDock({ data }: { data: CampaignPageData }) {
 
   return (
     <div className="cp-dock" data-visible="false" data-track-ux="sticky_bar">
-      <div className="cp-dock-inner" data-recipe-id={single?.id} data-recipe-position={single ? 1 : undefined}>
+      <div className="cp-dock-inner" data-recipe-id={single?.id} data-recipe-position={single ? 1 : undefined} data-track-pos={single ? 1 : undefined}>
         <span className="cp-dock-thumb" aria-hidden="true">
           <Image src={thumb} alt="" fill sizes="56px" />
         </span>

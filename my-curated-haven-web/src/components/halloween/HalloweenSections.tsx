@@ -248,7 +248,7 @@ export function HalloweenStory() {
   const [scare, ghosts] = HALLOWEEN_MORNING;
   return (
     <>
-      <section className="hw-story-head" id="hw-story" data-story-section="story" data-hw-clock={scare.clock}>
+      <section className="hw-story-head" id="hw-story" data-story-section="story" data-hw-clock={scare.clock} data-track-ux="story" data-track-view>
         <span className="hw-eyebrow">{HALLOWEEN_STORY.kicker}</span>
         <h2>{HALLOWEEN_STORY.heading}</h2>
         <p>{HALLOWEEN_STORY.lede}</p>
@@ -283,7 +283,7 @@ export function HalloweenStory() {
         <p className="hw-street-note">Keep scrolling to walk the street</p>
       </section>
 
-      <section className="hw-chapter hw-late" id="hw-night" data-story-section="story_end" data-hw-clock={HALLOWEEN_NIGHT.clock} data-hw-sky={SKY.night}>
+      <section className="hw-chapter hw-late" id="hw-night" data-story-section="story_end" data-hw-clock={HALLOWEEN_NIGHT.clock} data-hw-sky={SKY.night} data-track-ux="story" data-track-view>
         <Stamp moment={HALLOWEEN_NIGHT} />
         {HALLOWEEN_NIGHT.image ? (
           <figure className="hw-window">
