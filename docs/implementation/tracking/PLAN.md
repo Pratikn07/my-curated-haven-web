@@ -1,6 +1,6 @@
 # Site tracking plan
 
-Updated 2026-10-14. Covers the public site at mycuratedhaven.com and the PostHog project 630160. PR 1 is built; PRs 2 to 4 are not.
+Updated 2026-10-15. Covers the public site at mycuratedhaven.com and the PostHog project 630160. PRs 1 to 4 (with #147) ship together in one release on 2026-10-15, combined in #COMBINED; see "Release 2026-10-15" for what changed from this plan on the way.
 
 Today PostHog records page views and raw clicks, but a click doesn't say which part of the page it came from, its position, or what it opened. 147 of the 529 clicks recorded in the 30 days to 2026-10-14 (28%) carry no text at all. No purchase reaches PostHog, and the database drops 3 of the 4 Instagram campaign codes. This plan adds one labelled click event, page context on every event, scroll and time milestones, offer views, and a purchase funnel that ends in a server-side purchase tied to the visitor who bought.
 
@@ -31,7 +31,7 @@ Example: a parent taps Buy on `/collections/halloween`.
 | Labels | Fixed keys written in code, never the visible text, so renaming a button keeps its history |
 | Destinations | Route keys and slugs worked out from the link, never URLs (the validator rejects URLs) |
 | Autocapture | Stays on as a backup. Reports use the labelled events |
-| Old events | `story_action_clicked`, `story_section_viewed` and `homepage_cta_clicked` keep firing until 2026-11-30 so the new events can be checked against them, then retire in PR 4 |
+| Old events | `story_action_clicked`, `story_section_viewed` and `homepage_cta_clicked` were retired on 2026-10-15 with the release (PR 4, #PR4): `cta_clicked` and `section_viewed` carry the same taps and sections. PostHog insights that use the old events must be switched to the new ones (mapping in #PR4's description). The 2026-11-30 overlap was a default and was dropped by the owner |
 | Purchase of record | The server `purchase_confirmed` from the Stripe webhook, sent under the visitor's PostHog id. The browser only sends `purchase_confirmation_viewed`, so a sale is never counted twice |
 | Engagement | Live milestones while the parent is on the page: scroll 25/50/75/100% and visible time 15/30/60 s. PostHog's page-leave scroll depth exists for only 27% of phone page views (74 of 276), because Instagram's browser usually closes without sending it |
 | Free text | Never sent: search text, the child's name typed into the storybook sample, emails |
@@ -95,7 +95,7 @@ Example: a parent taps Buy on `/collections/halloween`.
 ### Removed events
 
 - `homepage_preview_viewed`: defined but not sent since 2026-10-02. Removed in PR 3.
-- After 2026-11-30 (PR 4): `story_action_clicked` and `homepage_cta_clicked` (replaced by `cta_clicked`), `story_section_viewed` (replaced by `section_viewed`). `story_view` and `homepage_preview_opened` stay.
+- Retired 2026-10-15 with the release (PR 4, #PR4): `story_action_clicked` and `homepage_cta_clicked` (replaced by `cta_clicked`), `story_section_viewed` (replaced by `section_viewed`). `story_view` and `homepage_preview_opened` stay. PostHog insights that use the retired events must be switched to the new ones (mapping in #PR4's description).
 
 ### Property values
 
@@ -258,22 +258,25 @@ New `src/components/analytics/ViewTracker.tsx`, mounted in `SiteShell.tsx`, with
 
 ## Purchase linked to the visitor
 
-Today `checkout_created` and `purchase_confirmed` are written to `private.analytics_exports` under a random `attempt_ref`, with no campaign, and the export is switched off. Changes, all in PR 1:
+Before this work `checkout_created` and `purchase_confirmed` were written to `private.analytics_exports` under a random `attempt_ref`, with no campaign, and the export was switched off. Changes, in PR 1 and #147 as combined in the release:
 
-1. **Browser.** `CheckoutButton.tsx` adds to the `/api/checkout` body `analytics: { distinct_id: posthog.get_distinct_id(), session_id: posthog.get_session_id(), surface, entry_story }`, only when PostHog is active. `entry_story` is read from session storage (`mch_entry_story`).
-2. **API.** `app/api/checkout/route.ts` adds `analytics` to `CHECKOUT_FIELDS`. It checks that `distinct_id` and `session_id` are UUIDs, `surface` is `lock_card` or `buy_box`, and `entry_story` matches the slug pattern. Invalid values are dropped silently; analytics must never block a purchase.
+1. **Browser.** `CheckoutButton.tsx` adds to the `/api/checkout` body `analytics: { distinct_id: posthog.get_distinct_id(), session_id: posthog.get_session_id(), surface, entry_story }`, only while analytics is on (the ids only when PostHog is active). `entry_story` is read from session storage (`mch_entry_story`).
+2. **API.** `app/api/checkout/route.ts` adds `analytics` to `CHECKOUT_FIELDS`. It checks that `distinct_id` and `session_id` are UUIDs, `surface` is `lock_card` or `buy_box`, and `entry_story` matches the slug pattern. Invalid values are dropped silently, and the whole field is ignored unless `analyticsConsent` is true; analytics must never block a purchase.
 3. **Library.** `lib/payments/checkout.ts` passes these values and `campaign.utm_content` to `recordCheckoutMeasurement` in `lib/payments/repository.ts:154`, which calls the new SQL function signature.
-4. **Migration** `supabase/migrations/20261015090000_tracking_purchase_link.sql`:
-   - New columns on `private.purchase_orders`: `analytics_distinct_id uuid`, `analytics_session_id uuid`, `checkout_surface text` (check: `lock_card`, `buy_box`), `campaign_content text` (check: `^[a-z0-9][a-z0-9_-]{0,39}$`), `entry_story text` (check: the slug pattern).
-   - One function, `private.is_registered_campaign_code(text)`, owns the campaign list. It adds `story_link`, `instagram_dm` and `comment_dm` and keeps the old codes so existing rows still pass. The order check and the measurement function both call it; `service_role` may execute it because it may write orders.
-   - Add a nine-argument `private.record_checkout_measurement` with the new values. The original four-argument signature stays and forwards to it, so code deployed before or after the migration keeps recording checkouts. Both are closed to `anon` and `authenticated`.
-   - Replace `private.capture_optional_analytics()` so the `checkout_created` and `purchase_confirmed` payloads also carry `campaign_code`, `campaign_content`, `checkout_surface`, `entry_story`, `collection_slug` (joined from the release) and `$session_id`.
-5. **Drain.** `lib/analytics/drain.ts` selects `po.analytics_distinct_id` and `po.user_id`.
-   - It uses the visitor's id as `distinct_id` when present, else `attempt_ref` (orders placed before this change).
+4. **Migrations.** `20261014220000_instagram_campaigns_and_purchase_identity.sql` (#147, applied to production 2026-10-14) and `20261015090000_tracking_purchase_link.sql` on top of it:
+   - Columns on `private.purchase_orders`: `analytics_distinct_id text` and `analytics_session_id text` (both checked as UUIDs, from 20261014220000), `checkout_surface text` (check: `lock_card`, `buy_box`), `campaign_content text` (check: `^[a-z0-9][a-z0-9_-]{0,39}$`), `entry_story text` (check: the slug pattern).
+   - One function, `private.is_registered_campaign_code(text)`, owns the campaign list: the four live codes (`bio_link`, `story_link`, `instagram_dm`, `comment_dm`) and the six launch codes, so existing rows still pass. The order check and the measurement function both call it; `service_role` may execute it because it may write orders.
+   - A nine-argument `private.record_checkout_measurement(uuid, text, boolean, text, text, text, text, text, text)`: the six-argument version from 20261014220000 plus surface, landing page and post. The six-argument and the original four-argument signatures forward to it, with no defaults, so every call resolves by its argument count and the code live before the release keeps recording checkouts. All three are closed to `anon` and `authenticated`.
+   - `private.capture_optional_analytics()` adds `campaign_code`, `campaign_content`, `checkout_surface`, `entry_story`, `collection_slug` (joined from the release) and `$session_id` to the `checkout_created` and `purchase_confirmed` payloads, leaving absent values out.
+5. **Drain.** `lib/analytics/drain.ts` selects the order's visitor, session, campaign and `user_id`.
+   - It uses the visitor's id as `distinct_id` when present, else `attempt_ref` (orders placed before this change), and adds `$session_id` and `campaign_code` from the order, so exports queued before 20261015090000 carry them too.
    - It keeps `$process_person_profile: false` for guest buyers and drops it when the order has a `user_id`, so the purchase lands on the buyer's PostHog profile.
+   - The export row id is the event `uuid` (a retry is not counted twice) and the transition's `occurred_at` is the event time.
+   - The key and host fall back to `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST`, so `ANALYTICS_EXPORT_ENABLED=true` is the only server variable needed.
+   - It runs inside the Stripe webhook after the payment is recorded, so it stops starting sends after 2.5 s and gives each send 2 s; anything left goes out on the next drain.
 6. **Return page.** Moved to PR 3: `OrderSummaryDto` in `lib/payments/types.ts` gets `analyticsRef` (the order's `analytics_attempt_ref`) for `purchase_confirmation_viewed`.
-7. **Account closure.** Closing an account sets `analytics_distinct_id` and `analytics_session_id` to null. Add this step to `ops/ACCOUNT-CLOSURE.md`.
-8. **Privacy page.** Add one line saying a purchase is linked to the analytics visit that started it. Add the storage keys `mch_entry_story` (in use but not listed today) and `mch_internal`. The owner approves the wording.
+7. **Account closure.** Closing an account sets `analytics_distinct_id` and `analytics_session_id` to null and removes `$session_id` from that account's queued exports (`ops/ACCOUNT-CLOSURE.md`).
+8. **Privacy page.** Says what purchases send to PostHog, what an order keeps (visit, button, link, post, landing page) and that closing an account removes the PostHog identifiers, and lists every storage key: `mch_browser_id`, `mch_session_id`, `mch_campaign_attribution`, `mch_entry_story`, `mch_analytics_attempt_refs`, `mch_signin_method` and `mch_internal`. The owner approves the wording.
 
 ## Pull requests
 
@@ -308,14 +311,12 @@ Tests:
 
 Done when: a live test purchase made from a `comment_dm` link shows in PostHog as `checkout_clicked` then `purchase_confirmed` on the same visitor, with `campaign_code: comment_dm` and `checkout_surface`, and `private.purchase_orders.campaign_code` is `comment_dm`.
 
-### Production steps after PR 1 (owner approval needed)
+### Production steps for the release (owner approval needed)
 
-1. Set `ANALYTICS_EXPORT_ENABLED=true`, `POSTHOG_SERVER_KEY` (the project token) and `POSTHOG_HOST=https://us.i.posthog.com` on the production Vercel project, using the repo's `ops/vercel` login.
-2. Switch the database export on: `UPDATE private.analytics_settings SET optional_export_enabled = true, updated_at = now() WHERE singleton = true;`
-3. Redeploy, make one live guest test purchase, and check PostHog's live events for `purchase_confirmed`.
-4. In PostHog, turn on the internal-users filter (event property `is_internal` = `true`) as the default for insights.
-
-The migration can be applied before or after the code deploys: the old function signature stays, and the server export catches its own errors. Applying it first is still the cleaner order.
+1. Done 2026-10-14: migration `20261014220000` applied, `ANALYTICS_EXPORT_ENABLED=true` set on the production Vercel project and `private.analytics_settings.optional_export_enabled = true`. `POSTHOG_SERVER_KEY` and `POSTHOG_HOST` are not needed: the server falls back to the public key and host.
+2. Apply `20261015090000` to production by hand, in one `BEGIN/COMMIT` with its `supabase_migrations.schema_migrations` row, before the release merges (`ops/PRODUCTION-CONFIG.md`). The code live before the release keeps working with it: its four-argument call forwards.
+3. Merge the release, which deploys to production. Make one live guest test purchase from a `comment_dm` link and check PostHog's live events for `checkout_clicked` and `purchase_confirmed` on the same visitor.
+4. In PostHog, turn on the internal-users filter (event property `is_internal` = `true`) as the default for insights, and switch insights that use the retired events to `cta_clicked` and `section_viewed`.
 
 ### PR 2: labelled clicks, page context, milestones and views
 
@@ -369,10 +370,52 @@ Tests: one recorder test per new event, and contract tests for every new propert
 
 ### PR 4: retire the old events
 
-After 2026-11-30, compare counts of `cta_clicked` against `story_action_clicked` and `homepage_cta_clicked` for the same taps. If they agree within 2%:
+Shipped 2026-10-15 with the release (#PR4), not after a 2026-11-30 overlap: the owner dropped the wait. Before removing them, PR 4 checked that `cta_clicked` and `section_viewed` carry the same taps and sections, then:
 
-- remove the old events, the click handling in `CampaignTracker.tsx` and the event in `TrackedHomepageLink.tsx`;
-- replace `story_section_viewed` with `section_viewed`.
+- removed `story_action_clicked` and `homepage_cta_clicked`, the click handling in `CampaignTracker.tsx` and the event in `TrackedHomepageLink.tsx`;
+- replaced `story_section_viewed` with `section_viewed`.
+
+PostHog insights that use the retired events must be switched to the new events; the mapping is in #PR4's description.
+
+## Release 2026-10-15
+
+#147 (Instagram campaigns on orders, purchases on the visitor) and PRs 1 to 4 (#150, #152, #151, #PR4) were merged and audited together in #COMBINED, which is what reached production. What differs from the plan above:
+
+Combining #147 and PR 1 (one design per concern):
+
+- The visitor and session ids are `text` columns checked as UUIDs (#147's migration, already applied in production), not `uuid` columns. `20261015090000` is written as a delta on top of it.
+- `checkout_clicked` is PR 1's `{collection_slug, surface, collection_release_id?}`. #147's `entry_point` values (`collection_page`, `recipe_page`, `plan_page`) were never deployed and are gone; `entry_point` again means only the sign-in entry point.
+- One helper for the visit details (`lib/analytics/checkout-analytics.ts`) and one `/api/checkout` field (`analytics`), kept only when `analyticsConsent` is true. #147's `identity.ts` is removed.
+- The measurement function is nine arguments with `text` ids; the six-argument (#147) and four-argument signatures forward to it.
+- The drain keeps #147's event `uuid`, event time and key/host fallback, and PR 1's rule that only guest purchases are personless.
+
+PR 2:
+
+- `ViewTracker` uses two IntersectionObservers: the section rule shrinks the screen from below, so a phone buy bar fixed to the bottom would never count under it. Offers use the full screen at 50%.
+- `surface` is checked by name and holds the five offer surfaces; `checkout_clicked` and `checkout_failed` accept only `lock_card` and `buy_box` through an event-level rule.
+- Offers on `/halloween` and on the lock card are marked only while the book is on sale; the buy box whenever an offer exists, with its `ownership_state`.
+- Pages missing from the label table got labels so the coverage test holds there too: series pages and `/collections/test` use `bookcase`, `/design-review` uses `static_page`. `Container` has an optional `trackUx` prop.
+- The "second recipe card" spot check runs on `/recipes`; the home grid shows only the owner's approved recipes, which the local seed doesn't have.
+
+PR 3:
+
+- `purchase_confirmation_viewed` is sent each time "You're in" shows, with no browser storage key; reports count distinct `order_ref`.
+- The guest claim action returns success instead of redirecting to its own address, so the form can send `purchase_claimed`; the page re-renders in place as "You're in".
+- `faq_opened` comes from a small `FaqTracker` (a capture-phase `toggle` listener), not from `ClickTracker`.
+- Supabase answers a wrong code and an expired one the same way, so `expired_code` means the code was refused after its 10-minute lifetime (`otp_expiry` 600 s).
+- A resend is not a new `sign_in_code_sent`. A failed resend still sends `sign_in_failed {send_code}`.
+- `load_failed` also comes from the error pages (`error_page`) and from a collection page whose price lookup failed (`buy_box`). `save_failed` also covers a save that never gets an answer.
+
+PR 4:
+
+- Shipped with the release instead of after 2026-11-30 (see "PR 4" above).
+
+Audit of the combined release:
+
+- PostHog never receives search text: `before_send` removes `q` as well as the Stripe `session_id` from every address, and `mask_personal_data_properties` masks ad click ids (`fbclid`, `gclid`, `igshid`) wherever PostHog keeps them, so `has_click_id` is the only click-id signal.
+- The export drain runs inside the Stripe webhook and becomes live with this release, so it is time-boxed (2.5 s, 2 s per send).
+- Scroll milestones stop listening once 100% is sent; `ViewTracker` rescans only when elements are added.
+- The sign-in form keeps the code's send time across failed attempts, resends and reloads, so `expired_code` follows the code's real age.
 
 ## PostHog setup after PR 2
 
@@ -413,10 +456,10 @@ Then by hand: send a link in an Instagram DM, open it in Instagram's browser on 
 ## Open decisions
 
 1. Wording of the privacy page line about linking purchases to the analytics visit (owner).
-2. Switching on the server export in production (owner).
+2. Switching on the server export in production (owner). Done 2026-10-14.
 3. Whether a page that fits on one screen should count as read to 100%. Default: yes.
 4. Paid Instagram ads. If they start, add `utm_medium=paid_social` and ad campaign codes in a separate change.
-5. Retirement date for the old events. Default: 2026-11-30.
+5. Retirement date for the old events. Decided: retired 2026-10-15 with the release (PR 4, #PR4). PostHog insights that use them must be switched to the new events (mapping in #PR4's description).
 
 ## Out of scope
 

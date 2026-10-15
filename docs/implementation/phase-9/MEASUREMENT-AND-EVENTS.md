@@ -2,7 +2,7 @@
 
 ## Shared envelope
 
-Every optional event has `event_id`, `event_name`, `schema_version`, `occurred_at`, `environment`, `source` and a validated property object. Browser events additionally use a random consented `browser_id`, `session_id`, canonical `route_key` and consent-policy version. Use UTC storage. Record server receipt time separately from the untrusted browser clock.
+Every optional event has `event_id`, `event_name`, `schema_version`, `occurred_at`, `environment`, `source` and a validated property object. Browser events additionally use a random consented `browser_id`, `session_id`, canonical `route_key` and consent-policy version. Since 2026-10-15 they also carry page context when the page has it: `content_slug` (the recipe, book, plan or story slug from the address; `/halloween` gives `halloween`) and `access_state` (`free`, `locked`, `owned`, `preview`). Use UTC storage. Record server receipt time separately from the untrusted browser clock.
 
 Start a new session after 30 minutes of inactivity. Persist the random browser identifier for up to 90 days only while consent remains accepted. These are proposed product defaults, pending the retention decision. Never fingerprint a visitor to recover missing identity. One browser is not one person. Signing out resets the optional identity.
 
@@ -23,18 +23,51 @@ Allowed common dimensions: registered campaign code, canonical route category, c
 | `sign_in_started` | Browser, sign-in flow opened | `entry_point` |
 | `sign_in_completed` | Browser, verified server success response | `entry_point`, `method` (`email_code` \| `google`) |
 | `recipe_save_changed` | Browser, successful server mutation response | `recipe_id`, `action=saved/removed` |
-| `collection_view` | Browser, actual saleable collection detail rendered | `collection_release_id` |
-| `checkout_clicked` | Browser, explicit buy action | `collection_release_id`, `entry_point` (`collection_page` \| `recipe_page` \| `plan_page`) |
-| `checkout_created` | Server, Phase 8 checkout session stored successfully | `collection_release_id`, opaque analytics `attempt_ref` |
-| `purchase_confirmed` | Server, validated paid transition committed | opaque `order_ref`, release, `currency`, `paid_minor` |
+| `collection_view` | Browser, collection page rendered, once per page view | `collection_slug`, optional `collection_release_id` (absent while nothing is on sale), optional `ownership_state` (`owned` \| `not_owned` \| `unauthenticated` \| `pending_payment` \| `unavailable`) |
+| `checkout_clicked` | Browser, Buy tapped, before the checkout request | `collection_slug`, `surface` (`lock_card` on a locked recipe or plan page \| `buy_box` on the collection page), optional `collection_release_id` |
+| `checkout_created` | Server, Phase 8 checkout session stored successfully | `collection_release_id`, opaque analytics `attempt_ref`, plus the visit context below |
+| `purchase_confirmed` | Server, validated paid transition committed | opaque `order_ref`, release, `currency`, `paid_minor`, plus the visit context below |
 | `purchase_access_activated` | Server, paid order's access first becomes available | opaque `order_ref`, release, `activation_delay_bucket` |
 | `refund_confirmed` | Server, successful refund adjustment committed | opaque `refund_ref`, `order_ref`, `currency`, `refunded_minor` |
-| `purchased_library_open` | Browser, owned collection library rendered | `collection_release_id` |
+| `purchased_library_open` | Browser, owned collection library (`/account/collections`) rendered | optional `collection_release_id` |
 | `make_ahead_plan_open` | Browser, a buyer's full make-ahead plan rendered (`/collections/halloween/plan`, added 2026-10-14). Not sent for the locked preview or for admins | `collection_release_id` |
 
 Browser sign-in and save events are observations for UX reporting, not an audit trail. Server payment events exported to optional analytics require eligible consent and a valid anonymous attribution link. Their authoritative counterparts always remain in the Phase 8 ledger. Opaque analytics references are random mappings, not emails or reversible provider IDs, and remain restricted.
 
-Since 2026-10-14 the buy button sends the visitor's PostHog distinct and session ids (UUIDs only) with checkout. They are stored on the order, and server events are sent under that distinct id with `$session_id` and the order's `campaign_code`, so a purchase lands on the same visitor as their page views. Orders without stored ids fall back to the opaque reference.
+Since 2026-10-15 the Buy button sends the visit behind the tap with checkout, only while analytics is on: the PostHog distinct and session ids (UUIDs only), the `surface` and the Instagram landing page the session started on (`entry_story`, a slug). The server keeps the well-formed values and drops the rest without refusing the checkout. With the registered campaign's `utm_content` (`campaign_content`), they are stored on the order (`private.purchase_orders`: `analytics_distinct_id`, `analytics_session_id`, `checkout_surface`, `campaign_content`, `entry_story`; migrations `20261014220000` and `20261015090000`). The visit context added to `checkout_created` and `purchase_confirmed` is `collection_slug`, `campaign_code`, `campaign_content`, `checkout_surface`, `entry_story` and `$session_id`; absent values are left out. The server sends these events under the stored distinct id, with the export row id as the event `uuid` (a retry is not counted twice) and the time the transition happened as the event time. Guest orders stay personless (`$process_person_profile: false`); a signed-in buyer's purchase joins their PostHog person. Orders without a stored id fall back to the opaque reference.
+
+### Tracking events (2026-10-15)
+
+Added by the tracking plan (`docs/implementation/tracking/PLAN.md`), PRs 1 to 3. Values are checked by property name in `src/lib/analytics/sanitize.ts`; a name keeps one value set across events (the checkout events accept only the two Buy surfaces of the five `surface` values).
+
+| Event | Producer and precise trigger | Allowed event properties (`*` required) |
+| --- | --- | --- |
+| `cta_clicked` | Browser, any link or button tapped on a public page (one capture-phase listener, labels from `data-track-*`) | `primary_ux`*, `link_type`* (`internal` \| `external` \| `anchor` \| `action`), `cta`, `cta_position` (1 to 50), `destination_kind` (a route key, `checkout`, `anchor`, `email`, `instagram`, `stripe`, `external`, `other_page`, `none`), `target_kind` (`recipe` \| `collection` \| `plan` \| `series` \| `story`), `target_slug` |
+| `section_viewed` | Browser, a `data-track-view` block's top passes two thirds up the screen, once per page view | `primary_ux`* |
+| `offer_viewed` | Browser, an offer is half on screen, once per surface and book per page view | `surface`* (`lock_card` \| `buy_box` \| `sticky_bar` \| `book_card` \| `story_offer`), `collection_slug`*, `ownership_state`, `price_minor`, `currency` |
+| `page_scroll_reached` | Browser, the page passes a depth, once each per page view | `depth`* (25 \| 50 \| 75 \| 100) |
+| `page_time_reached` | Browser, visible time on the page | `seconds`* (15 \| 30 \| 60) |
+| `paywall_viewed` | Browser, a locked recipe page loads | `recipe_id`*, `collection_slug` |
+| `checkout_failed` | Browser, Buy fails before Stripe opens | `collection_slug`*, `surface`* (`lock_card` \| `buy_box`), `checkout_error`* (`already_owned` \| `refresh_required` \| `unavailable` \| `network` \| `server`) |
+| `checkout_cancelled` | Browser, `/checkout/cancel` loads | `collection_slug` (only from a well-formed `?book=` slug) |
+| `purchase_confirmation_viewed` | Browser, "You're in" shown (each showing; count distinct `order_ref`) | `order_ref`*, `collection_slug`* |
+| `purchase_claimed` | Browser, a guest unlocks an order with the emailed code | `collection_slug` |
+| `sign_in_method_chosen` | Browser, Continue with Email or Google tapped | `method`*, `entry_point`* |
+| `sign_in_code_sent` | Browser, the sign-in code email is sent (not on resend) | `entry_point`* |
+| `sign_in_failed` | Browser, sending the code, checking it, or Google sign-in fails | `sign_in_step`* (`send_code` \| `verify_code` \| `google`), `sign_in_error`* (`invalid_code` \| `expired_code` \| `rate_limited` \| `bot_check` \| `cancelled` \| `unknown`) |
+| `recipe_filter_value_applied` | Browser, one per value when Apply Filters is tapped | `filter_kind`* (`meal` \| `diet` \| `time`), `filter_value`* (the fixed filter slugs) |
+| `faq_opened` | Browser, a `details[data-track-faq]` question opens | `primary_ux`*, `question_key`* |
+| `room_closed` | Browser, a room on the home page closes | `feature_key`*, `seconds_bucket`* (`under_10s` \| `10_to_30s` \| `over_30s`) |
+| `sample_interacted` | Browser, storybook story or style picked, nursery stamp, shelf reveal | `sample`*, `choice` (a fixed option slug, never the typed name) |
+| `not_found_viewed` | Browser, a 404 page shows | `route_class`* (`recipe` \| `collection` \| `story` \| `other`) |
+| `load_failed` | Browser, a recipe list, page or price lookup fails | `primary_ux`* |
+| `save_failed` | Browser, saving a recipe fails or gets no answer | `recipe_id`* |
+| `empty_state_viewed` | Browser, no search results, an empty bookcase, a book not on sale yet | `primary_ux`* (`empty_state`) |
+| `$exception` | Browser, PostHog error tracking (`capture_exceptions: true`) | PostHog's own |
+
+`page_view` also has the route keys `halloween`, `collections`, `collection_plan` and `collection_series`. `sign_in_completed` is recorded for email codes as well as Google, on the page the sign-in lands on. `homepage_preview_viewed` is removed.
+
+PostHog's own properties: the `before_send` hook removes `session_id` (the Stripe checkout session) and `q` (search text) from every address on an event, and `mask_personal_data_properties` masks ad click ids (`fbclid`, `gclid`, `igshid`, …) wherever PostHog records them. Session properties `entry_app` (`instagram` \| `facebook` \| `browser`) and `has_click_id` are set once per session; `signed_in` and, in admin browsers, `is_internal` are super properties.
 
 Do not implement `recipe_cooked`, `print_completed`, `meal_eaten` or a child's preference. The current app does not observe these outcomes. A locked preview does not produce `recipe_open`. A future explicit feedback feature requires a separate contract.
 
