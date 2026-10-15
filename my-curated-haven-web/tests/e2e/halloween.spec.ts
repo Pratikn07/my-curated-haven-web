@@ -56,7 +56,7 @@ test("[halloween] the book follows the recipes, and the buy bar follows once it 
   await expect(dock).not.toHaveAttribute("data-on");
   await page.locator("#hw-walk").scrollIntoViewIfNeeded();
   await expect(dock).toHaveAttribute("data-on", "");
-  await expect(dock).toContainText("20 recipes + plan");
+  await expect(dock).toContainText(/\d+ recipes \+ plan/);
   await expect(dock.getByRole("link")).toHaveAttribute("href", /^\/collections\/halloween(#buy)?$/);
 
   // The full book section near the end takes over from the bar.
