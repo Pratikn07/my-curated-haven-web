@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getAnalyticsProvider } from "@/lib/analytics/provider";
-import { isPostHogActive, posthog, syncSessionRecording } from "@/lib/analytics/posthog";
+import { isPostHogActive, posthog, syncInternalBrowser, syncSessionRecording } from "@/lib/analytics/posthog";
+import { isNotFoundPage } from "@/lib/analytics/not-found";
 import { isAdminNavigationContext, isAdminPath } from "@/lib/analytics/private-paths";
 import { pathToCanonicalRouteKey, toDeviceClass } from "@/lib/analytics/schema";
 
@@ -17,6 +18,20 @@ function identifyUser(user: { id: string; email?: string }) {
   }
   if (posthog.get_distinct_id() === user.id) return;
   posthog.identify(user.id, user.email ? { email: user.email } : undefined);
+}
+
+/**
+ * Tracking PR 2: the signed_in super property on every later event, from the auth state on each page.
+ * null clears it (sign-out), until the next page reads the session again.
+ */
+function setSignedIn(signedIn: boolean | null) {
+  try {
+    if (typeof window !== "undefined" && isAdminNavigationContext(window.location.href)) return;
+    if (signedIn === null) posthog.unregister("signed_in");
+    else posthog.register({ signed_in: signedIn });
+  } catch {
+    // Analytics must never interrupt the page.
+  }
 }
 
 /**
@@ -35,14 +50,18 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
     if (pathname && isAdminPath(pathname)) return;
     getAnalyticsProvider();
     if (!isPostHogActive()) return;
+    // Before this page's events: an admin's browser comes back opted in and tagged internal.
+    syncInternalBrowser();
 
     const {
       data: { subscription },
     } = createClient().auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         identifyUser(session.user);
+        setSignedIn(true);
       } else if (event === "SIGNED_OUT") {
         posthog.reset();
+        setSignedIn(null);
       }
     });
 
@@ -65,6 +84,7 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
           return;
         }
         if (session?.user) identifyUser(session.user);
+        setSignedIn(Boolean(session?.user));
       })
       .catch(() => {
         // Analytics must never interrupt the page.
@@ -76,6 +96,8 @@ export default function AnalyticsProvider({ children }: { children: ReactNode })
     if (!pathname) return;
     if (isAdminPath(pathname)) return;
     syncSessionRecording(pathname);
+    // A 404 sends not_found_viewed instead: a page_view there would count a missing recipe as a recipe page.
+    if (isNotFoundPage(pathname)) return;
 
     const routeKey = pathToCanonicalRouteKey(pathname);
     if (!routeKey) return;

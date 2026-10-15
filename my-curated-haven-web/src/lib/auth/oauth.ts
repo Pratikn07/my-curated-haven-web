@@ -11,13 +11,40 @@ export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 export const AUTH_CALLBACK_PATH = "/auth/callback";
 
 /**
- * Short-lived marker the callback leaves for the destination page.
- * Google sign-in finishes in a server route and redirects, so the tab that
- * started it never sees the success and cannot close the funnel on its own.
+ * Short-lived marker left for the destination page. Both sign-in methods finish
+ * on the server and redirect (Google in /auth/callback, the email code in a
+ * server action), so the page that started them never sees the success and
+ * cannot close the funnel on its own.
  */
 export const SIGN_IN_METHOD_COOKIE = "mch_signin_method";
 
-export type SignInMethodMarker = OAuthProvider;
+export const SIGN_IN_METHOD_MARKERS = ["email_code", ...OAUTH_PROVIDERS] as const;
+export type SignInMethodMarker = (typeof SIGN_IN_METHOD_MARKERS)[number];
+
+export function isSignInMethodMarker(value: unknown): value is SignInMethodMarker {
+  return typeof value === "string" && (SIGN_IN_METHOD_MARKERS as readonly string[]).includes(value);
+}
+
+/** The request's host is this machine (a local production build served over plain http). */
+function isLoopbackHost(host: string | null | undefined): boolean {
+  if (!host) return false;
+  const name = host.replace(/:\d+$/, "").toLowerCase();
+  return name === "localhost" || name === "127.0.0.1" || name === "[::1]" || name.endsWith(".localhost");
+}
+
+/**
+ * Readable by the page (not httpOnly), gone after two minutes. Secure in every deployed build; a production build
+ * served from this machine over http leaves Secure off, because WebKit refuses a Secure cookie on a plain-http
+ * 127.0.0.1 page (Chromium accepts it), so the marker would never arrive.
+ */
+export function signInMethodCookieOptions(host: string | null | undefined) {
+  return {
+    path: "/",
+    maxAge: 120,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production" && !isLoopbackHost(host),
+  };
+}
 
 export function isOAuthProvider(value: unknown): value is OAuthProvider {
   return typeof value === "string" && (OAUTH_PROVIDERS as readonly string[]).includes(value);

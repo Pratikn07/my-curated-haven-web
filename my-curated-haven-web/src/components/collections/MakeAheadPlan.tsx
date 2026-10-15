@@ -41,7 +41,7 @@ function Rich({ text }: { text: PlanText }) {
         typeof part === "string" ? (
           part
         ) : (
-          <Link key={`${part.slug}-${index}`} href={`/recipes/${part.slug}`}>
+          <Link key={`${part.slug}-${index}`} href={`/recipes/${part.slug}`} data-track-cta="open_recipe">
             {part.text}
           </Link>
         )
@@ -53,18 +53,18 @@ function Rich({ text }: { text: PlanText }) {
 export function PlanHeader({ plan, bookSlug, bookTitle }: { plan: MakeAheadPlanPreview; bookSlug: string; bookTitle: string }) {
   return (
     <header>
-      <nav aria-label="Breadcrumb" className="mp-nav">
+      <nav aria-label="Breadcrumb" className="mp-nav" data-track-ux="breadcrumb">
         <ol className="mp-crumbs">
           <li>
-            <Link href="/">Home</Link>
+            <Link href="/" data-track-cta="home">Home</Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href="/collections">Collections</Link>
+            <Link href="/collections" data-track-cta="collections">Collections</Link>
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <Link href={`/collections/${bookSlug}`}>{bookTitle}</Link>
+            <Link href={`/collections/${bookSlug}`} data-track-cta="see_collection">{bookTitle}</Link>
           </li>
           <li aria-hidden="true">/</li>
           <li aria-current="page">Make-ahead plan</li>
@@ -126,7 +126,7 @@ export function PlanMoreRecipes({
       </h2>
       <p className="mp-sub">{sub}</p>
       <ul className="mp-menu" style={{ marginTop: "0.875rem" }}>
-        {recipes.map((recipe) => {
+        {recipes.map((recipe, index) => {
           const tile = (
             <>
               <div className="mp-dish-photo">
@@ -136,9 +136,9 @@ export function PlanMoreRecipes({
             </>
           );
           return (
-            <li key={recipe.slug} className="mp-dish">
+            <li key={recipe.slug} className="mp-dish" data-track-pos={index + 1}>
               {recipe.href ? (
-                <Link href={recipe.href} className="mp-dish-link">
+                <Link href={recipe.href} className="mp-dish-link" data-track-cta="open_recipe">
                   {tile}
                   {recipe.free ? <span className="mp-dish-free">Free</span> : null}
                 </Link>
@@ -262,7 +262,7 @@ export function PlanTiers({ plan }: { plan: MakeAheadPlan }) {
 /** The book page's card for buyers, near the top: it opens the plan. */
 export function MakeAheadPlanCard({ entry }: { entry: MakeAheadPlanEntry }) {
   return (
-    <Link className="mp-plan-card" href={entry.path}>
+    <Link className="mp-plan-card" href={entry.path} data-track-ux="plan_card" data-track-cta="see_plan">
       <span className="mp-plan-card-title">{entry.card.title}</span>
       <span className="mp-plan-card-sub">{entry.card.subline}</span>
       <ArrowRight className="mp-plan-card-arrow" aria-hidden="true" />

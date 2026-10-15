@@ -61,7 +61,7 @@ The street (`HALLOWEEN_STREET` in `src/config/halloween.ts`) is five image layer
 
 ## Analytics
 
-The page reuses the campaign tracker: `story_view` with `story_slug: "halloween"` and `story_series: "halloween-2026"`, `story_action_clicked` for recipe (placement `recipes`), book, collection and all-recipes taps (`campaign_recipe` for a free recipe, `collection` otherwise), and `story_section_viewed` for recipes, story, story_end, collection and closing.
+The page reuses the campaign tracker for `story_view` with `story_slug: "halloween"` and `story_series: "halloween-2026"`. Taps send `cta_clicked` and parts of the page send `section_viewed`, labelled in the markup: `campaign_recipes` (recipe links with their slot), `book_card`, `plan_strip`, `story` (the morning, and again at night), `book_tiles`, `closing` and the phone buy bar `sticky_bar`. These replaced `story_action_clicked` and `story_section_viewed` in tracking PR 4.
 
 ## Selling the book (from 2026-10-13)
 

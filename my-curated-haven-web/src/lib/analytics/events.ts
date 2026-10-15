@@ -3,6 +3,8 @@
  * Discriminated event union and envelope definitions.
  */
 
+import type { PrimaryUx } from "./ux";
+
 export const ANALYTICS_SCHEMA_VERSION = 1;
 export const CURRENT_CONSENT_POLICY_VERSION = "2026-09-24";
 
@@ -14,61 +16,15 @@ export type ResultCountBucket = "0" | "1-5" | "6-10" | "11+";
 export type RecipeAccessKind = "free" | "paid";
 export type RecipeSaveAction = "saved" | "removed";
 export type SignInMethod = "email_code" | "google";
+/** The Buy button a checkout started from: the lock card on a locked recipe or plan page, or a collection's buy box. */
+export type CheckoutSurface = "lock_card" | "buy_box";
+/** The visitor's relationship to a collection, as the collection page shows it. */
+export type CollectionOwnershipState = "owned" | "not_owned" | "unauthenticated" | "pending_payment" | "unavailable";
 export type HomepageFeatureKey = "kitchen" | "library" | "nursery" | "shelf";
 export type HomepagePlacement = "hero" | "house" | "overview" | "preview" | "footer" | "final";
-export type HomepageDestination =
-  | "recipes_index"
-  | "recipe_detail"
-  | "collection_detail"
-  | "previews"
-  | "about"
-  | "support";
-export type HomepagePresentationState = "preparation" | "free_ready" | "collection_ready";
 export type StoryRoomKey = "kitchen";
-/**
- * Taps on a campaign page (/stories/<slug>). The first five values come from the
- * single-recipe pages and stay valid so older events keep their meaning.
- */
-export type StoryAction =
-  | "recipe_jump"
-  | "full_recipe"
-  | "more_recipe"
-  | "collection"
-  | "about"
-  | "campaign_recipe"
-  | "pack"
-  | "instagram"
-  | "recipes_index"
-  | "home"
-  | "make_ahead_plan";
-export type StoryPlacement =
-  | "card"
-  | "sticky"
-  | "recipe"
-  | "next"
-  | "offer"
-  | "about"
-  | "hero"
-  | "recipes"
-  | "story"
-  | "pack"
-  | "collection"
-  | "related"
-  | "closing"
-  | "plan";
 /** Which paid options the campaign page showed. */
 export type StoryOfferState = "none" | "pack" | "collection" | "both";
-/** Parts of a campaign page, in page order. story_end is the last moment of the kitchen story. */
-export type StorySection =
-  | "recipes"
-  | "story"
-  | "story_end"
-  | "pack"
-  | "collection"
-  | "related"
-  | "questions"
-  | "closing"
-  | "plan";
 
 export type CanonicalRouteKey =
   | "home"
@@ -85,7 +41,11 @@ export type CanonicalRouteKey =
   | "support"
   | "about"
   | "terms"
-  | "story";
+  | "story"
+  | "halloween"
+  | "collections"
+  | "collection_plan"
+  | "collection_series";
 
 export interface AnalyticsEnvelope {
   event_id: string;
@@ -100,6 +60,11 @@ export interface AnalyticsEnvelope {
   route_key?: CanonicalRouteKey;
   campaign_code?: string;
   properties: Record<string, unknown>;
+  // Tracking PR 2: page context on every browser event.
+  /** The recipe, book, plan or story the page is about, from its address (contentSlugFromPath). */
+  content_slug?: string;
+  /** What this visitor can open on the page, set by TrackPageState on recipe, collection and plan pages. */
+  access_state?: AccessState;
 }
 
 export interface PageViewPayload {
@@ -147,12 +112,17 @@ export interface RecipeSaveChangedPayload {
 }
 
 export interface CollectionViewPayload {
-  collection_release_id: string;
+  collection_slug: string;
+  /** Absent while nothing is on sale. */
+  collection_release_id?: string;
+  ownership_state?: CollectionOwnershipState;
 }
 
+/** Buy was tapped, before the request to start checkout. */
 export interface CheckoutClickedPayload {
-  collection_release_id: string;
-  entry_point: string;
+  collection_slug: string;
+  surface: CheckoutSurface;
+  collection_release_id?: string;
 }
 
 export interface CheckoutCreatedPayload {
@@ -189,21 +159,9 @@ export interface MakeAheadPlanOpenPayload {
   collection_release_id: string;
 }
 
-export interface HomepageCtaClickedPayload {
-  placement: HomepagePlacement;
-  destination: HomepageDestination;
-  presentation_state: HomepagePresentationState;
-  content_version: string;
-}
-
 export interface HomepagePreviewOpenedPayload {
   feature_key: HomepageFeatureKey;
   placement: HomepagePlacement;
-  content_version: string;
-}
-
-export interface HomepagePreviewViewedPayload {
-  feature_key: HomepageFeatureKey;
   content_version: string;
 }
 
@@ -216,22 +174,6 @@ export interface StoryViewPayload {
   offer_state?: StoryOfferState;
   /** Groups several posts, for example "halloween-2026". */
   story_series?: string;
-}
-
-export interface StoryActionClickedPayload {
-  story_slug: string;
-  story_action: StoryAction;
-  story_placement: StoryPlacement;
-  /** The recipe opened, for campaign_recipe and more_recipe taps. */
-  recipe_id?: string;
-  /** Its 1-based place in the list the parent tapped. */
-  recipe_position?: number;
-}
-
-/** A part of a campaign page came into view, once per page view. */
-export interface StorySectionViewedPayload {
-  story_slug: string;
-  story_section: StorySection;
 }
 
 export type AnalyticsEventMap = {
@@ -252,12 +194,188 @@ export type AnalyticsEventMap = {
   refund_confirmed: RefundConfirmedPayload;
   purchased_library_open: PurchasedLibraryOpenPayload;
   make_ahead_plan_open: MakeAheadPlanOpenPayload;
-  homepage_cta_clicked: HomepageCtaClickedPayload;
   homepage_preview_opened: HomepagePreviewOpenedPayload;
-  homepage_preview_viewed: HomepagePreviewViewedPayload;
   story_view: StoryViewPayload;
-  story_action_clicked: StoryActionClickedPayload;
-  story_section_viewed: StorySectionViewedPayload;
+  // Tracking PR 2
+  cta_clicked: CtaClickedPayload;
+  section_viewed: SectionViewedPayload;
+  offer_viewed: OfferViewedPayload;
+  page_scroll_reached: PageScrollReachedPayload;
+  page_time_reached: PageTimeReachedPayload;
+  // Tracking PR 3
+  paywall_viewed: PaywallViewedPayload;
+  checkout_failed: CheckoutFailedPayload;
+  checkout_cancelled: CheckoutCancelledPayload;
+  purchase_confirmation_viewed: PurchaseConfirmationViewedPayload;
+  purchase_claimed: PurchaseClaimedPayload;
+  sign_in_method_chosen: SignInMethodChosenPayload;
+  sign_in_code_sent: SignInCodeSentPayload;
+  sign_in_failed: SignInFailedPayload;
+  recipe_filter_value_applied: RecipeFilterValueAppliedPayload;
+  faq_opened: FaqOpenedPayload;
+  room_closed: RoomClosedPayload;
+  sample_interacted: SampleInteractedPayload;
+  not_found_viewed: NotFoundViewedPayload;
+  load_failed: LoadFailedPayload;
+  save_failed: SaveFailedPayload;
+  empty_state_viewed: EmptyStateViewedPayload;
 };
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;
+
+// Tracking PR 2: labelled clicks, page context, milestones and views (docs/implementation/tracking/PLAN.md).
+
+/** internal: one of our pages; external: another site; anchor: a part of the same page; action: a button with no link. */
+export type LinkType = "internal" | "external" | "anchor" | "action";
+/** Where a tap goes: a route key for our own pages, else a fixed kind. Never a URL. */
+export type DestinationKind =
+  | CanonicalRouteKey
+  | "checkout"
+  | "anchor"
+  | "email"
+  | "instagram"
+  | "stripe"
+  | "external"
+  | "other_page"
+  | "none";
+export type TargetKind = "recipe" | "collection" | "plan" | "series" | "story";
+/** free: open to all; locked: needs the book; owned: this visitor has the book; preview: a plan's public preview. */
+export type AccessState = "free" | "locked" | "owned" | "preview";
+/** Where an offer is shown. Checkout only starts from lock_card and buy_box (CheckoutSurface). */
+export type OfferSurface = CheckoutSurface | "sticky_bar" | "book_card" | "story_offer";
+export type ScrollDepth = 25 | 50 | 75 | 100;
+export type VisibleSeconds = 15 | 30 | 60;
+
+/** Any link or button was tapped. Labels come from data-track-* attributes in the markup (ClickTracker). */
+export interface CtaClickedPayload {
+  primary_ux: PrimaryUx;
+  link_type: LinkType;
+  /** A fixed key written in code, never the visible text. */
+  cta?: string;
+  /** 1 to 50, counted inside its module. */
+  cta_position?: number;
+  destination_kind?: DestinationKind;
+  target_kind?: TargetKind;
+  target_slug?: string;
+}
+
+/** A block marked data-track-view reached two thirds of the way up the screen, once per page view. */
+export interface SectionViewedPayload {
+  primary_ux: PrimaryUx;
+}
+
+/** An offer was at least half on screen, once per surface per page view. */
+export interface OfferViewedPayload {
+  surface: OfferSurface;
+  collection_slug: string;
+  ownership_state?: CollectionOwnershipState;
+  price_minor?: number;
+  currency?: string;
+}
+
+export interface PageScrollReachedPayload {
+  depth: ScrollDepth;
+}
+
+/** Seconds the page was visible (time in a background tab does not count). */
+export interface PageTimeReachedPayload {
+  seconds: VisibleSeconds;
+}
+
+// Tracking PR 3: funnel detail, sign-in, filters, FAQ, home samples and errors (docs/implementation/tracking/PLAN.md).
+
+/** Why Buy failed before Stripe opened. */
+export type CheckoutError = "already_owned" | "refresh_required" | "unavailable" | "network" | "server";
+/** The sign-in step that failed. */
+export type SignInStep = "send_code" | "verify_code" | "google";
+/** Why it failed, in fixed words. Never the email or the provider's own text. */
+export type SignInError = "invalid_code" | "expired_code" | "rate_limited" | "bot_check" | "cancelled" | "unknown";
+export type RecipeFilterKind = "meal" | "diet" | "time";
+/** How long a room on the home page stayed open. */
+export type RoomSecondsBucket = "under_10s" | "10_to_30s" | "over_30s";
+/** The try-it samples on the home page. */
+export type HomepageSample = "storybook_story" | "storybook_style" | "nursery_stamp" | "shelf_reveal";
+/** Which kind of address a 404 was for. */
+export type NotFoundRouteClass = "recipe" | "collection" | "story" | "other";
+
+/** A locked recipe page loaded. collection_slug is the open book it is in, when there is one. */
+export interface PaywallViewedPayload {
+  recipe_id: string;
+  collection_slug?: string;
+}
+
+export interface CheckoutFailedPayload {
+  collection_slug: string;
+  surface: CheckoutSurface;
+  checkout_error: CheckoutError;
+}
+
+/** /checkout/cancel loaded. The book is named only when the address carries a well-formed slug. */
+export interface CheckoutCancelledPayload {
+  collection_slug?: string;
+}
+
+/** "You're in" was shown. order_ref is the order's analytics reference, the same one purchase_confirmed carries. */
+export interface PurchaseConfirmationViewedPayload {
+  order_ref: string;
+  collection_slug: string;
+}
+
+/** A guest unlocked a paid order with the emailed code. */
+export interface PurchaseClaimedPayload {
+  collection_slug?: string;
+}
+
+export interface SignInMethodChosenPayload {
+  method: SignInMethod;
+  entry_point: string;
+}
+
+export interface SignInCodeSentPayload {
+  entry_point: string;
+}
+
+export interface SignInFailedPayload {
+  sign_in_step: SignInStep;
+  sign_in_error: SignInError;
+}
+
+/** One event per filter value applied; the value is a slug from the fixed lists in lib/recipes/filters.ts. */
+export interface RecipeFilterValueAppliedPayload {
+  filter_kind: RecipeFilterKind;
+  filter_value: string;
+}
+
+export interface FaqOpenedPayload {
+  primary_ux: import("./ux").PrimaryUx;
+  question_key: string;
+}
+
+export interface RoomClosedPayload {
+  feature_key: HomepageFeatureKey;
+  seconds_bucket: RoomSecondsBucket;
+}
+
+/** choice is the story, style or keepsake picked, as a fixed slug; never the child's name typed into the sample. */
+export interface SampleInteractedPayload {
+  sample: HomepageSample;
+  choice?: string;
+}
+
+export interface NotFoundViewedPayload {
+  route_class: NotFoundRouteClass;
+}
+
+/** A list or page failed to load: recipe_grid for a recipe list, error_page for the error screen. */
+export interface LoadFailedPayload {
+  primary_ux: import("./ux").PrimaryUx;
+}
+
+export interface SaveFailedPayload {
+  recipe_id: string;
+}
+
+/** No search results, an empty bookcase, or a book that is not on sale yet. */
+export interface EmptyStateViewedPayload {
+  primary_ux: "empty_state";
+}

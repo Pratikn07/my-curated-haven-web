@@ -4,10 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { headerLinks, type NavLink } from "@/config/site-navigation";
+import { headerLinks, navCta, type NavLink } from "@/config/site-navigation";
 import { createClient } from "@/lib/supabase/browser";
-import { HOMEPAGE_CONTENT_VERSION, HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
-import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 export default function Navbar({ links = headerLinks }: { links?: NavLink[] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -86,45 +84,24 @@ export default function Navbar({ links = headerLinks }: { links?: NavLink[] }) {
   }, [pathname]);
 
   const closeMenu = () => setMobileMenuOpen(false);
-  const handleNavigation = (href: string) => {
-    if (href !== "/#house" || pathname !== "/") return;
-    void trackAnalyticsEvent(
-      "homepage_cta_clicked",
-      {
-        placement: "house",
-        destination: "previews",
-        presentation_state: HOMEPAGE_RECIPE_STATE.mode,
-        content_version: HOMEPAGE_CONTENT_VERSION,
-      },
-      "home",
-    );
-    window.requestAnimationFrame(() => {
-      const target = document.getElementById("house");
-      if (!target) return;
-      target.scrollIntoView({
-        block: "start",
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-      });
-      target.focus({ preventScroll: true });
-    });
-  };
 
   return (
     <header className="sticky top-0 z-[var(--z-header)] border-b border-border bg-canvas">
-      <nav aria-label="Primary" className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <Link href="/" className="min-w-0 font-brand text-[1.5rem] leading-none font-semibold text-foreground sm:text-[1.75rem]">
+      <nav aria-label="Primary" className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6" data-track-ux="header_nav">
+        <Link href="/" className="min-w-0 font-brand text-[1.5rem] leading-none font-semibold text-foreground sm:text-[1.75rem]" data-track-cta="logo">
           My Curated <em className="font-semibold text-action">Haven</em>
         </Link>
 
         <div className="hidden items-center gap-5 lg:flex">
           {links.map((link) => (
-            <Link key={link.href} href={link.href} className="font-semibold text-foreground" onClick={() => handleNavigation(link.href)}>
+            <Link key={link.href} href={link.href} className="font-semibold text-foreground" data-track-cta={navCta(link.href)}>
               {link.label}
             </Link>
           ))}
           <Link
             href={isAuthenticated ? "/account" : "/sign-in"}
             className="font-semibold text-action hover:text-action-hover"
+            data-track-cta={isAuthenticated ? "account" : "sign_in"}
           >
             {isAuthenticated ? "Account" : "Sign In"}
           </Link>
@@ -138,22 +115,22 @@ export default function Navbar({ links = headerLinks }: { links?: NavLink[] }) {
           aria-expanded={mobileMenuOpen}
           aria-controls={menuId}
           onClick={() => setMobileMenuOpen((open) => !open)}
+          data-track-ux="mobile_nav"
+          data-track-cta="menu"
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </nav>
 
       {mobileMenuOpen ? (
-        <div id={menuId} className="border-t border-border bg-canvas px-4 py-2 lg:hidden">
+        <div id={menuId} className="border-t border-border bg-canvas px-4 py-2 lg:hidden" data-track-ux="mobile_nav">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className="flex min-h-12 items-center font-semibold"
-              onClick={() => {
-                handleNavigation(link.href);
-                closeMenu();
-              }}
+              onClick={closeMenu}
+              data-track-cta={navCta(link.href)}
             >
               {link.label}
             </Link>
@@ -162,6 +139,7 @@ export default function Navbar({ links = headerLinks }: { links?: NavLink[] }) {
             href={isAuthenticated ? "/account" : "/sign-in"}
             className="flex min-h-12 items-center font-semibold text-action"
             onClick={closeMenu}
+            data-track-cta={isAuthenticated ? "account" : "sign_in"}
           >
             {isAuthenticated ? "Account" : "Sign In"}
           </Link>

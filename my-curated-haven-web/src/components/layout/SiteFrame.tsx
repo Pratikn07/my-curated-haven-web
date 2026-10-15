@@ -21,7 +21,7 @@ export default function SiteFrame({
 
   return (
     <>
-      <a className="skip-link" href={isAdmin ? "#admin-main" : "#main"}>
+      <a className="skip-link" href={isAdmin ? "#admin-main" : "#main"} data-track-ignore>
         Skip to content
       </a>
       <div className="flex min-h-screen flex-col">

@@ -29,7 +29,8 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
       id="cp-story"
       className="cp-story"
       aria-labelledby="cp-story-title"
-      data-story-section="story"
+      data-track-ux="story"
+      data-track-view
       style={{ "--cp-moments": count } as CSSProperties}
     >
       <div className="cp-story-track">
@@ -91,6 +92,8 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
                     type="button"
                     className="cp-story-tick"
                     data-moment={momentIndex}
+                    data-track-cta="story_moment"
+                    data-track-pos={momentIndex + 1}
                     data-active={momentIndex === 0 ? "true" : undefined}
                     aria-current={momentIndex === 0 ? "step" : undefined}
                     aria-label={`Moment ${momentIndex + 1} of ${count}: ${moment.label}`}
@@ -108,11 +111,11 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
           </div>
           <Motif motif={motif} placement="story" />
         </div>
-        {/* Reached when the last moment has been seen, in either layout. */}
-        <span className="cp-story-sentinel" data-story-section="story_end" aria-hidden="true" />
       </div>
 
-      <figure className="cp-story-note" data-reveal="rise">
+      {/* The note follows the last moment in either layout, so reaching it is reaching the end of the story: a
+          second section_viewed {story}. A tall block, not a 1px marker, so a fast scroll can't skip past it. */}
+      <figure className="cp-story-note" data-reveal="rise" data-track-view>
         <p className="cp-note-kicker" aria-hidden="true">
           A note from the kitchen
         </p>

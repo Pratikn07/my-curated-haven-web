@@ -12,21 +12,26 @@ export default function CampaignQuestions({ data, index }: { data: CampaignPageD
   const { recipes, pack, collection } = data;
   const free = recipes.length === 1 ? "This recipe is" : `All ${recipeCountLabel(recipes.length)} on this page are`;
 
-  const questions: { question: string; answer: string }[] = [
+  // `key` names the question in faq_opened; it stays the same when the wording changes.
+  const questions: { key: string; question: string; answer: string }[] = [
     {
+      key: "free",
       question: recipes.length === 1 ? "Is this recipe free?" : "Are these recipes free?",
       answer: `Yes. ${free} free to read, cook and print. No account and no email.`,
     },
     {
+      key: "account",
       question: "Do I need an account?",
       answer: "No. An account is only for saving recipes to come back to later.",
     },
     {
+      key: "print",
       question: "Where do I print a recipe?",
       answer:
         "Open the recipe and use Print on its page. Inside Instagram, tap ⋯ at the top, choose Open in browser, then print from there.",
     },
     {
+      key: "allergens",
       question: "How are allergens shown?",
       answer:
         "Allergens are listed on every recipe page, so you can check before you cook. If you’re unsure, ask your child’s doctor.",
@@ -34,6 +39,7 @@ export default function CampaignQuestions({ data, index }: { data: CampaignPageD
   ];
   if (pack) {
     questions.push({
+      key: "pack",
       question: "What is included in a pack?",
       answer: `${pack.title} has ${recipeCountLabel(pack.recipeCount)}, each with ingredients, steps, allergens and storage. It is a one-time purchase of ${pack.formattedPrice}.`,
     });
@@ -41,10 +47,12 @@ export default function CampaignQuestions({ data, index }: { data: CampaignPageD
   if (collection) {
     questions.push(
       {
+        key: "collection",
         question: "What is included in a collection?",
         answer: `Every recipe in ${collection.title}: ${recipeCountLabel(collection.recipeCount)} today, each laid out the same way. It is a one-time purchase of ${collection.formattedPrice}.`,
       },
       {
+        key: "future-recipes",
         question: "Do future recipes get added to a collection?",
         answer: `Yes. Recipes added to ${collection.title} later are included at no extra cost.`,
       }
@@ -52,7 +60,7 @@ export default function CampaignQuestions({ data, index }: { data: CampaignPageD
   }
 
   return (
-    <section className="cp-questions" aria-labelledby="cp-questions-title" data-story-section="questions">
+    <section className="cp-questions" aria-labelledby="cp-questions-title" data-track-ux="faq" data-track-view>
       <div className="cp-questions-inner">
         <div className="cp-questions-head">
           <Kicker index={index}>Practical questions</Kicker>
@@ -65,7 +73,7 @@ export default function CampaignQuestions({ data, index }: { data: CampaignPageD
         </div>
         <div className="cp-faq">
           {questions.map((item, position) => (
-            <details key={item.question} data-reveal="rise" style={{ "--i": position } as CSSProperties}>
+            <details key={item.key} data-track-faq={item.key} data-reveal="rise" style={{ "--i": position } as CSSProperties}>
               <summary>
                 <span className="cp-faq-num" aria-hidden="true">
                   {String(position + 1).padStart(2, "0")}

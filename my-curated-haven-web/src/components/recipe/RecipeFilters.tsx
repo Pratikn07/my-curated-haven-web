@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
@@ -12,6 +12,7 @@ import {
   TIME_OPTIONS,
   type RecipeFilterState,
   parseFilterParams,
+  recipeFilterAnalyticsValues,
 } from "@/lib/recipes/filters";
 
 export {
@@ -26,6 +27,37 @@ interface RecipeFiltersProps {
   totalCount: number;
 }
 
+/** The query string for a filter state, in one fixed order, so two states can be compared. */
+function filterQuery(state: RecipeFilterState): string {
+  const params = new URLSearchParams();
+  if (state.q) params.set("q", state.q);
+  state.meals.forEach((m) => params.append("meal", m));
+  state.diets.forEach((d) => params.append("diet", d));
+  if (state.maxTime) params.set("maxTime", state.maxTime.toString());
+  return params.toString();
+}
+
+/** A search or filter waiting for its results, so its event reports the new count, not the old one. */
+type PendingResultEvent =
+  | { kind: "search"; query: string }
+  | { kind: "filter"; query: string; activeFilterCount: number };
+
+function sendResultEvent(pending: PendingResultEvent, count: number) {
+  if (pending.kind === "search") {
+    trackAnalyticsEvent(
+      "recipe_search_submit",
+      { result_count_bucket: toResultCountBucket(count), zero_results: count === 0 },
+      "recipes"
+    );
+  } else {
+    trackAnalyticsEvent(
+      "recipe_filter_apply",
+      { active_filter_count: pending.activeFilterCount, result_count_bucket: toResultCountBucket(count) },
+      "recipes"
+    );
+  }
+}
+
 export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -37,6 +69,25 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const titleId = useId();
 
   const currentFilters = parseFilterParams(searchParams);
+  const currentQuery = filterQuery(currentFilters);
+  const pendingRef = useRef<PendingResultEvent | null>(null);
+
+  // The URL and the new results arrive together; send the waiting event once they match what was asked for.
+  useEffect(() => {
+    const pending = pendingRef.current;
+    if (!pending || pending.query !== currentQuery) return;
+    pendingRef.current = null;
+    sendResultEvent(pending, totalCount);
+  }, [currentQuery, totalCount]);
+
+  /** Results are already on screen when nothing changed; otherwise wait for them. */
+  const queueResultEvent = (pending: PendingResultEvent) => {
+    if (pending.query === currentQuery) {
+      sendResultEvent(pending, totalCount);
+    } else {
+      pendingRef.current = pending;
+    }
+  };
 
   // Uncontrolled search input: text typed before hydration survives, and the
   // key below resets it whenever the URL's q changes (Phase 6 audit R6-05).
@@ -47,36 +98,25 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const [draftDiets, setDraftDiets] = useState<string[]>(currentFilters.diets);
   const [draftMaxTime, setDraftMaxTime] = useState<number | null>(currentFilters.maxTime);
 
-  const updateFilters = (next: Partial<RecipeFilterState>) => {
+  /** Pushes the new filters and returns their query string. */
+  const updateFilters = (next: Partial<RecipeFilterState>): string => {
     const merged: RecipeFilterState = {
       ...currentFilters,
       ...next,
     };
 
-    const params = new URLSearchParams();
-    if (merged.q) params.set("q", merged.q);
-    merged.meals.forEach((m) => params.append("meal", m));
-    merged.diets.forEach((d) => params.append("diet", d));
-    if (merged.maxTime) params.set("maxTime", merged.maxTime.toString());
-
-    const qs = params.toString();
+    const qs = filterQuery(merged);
     startTransition(() => {
       router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
+    return qs;
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const q = String(new FormData(e.currentTarget as HTMLFormElement).get("q") ?? "");
-    updateFilters({ q: q.trim().slice(0, 120) });
-    trackAnalyticsEvent(
-      "recipe_search_submit",
-      {
-        result_count_bucket: toResultCountBucket(totalCount),
-        zero_results: totalCount === 0,
-      },
-      "recipes"
-    );
+    const query = updateFilters({ q: q.trim().slice(0, 120) });
+    queueResultEvent({ kind: "search", query });
   };
 
   const openDialog = () => {
@@ -94,19 +134,16 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const applyDialogFilters = () => {
     const activeFilterCount =
       draftMeals.length + draftDiets.length + (draftMaxTime ? 1 : 0);
-    updateFilters({
+    const query = updateFilters({
       meals: draftMeals,
       diets: draftDiets,
       maxTime: draftMaxTime,
     });
-    trackAnalyticsEvent(
-      "recipe_filter_apply",
-      {
-        active_filter_count: activeFilterCount,
-        result_count_bucket: toResultCountBucket(totalCount),
-      },
-      "recipes"
-    );
+    queueResultEvent({ kind: "filter", query, activeFilterCount });
+    // One recipe_filter_value_applied per value, so reports can say which meals, diets and times parents pick.
+    for (const { kind, value } of recipeFilterAnalyticsValues({ meals: draftMeals, diets: draftDiets, maxTime: draftMaxTime })) {
+      void trackAnalyticsEvent("recipe_filter_value_applied", { filter_kind: kind, filter_value: value }, "recipes");
+    }
     closeDialog();
   };
 
@@ -129,7 +166,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
   const hasActiveFilters = activeFilterCount > 0;
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4" data-track-ux="filters">
       {/* Search Bar + Filter Trigger */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <form
@@ -137,6 +174,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
           action="/recipes"
           method="GET"
           className="flex flex-1 items-center gap-2"
+          data-track-ux="search"
         >
           <div className="relative flex-1">
             <input
@@ -150,7 +188,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               className="w-full rounded-xl border border-border-control bg-surface px-4 py-3 text-base text-foreground placeholder:text-text-muted focus:border-action focus:outline-none focus:ring-2 focus:ring-action/20"
             />
           </div>
-          <Button type="submit">Search</Button>
+          <Button type="submit" data-track-cta="search">Search</Button>
         </form>
 
         <Button
@@ -159,6 +197,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
           onClick={openDialog}
           aria-haspopup="dialog"
           className="whitespace-nowrap"
+          data-track-cta="open_filters"
         >
           Filters
           {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
@@ -177,6 +216,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               }}
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-foreground hover:bg-surface-muted focus-visible:outline-2"
               aria-label={`Remove search term ${currentFilters.q}`}
+              data-track-cta="remove_filter"
             >
               <span>Query: &ldquo;{currentFilters.q}&rdquo;</span>
               <span aria-hidden="true" className="text-text-muted">&times;</span>
@@ -194,6 +234,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               }
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-foreground hover:bg-surface-muted focus-visible:outline-2"
               aria-label={`Remove meal filter ${meal}`}
+              data-track-cta="remove_filter"
             >
               <span>{meal}</span>
               <span aria-hidden="true" className="text-text-muted">&times;</span>
@@ -211,6 +252,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               }
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-foreground hover:bg-surface-muted focus-visible:outline-2"
               aria-label={`Remove dietary filter ${diet}`}
+              data-track-cta="remove_filter"
             >
               <span>{diet}</span>
               <span aria-hidden="true" className="text-text-muted">&times;</span>
@@ -223,6 +265,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               onClick={() => updateFilters({ maxTime: null })}
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-sm font-medium text-foreground hover:bg-surface-muted focus-visible:outline-2"
               aria-label={`Remove time filter under ${currentFilters.maxTime} minutes`}
+              data-track-cta="remove_filter"
             >
               <span>Under {currentFilters.maxTime} min</span>
               <span aria-hidden="true" className="text-text-muted">&times;</span>
@@ -233,6 +276,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
             <button
               type="button"
               onClick={clearAllFilters}
+              data-track-cta="clear_filters"
               className="text-sm font-semibold text-action underline hover:text-action-hover focus-visible:outline-2"
             >
               Clear all
@@ -273,6 +317,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
             onClick={closeDialog}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-text-muted hover:bg-surface-muted hover:text-foreground focus-visible:outline-2"
             aria-label="Close filter modal"
+            data-track-cta="close"
           >
             &times;
           </button>
@@ -352,6 +397,7 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
                     onClick={() =>
                       setDraftMaxTime(isSelected ? null : time.value)
                     }
+                    data-track-cta="pick_time"
                     className={`min-h-11 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
                       isSelected
                         ? "border-action bg-action text-action-foreground"
@@ -376,14 +422,15 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
               setDraftMaxTime(null);
             }}
             className="text-sm font-semibold text-text-muted hover:text-foreground focus-visible:outline-2"
+            data-track-cta="reset_filters"
           >
             Reset filters
           </button>
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={closeDialog}>
+            <Button variant="secondary" onClick={closeDialog} data-track-cta="cancel">
               Cancel
             </Button>
-            <Button onClick={applyDialogFilters}>
+            <Button onClick={applyDialogFilters} data-track-cta="apply_filters">
               Apply Filters
             </Button>
           </div>

@@ -13,7 +13,7 @@ import ShelfControls from "./ShelfControls";
 export default function CampaignRelated({ recipes, index }: { recipes: RecipeCatalogItem[]; index?: string }) {
   if (recipes.length === 0) return null;
   return (
-    <section className="cp-related" aria-labelledby="cp-related-title" data-story-section="related">
+    <section className="cp-related" aria-labelledby="cp-related-title" data-track-ux="related_shelf" data-track-view>
       <div className="cp-related-head">
         <div>
           <Kicker index={index}>Still hungry?</Kicker>
@@ -30,14 +30,11 @@ export default function CampaignRelated({ recipes, index }: { recipes: RecipeCat
         aria-label="More free recipes"
         data-drag
         data-cursor="Drag"
-        data-story-action="more_recipe"
-        data-story-placement="related"
       >
         {recipes.map((recipe, position) => (
           <li
             key={recipe.id}
-            data-recipe-id={recipe.id}
-            data-recipe-position={position + 1}
+            data-track-pos={position + 1}
             data-reveal="rise"
             style={{ "--i": Math.min(position, 4) } as CSSProperties}
           >
@@ -45,7 +42,7 @@ export default function CampaignRelated({ recipes, index }: { recipes: RecipeCat
           </li>
         ))}
         <li className="cp-shelf-end" data-reveal="rise" style={{ "--i": Math.min(recipes.length, 4) } as CSSProperties}>
-          <Link href="/recipes" data-story-action="recipes_index" data-story-placement="related">
+          <Link href="/recipes" data-track-cta="see_all_recipes">
             <span className="cp-shelf-end-kicker">The whole kitchen</span>
             <span className="cp-shelf-end-title">Every free recipe, in one place</span>
             <span className="cp-shelf-end-icon" aria-hidden="true">

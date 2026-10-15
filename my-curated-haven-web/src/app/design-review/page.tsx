@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function DesignReviewPage() {
   return (
-    <Container className="py-8">
+    <Container className="py-8" trackUx="static_page">
       <p className="font-semibold text-action">Design review fixture. Not a public recipe.</p>
       <h1 className="mt-2 text-[2rem] font-semibold">Recipe layout examples</h1>
       <p className="mt-3 max-w-[65ch] text-text-muted">

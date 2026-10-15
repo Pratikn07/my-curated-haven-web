@@ -264,7 +264,7 @@ export function FreeRecipes({ recipes, headingId = "free-title" }: { recipes: re
 export function FreeRecipeCard({ recipe }: { recipe: RecipeCatalogItem }) {
   const photo = usableImageSrc(recipe.previewImagePath);
   return (
-    <Link className="cl-free-card" href={`/recipes/${recipe.slug}`}>
+    <Link className="cl-free-card" href={`/recipes/${recipe.slug}`} data-track-cta="open_recipe">
       <div className="cl-free-photo">
         {photo ? <Image src={photo} alt="" fill sizes="(min-width: 720px) 30vw, 6.5rem" /> : null}
       </div>

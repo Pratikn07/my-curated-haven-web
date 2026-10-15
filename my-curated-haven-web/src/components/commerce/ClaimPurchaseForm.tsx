@@ -6,9 +6,12 @@ import TurnstileWidget from "@/components/auth/TurnstileWidget";
 import { EMAIL_OTP_LENGTH } from "@/lib/auth/otp";
 import { emailSubmitBlocked, isTurnstileEnabled } from "@/lib/auth/turnstile";
 import { bookName } from "@/lib/collections/book-name";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 interface ClaimPurchaseFormProps {
   sessionId: string;
+  /** The book being unlocked, for purchase_claimed. */
+  collectionSlug?: string;
   maskedEmail: string;
   collectionTitle: string;
   supportReference: string;
@@ -40,7 +43,7 @@ function codeWasSent(sessionId: string): boolean {
  * After paying without an account: one tap sends a code to the email they paid with, and typing it unlocks the book.
  * The code proves the email is theirs, so nobody else holding the payment link can take the purchase.
  */
-export default function ClaimPurchaseForm({ sessionId, maskedEmail, collectionTitle, supportReference }: ClaimPurchaseFormProps) {
+export default function ClaimPurchaseForm({ sessionId, collectionSlug, maskedEmail, collectionTitle, supportReference }: ClaimPurchaseFormProps) {
   const [step, setStep] = useState<"send" | "code">("send");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -82,18 +85,20 @@ export default function ClaimPurchaseForm({ sessionId, maskedEmail, collectionTi
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      // A correct code redirects to "You're in" and never returns here.
+      // A correct code re-renders this page as "You're in"; forget the sent code first.
       remember(sessionId, false);
       const res = await verifyPurchaseCodeAction(sessionId, code);
-      if (!res.success) {
-        remember(sessionId, true);
-        setError(res.error ?? "That code didn't work. Check it and try again.");
+      if (res.success) {
+        void trackAnalyticsEvent("purchase_claimed", collectionSlug ? { collection_slug: collectionSlug } : {}, "checkout_return");
+        return;
       }
+      remember(sessionId, true);
+      setError(res.error ?? "That code didn't work. Check it and try again.");
     });
   };
 
   return (
-    <div className="text-left">
+    <div className="text-left" data-track-ux="claim_form">
       <p className="text-center text-sm font-semibold uppercase tracking-wider text-action">Payment received</p>
       <h1 className="mt-2 text-center text-3xl font-extrabold text-foreground">One last step</h1>
       <p className="mx-auto mt-3 max-w-sm text-center text-base text-text-muted">

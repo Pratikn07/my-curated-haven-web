@@ -6,10 +6,31 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
-import { isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
+import { checkoutErrorFor, type CheckoutAnalyticsInput } from "@/lib/analytics/checkout-analytics";
+import { ENTRY_STORY_STORAGE_KEY, isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
+import type { CheckoutError, CheckoutSurface } from "@/lib/analytics/events";
+import { isPostHogActive, posthog } from "@/lib/analytics/posthog";
+import { pathToCanonicalRouteKey } from "@/lib/analytics/schema";
 import { rememberBoughtFrom } from "@/lib/recipes/bought-from";
 
 const CHECKOUT_FAILED = "We couldn't start checkout. Please refresh the page and try again.";
+
+/** The visit behind this tap, so the order and the server's purchase event can name it. */
+function checkoutAnalytics(surface: CheckoutSurface): CheckoutAnalyticsInput | undefined {
+  if (!isAnalyticsPermitted()) return undefined;
+  const input: CheckoutAnalyticsInput = { surface };
+  try {
+    if (isPostHogActive()) {
+      input.distinct_id = posthog.get_distinct_id();
+      input.session_id = posthog.get_session_id();
+    }
+    const story = sessionStorage.getItem(ENTRY_STORY_STORAGE_KEY);
+    if (story) input.entry_story = story;
+  } catch {
+    // Analytics must never stop a purchase.
+  }
+  return input;
+}
 
 interface CheckoutButtonProps {
   collectionSlug: string;
@@ -17,7 +38,8 @@ interface CheckoutButtonProps {
   ownershipState: OwnershipStatus;
   /** What this page shows for sale; checkout refuses a stale expectation and asks for a refresh. */
   expected: CheckoutExpectation | null;
-  releaseId?: string;
+  /** Which Buy button this is, for checkout_clicked and the order: a lock card or a collection's buy box. */
+  surface: CheckoutSurface;
   className?: string;
   /** "cloth" renders in the collections pages' button style; labels and behaviour are unchanged. */
   appearance?: "default" | "cloth";
@@ -32,7 +54,7 @@ export default function CheckoutButton({
   formattedPrice,
   ownershipState,
   expected,
-  releaseId,
+  surface,
   className = "",
   appearance = "default",
   signInHint = true,
@@ -46,6 +68,7 @@ export default function CheckoutButton({
     return (
       <a
         href="#collection-recipes"
+        data-track-cta="open_collection"
         className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-surface-muted px-6 py-3 text-base font-semibold text-action border border-action/20 hover:bg-action/5 focus-visible:outline-2 focus-visible:outline-action")} ${className}`}
       >
         <CheckCircle2 className="h-4 w-4 text-action" aria-hidden="true" />
@@ -73,16 +96,23 @@ export default function CheckoutButton({
     setIsLoading(true);
     setErrorMessage(null);
 
-    if (releaseId) {
-      trackAnalyticsEvent(
-        "checkout_clicked",
-        {
-          collection_release_id: releaseId,
-          entry_point: "collection_page",
-        },
-        "collection_detail"
+    const releaseId = expected?.releaseId;
+    void trackAnalyticsEvent(
+      "checkout_clicked",
+      {
+        collection_slug: collectionSlug,
+        surface,
+        ...(releaseId ? { collection_release_id: releaseId } : {}),
+      },
+      pathToCanonicalRouteKey(window.location.pathname) ?? undefined
+    );
+    // Recorded before any reload, so a 409's refresh can't lose it.
+    const checkoutFailed = (checkoutError: CheckoutError) =>
+      void trackAnalyticsEvent(
+        "checkout_failed",
+        { collection_slug: collectionSlug, surface, checkout_error: checkoutError },
+        pathToCanonicalRouteKey(window.location.pathname) ?? undefined
       );
-    }
 
     try {
       const campaign = getSessionCampaign();
@@ -98,6 +128,8 @@ export default function CheckoutButton({
               utm_content: campaign.utm_content,
             }
           : undefined,
+        // Lets the server's purchase event land on this visitor, with the button and landing page.
+        analytics: checkoutAnalytics(surface),
       };
 
       const res = await fetch("/api/checkout", {
@@ -110,6 +142,7 @@ export default function CheckoutButton({
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        checkoutFailed(checkoutErrorFor(res.status, data?.code));
         if (res.status === 409) {
           // Already owned
           window.location.reload();
@@ -129,10 +162,12 @@ export default function CheckoutButton({
         if (fromRecipeSlug) rememberBoughtFrom(collectionSlug, fromRecipeSlug);
         window.location.href = data.checkoutUrl;
       } else {
+        checkoutFailed("server");
         setErrorMessage(CHECKOUT_FAILED);
         setIsLoading(false);
       }
     } catch {
+      checkoutFailed("network");
       setErrorMessage("We couldn't reach checkout. Check your connection and try again.");
       setIsLoading(false);
     }
@@ -143,6 +178,8 @@ export default function CheckoutButton({
       <button
         onClick={handleCheckout}
         disabled={isLoading}
+        data-track-cta="buy"
+        data-track-dest="checkout"
         data-checkout-expected={expected ? JSON.stringify(expected) : undefined}
         aria-busy={isLoading}
         className={`${look("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-4 py-3 sm:px-6 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:opacity-75 text-center")} ${className}`}
@@ -163,7 +200,7 @@ export default function CheckoutButton({
           {signInHint ? (
             <>
               {" "}Already bought it?{" "}
-              <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground">
+              <Link href={`/sign-in?returnTo=/collections/${collectionSlug}`} className="underline hover:text-foreground" data-track-cta="sign_in">
                 Sign in
               </Link>
             </>

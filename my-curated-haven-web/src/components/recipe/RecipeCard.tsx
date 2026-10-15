@@ -24,6 +24,8 @@ export type RecipeCardProps = {
   showSaveButton?: boolean;
   /** A catalog recipe off the free list opens to its locked page, so it carries no "Free recipe" label. */
   free?: boolean;
+  /** Its 1-based place in the list it is shown in, for click analytics (data-track-pos). */
+  position?: number;
 };
 
 function isCatalogItem(
@@ -39,6 +41,7 @@ export default function RecipeCard({
   isAuthenticated = false,
   showSaveButton = false,
   free = true,
+  position,
 }: RecipeCardProps) {
   const isCatalog = isCatalogItem(recipe);
   const slug = isCatalog ? recipe.slug : undefined;
@@ -60,7 +63,10 @@ export default function RecipeCard({
   const hasImage = Boolean(imageSrc && imageSrc.trim().length > 0 && !missingImage);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface transition-shadow hover:shadow-md">
+    <article
+      className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface transition-shadow hover:shadow-md"
+      data-track-pos={position}
+    >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-muted">
         {hasImage && slug ? (
           <Link
@@ -68,6 +74,7 @@ export default function RecipeCard({
             tabIndex={-1}
             aria-hidden="true"
             className="block h-full w-full"
+            data-track-cta="open_recipe"
           >
             <Image
               src={imageSrc!}
@@ -100,6 +107,7 @@ export default function RecipeCard({
             {slug ? (
               <Link
                 href={`/recipes/${slug}`}
+                data-track-cta="open_recipe"
                 className="hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action"
               >
                 {title}

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { HALLOWEEN_COLLECTION_SLUG } from "@/config/halloween";
+import { offerAttributes } from "@/lib/analytics/track-markup";
 
 const REST = 50;
 const clamp = (value: number) => Math.min(100, Math.max(0, value));
@@ -121,10 +123,11 @@ export function BookGrid({ recipes }: { recipes: { slug: string; title: string; 
     <>
       <ol className="hw-book-tiles">
         {recipes.map((item, index) => (
-          <li key={item.slug}>
+          <li key={item.slug} data-track-pos={index + 1}>
             <button
               className="hw-book-tile"
               type="button"
+              data-track-cta="book_tile"
               aria-label={`${item.title}, ${item.free ? "free" : "in the book"}`}
               aria-pressed={picked === index}
               onClick={() => setPicked(picked === index ? null : index)}
@@ -141,8 +144,7 @@ export function BookGrid({ recipes }: { recipes: { slug: string; title: string; 
             <span>{recipe.title}</span>
             <Link
               href={recipe.href}
-              data-story-action={recipe.free ? "campaign_recipe" : "collection"}
-              data-story-placement="collection"
+              data-track-cta={recipe.free ? "open_recipe" : "see_collection"}
             >
               {recipe.free ? "Free · open the recipe" : "In the book · see it"} <span aria-hidden="true">→</span>
             </Link>
@@ -171,7 +173,15 @@ export function GhostPeek() {
   };
 
   return (
-    <button className="hw-ghost" type="button" aria-label="Say hi to the ghost" data-giggle={showing ? "" : undefined} onClick={giggle}>
+    <button
+      className="hw-ghost"
+      type="button"
+      aria-label="Say hi to the ghost"
+      data-giggle={showing ? "" : undefined}
+      onClick={giggle}
+      data-track-ux="story"
+      data-track-cta="ghost"
+    >
       <span className="hw-bubble" aria-hidden="true">hee hee</span>
       <svg key={giggles} viewBox="0 0 100 110" aria-hidden="true">
         <path d="M50 4C24 4 10 24 10 50v52l10-8 10 8 10-8 10 8 10-8 10 8 10-8 10 8V50C90 24 76 4 50 4z" fill="#fffaf1" />
@@ -242,7 +252,7 @@ export function HalloweenDock({ title, price, count, extra, href, onSale }: { ti
   useEffect(() => {
     const element = dock.current;
     const card = document.getElementById("hw-bookcard");
-    const end = document.querySelector<HTMLElement>('[data-story-section="collection"]');
+    const end = document.getElementById("hw-collection");
     if (!element || !card) return;
     let frame = 0;
     const update = () => {
@@ -268,14 +278,20 @@ export function HalloweenDock({ title, price, count, extra, href, onSale }: { ti
   }, []);
 
   return (
-    <div className="hw-dock" ref={dock} hidden>
+    <div
+      className="hw-dock"
+      ref={dock}
+      hidden
+      data-track-ux="sticky_bar"
+      {...(onSale ? offerAttributes("sticky_bar", HALLOWEEN_COLLECTION_SLUG) : {})}
+    >
       <p className="hw-dock-text">
         <strong>{title}</strong>
         <span>
           {price} · {count} recipes{extra ? ` ${extra}` : ""}
         </span>
       </p>
-      <a className="hw-dock-cta" href={href} data-story-action="collection" data-story-placement="sticky">
+      <a className="hw-dock-cta" href={href} data-track-cta="get_book">
         {onSale ? "Get it" : "See it"} <span aria-hidden="true">→</span>
       </a>
     </div>

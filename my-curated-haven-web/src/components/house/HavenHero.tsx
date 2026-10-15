@@ -1,9 +1,8 @@
+import Link from "next/link";
 import { DoorOpen } from "lucide-react";
 import Container from "@/components/layout/Container";
-import TrackedHomepageLink from "@/components/home/TrackedHomepageLink";
 import HouseExplorer, { type KitchenRecipeLink } from "@/components/house/HouseExplorer";
 import HouseScene from "@/components/house/HouseScene";
-import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 
 /**
  * Homepage opening: what the site is, a headline that invites the visitor in, a hint to tap the house,
@@ -41,18 +40,14 @@ export default function HavenHero({
           kitchenRecipes={kitchenRecipes}
           showCollections={showCollections}
           after={
-            <TrackedHomepageLink
+            <Link
               href="/recipes"
-              tracking={{
-                type: "cta",
-                destination: "recipes_index",
-                placement: "hero",
-                presentationState: HOMEPAGE_RECIPE_STATE.mode,
-              }}
               className="inline-flex min-h-12 items-center justify-center justify-self-start rounded-xl bg-action px-5 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+              data-track-ux="hero"
+              data-track-cta="browse_recipes"
             >
               Browse recipes
-            </TrackedHomepageLink>
+            </Link>
           }
         />
       </Container>
