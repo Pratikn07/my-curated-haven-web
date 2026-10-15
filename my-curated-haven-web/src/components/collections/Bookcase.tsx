@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { BookCover } from "@/components/collections/Book";
 import { isOpeningBook, openBook, shouldOpenBook } from "@/components/collections/motion/openBook";
 import {
@@ -93,6 +94,14 @@ export default function Bookcase({ entries, shelves, series, featured }: Bookcas
 
   const visible = useMemo(() => matchingBooks(entries, stage, filters), [entries, stage, filters]);
   const filtering = filters.length > 0;
+
+  // The chosen age and chips match no book: empty_state_viewed, once per page view.
+  const emptyTracked = useRef(false);
+  useEffect(() => {
+    if (visible.length > 0 || emptyTracked.current) return;
+    emptyTracked.current = true;
+    void trackAnalyticsEvent("empty_state_viewed", { primary_ux: "empty_state" }, "collections");
+  }, [visible.length]);
   const featuredEntry = !filtering ? visible.find((entry) => entry.slug === featured && entry.open) : undefined;
 
   return (

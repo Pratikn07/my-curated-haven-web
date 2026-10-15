@@ -12,6 +12,7 @@ import { isAllowedCampaign } from "./campaigns";
 import { trustedAnalyticsEnvironment } from "./environment";
 import { EVENT_ALLOWED_PROPERTIES, EVENT_REQUIRED_PROPERTIES } from "./schema";
 import { isPrimaryUx } from "./ux";
+import { RECIPE_FILTER_VALUE_SLUGS } from "../recipes/filters";
 
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const UUID_REGEX =
@@ -112,6 +113,20 @@ const UUID_FIELDS = new Set([
   "refund_ref",
 ]);
 
+// Tracking PR 3
+const CHECKOUT_ERRORS = new Set(["already_owned", "refresh_required", "unavailable", "network", "server"]);
+const SIGN_IN_STEPS = new Set(["send_code", "verify_code", "google"]);
+const SIGN_IN_ERRORS = new Set(["invalid_code", "expired_code", "rate_limited", "bot_check", "cancelled", "unknown"]);
+const FILTER_KINDS = new Set(["meal", "diet", "time"]);
+const FILTER_VALUES = new Set<string>([
+  ...RECIPE_FILTER_VALUE_SLUGS.meal,
+  ...RECIPE_FILTER_VALUE_SLUGS.diet,
+  ...RECIPE_FILTER_VALUE_SLUGS.time,
+]);
+const SECONDS_BUCKETS = new Set(["under_10s", "10_to_30s", "over_30s"]);
+const HOMEPAGE_SAMPLES = new Set(["storybook_story", "storybook_style", "nursery_stamp", "shelf_reveal"]);
+const ROUTE_CLASSES = new Set(["recipe", "collection", "story", "other"]);
+
 export type ValidationFailure = { ok: false; reason: string };
 export type ValidationSuccess = { ok: true; properties: Record<string, unknown> };
 export type ValidationResult = ValidationSuccess | ValidationFailure;
@@ -174,6 +189,17 @@ function checkString(key: string, value: string): string | ValidationFailure {
   if (key === "content_version" && !/^h[vh]-[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) {
     return fail("content_version");
   }
+  // Tracking PR 3
+  if (key === "checkout_error" && !CHECKOUT_ERRORS.has(value)) return fail("checkout_error");
+  if (key === "sign_in_step" && !SIGN_IN_STEPS.has(value)) return fail("sign_in_step");
+  if (key === "sign_in_error" && !SIGN_IN_ERRORS.has(value)) return fail("sign_in_error");
+  if (key === "filter_kind" && !FILTER_KINDS.has(value)) return fail("filter_kind");
+  if (key === "filter_value" && !FILTER_VALUES.has(value)) return fail("filter_value");
+  if (key === "question_key" && !SLUG_REGEX.test(value)) return fail("question_key");
+  if (key === "seconds_bucket" && !SECONDS_BUCKETS.has(value)) return fail("seconds_bucket");
+  if (key === "sample" && !HOMEPAGE_SAMPLES.has(value)) return fail("sample");
+  if (key === "choice" && !SLUG_REGEX.test(value)) return fail("choice");
+  if (key === "route_class" && !ROUTE_CLASSES.has(value)) return fail("route_class");
   return value;
 }
 

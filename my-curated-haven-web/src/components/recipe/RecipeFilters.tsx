@@ -12,6 +12,7 @@ import {
   TIME_OPTIONS,
   type RecipeFilterState,
   parseFilterParams,
+  recipeFilterAnalyticsValues,
 } from "@/lib/recipes/filters";
 
 export {
@@ -139,6 +140,10 @@ export default function RecipeFilters({ totalCount }: RecipeFiltersProps) {
       maxTime: draftMaxTime,
     });
     queueResultEvent({ kind: "filter", query, activeFilterCount });
+    // One recipe_filter_value_applied per value, so reports can say which meals, diets and times parents pick.
+    for (const { kind, value } of recipeFilterAnalyticsValues({ meals: draftMeals, diets: draftDiets, maxTime: draftMaxTime })) {
+      void trackAnalyticsEvent("recipe_filter_value_applied", { filter_kind: kind, filter_value: value }, "recipes");
+    }
     closeDialog();
   };
 

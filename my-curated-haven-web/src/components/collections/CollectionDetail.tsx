@@ -7,6 +7,7 @@ import { BookCover } from "@/components/collections/Book";
 import { MakeAheadPlanCard } from "@/components/collections/MakeAheadPlan";
 import { FreeRecipeCard, MaskedWords } from "@/components/collections/Showroom";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 import type { MakeAheadPlanEntry } from "@/config/halloween";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 import { collectionFacts, recipeCount, rowAccess } from "@/lib/collections/visibility";
@@ -133,6 +134,12 @@ export function DetailHero({ model }: { model: DetailModel }) {
               ) : (
                 <span className="cl-button" aria-disabled="true">
                   {model.commerceUnavailable ? "Purchase unavailable right now" : "Opening soon"}
+                  {/* Not on sale yet is an empty state; a failed price lookup is a load failure. */}
+                  {model.commerceUnavailable ? (
+                    <PageEventTracker event="load_failed" payload={{ primary_ux: "buy_box" }} />
+                  ) : (
+                    <PageEventTracker event="empty_state_viewed" payload={{ primary_ux: "empty_state" }} />
+                  )}
                 </span>
               )}
             </div>
@@ -273,24 +280,30 @@ export function FreeSamples({ recipes }: { recipes: readonly RecipeCatalogItem[]
 }
 
 export function Questions() {
+  // `key` names the question in faq_opened; it stays the same when the wording changes.
   const items = [
     {
+      key: "subscription",
       q: "Is this a subscription?",
       a: "No. You pay once and the collection stays in your library. Recipes we add to it later are included at no extra cost.",
     },
     {
+      key: "refund",
       q: "Can I get a refund?",
       a: "All sales are final. That is why some complete recipes are free: cook one first and see whether our recipes suit your family.",
     },
     {
+      key: "account",
       q: "Do I need an account?",
       a: "No. Checkout asks only for your email and payment. Then we email you a code that opens the collection on any device; there is no password to remember.",
     },
     {
+      key: "print",
       q: "Can I print the recipes?",
       a: "Every recipe has a print-friendly page. If printing doesn't start inside Instagram's browser, open the page in Safari or Chrome.",
     },
     {
+      key: "allergens",
       q: "What about allergens?",
       a: `Each recipe lists the allergens in its ingredients, and the list above shows them for every recipe before you buy. Check every label against your child's needs.`,
     },
@@ -303,7 +316,7 @@ export function Questions() {
         </h2>
         <div className="cl-qa">
           {items.map((item) => (
-            <details key={item.q}>
+            <details key={item.key} data-track-faq={item.key}>
               <summary>
                 {item.q}
                 <span className="cl-qa-icon" aria-hidden="true" />

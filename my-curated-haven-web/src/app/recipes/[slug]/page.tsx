@@ -36,6 +36,7 @@ import { EVERYDAY_PHOTOS } from "@/config/everyday-photos";
 import { BeforeAfter } from "@/components/halloween/HalloweenClient";
 import { LockIcon, RecipeFog, RecipeRevealStage } from "@/components/recipe/RecipeLock";
 import ClearOpenedParam from "@/components/recipe/ClearOpenedParam";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 
 const getCachedRecipe = cache(async (slug: string) => {
   const supabase = await createClient();
@@ -379,6 +380,10 @@ export default async function RecipeDetailPage({ params, searchParams }: RecipeD
         {isAccessDenied ? (
           /* Gated / Locked Recipe Presentation: the fog teaser, with the buy card over its lower half */
           <div className="recipe-locked">
+            <PageEventTracker
+              event="paywall_viewed"
+              payload={{ recipe_id: catalog.id, ...(book ? { collection_slug: book.collection.slug } : {}) }}
+            />
             <RecipeFog ghost={ghost} />
             <div className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 sm:p-10 text-center shadow-sm">
               <div className="recipe-lock-badge mx-auto flex h-14 w-14 items-center justify-center rounded-full">

@@ -33,6 +33,8 @@ export function initPostHog(): boolean {
     session_recording: {
       maskAllInputs: true,
     },
+    // Tracking PR 3: uncaught errors arrive as $exception (PostHog error tracking), so reports can show what breaks.
+    capture_exceptions: true,
   });
   initialized = true;
   syncSessionRecording(window.location.pathname);

@@ -6,9 +6,9 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 import type { CheckoutExpectation, OwnershipStatus } from "@/lib/payments/types";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
 import { getSessionCampaign } from "@/lib/analytics/campaigns";
-import type { CheckoutAnalyticsInput } from "@/lib/analytics/checkout-analytics";
+import { checkoutErrorFor, type CheckoutAnalyticsInput } from "@/lib/analytics/checkout-analytics";
 import { ENTRY_STORY_STORAGE_KEY, isAnalyticsPermitted, rememberAttemptRef } from "@/lib/analytics/consent";
-import type { CheckoutSurface } from "@/lib/analytics/events";
+import type { CheckoutError, CheckoutSurface } from "@/lib/analytics/events";
 import { isPostHogActive, posthog } from "@/lib/analytics/posthog";
 import { pathToCanonicalRouteKey } from "@/lib/analytics/schema";
 import { rememberBoughtFrom } from "@/lib/recipes/bought-from";
@@ -105,6 +105,13 @@ export default function CheckoutButton({
       },
       pathToCanonicalRouteKey(window.location.pathname) ?? undefined
     );
+    // Recorded before any reload, so a 409's refresh can't lose it.
+    const checkoutFailed = (checkoutError: CheckoutError) =>
+      void trackAnalyticsEvent(
+        "checkout_failed",
+        { collection_slug: collectionSlug, surface, checkout_error: checkoutError },
+        pathToCanonicalRouteKey(window.location.pathname) ?? undefined
+      );
 
     try {
       const campaign = getSessionCampaign();
@@ -133,6 +140,7 @@ export default function CheckoutButton({
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        checkoutFailed(checkoutErrorFor(res.status, data?.code));
         if (res.status === 409) {
           // Already owned
           window.location.reload();
@@ -152,10 +160,12 @@ export default function CheckoutButton({
         if (fromRecipeSlug) rememberBoughtFrom(collectionSlug, fromRecipeSlug);
         window.location.href = data.checkoutUrl;
       } else {
+        checkoutFailed("server");
         setErrorMessage(CHECKOUT_FAILED);
         setIsLoading(false);
       }
     } catch {
+      checkoutFailed("network");
       setErrorMessage("We couldn't reach checkout. Check your connection and try again.");
       setIsLoading(false);
     }

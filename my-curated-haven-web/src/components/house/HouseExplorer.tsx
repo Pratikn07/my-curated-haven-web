@@ -13,6 +13,7 @@ import {
 import { HOMEPAGE_CONTENT_VERSION } from "@/config/homepage-content";
 import { COLLECTIONS_HREF } from "@/config/site-navigation";
 import { trackAnalyticsEvent } from "@/lib/analytics/client";
+import { toSecondsBucket } from "@/lib/analytics/schema";
 import { applyHouseLight } from "@/lib/house-light";
 import HouseDepth from "@/components/house/HouseDepth";
 import { Steam } from "@/components/house/HouseScene";
@@ -199,8 +200,26 @@ export default function HouseExplorer({
     activeRef.current = active;
   }, [active]);
 
+  // The open room and when it opened, so room_closed can say how long it stayed open (in buckets).
+  const roomOpenedAt = useRef<{ id: HouseRoomId; at: number } | null>(null);
+  const trackRoomClosed = useCallback(() => {
+    const opened = roomOpenedAt.current;
+    roomOpenedAt.current = null;
+    if (!opened) return;
+    void trackAnalyticsEvent(
+      "room_closed",
+      { feature_key: opened.id, seconds_bucket: toSecondsBucket((performance.now() - opened.at) / 1000) },
+      "home",
+    );
+  }, []);
+
   const openRoom = useCallback((id: HouseRoomId, trigger: HTMLElement | null, history: "push" | "replace" | "none") => {
     if (trigger) openedFrom.current = trigger;
+    // Stepping straight into another room closes this one.
+    if (roomOpenedAt.current?.id !== id) {
+      trackRoomClosed();
+      roomOpenedAt.current = { id, at: performance.now() };
+    }
     setActive(id);
     if (history === "push") {
       // The page behind never moves while a room is open, so the browser need not restore
@@ -216,9 +235,10 @@ export default function HouseExplorer({
       { feature_key: id, placement: "house", content_version: HOMEPAGE_CONTENT_VERSION },
       "home",
     );
-  }, []);
+  }, [trackRoomClosed]);
 
   const finishClose = useCallback(() => {
+    trackRoomClosed();
     setActive(null);
     const after = afterClose.current;
     afterClose.current = null;
@@ -230,7 +250,7 @@ export default function HouseExplorer({
         else openedFrom.current?.focus({ preventScroll: true });
       }),
     );
-  }, []);
+  }, [trackRoomClosed]);
 
   /** Steps out of the room. `after` runs once the room view has closed. */
   const closeRoom = useCallback(

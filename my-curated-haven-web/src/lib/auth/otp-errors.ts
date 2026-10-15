@@ -41,3 +41,47 @@ export function otpRequestErrorMessage(error: { code?: string; message: string }
 export function otpVerifyErrorMessage(): string {
   return "That code didn't work or has expired. Check it, or ask for a new code.";
 }
+
+// Tracking PR 3: why a sign-in step failed, in the fixed words sign_in_failed reports. Never the email, never
+// Supabase's own text.
+
+export type SignInFailure = "invalid_code" | "expired_code" | "rate_limited" | "bot_check" | "cancelled" | "unknown";
+
+/** The emailed code's lifetime: Supabase's otp_expiry, 600 seconds here and in production. */
+export const OTP_CODE_LIFETIME_MS = 10 * 60 * 1000;
+
+function isRateLimited(code: string, message: string): boolean {
+  return (
+    code === "over_email_send_rate_limit" ||
+    code === "over_request_rate_limit" ||
+    message.includes("rate limit") ||
+    /only request this after \d+ seconds?/.test(message)
+  );
+}
+
+/** Why sending the code failed, using the same rules as otpRequestErrorMessage. */
+export function otpRequestFailure(error: { code?: string; message: string }): SignInFailure {
+  const code = error.code ?? "";
+  const message = error.message.toLowerCase();
+  if (isRateLimited(code, message)) return "rate_limited";
+  if (code === "captcha_failed" || message.includes("captcha")) return "bot_check";
+  return "unknown";
+}
+
+/**
+ * Why checking the code failed. Supabase answers a wrong code and an expired one the same way (otp_expired), so
+ * both start as invalid_code; signInCodeFailure tells them apart by the code's age.
+ */
+export function otpVerifyFailure(error: { code?: string; message: string }): SignInFailure {
+  const code = error.code ?? "";
+  const message = error.message.toLowerCase();
+  if (isRateLimited(code, message)) return "rate_limited";
+  if (code === "otp_expired" || message.includes("expired or is invalid")) return "invalid_code";
+  return "unknown";
+}
+
+/** A code refused after its lifetime had run out was expired, not mistyped. */
+export function signInCodeFailure(failure: SignInFailure, codeSentAt: number | null, now = Date.now()): SignInFailure {
+  if (failure !== "invalid_code" || codeSentAt === null) return failure;
+  return now - codeSentAt >= OTP_CODE_LIFETIME_MS ? "expired_code" : "invalid_code";
+}

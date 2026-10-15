@@ -1,4 +1,4 @@
-import type { CheckoutSurface } from "./events";
+import type { CheckoutError, CheckoutSurface } from "./events";
 
 /**
  * What the Buy button sends to /api/checkout so the order remembers the visit that started it: the PostHog
@@ -42,4 +42,17 @@ export function acceptCheckoutAnalytics(raw: unknown): CheckoutAnalytics | null 
     entryStory: pick(input.entry_story, SLUG),
   };
   return Object.values(accepted).some((value) => value !== null) ? accepted : null;
+}
+
+// Tracking PR 3
+
+/**
+ * checkout_failed's reason, from /api/checkout's answer: its two 409 codes as they are, a switched-off checkout as
+ * unavailable, anything else as server. A request that never got an answer is "network", decided by the caller.
+ */
+export function checkoutErrorFor(status: number, code: unknown): CheckoutError {
+  if (status === 409 && code === "already_owned") return "already_owned";
+  if (status === 409 && code === "refresh_required") return "refresh_required";
+  if (code === "CHECKOUT_DISABLED") return "unavailable";
+  return "server";
 }

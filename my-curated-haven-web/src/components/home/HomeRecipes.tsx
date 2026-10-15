@@ -2,6 +2,7 @@ import Link from "next/link";
 import Container from "@/components/layout/Container";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import TrackedHomepageLink from "@/components/home/TrackedHomepageLink";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 import { HOMEPAGE_RECIPE_STATE } from "@/config/homepage-content";
 import type { HomepageRecipes } from "@/lib/data/load-homepage-recipes";
 
@@ -32,6 +33,7 @@ export default function HomeRecipes({ data }: { data: HomepageRecipes }) {
           </div>
         ) : data.status === "unavailable" ? (
           <div className="mt-8 rounded-[var(--radius-card)] border border-border bg-surface p-6 sm:p-8" role="status">
+            <PageEventTracker event="load_failed" payload={{ primary_ux: "recipe_grid" }} />
             <h3 className="text-xl font-semibold">Recipes are temporarily unavailable</h3>
             <p className="mt-2 text-text-muted">
               We couldn&apos;t load the current free recipe list. Please try the recipe index again in a little while.

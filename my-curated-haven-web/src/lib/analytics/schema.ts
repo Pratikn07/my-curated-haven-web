@@ -106,10 +106,26 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   make_ahead_plan_open: ["collection_release_id"],
   homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
-  homepage_preview_viewed: ["feature_key", "content_version"],
   story_view: ["story_slug", "room", "recipe_count", "offer_state", "story_series"],
   story_action_clicked: ["story_slug", "story_action", "story_placement", "recipe_id", "recipe_position"],
   story_section_viewed: ["story_slug", "story_section"],
+  // Tracking PR 3
+  paywall_viewed: ["recipe_id", "collection_slug"],
+  checkout_failed: ["collection_slug", "surface", "checkout_error"],
+  checkout_cancelled: ["collection_slug"],
+  purchase_confirmation_viewed: ["order_ref", "collection_slug"],
+  purchase_claimed: ["collection_slug"],
+  sign_in_method_chosen: ["method", "entry_point"],
+  sign_in_code_sent: ["entry_point"],
+  sign_in_failed: ["sign_in_step", "sign_in_error"],
+  recipe_filter_value_applied: ["filter_kind", "filter_value"],
+  faq_opened: ["primary_ux", "question_key"],
+  room_closed: ["feature_key", "seconds_bucket"],
+  sample_interacted: ["sample", "choice"],
+  not_found_viewed: ["route_class"],
+  load_failed: ["primary_ux"],
+  save_failed: ["recipe_id"],
+  empty_state_viewed: ["primary_ux"],
 };
 
 export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
@@ -132,8 +148,46 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   make_ahead_plan_open: ["collection_release_id"],
   homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
-  homepage_preview_viewed: ["feature_key", "content_version"],
   story_view: ["story_slug", "room"],
   story_action_clicked: ["story_slug", "story_action", "story_placement"],
   story_section_viewed: ["story_slug", "story_section"],
+  // Tracking PR 3
+  paywall_viewed: ["recipe_id"],
+  checkout_failed: ["collection_slug", "surface", "checkout_error"],
+  checkout_cancelled: [],
+  purchase_confirmation_viewed: ["order_ref", "collection_slug"],
+  purchase_claimed: [],
+  sign_in_method_chosen: ["method", "entry_point"],
+  sign_in_code_sent: ["entry_point"],
+  sign_in_failed: ["sign_in_step", "sign_in_error"],
+  recipe_filter_value_applied: ["filter_kind", "filter_value"],
+  faq_opened: ["primary_ux", "question_key"],
+  room_closed: ["feature_key", "seconds_bucket"],
+  sample_interacted: ["sample"],
+  not_found_viewed: ["route_class"],
+  load_failed: ["primary_ux"],
+  save_failed: ["recipe_id"],
+  empty_state_viewed: ["primary_ux"],
 };
+
+// Tracking PR 3
+
+/** A public slug (book, recipe, landing page, question key), the same pattern the validator checks. */
+export function isTrackingSlug(value: unknown): value is string {
+  return typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,63}$/.test(value);
+}
+
+/** How long something stayed open, in the three buckets room_closed reports. */
+export function toSecondsBucket(seconds: number): import("./events").RoomSecondsBucket {
+  if (seconds < 10) return "under_10s";
+  if (seconds <= 30) return "10_to_30s";
+  return "over_30s";
+}
+
+/** Which kind of address a 404 page was shown for. */
+export function routeClassFromPath(pathname: string): import("./events").NotFoundRouteClass {
+  if (pathname.startsWith("/recipes/")) return "recipe";
+  if (pathname.startsWith("/collections/")) return "collection";
+  if (pathname.startsWith("/stories/")) return "story";
+  return "other";
+}

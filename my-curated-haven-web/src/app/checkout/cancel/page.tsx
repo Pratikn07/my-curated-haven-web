@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { getPublishedCollection } from "@/lib/collections/publication";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
+import { isTrackingSlug } from "@/lib/analytics/schema";
 
 export const metadata: Metadata = {
   title: "Checkout cancelled",
@@ -20,6 +22,8 @@ export default async function CheckoutCancelPage({ searchParams }: CancelPagePro
 
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
+      {/* The address is typed or forwarded by anyone, so it names the book only when it is a well-formed slug. */}
+      <PageEventTracker event="checkout_cancelled" payload={isTrackingSlug(slug) ? { collection_slug: slug } : {}} />
       <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-foreground">Checkout cancelled</h1>
         <p className="mt-2 text-sm leading-relaxed text-text-muted">
