@@ -1,6 +1,6 @@
 # Site tracking plan
 
-Updated 2026-10-15. Covers the public site at mycuratedhaven.com and the PostHog project 630160. PRs 1 to 4 (with #147) ship together in one release on 2026-10-15, combined in #COMBINED; see "Release 2026-10-15" for what changed from this plan on the way.
+Updated 2026-10-15. Covers the public site at mycuratedhaven.com and the PostHog project 630160. PRs 1 to 4 (with #147) ship together in one release on 2026-10-15, combined in #154; see "Release 2026-10-15" for what changed from this plan on the way.
 
 Today PostHog records page views and raw clicks, but a click doesn't say which part of the page it came from, its position, or what it opened. 147 of the 529 clicks recorded in the 30 days to 2026-10-14 (28%) carry no text at all. No purchase reaches PostHog, and the database drops 3 of the 4 Instagram campaign codes. This plan adds one labelled click event, page context on every event, scroll and time milestones, offer views, and a purchase funnel that ends in a server-side purchase tied to the visitor who bought.
 
@@ -31,7 +31,7 @@ Example: a parent taps Buy on `/collections/halloween`.
 | Labels | Fixed keys written in code, never the visible text, so renaming a button keeps its history |
 | Destinations | Route keys and slugs worked out from the link, never URLs (the validator rejects URLs) |
 | Autocapture | Stays on as a backup. Reports use the labelled events |
-| Old events | `story_action_clicked`, `story_section_viewed` and `homepage_cta_clicked` were retired on 2026-10-15 with the release (PR 4, #PR4): `cta_clicked` and `section_viewed` carry the same taps and sections. PostHog insights that use the old events must be switched to the new ones (mapping in #PR4's description). The 2026-11-30 overlap was a default and was dropped by the owner |
+| Old events | `story_action_clicked`, `story_section_viewed` and `homepage_cta_clicked` were retired on 2026-10-15 with the release (PR 4, #153): `cta_clicked` and `section_viewed` carry the same taps and sections. PostHog insights that use the old events must be switched to the new ones (mapping in #153's description). The 2026-11-30 overlap was a default and was dropped by the owner |
 | Purchase of record | The server `purchase_confirmed` from the Stripe webhook, sent under the visitor's PostHog id. The browser only sends `purchase_confirmation_viewed`, so a sale is never counted twice |
 | Engagement | Live milestones while the parent is on the page: scroll 25/50/75/100% and visible time 15/30/60 s. PostHog's page-leave scroll depth exists for only 27% of phone page views (74 of 276), because Instagram's browser usually closes without sending it |
 | Free text | Never sent: search text, the child's name typed into the storybook sample, emails |
@@ -95,7 +95,7 @@ Example: a parent taps Buy on `/collections/halloween`.
 ### Removed events
 
 - `homepage_preview_viewed`: defined but not sent since 2026-10-02. Removed in PR 3.
-- Retired 2026-10-15 with the release (PR 4, #PR4): `story_action_clicked` and `homepage_cta_clicked` (replaced by `cta_clicked`), `story_section_viewed` (replaced by `section_viewed`). `story_view` and `homepage_preview_opened` stay. PostHog insights that use the retired events must be switched to the new ones (mapping in #PR4's description).
+- Retired 2026-10-15 with the release (PR 4, #153): `story_action_clicked` and `homepage_cta_clicked` (replaced by `cta_clicked`), `story_section_viewed` (replaced by `section_viewed`). `story_view` and `homepage_preview_opened` stay. PostHog insights that use the retired events must be switched to the new ones (mapping in #153's description).
 
 ### Property values
 
@@ -370,7 +370,7 @@ Tests: one recorder test per new event, and contract tests for every new propert
 
 ### PR 4: retire the old events
 
-Shipped 2026-10-15 with the release (#PR4), not after a 2026-11-30 overlap: the owner dropped the wait. Before removing them, PR 4 checked that `cta_clicked` and `section_viewed` carry the same taps and sections, then:
+Shipped 2026-10-15 with the release (#153), not after a 2026-11-30 overlap: the owner dropped the wait. Before removing them, PR 4 checked that `cta_clicked` and `section_viewed` carry the same taps and sections, then:
 
 - added the labels the old events carried and PR 2 missed: `section_viewed {story}` for the Halloween story and its end (and the story page's end sentinel), `cta_position: 1` on the story dock's single recipe, and `see_pack` for the pack button so pack and collection taps differ by `cta`;
 - removed `story_action_clicked` and `homepage_cta_clicked`, the click handling and section observer in `CampaignTracker.tsx` (it keeps `story_view` and `entry_story`), and `TrackedHomepageLink.tsx` (its links are plain links with their labels);
@@ -378,11 +378,11 @@ Shipped 2026-10-15 with the release (#PR4), not after a 2026-11-30 overlap: the 
 
 Old to new, in short: a story tap's `story_action`/`story_placement` becomes `cta_clicked`'s `primary_ux` and `cta`, `recipe_id` becomes `target_slug` and `recipe_position` becomes `cta_position`; a story section becomes `section_viewed {primary_ux}`, with the end of the story as a second `section_viewed {story}` in the same page view; a homepage CTA's `placement`/`destination` becomes `primary_ux`/`destination_kind`.
 
-PostHog insights that use the retired events must be switched to the new events; the mapping is in #PR4's description.
+PostHog insights that use the retired events must be switched to the new events; the mapping is in #153's description.
 
 ## Release 2026-10-15
 
-#147 (Instagram campaigns on orders, purchases on the visitor) and PRs 1 to 4 (#150, #152, #151, #PR4) were merged and audited together in #COMBINED, which is what reached production. What differs from the plan above:
+#147 (Instagram campaigns on orders, purchases on the visitor) and PRs 1 to 4 (#150, #152, #151, #153) were merged and audited together in #154, which is what reached production. What differs from the plan above:
 
 Combining #147 and PR 1 (one design per concern):
 
@@ -462,7 +462,7 @@ Then by hand: send a link in an Instagram DM, open it in Instagram's browser on 
 2. Switching on the server export in production (owner). Done 2026-10-14.
 3. Whether a page that fits on one screen should count as read to 100%. Default: yes.
 4. Paid Instagram ads. If they start, add `utm_medium=paid_social` and ad campaign codes in a separate change.
-5. Retirement date for the old events. Decided: retired 2026-10-15 with the release (PR 4, #PR4). PostHog insights that use them must be switched to the new events (mapping in #PR4's description).
+5. Retirement date for the old events. Decided: retired 2026-10-15 with the release (PR 4, #153). PostHog insights that use them must be switched to the new events (mapping in #153's description).
 
 ## Out of scope
 
