@@ -189,13 +189,16 @@ test("[halloween] each tap the old story events counted sends cta_clicked with i
 });
 
 test("[halloween] reading to the end sends section_viewed for each part, and twice for the story once its night is reached", async ({ page }) => {
+  // A long page scrolled a step at a time with two frames per step; WebKit in CI renders a frame in up to ~400 ms.
+  test.setTimeout(120_000);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(PAGE);
   await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
-  // Small steps, so every part passes the line the observer uses.
+  // Half a screen per step: less than the 65% of the screen above the reading line, so no part can skip it.
   // Each step waits two frames, so the browser has rendered the position and run its intersection checks: a fixed
   // pause was too short for WebKit under CI load, which then skipped a part as if it had never been on screen.
-  for (let y = 0; ; y += 200) {
+  const step = await page.evaluate(() => Math.floor(window.innerHeight / 2));
+  for (let y = 0; ; y += step) {
     const height = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
     await page.evaluate(async (top) => {
       window.scrollTo(0, top);

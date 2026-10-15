@@ -367,6 +367,9 @@ test("[stories] the pack and the collection each record their own label in story
 });
 
 test("[stories] reading to the end sends section_viewed for each part, and twice for the story once its end is reached", async ({ page }) => {
+  // Two long pages, each scrolled a step at a time with two frames per step; WebKit in CI renders a frame in up to
+  // about 400 ms.
+  test.setTimeout(150_000);
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const [path, expected] of [
     // One-recipe page: the collection offer and the shelf of more recipes.
@@ -379,7 +382,9 @@ test("[stories] reading to the end sends section_viewed for each part, and twice
     // Small steps, so every part (and the note that ends the story) passes the line the observer uses.
     // Each step waits two frames, so the browser has rendered the position and run its intersection checks: a fixed
     // pause was too short for WebKit under CI load, which then skipped a part as if it had never been on screen.
-    for (let y = 0; ; y += 200) {
+    // Half a screen per step: less than the 65% of the screen above the reading line, so no part can skip it.
+    const step = await page.evaluate(() => Math.floor(window.innerHeight / 2));
+    for (let y = 0; ; y += step) {
       const height = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
       await page.evaluate(async (top) => {
         window.scrollTo(0, top);
