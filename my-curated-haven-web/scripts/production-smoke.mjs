@@ -96,7 +96,10 @@ function recipePage() {
     const items = (id) => (section(id).match(/<li\b/g) ?? []).length;
     if (items("ingredients-heading") < 1) return "no ingredients listed";
     if (items("instructions-heading") < 1) return "no method steps listed";
-    if (!section("allergens-heading")) return "allergen section missing";
+    // Recipes with step-by-step method content carry the allergen line ("Contains: milk" or "No allergens ...") in
+    // the "Safety for little ones" box instead of a separate allergen section (#140).
+    const safety = section("safety-heading").replace(/<[^>]+>/g, " ");
+    if (!section("allergens-heading") && !/Contains:|No allergens/.test(safety)) return "allergen section missing";
     return "";
   };
 }
