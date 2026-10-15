@@ -67,10 +67,14 @@ test("hands-on time, the safety box and the method replace the classic sections"
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Synthetic Free Veggie Frittata");
 
   await expect(page.getByText("Hands-on", { exact: true })).toBeVisible();
-  await expect(page.getByText("2 hr 45 min", { exact: true })).toBeVisible();
+  await expect(page.getByText("15 min", { exact: true })).toBeVisible();
   await expect(page.getByText("6 pops", { exact: true })).toBeVisible();
-  await expect(page.getByText("15 min of work, then 2 hr 30 min in the freezer.")).toBeVisible();
-  await expect(page.getByRole("img", { name: "15 min hands-on out of 2 hr 45 min total" })).toBeVisible();
+  // No total time or waiting in the header; the wait is told inside the method, just above step 1.
+  await expect(page.locator("header").getByText(/2 hr/)).toHaveCount(0);
+  const methodSection = page.locator("section[aria-labelledby='instructions-heading']");
+  await expect(methodSection.locator(".rm-wait-note")).toHaveText(
+    "Along the way it needs 2 hr 30 min in the freezer. Nothing for you to do then."
+  );
 
   const safety = page.locator("section[aria-labelledby='safety-heading']");
   await expect(safety.getByRole("heading", { name: "Safety for little ones" })).toBeVisible();

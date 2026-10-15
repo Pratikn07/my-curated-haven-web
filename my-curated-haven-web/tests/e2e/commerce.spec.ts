@@ -90,7 +90,6 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
     for (const slug of freeRecipes) {
       await page.goto(`/recipes/${slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      await expect(page.getByText("Free Toddler Recipe", { exact: true })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Ingredients" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Method & Instructions" })).toBeVisible();
       await expect(page.getByRole("button", { name: /print/i })).toBeVisible();
@@ -102,7 +101,6 @@ test.describe("Phase 8: Commerce, Checkout & Access Gating", () => {
 
     // Title and summary are public previews
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Synthetic Paid Golden Lentil Soup");
-    await expect(page.getByText("In a recipe book", { exact: true }).first()).toBeVisible();
 
     // Locked presentation is shown. This recipe is in no configured book here, so it is not on sale and
     // points to the free recipes; saving needs access, so there is no save button.

@@ -1,4 +1,4 @@
-// The recipe page's method content: validation, minutes, per-age lines and the time sentence.
+// The recipe page's method content: validation, minutes, per-age lines and the waiting line.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -121,21 +121,19 @@ test("minutes read like a recipe card", () => {
   assert.equal(formatMinutes(0), "0 min");
 });
 
-test("the time sentence and bar under Hands-on, Total and Makes", () => {
+test("the header shows hands-on time only; the wait is told above step 1", () => {
   const pops = methodTime(example);
   assert.equal(pops.handsOn, "15 min");
-  assert.equal(pops.total, "2 hr 45 min");
-  assert.equal(pops.sentence, "15 min of work, then 2 hr 30 min in the freezer.");
-  assert.equal(pops.handsOnPercent, 9);
-  assert.equal(methodTime({ handsOnMinutes: 15, totalMinutes: 15, waitLabel: "" }).sentence, "All 15 min is hands-on. No waiting.");
-  assert.equal(methodTime({ handsOnMinutes: 15, totalMinutes: 15, waitLabel: "" }).handsOnPercent, 100);
+  assert.equal(pops.wait, "Along the way it needs 2 hr 30 min in the freezer. Nothing for you to do then.");
+  assert.equal(methodTime({ handsOnMinutes: 15, totalMinutes: 15, waitLabel: "" }).wait, null);
   assert.equal(
-    methodTime({ handsOnMinutes: 15, totalMinutes: 115, waitLabel: "oven and fridge" }).sentence,
-    "15 min of work, then 1 hr 40 min in the oven and fridge."
+    methodTime({ handsOnMinutes: 15, totalMinutes: 115, waitLabel: "oven and fridge" }).wait,
+    "Along the way it needs 1 hr 40 min in the oven and fridge. Nothing for you to do then."
   );
-  assert.equal(methodTime({ handsOnMinutes: 10, totalMinutes: 40, waitLabel: "" }).sentence, "10 min of work, then 30 min of waiting.");
-  // A tiny hands-on share still shows a sliver of the action color.
-  assert.equal(methodTime({ handsOnMinutes: 5, totalMinutes: 600, waitLabel: "fridge" }).handsOnPercent, 6);
+  assert.equal(
+    methodTime({ handsOnMinutes: 10, totalMinutes: 40, waitLabel: "" }).wait,
+    "Along the way it needs 30 min of waiting. Nothing for you to do then."
+  );
 });
 
 test("per-age lines: one line for all ages, a line per age, or nothing for a missing age", () => {
