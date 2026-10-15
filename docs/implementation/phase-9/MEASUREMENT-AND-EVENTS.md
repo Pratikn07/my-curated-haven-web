@@ -65,6 +65,8 @@ Added by the tracking plan (`docs/implementation/tracking/PLAN.md`), PRs 1 to 3.
 | `empty_state_viewed` | Browser, no search results, an empty bookcase, a book not on sale yet | `primary_ux`* (`empty_state`) |
 | `$exception` | Browser, PostHog error tracking (`capture_exceptions: true`) | PostHog's own |
 
+Retired 2026-10-15 with the release (tracking PR 4): `story_action_clicked` and `homepage_cta_clicked` (their taps are `cta_clicked`) and `story_section_viewed` (now `section_viewed`); the validator refuses them. `story_view` and `homepage_preview_opened` stay. PostHog insights built on the retired events must be switched to the new ones (mapping in PR 4's description).
+
 `page_view` also has the route keys `halloween`, `collections`, `collection_plan` and `collection_series`. `sign_in_completed` is recorded for email codes as well as Google, on the page the sign-in lands on. `homepage_preview_viewed` is removed.
 
 PostHog's own properties: the `before_send` hook removes `session_id` (the Stripe checkout session) and `q` (search text) from every address on an event, and `mask_personal_data_properties` masks ad click ids (`fbclid`, `gclid`, `igshid`, …) wherever PostHog records them. Session properties `entry_app` (`instagram` \| `facebook` \| `browser`) and `has_click_id` are set once per session; `signed_in` and, in admin browsers, `is_internal` are super properties.

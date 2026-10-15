@@ -109,7 +109,6 @@ export function CampaignPack({
     <section
       className="cp-pack"
       aria-labelledby="cp-pack-title"
-      data-story-section="pack"
       data-track-ux="story_offer"
       data-track-view
       {...offerAttributes("story_offer", offer.collectionSlug)}
@@ -137,9 +136,7 @@ export function CampaignPack({
               prefetch={false}
               className="cp-button"
               data-magnetic
-              data-story-action="pack"
-              data-story-placement="pack"
-              data-track-cta="see_collection"
+              data-track-cta="see_pack"
             >
               <span className="cp-button-label">See what’s inside</span>
               <span className="cp-button-icon" aria-hidden="true">
@@ -184,7 +181,6 @@ export function CampaignCollection({
     <section
       className="cp-collection"
       aria-labelledby="cp-collection-title"
-      data-story-section="collection"
       data-track-ux="story_offer"
       data-track-view
       {...offerAttributes("story_offer", offer.collectionSlug)}
@@ -220,8 +216,6 @@ export function CampaignCollection({
               className="cp-button"
               data-tone="light"
               data-magnetic
-              data-story-action="collection"
-              data-story-placement="collection"
               data-track-cta="see_collection"
             >
               <span className="cp-button-label">See the collection</span>

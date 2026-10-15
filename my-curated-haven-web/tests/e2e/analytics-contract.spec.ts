@@ -81,24 +81,7 @@ test("[haven-house] accepts bounded room events and rejects raw destinations", (
   });
   expect(unknownFeature.ok).toBe(false);
 
-  const cta = validateAnalyticsEvent("homepage_cta_clicked", {
-    placement: "hero",
-    destination: "recipes_index",
-    presentation_state: "preparation",
-    content_version: "hh-2026-10-02",
-  });
-  expect(cta.ok).toBe(true);
-
-  expect(
-    validateAnalyticsEvent("homepage_cta_clicked", {
-      placement: "hero",
-      destination: "/recipes?email=person@example.com",
-      presentation_state: "preparation",
-      content_version: "hh-2026-10-02",
-    }).ok,
-  ).toBe(false);
-
-  // Removed in tracking PR 3: never sent after 2026-10-02.
+  // Removed in tracking PR 3: never sent after 2026-10-02. homepage_cta_clicked (PR 4) is checked with the story events.
   expect(
     validateAnalyticsEvent("homepage_preview_viewed", {
       feature_key: "nursery",
@@ -176,35 +159,14 @@ test("[stories] landing page events accept only fixed values", () => {
   expect(validateAnalyticsEvent("page_view", { route_key: "story", device_class: "mobile" }).ok).toBe(true);
 
   expect(validateAnalyticsEvent("story_view", { story_slug: "frittata-fingers", room: "kitchen" }).ok).toBe(true);
-  expect(
-    validateAnalyticsEvent("story_action_clicked", {
-      story_slug: "frittata-fingers",
-      story_action: "collection",
-      story_placement: "offer",
-    }).ok
-  ).toBe(true);
 
   for (const story_slug of ["Frittata Fingers", "parent@example.com", "https://x.test", "../x", ""]) {
     expect(validateAnalyticsEvent("story_view", { story_slug, room: "kitchen" }).ok, story_slug).toBe(false);
   }
   expect(validateAnalyticsEvent("story_view", { story_slug: "frittata-fingers", room: "garden" }).ok).toBe(false);
-  expect(
-    validateAnalyticsEvent("story_action_clicked", {
-      story_slug: "frittata-fingers",
-      story_action: "https://mycuratedhaven.com/collections/x",
-      story_placement: "offer",
-    }).ok
-  ).toBe(false);
-  expect(
-    validateAnalyticsEvent("story_action_clicked", {
-      story_slug: "frittata-fingers",
-      story_action: "recipe_jump",
-      story_placement: "popup",
-    }).ok
-  ).toBe(false);
 });
 
-test("[stories] campaign page events add only fixed values and small counts", () => {
+test("[stories] story_view adds only fixed values and small counts", () => {
   expect(
     validateAnalyticsEvent("story_view", {
       story_slug: "halloween-treats",
@@ -214,53 +176,74 @@ test("[stories] campaign page events add only fixed values and small counts", ()
       story_series: "halloween-2026",
     }).ok
   ).toBe(true);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", offer_state: "upsell" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", story_series: "Halloween 2026" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", recipe_count: 500 }).ok).toBe(false);
+});
+
+// Tracking PR 4: the old click and section events are retired; cta_clicked and section_viewed carry the same taps.
+test("the retired story and homepage events are refused, and their replacements carry the same labels", () => {
   expect(
     validateAnalyticsEvent("story_action_clicked", {
       story_slug: "halloween-treats",
       story_action: "campaign_recipe",
       story_placement: "recipes",
-      recipe_id: "10000000-0000-0000-0000-000000000001",
+      recipe_id: RECIPE_ID,
       recipe_position: 2,
-    }).ok
-  ).toBe(true);
-  for (const [story_action, story_placement] of [
-    ["pack", "pack"],
-    ["collection", "collection"],
-    ["instagram", "closing"],
-    ["recipes_index", "closing"],
-    ["recipe_jump", "hero"],
-    ["more_recipe", "related"],
-    ["make_ahead_plan", "plan"],
-  ]) {
-    expect(
-      validateAnalyticsEvent("story_action_clicked", { story_slug: "halloween-treats", story_action, story_placement }).ok,
-      `${story_action}/${story_placement}`
-    ).toBe(true);
-  }
-  for (const story_section of ["recipes", "story", "story_end", "pack", "collection", "related", "questions", "closing", "plan"]) {
-    expect(validateAnalyticsEvent("story_section_viewed", { story_slug: "halloween-treats", story_section }).ok).toBe(true);
-  }
+    })
+  ).toEqual({ ok: false, reason: "event_name" });
+  expect(validateAnalyticsEvent("story_section_viewed", { story_slug: "halloween-treats", story_section: "recipes" })).toEqual({
+    ok: false,
+    reason: "event_name",
+  });
+  expect(
+    validateAnalyticsEvent("homepage_cta_clicked", {
+      placement: "hero",
+      destination: "recipes_index",
+      presentation_state: "preparation",
+      content_version: "hh-2026-10-02",
+    })
+  ).toEqual({ ok: false, reason: "event_name" });
+  // Their old properties are not accepted on the events that stay.
+  expect(validateAnalyticsEvent("story_view", { story_slug: "halloween-treats", room: "kitchen", story_section: "recipes" }).ok).toBe(false);
+  expect(validateAnalyticsEvent("story_view", { story_slug: "halloween-treats", room: "kitchen", recipe_position: 2 }).ok).toBe(false);
 
-  expect(validateAnalyticsEvent("story_section_viewed", { story_slug: "halloween-treats", story_section: "footer" }).ok).toBe(false);
-  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", offer_state: "upsell" }).ok).toBe(false);
-  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", story_series: "Halloween 2026" }).ok).toBe(false);
-  expect(validateAnalyticsEvent("story_view", { story_slug: "x", room: "kitchen", recipe_count: 500 }).ok).toBe(false);
-  expect(
-    validateAnalyticsEvent("story_action_clicked", {
-      story_slug: "x",
-      story_action: "campaign_recipe",
-      story_placement: "recipes",
-      recipe_position: 0,
-    }).ok
-  ).toBe(false);
-  expect(
-    validateAnalyticsEvent("story_action_clicked", {
-      story_slug: "x",
-      story_action: "campaign_recipe",
-      story_placement: "recipes",
-      recipe_id: "sweet-potato-frittata",
-    }).ok
-  ).toBe(false);
+  // What the same taps send now (the old-to-new table in the PR 4 description).
+  for (const [primary_ux, cta, link_type, destination_kind, target_kind, target_slug, cta_position] of [
+    ["hero", "see_recipes", "anchor", "anchor"],
+    ["campaign_recipes", "open_recipe", "internal", "recipe_detail", "recipe", "synth-free-veggie-frittata", 2],
+    ["campaign_recipes", "see_collection", "internal", "collection_detail", "collection", "halloween", 3],
+    ["sticky_bar", "open_recipe", "internal", "recipe_detail", "recipe", "synth-free-veggie-frittata", 1],
+    ["sticky_bar", "see_recipes", "anchor", "anchor"],
+    ["sticky_bar", "get_book", "internal", "collection_detail", "collection", "halloween"],
+    ["story_offer", "see_pack", "internal", "collection_detail", "collection", "comfort-haven-collection"],
+    ["story_offer", "see_collection", "internal", "collection_detail", "collection", "comfort-haven-collection"],
+    ["related_shelf", "open_recipe", "internal", "recipe_detail", "recipe", "synth-free-oat-bake", 4],
+    ["related_shelf", "see_all_recipes", "internal", "recipes"],
+    ["closing", "see_all_recipes", "internal", "recipes"],
+    ["closing", "instagram", "external", "instagram"],
+    ["closing", "home", "internal", "home"],
+    ["book_card", "get_book", "internal", "collection_detail", "collection", "halloween"],
+    ["plan_strip", "see_plan", "internal", "collection_plan", "plan", "halloween"],
+    ["book_tiles", "open_recipe", "internal", "recipe_detail", "recipe", "ghost-bark"],
+    ["book_tiles", "see_collection", "internal", "collection_detail", "collection", "halloween"],
+    ["hero", "browse_recipes", "internal", "recipes"],
+    ["recipe_grid", "see_all_recipes", "internal", "recipes"],
+    ["collection_band", "see_collection", "internal", "collection_detail", "collection", "halloween"],
+  ] as const) {
+    const click = {
+      primary_ux,
+      link_type,
+      cta,
+      destination_kind,
+      ...(target_kind ? { target_kind, target_slug } : {}),
+      ...(cta_position ? { cta_position } : {}),
+    };
+    expect(validateAnalyticsEvent("cta_clicked", click).ok, JSON.stringify(click)).toBe(true);
+  }
+  for (const primary_ux of ["campaign_recipes", "story", "story_offer", "related_shelf", "faq", "closing", "plan_strip", "book_tiles"]) {
+    expect(validateAnalyticsEvent("section_viewed", { primary_ux }).ok, primary_ux).toBe(true);
+  }
 });
 
 test("landing, bookcase, plan and series pages have their own route names", () => {

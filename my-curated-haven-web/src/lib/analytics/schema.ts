@@ -104,11 +104,8 @@ export const EVENT_ALLOWED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   refund_confirmed: ["refund_ref", "order_ref", "currency", "refunded_minor"],
   purchased_library_open: ["collection_release_id"],
   make_ahead_plan_open: ["collection_release_id"],
-  homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
   story_view: ["story_slug", "room", "recipe_count", "offer_state", "story_series"],
-  story_action_clicked: ["story_slug", "story_action", "story_placement", "recipe_id", "recipe_position"],
-  story_section_viewed: ["story_slug", "story_section"],
   // Tracking PR 2
   cta_clicked: ["primary_ux", "link_type", "cta", "cta_position", "destination_kind", "target_kind", "target_slug"],
   section_viewed: ["primary_ux"],
@@ -152,11 +149,8 @@ export const EVENT_REQUIRED_PROPERTIES: Record<AnalyticsEventName, string[]> = {
   refund_confirmed: ["refund_ref", "order_ref", "currency", "refunded_minor"],
   purchased_library_open: [],
   make_ahead_plan_open: ["collection_release_id"],
-  homepage_cta_clicked: ["placement", "destination", "presentation_state", "content_version"],
   homepage_preview_opened: ["feature_key", "placement", "content_version"],
   story_view: ["story_slug", "room"],
-  story_action_clicked: ["story_slug", "story_action", "story_placement"],
-  story_section_viewed: ["story_slug", "story_section"],
   // Tracking PR 2
   cta_clicked: ["primary_ux", "link_type"],
   section_viewed: ["primary_ux"],

@@ -372,8 +372,11 @@ Tests: one recorder test per new event, and contract tests for every new propert
 
 Shipped 2026-10-15 with the release (#PR4), not after a 2026-11-30 overlap: the owner dropped the wait. Before removing them, PR 4 checked that `cta_clicked` and `section_viewed` carry the same taps and sections, then:
 
-- removed `story_action_clicked` and `homepage_cta_clicked`, the click handling in `CampaignTracker.tsx` and the event in `TrackedHomepageLink.tsx`;
-- replaced `story_section_viewed` with `section_viewed`.
+- added the labels the old events carried and PR 2 missed: `section_viewed {story}` for the Halloween story and its end (and the story page's end sentinel), `cta_position: 1` on the story dock's single recipe, and `see_pack` for the pack button so pack and collection taps differ by `cta`;
+- removed `story_action_clicked` and `homepage_cta_clicked`, the click handling and section observer in `CampaignTracker.tsx` (it keeps `story_view` and `entry_story`), and `TrackedHomepageLink.tsx` (its links are plain links with their labels);
+- replaced `story_section_viewed` with `section_viewed`, and removed the `data-story-*` and `data-recipe-*` attributes.
+
+Old to new, in short: a story tap's `story_action`/`story_placement` becomes `cta_clicked`'s `primary_ux` and `cta`, `recipe_id` becomes `target_slug` and `recipe_position` becomes `cta_position`; a story section becomes `section_viewed {primary_ux}`, with the end of the story as a second `section_viewed {story}` in the same page view; a homepage CTA's `placement`/`destination` becomes `primary_ux`/`destination_kind`.
 
 PostHog insights that use the retired events must be switched to the new events; the mapping is in #PR4's description.
 

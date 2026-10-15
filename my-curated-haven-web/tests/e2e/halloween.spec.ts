@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 /**
  * The Halloween landing page. Runs against the local database, where the
@@ -60,7 +60,7 @@ test("[halloween] the book follows the recipes, and the buy bar follows once it 
   await expect(dock.getByRole("link")).toHaveAttribute("href", /^\/collections\/halloween(#buy)?$/);
 
   // The full book section near the end takes over from the bar.
-  await page.locator('[data-story-section="collection"]').scrollIntoViewIfNeeded();
+  await page.locator("#hw-collection").scrollIntoViewIfNeeded();
   await expect(dock).not.toHaveAttribute("data-on");
 });
 
@@ -138,6 +138,79 @@ test("[halloween] the visit is counted as the Halloween story", async ({ page })
   await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
   const view = (await recordedEvents(page)).find((event) => event.event_name === "story_view")!;
   expect(view.properties).toMatchObject({ story_slug: "halloween", room: "kitchen", story_series: "halloween-2026" });
+});
+
+test("[halloween] each tap the old story events counted sends cta_clicked with its part of the page and slot", async ({ page }) => {
+  await page.goto(PAGE);
+  await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
+  // Tapped in place, so the recorder on this page can still be read.
+  await page.evaluate(() => window.addEventListener("click", (event) => event.preventDefault(), true));
+  const tap = async (link: Locator) => {
+    const before = (await recordedEvents(page)).length;
+    await link.evaluate((element) => (element as HTMLElement).click());
+    let added: RecordedEvent[] = [];
+    await expect
+      .poll(async () => {
+        added = (await recordedEvents(page)).slice(before).filter((event) => event.event_name === "cta_clicked");
+        return added.length;
+      })
+      .toBe(1);
+    return added[0].properties;
+  };
+  // In the local data the Halloween recipes are in the book, so their links open the collection; free ones open the recipe.
+  const second = page.locator("#hw-recipes .hw-trick").nth(1).locator("a.hw-open");
+  const href = await second.getAttribute("href");
+  const target = href!.startsWith("/recipes/")
+    ? { cta: "open_recipe", destination_kind: "recipe_detail", target_kind: "recipe", target_slug: href!.slice("/recipes/".length) }
+    : { cta: "see_collection", destination_kind: "collection_detail", target_kind: "collection", target_slug: "halloween" };
+  const { cta, ...where } = target;
+  expect(await tap(second)).toEqual({ primary_ux: "campaign_recipes", link_type: "internal", cta, cta_position: 2, ...where });
+
+  const book = { link_type: "internal", destination_kind: "collection_detail", target_kind: "collection", target_slug: "halloween" };
+  expect(await tap(page.locator("#hw-bookcard a"))).toEqual({ primary_ux: "book_card", cta: "get_book", ...book });
+  expect(await tap(page.locator("#hw-plan a"))).toEqual({
+    primary_ux: "plan_strip",
+    link_type: "internal",
+    cta: "see_plan",
+    destination_kind: "collection_plan",
+    target_kind: "plan",
+    target_slug: "halloween",
+  });
+  expect(await tap(page.locator("#hw-collection a.hw-cta"))).toEqual({ primary_ux: "book_tiles", cta: "see_collection", ...book });
+  expect(await tap(page.locator(".hw-closing a[href='/recipes']"))).toEqual({
+    primary_ux: "closing",
+    link_type: "internal",
+    cta: "see_all_recipes",
+    destination_kind: "recipes",
+  });
+  expect(
+    (await recordedEvents(page)).filter((event) => /^story_(action_clicked|section_viewed)$/.test(event.event_name))
+  ).toEqual([]);
+});
+
+test("[halloween] reading to the end sends section_viewed for each part, and twice for the story once its night is reached", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(PAGE);
+  await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
+  // Small steps, so every part passes the line the observer uses.
+  for (let y = 0; ; y += 250) {
+    const height = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    await page.evaluate((top) => window.scrollTo(0, top), Math.min(y, height));
+    await page.waitForTimeout(60);
+    if (y >= height) break;
+  }
+  const tally = async () => {
+    const counts: Record<string, number> = {};
+    for (const event of await recordedEvents(page)) {
+      if (event.event_name !== "section_viewed") continue;
+      const ux = String(event.properties.primary_ux);
+      counts[ux] = (counts[ux] ?? 0) + 1;
+    }
+    return counts;
+  };
+  await expect
+    .poll(tally)
+    .toEqual({ campaign_recipes: 1, book_card: 1, plan_strip: 1, story: 2, book_tiles: 1, closing: 1 });
 });
 
 test("[halloween] the before-and-after slider rests half and half, and the arrow keys or a tap move the line", async ({ page }) => {

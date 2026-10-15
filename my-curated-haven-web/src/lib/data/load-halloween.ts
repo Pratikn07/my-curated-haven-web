@@ -9,8 +9,6 @@ import { createPublicClient } from "@/lib/supabase/public";
 export interface HalloweenLink {
   href: string;
   free: boolean;
-  /** Catalog id, only for free recipes (analytics). */
-  recipeId?: string;
 }
 
 export interface HalloweenMenuItem extends HalloweenDish, HalloweenLink {
@@ -62,7 +60,7 @@ export async function loadHalloweenPage(): Promise<HalloweenPageData | null> {
 
   const linkFor = (slug: string): HalloweenLink => {
     const recipe = free.get(slug);
-    return recipe ? { href: `/recipes/${slug}`, free: true, recipeId: recipe.id } : { href: bookHref, free: false };
+    return recipe ? { href: `/recipes/${slug}`, free: true } : { href: bookHref, free: false };
   };
 
   const menu: HalloweenMenuItem[] = [];

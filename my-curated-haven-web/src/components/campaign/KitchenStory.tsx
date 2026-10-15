@@ -29,7 +29,6 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
       id="cp-story"
       className="cp-story"
       aria-labelledby="cp-story-title"
-      data-story-section="story"
       data-track-ux="story"
       data-track-view
       style={{ "--cp-moments": count } as CSSProperties}
@@ -113,7 +112,7 @@ export default function KitchenStory({ story, motif, index }: { story: KitchenSt
           <Motif motif={motif} placement="story" />
         </div>
         {/* Reached when the last moment has been seen, in either layout. */}
-        <span className="cp-story-sentinel" data-story-section="story_end" aria-hidden="true" />
+        <span className="cp-story-sentinel" data-track-view aria-hidden="true" />
       </div>
 
       <figure className="cp-story-note" data-reveal="rise">

@@ -16,7 +16,7 @@ Conduct the five-person comprehension review described in [page structure](PAGE-
 
 | Event | Allowed properties | Trigger |
 | --- | --- | --- |
-| `homepage_cta_clicked` | placement enum, destination enum, presentation state, content version | User follows a real homepage action |
+| `homepage_cta_clicked` | placement enum, destination enum, presentation state, content version | Retired 2026-10-15 (tracking PR 4). Homepage taps are `cta_clicked` (`primary_ux` `hero`, `recipe_grid`, `collection_band`, …); the validator now rejects it |
 | `homepage_preview_opened` | feature key enum, placement enum, content version | User follows a preview anchor from the overview/navigation |
 | `homepage_preview_viewed` | feature key enum, content version | Removed 2026-10-14 (tracking PR 3). Not sent since 2026-10-02; the validator now rejects it |
 

@@ -201,14 +201,16 @@ test("[stories] the promised recipe stays one tap away once it has scrolled past
   await expect(open).toBeVisible();
   await open.click();
   await expect(page).toHaveURL(/\/recipes\/synth-free-veggie-frittata$/);
-  const taps = (await recordedEvents(page)).filter((event) => event.event_name === "story_action_clicked");
+  const taps = (await recordedEvents(page)).filter((event) => event.event_name === "cta_clicked");
   expect(taps.map((event) => event.properties)).toEqual([
     {
-      story_slug: "local-sample-frittata",
-      story_action: "campaign_recipe",
-      story_placement: "sticky",
-      recipe_id: "10000000-0000-0000-0000-000000000002",
-      recipe_position: 1,
+      primary_ux: "sticky_bar",
+      link_type: "internal",
+      cta: "open_recipe",
+      cta_position: 1,
+      destination_kind: "recipe_detail",
+      target_kind: "recipe",
+      target_slug: "synth-free-veggie-frittata",
     },
   ]);
 });
@@ -297,17 +299,18 @@ test("[stories] analytics names the post, keeps comment_dm and records taps and 
 
   await page.getByRole("link", { name: /See the 3 free recipes/ }).click();
   await expect
-    .poll(async () => (await recordedEvents(page)).filter((event) => event.event_name === "story_action_clicked").length)
+    .poll(async () => (await recordedEvents(page)).filter((event) => event.event_name === "cta_clicked").length)
     .toBe(1);
-  expect((await recordedEvents(page)).find((event) => event.event_name === "story_action_clicked")?.properties).toEqual({
-    story_slug: "local-sample-breakfasts",
-    story_action: "recipe_jump",
-    story_placement: "hero",
+  expect((await recordedEvents(page)).find((event) => event.event_name === "cta_clicked")?.properties).toEqual({
+    primary_ux: "hero",
+    link_type: "anchor",
+    cta: "see_recipes",
+    destination_kind: "anchor",
   });
   await expect
     .poll(async () =>
       (await recordedEvents(page)).some(
-        (event) => event.event_name === "story_section_viewed" && event.properties.story_section === "recipes"
+        (event) => event.event_name === "section_viewed" && event.properties.primary_ux === "campaign_recipes"
       )
     )
     .toBe(true);
@@ -315,19 +318,82 @@ test("[stories] analytics names the post, keeps comment_dm and records taps and 
   await page.locator("#cp-recipes").getByRole("link", { name: "Synthetic Free Veggie Frittata" }).click();
   await expect(page).toHaveURL(/\/recipes\/synth-free-veggie-frittata$/);
   const opened = (await recordedEvents(page)).filter(
-    (event) => event.event_name === "story_action_clicked" && event.properties.story_action === "campaign_recipe"
+    (event) => event.event_name === "cta_clicked" && event.properties.primary_ux === "campaign_recipes"
   );
   expect(opened.map((event) => event.properties)).toEqual([
     {
-      story_slug: "local-sample-breakfasts",
-      story_action: "campaign_recipe",
-      story_placement: "recipes",
-      recipe_id: "10000000-0000-0000-0000-000000000002",
-      recipe_position: 2,
+      primary_ux: "campaign_recipes",
+      link_type: "internal",
+      cta: "open_recipe",
+      cta_position: 2,
+      destination_kind: "recipe_detail",
+      target_kind: "recipe",
+      target_slug: "synth-free-veggie-frittata",
     },
   ]);
+  // The old story events are retired: cta_clicked and section_viewed carry these taps and sections now.
+  expect(
+    (await recordedEvents(page)).filter((event) => /^story_(action_clicked|section_viewed)$/.test(event.event_name))
+  ).toEqual([]);
   // The visit stays tied to the post after leaving it.
   expect(await page.evaluate(() => sessionStorage.getItem("mch_entry_story"))).toBe("local-sample-breakfasts");
+});
+
+test("[stories] the pack and the collection each record their own label in story_offer", async ({ page }) => {
+  for (const [path, region, link, cta] of [
+    [MULTI, "Want more mornings like these?", /See what’s inside/, "see_pack"],
+    [SINGLE, "The Comfort Haven Collection", /See the collection/, "see_collection"],
+  ] as const) {
+    await page.goto(path);
+    await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
+    const offer = page.getByRole("region", { name: region });
+    await offer.scrollIntoViewIfNeeded();
+    // Tapped in place, so the recorder on this page can still be read.
+    await page.evaluate(() => window.addEventListener("click", (event) => event.preventDefault(), true));
+    await offer.getByRole("link", { name: link }).click();
+    await expect
+      .poll(async () => (await recordedEvents(page)).filter((event) => event.event_name === "cta_clicked").map((event) => event.properties))
+      .toEqual([
+        {
+          primary_ux: "story_offer",
+          link_type: "internal",
+          cta,
+          destination_kind: "collection_detail",
+          target_kind: "collection",
+          target_slug: "comfort-haven-collection",
+        },
+      ]);
+  }
+});
+
+test("[stories] reading to the end sends section_viewed for each part, and twice for the story once its end is reached", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const [path, expected] of [
+    // One-recipe page: the collection offer and the shelf of more recipes.
+    [SINGLE, { campaign_recipes: 1, story: 2, story_offer: 1, related_shelf: 1, faq: 1, closing: 1 }],
+    // Three-recipe page: the pack, and no shelf in the local data.
+    [MULTI, { campaign_recipes: 1, story: 2, story_offer: 1, faq: 1, closing: 1 }],
+  ] as const) {
+    await page.goto(path);
+    await expect.poll(async () => (await recordedEvents(page)).some((event) => event.event_name === "story_view")).toBe(true);
+    // Small steps, so every part (and the story's zero-height end marker) passes the line the observer uses.
+    for (let y = 0; ; y += 250) {
+      const height = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+      await page.evaluate((top) => window.scrollTo(0, top), Math.min(y, height));
+      await page.waitForTimeout(60);
+      if (y >= height) break;
+    }
+    const tally = async () => {
+      const counts: Record<string, number> = {};
+      for (const event of await recordedEvents(page)) {
+        if (event.event_name !== "section_viewed") continue;
+        const ux = String(event.properties.primary_ux);
+        counts[ux] = (counts[ux] ?? 0) + 1;
+      }
+      return counts;
+    };
+    await expect.poll(tally, { message: path }).toEqual(expected);
+  }
 });
 
 test("[stories] a campaign page never downloads the homepage house painting", async ({ page }) => {

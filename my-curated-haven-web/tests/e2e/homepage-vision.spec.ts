@@ -29,6 +29,26 @@ test("[haven-house] opening offers recipes first without implying a sale", async
   expect(renderedCopy).not.toMatch(/\$\s?\d|expert-vetted|clinician-approved|buy now|limited time/i);
 });
 
+test("[haven-house] Browse recipes records cta_clicked from the hero, and no retired homepage event", async ({ page }) => {
+  type RecordedEvent = { event_name: string; route_key?: string; properties: Record<string, unknown> };
+  const recordedEvents = () =>
+    page.evaluate(() => {
+      const provider = (
+        window as unknown as { __mch_analytics_provider?: { getRecordedEvents?: () => RecordedEvent[] } }
+      ).__mch_analytics_provider;
+      return provider?.getRecordedEvents?.() ?? [];
+    });
+  await page.goto("/");
+  await page.locator("#house").getByRole("link", { name: "Browse recipes" }).click();
+  // Sent on the tap; the recorder lives on through the move to /recipes.
+  await expect.poll(async () => (await recordedEvents()).some((event) => event.event_name === "cta_clicked")).toBe(true);
+  const events = await recordedEvents();
+  const click = events.find((event) => event.event_name === "cta_clicked")!;
+  expect(click.properties).toEqual({ primary_ux: "hero", link_type: "internal", cta: "browse_recipes", destination_kind: "recipes" });
+  expect(click.route_key).toBe("home");
+  expect(events.filter((event) => event.event_name === "homepage_cta_clicked")).toEqual([]);
+});
+
 test("[haven-house] every room shows its name and status as text", async ({ page }) => {
   await page.goto("/");
   const rooms = roomList(page);

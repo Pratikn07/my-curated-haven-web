@@ -22,59 +22,9 @@ export type CheckoutSurface = "lock_card" | "buy_box";
 export type CollectionOwnershipState = "owned" | "not_owned" | "unauthenticated" | "pending_payment" | "unavailable";
 export type HomepageFeatureKey = "kitchen" | "library" | "nursery" | "shelf";
 export type HomepagePlacement = "hero" | "house" | "overview" | "preview" | "footer" | "final";
-export type HomepageDestination =
-  | "recipes_index"
-  | "recipe_detail"
-  | "collection_detail"
-  | "previews"
-  | "about"
-  | "support";
-export type HomepagePresentationState = "preparation" | "free_ready" | "collection_ready";
 export type StoryRoomKey = "kitchen";
-/**
- * Taps on a campaign page (/stories/<slug>). The first five values come from the
- * single-recipe pages and stay valid so older events keep their meaning.
- */
-export type StoryAction =
-  | "recipe_jump"
-  | "full_recipe"
-  | "more_recipe"
-  | "collection"
-  | "about"
-  | "campaign_recipe"
-  | "pack"
-  | "instagram"
-  | "recipes_index"
-  | "home"
-  | "make_ahead_plan";
-export type StoryPlacement =
-  | "card"
-  | "sticky"
-  | "recipe"
-  | "next"
-  | "offer"
-  | "about"
-  | "hero"
-  | "recipes"
-  | "story"
-  | "pack"
-  | "collection"
-  | "related"
-  | "closing"
-  | "plan";
 /** Which paid options the campaign page showed. */
 export type StoryOfferState = "none" | "pack" | "collection" | "both";
-/** Parts of a campaign page, in page order. story_end is the last moment of the kitchen story. */
-export type StorySection =
-  | "recipes"
-  | "story"
-  | "story_end"
-  | "pack"
-  | "collection"
-  | "related"
-  | "questions"
-  | "closing"
-  | "plan";
 
 export type CanonicalRouteKey =
   | "home"
@@ -209,13 +159,6 @@ export interface MakeAheadPlanOpenPayload {
   collection_release_id: string;
 }
 
-export interface HomepageCtaClickedPayload {
-  placement: HomepagePlacement;
-  destination: HomepageDestination;
-  presentation_state: HomepagePresentationState;
-  content_version: string;
-}
-
 export interface HomepagePreviewOpenedPayload {
   feature_key: HomepageFeatureKey;
   placement: HomepagePlacement;
@@ -231,22 +174,6 @@ export interface StoryViewPayload {
   offer_state?: StoryOfferState;
   /** Groups several posts, for example "halloween-2026". */
   story_series?: string;
-}
-
-export interface StoryActionClickedPayload {
-  story_slug: string;
-  story_action: StoryAction;
-  story_placement: StoryPlacement;
-  /** The recipe opened, for campaign_recipe and more_recipe taps. */
-  recipe_id?: string;
-  /** Its 1-based place in the list the parent tapped. */
-  recipe_position?: number;
-}
-
-/** A part of a campaign page came into view, once per page view. */
-export interface StorySectionViewedPayload {
-  story_slug: string;
-  story_section: StorySection;
 }
 
 export type AnalyticsEventMap = {
@@ -267,11 +194,8 @@ export type AnalyticsEventMap = {
   refund_confirmed: RefundConfirmedPayload;
   purchased_library_open: PurchasedLibraryOpenPayload;
   make_ahead_plan_open: MakeAheadPlanOpenPayload;
-  homepage_cta_clicked: HomepageCtaClickedPayload;
   homepage_preview_opened: HomepagePreviewOpenedPayload;
   story_view: StoryViewPayload;
-  story_action_clicked: StoryActionClickedPayload;
-  story_section_viewed: StorySectionViewedPayload;
   // Tracking PR 2
   cta_clicked: CtaClickedPayload;
   section_viewed: SectionViewedPayload;
