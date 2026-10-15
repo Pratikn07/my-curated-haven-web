@@ -1757,20 +1757,6 @@
   transition: transform 0.7s var(--cl-ease);
 }
 
-.cl-row-num {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--cl-paper) 88%, transparent);
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--cloth, var(--cl-ember));
-}
-
 .cl-row-free,
 .cl-row-mark {
   position: absolute;

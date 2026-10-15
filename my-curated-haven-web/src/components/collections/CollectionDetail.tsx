@@ -184,9 +184,6 @@ export function Contents({ model }: { model: DetailModel }) {
                   {recipe.image ? (
                     <Image src={recipe.image} alt="" fill sizes="(min-width: 1024px) 17rem, (min-width: 640px) 30vw, 45vw" />
                   ) : null}
-                  <span className="cl-row-num" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
                   {access === "free" ? (
                     <span className="cl-row-free" aria-hidden="true">
                       Free

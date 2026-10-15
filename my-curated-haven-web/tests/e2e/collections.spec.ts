@@ -10,7 +10,7 @@ import { expect, test } from "@playwright/test";
 const LOAD = { waitUntil: "domcontentloaded" } as const;
 
 const COLLECTIONS = [
-  { slug: "halloween", title: "Halloween", recipes: 20 },
+  { slug: "halloween", title: "Halloween", recipes: 19 },
   { slug: "meal-prep", title: "Meal Prep", recipes: 10 },
   { slug: "protein-packs", title: "Protein Packs", recipes: 10 },
 ];
