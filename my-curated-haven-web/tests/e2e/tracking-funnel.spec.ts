@@ -40,6 +40,23 @@ function databaseUrl(): string {
   return raw;
 }
 
+/** The visit details an order kept, by its support reference. */
+async function orderVisit(supportReference: string) {
+  const db = new Client({ connectionString: databaseUrl() });
+  await db.connect();
+  try {
+    const { rows } = await db.query(
+      `SELECT analytics_distinct_id AS visitor, analytics_session_id AS session, checkout_surface, entry_story
+       FROM private.purchase_orders WHERE support_reference = $1`,
+      [supportReference]
+    );
+    expect(rows).toHaveLength(1);
+    return rows[0];
+  } finally {
+    await db.end();
+  }
+}
+
 /** The newest sign-in code sent to this address, from the local mail inbox. */
 async function getLatestOtp(email: string, timeoutMs = 20_000): Promise<string> {
   const start = Date.now();
@@ -153,10 +170,44 @@ test("malformed visit details never stop a checkout", async ({ page }) => {
     (await page.getByRole("button", { name: /Buy now — \$15\.00/i }).getAttribute("data-checkout-expected")) ?? "null"
   );
   const res = await page.request.post("/api/checkout", {
-    data: { collectionSlug: BOOK, expected, analytics: { distinct_id: "parent@example.com", surface: "sticky_bar" } },
+    data: {
+      collectionSlug: BOOK,
+      expected,
+      analyticsConsent: true,
+      analytics: { distinct_id: "parent@example.com", session_id: "not-a-session", surface: "sticky_bar", entry_story: "https://x.test" },
+    },
   });
   expect(res.status()).toBe(200);
-  expect((await res.json()).checkoutUrl).toBeTruthy();
+  const body = await res.json();
+  expect(body.checkoutUrl).toBeTruthy();
+  expect(await orderVisit(body.supportReference)).toEqual({ visitor: null, session: null, checkout_surface: null, entry_story: null });
+});
+
+test("visit details are not kept when the browser has analytics off", async ({ page }) => {
+  await page.goto(`/collections/${BOOK}`);
+  const expected = JSON.parse(
+    (await page.getByRole("button", { name: /Buy now — \$15\.00/i }).getAttribute("data-checkout-expected")) ?? "null"
+  );
+  const res = await page.request.post("/api/checkout", {
+    data: {
+      collectionSlug: BOOK,
+      expected,
+      analyticsConsent: false,
+      analytics: {
+        distinct_id: "01990000-0000-7000-8000-00000000a003",
+        session_id: "01990000-0000-7000-8000-00000000a004",
+        surface: "buy_box",
+        entry_story: "halloween",
+      },
+    },
+  });
+  expect(res.status()).toBe(200);
+  expect(await orderVisit((await res.json()).supportReference)).toEqual({
+    visitor: null,
+    session: null,
+    checkout_surface: null,
+    entry_story: null,
+  });
 });
 
 test("a search reports the count of its own results, not the previous ones", async ({ page }) => {
