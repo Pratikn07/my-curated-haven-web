@@ -96,7 +96,10 @@ function recipePage() {
     const items = (id) => (section(id).match(/<li\b/g) ?? []).length;
     if (items("ingredients-heading") < 1) return "no ingredients listed";
     if (items("instructions-heading") < 1) return "no method steps listed";
-    if (!section("allergens-heading")) return "allergen section missing";
+    // A recipe with method content shows its allergen line in the safety box instead of the classic section.
+    const methodAllergens = section("safety-heading").match(/<p[^>]*class="[^"]*\brm-contains\b[^"]*"[^>]*>([\s\S]*?)<\/p>/)?.[1];
+    const hasMethodAllergens = Boolean(methodAllergens?.replace(/<[^>]+>/g, "").trim());
+    if (!section("allergens-heading") && !hasMethodAllergens) return "allergen section missing";
     return "";
   };
 }
