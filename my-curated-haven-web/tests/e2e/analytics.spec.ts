@@ -91,6 +91,45 @@ test("a registered Instagram campaign is kept from the first page", async ({ pag
     .toBeGreaterThan(0);
 });
 
+test("[tracking] the Halloween landing page records its own page view", async ({ page }) => {
+  await page.goto("/halloween");
+  await expect
+    .poll(() => countEvents(page, (event) => event.event_name === "page_view" && event.properties.route_key === "halloween"))
+    .toBe(1);
+});
+
+test("[tracking] tapping buy records checkout_clicked for the release on sale", async ({ page }) => {
+  const checkoutBodies: Array<Record<string, unknown>> = [];
+  await page.route("**/api/checkout", async (route) => {
+    checkoutBodies.push(route.request().postDataJSON());
+    // Stop here: the test is about the click, not the purchase.
+    await route.fulfill({ status: 503, contentType: "application/json", body: "{}" });
+  });
+
+  await page.goto("/collections/comfort-haven-collection");
+  const buy = page.getByRole("button", { name: /Buy now/i });
+  const expected = JSON.parse((await buy.getAttribute("data-checkout-expected")) ?? "{}");
+  expect(expected.releaseId).toBeTruthy();
+  await buy.click();
+
+  await expect
+    .poll(() =>
+      countEvents(
+        page,
+        (event) =>
+          event.event_name === "checkout_clicked" &&
+          event.properties.collection_release_id === expected.releaseId &&
+          event.properties.collection_slug === "comfort-haven-collection" &&
+          event.properties.surface === "buy_box" &&
+          !("entry_point" in event.properties)
+      )
+    )
+    .toBe(1);
+  // PostHog is off in tests, so only the button travels with the checkout request, never PostHog ids.
+  expect(checkoutBodies).toHaveLength(1);
+  expect(checkoutBodies[0].analytics).toEqual({ surface: "buy_box" });
+});
+
 test("an unknown campaign is not stored", async ({ page }) => {
   await page.goto(
     "/recipes?utm_source=instagram&utm_medium=organic_social&utm_campaign=not_registered&utm_content=bio"

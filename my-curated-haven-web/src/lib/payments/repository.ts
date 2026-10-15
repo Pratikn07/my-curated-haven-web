@@ -154,13 +154,30 @@ export async function markPurchaseOrderForReview(orderId: string): Promise<void>
 export async function recordCheckoutMeasurement(params: {
   orderId: string;
   campaignCode: string | null;
+  campaignContent?: string | null;
   analyticsConsent: boolean;
   environment: string;
+  /** The buyer's PostHog ids, so the server purchase event joins their visit. The database drops malformed ones. */
+  distinctId?: string | null;
+  sessionId?: string | null;
+  checkoutSurface?: string | null;
+  entryStory?: string | null;
 }): Promise<string | null> {
   const pool = getCommercePool();
+  // The nine-argument signature from 20261015090000_tracking_purchase_link.sql.
   const { rows } = await pool.query(
-    `SELECT private.record_checkout_measurement($1, $2, $3, $4) AS attempt_ref`,
-    [params.orderId, params.campaignCode, params.analyticsConsent, params.environment]
+    `SELECT private.record_checkout_measurement($1, $2, $3, $4, $5::text, $6::text, $7::text, $8::text, $9::text) AS attempt_ref`,
+    [
+      params.orderId,
+      params.campaignCode,
+      params.analyticsConsent,
+      params.environment,
+      params.distinctId ?? null,
+      params.sessionId ?? null,
+      params.checkoutSurface ?? null,
+      params.entryStory ?? null,
+      params.campaignContent ?? null,
+    ]
   );
   const ref = rows[0]?.attempt_ref;
   return typeof ref === "string" ? ref : null;
@@ -187,6 +204,7 @@ export async function getOrderSummaryBySessionId(
       po.attempt_state,
       po.release_id,
       po.session_id,
+      po.analytics_attempt_ref::text as analytics_ref,
       c.slug as collection_slug,
       c.title as collection_title,
       co.base_minor_amount,
@@ -248,6 +266,7 @@ export async function getOrderSummaryBySessionId(
     formattedAmount: formatPrice(amountMinor, currency),
     isEntitled: Boolean(r.is_entitled),
     statusDisplay,
+    analyticsRef: r.analytics_ref ?? null,
   };
 }
 

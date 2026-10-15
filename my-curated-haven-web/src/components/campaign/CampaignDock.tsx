@@ -17,8 +17,8 @@ export default function CampaignDock({ data }: { data: CampaignPageData }) {
   const thumb = usableImageSrc(single?.previewImagePath) ?? hero.src;
 
   return (
-    <div className="cp-dock" data-visible="false">
-      <div className="cp-dock-inner" data-recipe-id={single?.id} data-recipe-position={single ? 1 : undefined}>
+    <div className="cp-dock" data-visible="false" data-track-ux="sticky_bar">
+      <div className="cp-dock-inner" data-track-pos={single ? 1 : undefined}>
         <span className="cp-dock-thumb" aria-hidden="true">
           <Image src={thumb} alt="" fill sizes="56px" />
         </span>
@@ -31,8 +31,7 @@ export default function CampaignDock({ data }: { data: CampaignPageData }) {
             href={`/recipes/${single.slug}`}
             prefetch={false}
             className="cp-button cp-dock-cta"
-            data-story-action="campaign_recipe"
-            data-story-placement="sticky"
+            data-track-cta="open_recipe"
           >
             <span className="cp-button-label">Open recipe</span>
             <span className="cp-button-icon" aria-hidden="true">
@@ -40,7 +39,7 @@ export default function CampaignDock({ data }: { data: CampaignPageData }) {
             </span>
           </Link>
         ) : (
-          <a href="#cp-recipes" className="cp-button cp-dock-cta" data-story-action="recipe_jump" data-story-placement="sticky">
+          <a href="#cp-recipes" className="cp-button cp-dock-cta" data-track-cta="see_recipes">
             <span className="cp-button-label">Jump to them</span>
             <span className="cp-button-icon" aria-hidden="true">
               ↑

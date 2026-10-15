@@ -9,5 +9,14 @@ export function isInAppBrowser(userAgent: string | null | undefined): boolean {
   return Boolean(userAgent && IN_APP.test(userAgent));
 }
 
+/**
+ * Which app's browser this is, for analytics (entry_app): Instagram's, Facebook's (the other markers in IN_APP),
+ * or an ordinary browser. Uses the same pattern as isInAppBrowser, so sign-in and analytics agree.
+ */
+export function inAppBrowserName(userAgent: string | null | undefined): "instagram" | "facebook" | "browser" {
+  if (!userAgent || !isInAppBrowser(userAgent)) return "browser";
+  return /\bInstagram\b/i.test(userAgent) ? "instagram" : "facebook";
+}
+
 /** How to leave the in-app browser, in Instagram's own words. */
 export const OPEN_IN_BROWSER_HINT = "tap ⋯ at the top, then Open in browser";

@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(19);
+SELECT plan(26);
 
 -- ============================================================================
 -- A01: Row Level Security is enabled on search_analytics
@@ -180,11 +180,17 @@ UPDATE private.analytics_settings SET optional_export_enabled = true WHERE singl
 SELECT lives_ok(
   $$SELECT private.record_checkout_measurement(
     (SELECT id FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-b'),
-    'toddler_recipes_launch',
+    'story_link',
     true,
     'test'
   )$$,
   'A15a: checkout measurement records a registered campaign'
+);
+
+SELECT is(
+  (SELECT campaign_code FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-b'),
+  'story_link',
+  'A15b: a live Instagram campaign code is stored on the order'
 );
 
 SELECT is(
@@ -204,6 +210,82 @@ SELECT is(
   (SELECT delivery_state FROM private.analytics_exports WHERE event_name = 'checkout_created' AND order_id = (SELECT id FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-b')),
   'suppressed',
   'A16: withdrawal suppresses a queued export and keeps the order'
+);
+
+INSERT INTO private.purchase_orders (
+  support_reference,
+  owner_principal,
+  user_id,
+  offer_id,
+  release_id,
+  snapshot,
+  attempt_state,
+  idempotency_key
+) VALUES (
+  'MCH-P9C',
+  '00000000-0000-0000-0000-000000000003',
+  '00000000-0000-0000-0000-000000000003',
+  'f0000000-0000-0000-0000-000000000001',
+  'a0000000-0000-0000-0000-000000000001',
+  '{}'::jsonb,
+  'closed',
+  'p9-analytics-idem-c'
+);
+
+SELECT lives_ok(
+  $$SELECT private.record_checkout_measurement(
+    (SELECT id FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-c'),
+    'comment_dm',
+    true,
+    'test',
+    '0192f3a1-7b2c-7d4e-8f90-123456789abc',
+    '0192f3a1-7b2c-7d4e-8f90-cba987654321'
+  )$$,
+  'A17a: checkout measurement accepts the visitor analytics ids'
+);
+
+SELECT is(
+  (SELECT row(campaign_code, analytics_distinct_id, analytics_session_id)::text
+   FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-c'),
+  row('comment_dm', '0192f3a1-7b2c-7d4e-8f90-123456789abc', '0192f3a1-7b2c-7d4e-8f90-cba987654321')::text,
+  'A17: comment_dm and the visitor analytics ids are stored on the order'
+);
+
+SELECT lives_ok(
+  $$SELECT private.record_checkout_measurement(
+    (SELECT id FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-c'),
+    'comment_dm',
+    true,
+    'test',
+    NULL,
+    NULL
+  )$$,
+  'A18a: a second tap without ids runs'
+);
+
+SELECT is(
+  (SELECT analytics_distinct_id FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-c'),
+  '0192f3a1-7b2c-7d4e-8f90-123456789abc',
+  'A18: a second tap without ids keeps the stored visitor id'
+);
+
+SELECT lives_ok(
+  $$SELECT private.record_checkout_measurement(
+    (SELECT id FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-a'),
+    'instagram_dm',
+    true,
+    'test',
+    'someone@example.com',
+    'not-a-session'
+  )$$,
+  'A19a: malformed analytics ids do not block checkout measurement'
+);
+
+SELECT is(
+  (SELECT row(campaign_code, analytics_distinct_id, analytics_session_id)::text
+   FROM private.purchase_orders WHERE idempotency_key = 'p9-analytics-idem-a'),
+  row('instagram_dm', NULL::text, NULL::text)::text,
+  'A19: malformed analytics ids are not stored'
 );
 
 SELECT * FROM finish();

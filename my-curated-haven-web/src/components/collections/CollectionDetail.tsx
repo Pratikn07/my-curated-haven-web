@@ -7,11 +7,13 @@ import { BookCover } from "@/components/collections/Book";
 import { MakeAheadPlanCard } from "@/components/collections/MakeAheadPlan";
 import { FreeRecipeCard, MaskedWords } from "@/components/collections/Showroom";
 import CheckoutButton from "@/components/commerce/CheckoutButton";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 import type { MakeAheadPlanEntry } from "@/config/halloween";
 import type { CollectionRecipe, ShowroomCollection } from "@/lib/collections/types";
 import { collectionFacts, recipeCount, rowAccess } from "@/lib/collections/visibility";
 import type { RecipeCatalogItem } from "@/lib/data/recipes";
 import type { CollectionOfferDto } from "@/lib/payments/types";
+import { offerAttributes } from "@/lib/analytics/track-markup";
 import { formatMinutes } from "@/lib/recipes/format";
 
 /** One collection page's content, from the showroom config, the commerce database, or both. */
@@ -47,14 +49,14 @@ export function DetailHero({ model }: { model: DetailModel }) {
   return (
     <section className="cl-dhero" data-cloth={model.cloth} aria-labelledby="collection-title">
       <div className="cl-wrap">
-        <nav aria-label="Breadcrumb">
+        <nav aria-label="Breadcrumb" data-track-ux="breadcrumb">
           <ol className="cl-crumbs">
             <li>
-              <Link href="/">Home</Link>
+              <Link href="/" data-track-cta="home">Home</Link>
             </li>
             <li aria-hidden="true">/</li>
             <li>
-              <Link href="/collections">Collections</Link>
+              <Link href="/collections" data-track-cta="collections">Collections</Link>
             </li>
             <li aria-hidden="true">/</li>
             <li aria-current="page">{model.title}</li>
@@ -84,7 +86,20 @@ export function DetailHero({ model }: { model: DetailModel }) {
             {model.forWhen ? <p className="cl-forwhen">{model.forWhen}</p> : null}
           </div>
 
-          <aside className="cl-buy" id="buy" data-cloth={model.cloth} aria-label="Get this collection">
+          <aside
+            className="cl-buy"
+            id="buy"
+            data-cloth={model.cloth}
+            aria-label="Get this collection"
+            data-track-ux="buy_box"
+            {...(offer
+              ? offerAttributes("buy_box", offer.collectionSlug, {
+                  ownershipState: offer.ownershipState,
+                  priceMinor: offer.priceMinor,
+                  currency: offer.currency,
+                })
+              : {})}
+          >
             <div>
               {model.price ? <p className="cl-buy-price">{model.price}</p> : null}
               <p className="cl-buy-kind">One-time purchase</p>
@@ -101,7 +116,7 @@ export function DetailHero({ model }: { model: DetailModel }) {
                   <Check aria-hidden="true" />
                   <span>
                     {plan.buyLine}{" "}
-                    <Link className="cl-buy-plan" href={plan.path}>
+                    <Link className="cl-buy-plan" href={plan.path} data-track-cta="see_plan">
                       See the plan
                     </Link>
                   </span>
@@ -127,11 +142,18 @@ export function DetailHero({ model }: { model: DetailModel }) {
                   formattedPrice={offer.formattedPrice}
                   ownershipState={offer.ownershipState}
                   expected={offer.expected}
+                  surface="buy_box"
                   appearance="cloth"
                 />
               ) : (
                 <span className="cl-button" aria-disabled="true">
                   {model.commerceUnavailable ? "Purchase unavailable right now" : "Opening soon"}
+                  {/* Not on sale yet is an empty state; a failed price lookup is a load failure. */}
+                  {model.commerceUnavailable ? (
+                    <PageEventTracker event="load_failed" payload={{ primary_ux: "buy_box" }} />
+                  ) : (
+                    <PageEventTracker event="empty_state_viewed" payload={{ primary_ux: "empty_state" }} />
+                  )}
                 </span>
               )}
             </div>
@@ -140,13 +162,13 @@ export function DetailHero({ model }: { model: DetailModel }) {
                 "You own this collection. Every recipe below is open to you."
               ) : offer ? (
                 <>
-                  Not sure yet? <Link href={tryFreeHref}>Cook a free recipe first</Link>.
+                  Not sure yet? <Link href={tryFreeHref} data-track-cta="free_recipe">Cook a free recipe first</Link>.
                 </>
               ) : model.commerceUnavailable ? (
                 "We could not load checkout just now. Please refresh in a moment."
               ) : (
                 <>
-                  This collection is being finished. Meanwhile, <Link href="/recipes">cook a free recipe</Link>.
+                  This collection is being finished. Meanwhile, <Link href="/recipes" data-track-cta="free_recipe">cook a free recipe</Link>.
                 </>
               )}
             </p>
@@ -162,7 +184,7 @@ export function Contents({ model }: { model: DetailModel }) {
   const owned = model.offer?.ownershipState === "owned";
   const freeCount = owned ? 0 : model.recipes.filter((recipe) => recipe.free).length;
   return (
-    <section className="cl-contents" id="collection-recipes" data-cloth={model.cloth} aria-labelledby="contents-title">
+    <section className="cl-contents" id="collection-recipes" data-cloth={model.cloth} aria-labelledby="contents-title" data-track-ux="contents_list" data-track-view>
       <div className="cl-wrap">
         <div className="cl-contents-head">
           <h2 className="cl-h2" id="contents-title">
@@ -225,9 +247,9 @@ export function Contents({ model }: { model: DetailModel }) {
               </div>
             );
             return (
-              <li className="cl-row" key={recipe.slug}>
+              <li className="cl-row" key={recipe.slug} data-track-pos={index + 1}>
                 {recipe.href ? (
-                  <Link className="cl-row-link" href={recipe.href}>
+                  <Link className="cl-row-link" href={recipe.href} data-track-cta="open_recipe">
                     {body}
                   </Link>
                 ) : (
@@ -245,7 +267,7 @@ export function Contents({ model }: { model: DetailModel }) {
 export function FreeSamples({ recipes }: { recipes: readonly RecipeCatalogItem[] }) {
   if (recipes.length === 0) return null;
   return (
-    <section className="cl-samples" id="free-samples" aria-labelledby="samples-title">
+    <section className="cl-samples" id="free-samples" aria-labelledby="samples-title" data-track-ux="free_samples" data-track-view>
       <div className="cl-wrap">
         <div className="cl-free-head">
           <div>
@@ -260,8 +282,8 @@ export function FreeSamples({ recipes }: { recipes: readonly RecipeCatalogItem[]
           </div>
         </div>
         <ul className="cl-free-grid">
-          {recipes.map((recipe) => (
-            <li key={recipe.id}>
+          {recipes.map((recipe, index) => (
+            <li key={recipe.id} data-track-pos={index + 1}>
               <FreeRecipeCard recipe={recipe} />
             </li>
           ))}
@@ -272,37 +294,43 @@ export function FreeSamples({ recipes }: { recipes: readonly RecipeCatalogItem[]
 }
 
 export function Questions() {
+  // `key` names the question in faq_opened; it stays the same when the wording changes.
   const items = [
     {
+      key: "subscription",
       q: "Is this a subscription?",
       a: "No. You pay once and the collection stays in your library. Recipes we add to it later are included at no extra cost.",
     },
     {
+      key: "refund",
       q: "Can I get a refund?",
       a: "All sales are final. That is why some complete recipes are free: cook one first and see whether our recipes suit your family.",
     },
     {
+      key: "account",
       q: "Do I need an account?",
       a: "No. Checkout asks only for your email and payment. Then we email you a code that opens the collection on any device; there is no password to remember.",
     },
     {
+      key: "print",
       q: "Can I print the recipes?",
       a: "Every recipe has a print-friendly page. If printing doesn't start inside Instagram's browser, open the page in Safari or Chrome.",
     },
     {
+      key: "allergens",
       q: "What about allergens?",
       a: `Each recipe lists the allergens in its ingredients, and the list above shows them for every recipe before you buy. Check every label against your child's needs.`,
     },
   ];
   return (
-    <section className="cl-questions" aria-labelledby="questions-title">
+    <section className="cl-questions" aria-labelledby="questions-title" data-track-ux="faq" data-track-view>
       <div className="cl-wrap">
         <h2 className="cl-h2" id="questions-title">
           Good to know
         </h2>
         <div className="cl-qa">
           {items.map((item) => (
-            <details key={item.q}>
+            <details key={item.key} data-track-faq={item.key}>
               <summary>
                 {item.q}
                 <span className="cl-qa-icon" aria-hidden="true" />
@@ -318,7 +346,7 @@ export function Questions() {
 
 export function NextBook({ next }: { next: ShowroomCollection }) {
   return (
-    <Link className="cl-next" href={`/collections/${next.slug}`} data-cloth={next.cloth} data-dock-end>
+    <Link className="cl-next" href={`/collections/${next.slug}`} data-cloth={next.cloth} data-dock-end data-track-ux="next_book" data-track-cta="next_book">
       <div className="cl-wrap cl-next-inner">
         <div>
           <p className="cl-next-label">Next on the shelf</p>
@@ -334,7 +362,19 @@ export function NextBook({ next }: { next: ShowroomCollection }) {
 export function BuyDock({ model }: { model: DetailModel }) {
   if (model.offer?.ownershipState === "owned") return null;
   return (
-    <div className="cl-dock" data-cloth={model.cloth} hidden>
+    <div
+      className="cl-dock"
+      data-cloth={model.cloth}
+      hidden
+      data-track-ux="sticky_bar"
+      {...(model.offer
+        ? offerAttributes("sticky_bar", model.offer.collectionSlug, {
+            ownershipState: model.offer.ownershipState,
+            priceMinor: model.offer.priceMinor,
+            currency: model.offer.currency,
+          })
+        : {})}
+    >
       <p className="cl-dock-text">
         <strong>{model.title}</strong>
         <span>
@@ -342,7 +382,7 @@ export function BuyDock({ model }: { model: DetailModel }) {
           {recipeCount(model.recipes.length)}
         </span>
       </p>
-      <a className="cl-button" data-tone="cream" href="#buy">
+      <a className="cl-button" data-tone="cream" href="#buy" data-track-cta="get_book">
         {model.offer ? "Get it" : "Details"}
         <ArrowRight className="cl-button-arrow" aria-hidden="true" />
       </a>

@@ -41,7 +41,8 @@ export async function requestPurchaseCodeAction(sessionId: string, captchaToken?
 
 /**
  * Check the code, which signs the parent in as the account for that email (creating it the first time), then attach
- * the paid order to it and show "You're in".
+ * the paid order to it. Success returns to the form, so it can record purchase_claimed, and the revalidated page
+ * re-renders in place as "You're in".
  */
 export async function verifyPurchaseCodeAction(sessionId: string, code: string): Promise<PurchaseCodeResult> {
   if (!SESSION.test(sessionId)) return { success: false, error: "This payment link is not valid." };
@@ -56,7 +57,7 @@ export async function verifyPurchaseCodeAction(sessionId: string, code: string):
 
   await claimGuestOrders(data.user.id);
   revalidatePath("/", "layout");
-  redirect(returnPath(sessionId));
+  return { success: true };
 }
 
 /** Local fixtures only: a mock checkout has no Stripe page, so the email Stripe would collect is typed here. */

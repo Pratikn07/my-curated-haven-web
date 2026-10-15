@@ -5,10 +5,10 @@ const list = "list-disc pl-6 space-y-2 my-4";
 
 export default function Privacy() {
     return (
-        <div className="bg-canvas py-8">
+        <div className="bg-canvas py-8" data-track-ux="static_page">
                 <div className="max-w-4xl mx-auto px-6">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 font-heading text-foreground">Privacy Policy</h1>
-                    <p className="text-text-muted mb-12">Last updated: October 14, 2026</p>
+                    <p className="text-text-muted mb-12">Last updated: October 15, 2026</p>
 
                     <div className="prose prose-lg max-w-none space-y-8 text-foreground/80">
                         <section>
@@ -53,7 +53,7 @@ export default function Privacy() {
                                 <li><strong>Sign-in cookies.</strong> If you sign in, our authentication provider sets cookies that keep you signed in. The website needs them for accounts, saved recipes and the collections you buy.</li>
                                 <li><strong>Checkout cookie.</strong> If you start a purchase without signing in, we set a cookie (<code>mch_guest</code>) holding a random identifier for 30 days, so tapping buy again returns you to the same checkout instead of starting a second one.</li>
                                 <li>
-                                    <strong>Analytics.</strong> We use PostHog to measure how the website is used. It stores a random identifier in a cookie and in your browser storage, and records the pages you visit, the links and buttons you click, the website that sent you, and your device and browser type. Our own code also stores a browser and session identifier (<code>mch_browser_id</code>, <code>mch_session_id</code>) and the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>).
+                                    <strong>Analytics.</strong> We use PostHog to measure how the website is used. It stores a random identifier in a cookie and in your browser storage, and records the pages you visit, how far you scroll and how long a page stays open, the links and buttons you tap, the website or Instagram link that sent you, your device and browser type, and errors the website hits, such as a page that fails to load. It does not receive what you type, such as a search or a name in the storybook sample. Our own code also stores a browser and session identifier (<code>mch_browser_id</code>, <code>mch_session_id</code>), the campaign name from a Tiny Soho link you followed (<code>mch_campaign_attribution</code>), the Instagram page your visit started on (<code>mch_entry_story</code>) and a random reference for each checkout you start (<code>mch_analytics_attempt_refs</code>). After you sign in, a cookie (<code>mch_signin_method</code>) remembers for two minutes whether you used an email code or Google, so the next page can count the sign-in. On our own team&apos;s browsers, <code>mch_internal</code> marks visits as ours so we can leave them out of reports.
                                 </li>
                                 <li>
                                     <strong>Session recordings.</strong> PostHog records how pages look and respond while you use them, so we can see where the website is confusing. Anything you type is hidden in the recording. We do not record the sign-in, account or checkout pages.
@@ -75,6 +75,9 @@ export default function Privacy() {
                             </p>
                             <p className="leading-relaxed">
                                 We keep purchase records to give you access to what you bought, to handle payment disputes (chargebacks), and to meet tax and accounting obligations.
+                            </p>
+                            <p className="leading-relaxed">
+                                With each purchase we also keep PostHog&apos;s identifiers for the visit that started it, which Buy button you used, and the Tiny Soho link, post and Instagram page the visit came from. When you start a checkout, when the payment succeeds and if it is refunded, we tell PostHog under that same visit what you bought, the amount, and that link, button and page, so we can see which pages and posts lead to a purchase. These purchase events never include your card details or email address. If you close your account, we remove the PostHog identifiers from your purchase records.
                             </p>
                         </section>
 

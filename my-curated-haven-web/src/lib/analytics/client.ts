@@ -1,4 +1,5 @@
 import {
+  type AccessState,
   type AnalyticsEventMap,
   type AnalyticsEventName,
   type CanonicalRouteKey,
@@ -11,7 +12,9 @@ import {
 import { parseAndRecordCampaign } from "./campaigns";
 import { buildAnalyticsEnvelope } from "./sanitize";
 import { getAnalyticsProvider } from "./provider";
+import { isNotFoundPage } from "./not-found";
 import { isAdminNavigationContext } from "./private-paths";
+import { contentSlugFromPath } from "./schema";
 
 const SESSION_EXPIRY_MS = 30 * 60 * 1000; // 30 minutes inactivity
 const VIEW_DEDUP_MS = 50;
@@ -96,6 +99,8 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
     const sessionId = getOrCreateSessionId();
     // Read the URL too, so the very first event of a campaign visit is tagged.
     const campaign = parseAndRecordCampaign(new URLSearchParams(window.location.search));
+    // A 404's address can hold anything, so nothing is read from it (lib/analytics/not-found).
+    const notFound = isNotFoundPage(window.location.pathname);
 
     const envelope = buildAnalyticsEnvelope({
       eventName,
@@ -103,8 +108,11 @@ export async function trackAnalyticsEvent<T extends AnalyticsEventName>(
       source: "browser",
       browserId,
       sessionId,
-      routeKey,
+      routeKey: notFound ? undefined : routeKey,
       campaignCode: campaign?.utm_campaign,
+      // Tracking PR 2: page context, read from the page this event happens on.
+      contentSlug: notFound ? undefined : contentSlugFromPath(window.location.pathname),
+      accessState: pageAccessState(window.location.pathname),
     });
 
     if (!envelope) return;
@@ -126,4 +134,21 @@ export function resetAnalyticsClient(): void {
   } catch {
     // ignore
   }
+}
+
+// Tracking PR 2: what the visitor can open on this page (TrackPageState). Kept with the pathname it belongs
+// to, so it never carries over to the next page.
+let pageState: { pathname: string; accessState: AccessState } | null = null;
+
+export function setPageAccessState(pathname: string, accessState: AccessState): void {
+  pageState = { pathname, accessState };
+}
+
+/** Forgets the state only if it still belongs to this page and value, so a newer page's state is kept. */
+export function clearPageAccessState(pathname: string, accessState: AccessState): void {
+  if (pageState?.pathname === pathname && pageState.accessState === accessState) pageState = null;
+}
+
+export function pageAccessState(pathname: string): AccessState | undefined {
+  return pageState?.pathname === pathname ? pageState.accessState : undefined;
 }

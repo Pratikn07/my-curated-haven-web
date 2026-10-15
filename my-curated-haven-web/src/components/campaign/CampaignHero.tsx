@@ -44,8 +44,8 @@ export default function CampaignHero({ data }: { data: CampaignPageData }) {
             href="#cp-recipes"
             className="cp-button cp-hero-cta"
             data-magnetic
-            data-story-action="recipe_jump"
-            data-story-placement="hero"
+            data-track-ux="hero"
+            data-track-cta="see_recipes"
           >
             <span className="cp-button-label">
               {count === 1 ? "See the free recipe" : `See the ${recipeCountLabel(count, "free")}`}

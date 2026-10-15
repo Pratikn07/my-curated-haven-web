@@ -5,6 +5,7 @@ import { bindSessionToOrder, closeExpiredCheckoutAttempt, recordCheckoutMeasurem
 import { findCollectionIdBySlug, reserveCollectionOrder, reserveGuestCollectionOrder } from "./collection-reservation";
 import type { CheckoutExpectation, CheckoutResult } from "./types";
 import { acceptCampaignInput, type CampaignInput } from "@/lib/analytics/campaigns";
+import type { CheckoutAnalytics } from "@/lib/analytics/checkout-analytics";
 import { trustedAnalyticsEnvironment } from "@/lib/analytics/environment";
 import { reusableCheckoutUrl } from "./guardrails";
 
@@ -22,6 +23,8 @@ export interface CreateCheckoutParams {
   requestOrigin?: string;
   analyticsConsent?: boolean;
   attribution?: CampaignInput | null;
+  /** The visit behind the tap: PostHog visitor and session, Buy button, Instagram landing page. */
+  analytics?: CheckoutAnalytics | null;
 }
 
 export async function createCheckoutSession({
@@ -32,6 +35,7 @@ export async function createCheckoutSession({
   requestOrigin,
   analyticsConsent = false,
   attribution = null,
+  analytics = null,
 }: CreateCheckoutParams): Promise<CheckoutResult> {
   const config = getStripeConfig();
 
@@ -185,8 +189,13 @@ export async function createCheckoutSession({
     analyticsAttemptRef = await recordCheckoutMeasurement({
       orderId: order.id,
       campaignCode: campaign?.utm_campaign ?? null,
+      campaignContent: campaign?.utm_content ?? null,
       analyticsConsent: analyticsConsent === true,
       environment: trustedAnalyticsEnvironment(),
+      distinctId: analytics?.distinctId ?? null,
+      sessionId: analytics?.sessionId ?? null,
+      checkoutSurface: analytics?.surface ?? null,
+      entryStory: analytics?.entryStory ?? null,
     });
   } catch {
     analyticsAttemptRef = null;

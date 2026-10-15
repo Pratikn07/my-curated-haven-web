@@ -28,6 +28,7 @@ function RecipeTile({ recipe, featured, stagger }: { recipe: CampaignRecipe; fea
   return (
     <li
       className="cp-recipe"
+      data-track-pos={recipe.position}
       data-featured={featured ? "true" : undefined}
       data-reveal="rise"
       data-tilt
@@ -65,10 +66,7 @@ function RecipeTile({ recipe, featured, stagger }: { recipe: CampaignRecipe; fea
           <Link
             href={`/recipes/${recipe.slug}`}
             prefetch={false}
-            data-story-action="campaign_recipe"
-            data-story-placement="recipes"
-            data-recipe-id={recipe.id}
-            data-recipe-position={recipe.position}
+            data-track-cta="open_recipe"
           >
             {recipe.title}
           </Link>
@@ -115,7 +113,8 @@ export default function CampaignRecipes({ data, index }: { data: CampaignPageDat
       aria-labelledby="cp-recipes-title"
       data-layout={plan.layout}
       data-compact={plan.compactOnPhones ? "true" : undefined}
-      data-story-section="recipes"
+      data-track-ux="campaign_recipes"
+      data-track-view
       style={{ "--cols": plan.columns } as CSSProperties}
     >
       <div className="cp-section-head">

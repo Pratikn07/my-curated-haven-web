@@ -10,6 +10,8 @@ import {
   type DetailModel,
 } from "@/components/collections/CollectionDetail";
 import CollectionsMotion from "@/components/collections/CollectionsMotion";
+import CollectionViewTracker from "@/components/commerce/CollectionViewTracker";
+import TrackPageState from "@/components/analytics/TrackPageState";
 import { makeAheadPlanFor } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 import type { ShowroomCollection } from "@/lib/collections/types";
@@ -156,6 +158,10 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
 
   return (
     <div className="cl" data-cloth={model.cloth}>
+      {/* Analytics: the book is this parent's, or locked to them. Unknown while commerce can't be read. */}
+      {model.commerceUnavailable ? null : (
+        <TrackPageState accessState={model.offer?.ownershipState === "owned" ? "owned" : "locked"} />
+      )}
       <DetailHero model={model} />
       <Contents model={model} />
       <FreeSamples recipes={ownFree} />
@@ -163,6 +169,11 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {next && next.slug !== slug ? <NextBook next={next} /> : <span data-dock-end />}
       <BuyDock model={model} />
       <CollectionsMotion />
+      <CollectionViewTracker
+        collectionSlug={slug}
+        releaseId={model.offer?.releaseId}
+        ownershipState={model.offer?.ownershipState}
+      />
     </div>
   );
 }

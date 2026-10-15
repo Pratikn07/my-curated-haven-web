@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
 import { getPublishedCollection } from "@/lib/collections/publication";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
+import { isTrackingSlug } from "@/lib/analytics/schema";
 
 export const metadata: Metadata = {
   title: "Checkout cancelled",
@@ -19,7 +21,9 @@ export default async function CheckoutCancelPage({ searchParams }: CancelPagePro
   const book = slug ? await getPublishedCollection(slug).then((found) => found?.collection ?? null).catch(() => null) : null;
 
   return (
-    <div className="mx-auto w-full max-w-lg px-4 py-16 text-center">
+    <div className="mx-auto w-full max-w-lg px-4 py-16 text-center" data-track-ux="checkout_cancel">
+      {/* The address is typed or forwarded by anyone, so it names the book only when it is a well-formed slug. */}
+      <PageEventTracker event="checkout_cancelled" payload={isTrackingSlug(slug) ? { collection_slug: slug } : {}} />
       <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 sm:p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-foreground">Checkout cancelled</h1>
         <p className="mt-2 text-sm leading-relaxed text-text-muted">
@@ -31,6 +35,7 @@ export default async function CheckoutCancelPage({ searchParams }: CancelPagePro
           <Link
             href={book ? `/collections/${book.slug}` : "/collections"}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-action px-6 py-3 font-semibold text-white hover:bg-action-hover"
+            data-track-cta={book ? "see_collection" : "browse_collections"}
           >
             <BookOpen className="h-4 w-4" />
             <span>{book ? `Back to ${book.title}` : "See the books"}</span>
@@ -38,6 +43,7 @@ export default async function CheckoutCancelPage({ searchParams }: CancelPagePro
           <Link
             href="/recipes"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
+            data-track-cta="browse_recipes"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Free recipes</span>

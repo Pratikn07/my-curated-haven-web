@@ -24,6 +24,7 @@ Owner of every row: the site owner (the only operator). Backup operator: none ye
 | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | PostHog project key, `https://us.i.posthog.com` | No (public by design) |
 | `NEXT_PUBLIC_APP_ENV` | `production`; gates remote analytics | No |
 | `NEXT_PUBLIC_ANALYTICS_ENABLED` | `true`; set `false` and redeploy to switch analytics off | No |
+| `ANALYTICS_EXPORT_ENABLED` | `true`, set 2026-10-14: server purchase events to PostHog (with `private.analytics_settings.optional_export_enabled = true`). The key and host fall back to `NEXT_PUBLIC_POSTHOG_KEY`/`NEXT_PUBLIC_POSTHOG_HOST` from the tracking release on; `POSTHOG_SERVER_KEY` and `POSTHOG_HOST` are not set and not needed | No |
 | `VERCEL_FORCE_NO_BUILD_CACHE` | `1`; the build cache once shipped stale CSS | No |
 | `STRIPE_SECRET_KEY` | Live restricted key (`rk_live_`, full access except sensitive operations), set 2026-10-12 | Yes |
 | `STRIPE_WEBHOOK_SECRET` | Signing secret of live endpoint `we_1UPkTMPLtGCDwKKM62HXoTUg` | Yes |
@@ -53,9 +54,10 @@ The live webhook endpoint (`https://mycuratedhaven.com/api/stripe/webhook`, 8 ev
 | Product project | `ccrgvammglkvdlaojgzv` (us-east-2), shared with the iOS app | same |
 | Instagram project | `kukpvpklizsvedcmybhn` (`insta-automation`, org `tinysoho`). Never run recipe migrations there | same |
 | Migrations | Applied one at a time in `BEGIN/COMMIT`, then `supabase migration repair`. Never a blind `db push` or `config push` | `supabase migration list --linked` |
-| Pending, in order | `20260923200000` commerce schema → `20260924010000` measurement → `20260924174355` Phase 8 guards (with checkout only) | same |
+| Pending | `20261015090000` tracking purchase link: apply before the tracking release merges. Safe with the code live before it: its four-argument call forwards | same |
+| Applied by hand, latest | `20261014220000` Instagram campaigns and purchase identity, 2026-10-14, in one `BEGIN/COMMIT` with its `supabase_migrations.schema_migrations` row (stored SQL md5 matches the file) | same |
 | Sign-in email sender | **Built-in**: only delivers to the Supabase team (1 member), 2 emails an hour (M11-01) | auth config: `smtp_host` empty, `rate_limit_email_sent` 2 |
-| Code expiry | `mailer_otp_exp` 3600 s | auth config |
+| Code expiry | `mailer_otp_exp` 600 s, set 2026-09-28 (`docs/audit/OWNER-TODO.md`); the sign-in form's `expired_code` reason assumes this 10-minute lifetime | auth config |
 | Site URL, redirects | `https://mycuratedhaven.com`; allow list includes `https://mycuratedhaven.com/**` and the iOS app schemes | auth config |
 | CAPTCHA | Off (M7-01, Turnstile) | auth config |
 | Backups | Supabase free plan: none. Daily dump and image mirror at 03:30 via launchd on the owner's Mac, 14 days kept, restore rehearsed (`ops/README.md`) | `~/MyCuratedHavenBackups/backup.log` |
@@ -67,6 +69,7 @@ The live webhook endpoint (`https://mycuratedhaven.com/api/stripe/webhook`, 8 ev
 | --- | --- |
 | Project | `Default project`, US Cloud (`us.i.posthog.com`), project 630160, Free plan (1M events, 5K recordings a month) |
 | Captured | Page views, clicks, identified signed-in users, session recordings (inputs masked, none on sign-in, account, checkout) |
+| Server purchase export | `checkout_created` and `purchase_confirmed` sent from the Stripe webhook under the buyer's own PostHog id, with `$session_id`, `campaign_code`, `campaign_content`, `checkout_surface`, `entry_story` and `collection_slug`. Migration `20261014220000` applied, `ANALYTICS_EXPORT_ENABLED=true` set in Vercel production and `private.analytics_settings.optional_export_enabled = true`, all on 2026-10-14. Migration `20261015090000` pending. Sends once the tracking release (#154) is deployed; code before it needs `POSTHOG_SERVER_KEY`/`POSTHOG_HOST`, which are not set. Switch off with `optional_export_enabled = false` |
 | Warehouse source | GitHub `pratikn07/my-curated-haven-web` (`pull_requests`, `commits`), read-only token |
 
 ## Monitoring

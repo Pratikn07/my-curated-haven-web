@@ -1446,11 +1446,6 @@
   color: var(--cp-accent-hover);
 }
 
-.cp-story-sentinel {
-  display: block;
-  height: 1px;
-}
-
 .cp-motif[data-placement="story"] {
   display: none;
 }

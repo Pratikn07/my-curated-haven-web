@@ -159,9 +159,9 @@ All values are fixed lists or patterns, checked in `src/lib/analytics/sanitize.t
 | Event | Properties | When |
 | --- | --- | --- |
 | `story_view` | `story_slug`, `room`, `recipe_count`, `offer_state` (none, pack, collection, both), `story_series` | The page is shown |
-| `story_action_clicked` | `story_slug`, `story_action`, `story_placement`, and for recipe taps `recipe_id` and `recipe_position` | A marked link is tapped |
-| `story_section_viewed` | `story_slug`, `story_section` (recipes, story, story_end, pack, collection, related, questions, closing, plan) | A section is first reached |
+| `cta_clicked` | `primary_ux`, `cta`, `cta_position`, `link_type`, `destination_kind`, `target_kind`, `target_slug` | Any link or button is tapped |
+| `section_viewed` | `primary_ux` | A block marked `data-track-view` is first reached |
 
-Actions: `recipe_jump` (hero button), `campaign_recipe` (a promised recipe opened), `more_recipe`, `pack` and `collection` (purchase intent), `instagram` (back to Instagram), `recipes_index`, `home`, `make_ahead_plan` ("See the plan" on /halloween, placement `plan`). The older `full_recipe` and `about` stay valid for past events.
+Taps and sections are labelled in the markup with `data-track-*` attributes, the same as every other page (`docs/implementation/tracking/PLAN.md`, "How labelled clicks work"). On a story page the parts are `hero`, `campaign_recipes`, `story` (sent twice once the end of the story is reached), `story_offer` (pack and collection; the pack's button is `see_pack`), `related_shelf`, `faq`, `closing` and `sticky_bar`. `story_action_clicked` and `story_section_viewed` were retired in tracking PR 4.
 
 The visit still remembers its first campaign page (`entry_story` in PostHog), so a recipe opened or a purchase later in the visit is tied back to the post. `comment_dm` and the other Instagram campaign codes still come from the link's UTM tags.

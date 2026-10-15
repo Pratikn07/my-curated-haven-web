@@ -94,12 +94,12 @@ export default function MakeAheadShopping({
   }
 
   return (
-    <section className="mp-card" aria-labelledby="mp-shop-h">
+    <section className="mp-card" aria-labelledby="mp-shop-h" data-track-ux="shopping_list">
       <div className="mp-shop-head">
         <h2 className="mp-h2" id="mp-shop-h">
           {heading}
         </h2>
-        <button type="button" className="mp-copy" onClick={copy}>
+        <button type="button" className="mp-copy" onClick={copy} data-track-cta="copy">
           {COPY_LABEL}
         </button>
       </div>

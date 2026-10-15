@@ -16,9 +16,9 @@ Conduct the five-person comprehension review described in [page structure](PAGE-
 
 | Event | Allowed properties | Trigger |
 | --- | --- | --- |
-| `homepage_cta_clicked` | placement enum, destination enum, presentation state, content version | User follows a real homepage action |
+| `homepage_cta_clicked` | placement enum, destination enum, presentation state, content version | Retired 2026-10-15 (tracking PR 4). Homepage taps are `cta_clicked` (`primary_ux` `hero`, `recipe_grid`, `collection_band`, …); the validator now rejects it |
 | `homepage_preview_opened` | feature key enum, placement enum, content version | User follows a preview anchor from the overview/navigation |
-| `homepage_preview_viewed` | feature key enum, content version | At least half the section visible for at least one second, once per page view |
+| `homepage_preview_viewed` | feature key enum, content version | Removed 2026-10-14 (tracking PR 3). Not sent since 2026-10-02; the validator now rejects it |
 
 Suggested destination enum: recipes_index, recipe_detail, collection_detail, previews, about, support. Do not capture raw destination URLs, arbitrary hash strings or user text. Feature key is chat/shop/bloom. Placement is hero/overview/preview/footer/final. If tracking direct recipe-card clicks needs recipe identity, use the existing approved recipe event contract rather than adding unrestricted values.
 

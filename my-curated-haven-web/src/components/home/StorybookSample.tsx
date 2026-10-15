@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackAnalyticsEvent } from "@/lib/analytics/client";
 
 const STYLES = [
   { id: "watercolor", label: "Watercolor" },
@@ -80,8 +81,20 @@ export default function StorybookSample() {
   const name = trimmed ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1) : SAMPLE_NAMES[sampleName];
   const story = STORIES.find((item) => item.id === storyId) ?? STORIES[0];
 
+  // sample_interacted names the story or style picked. The typed name never leaves this component.
+  const pickStory = (id: (typeof STORIES)[number]["id"]) => {
+    if (id !== storyId) void trackAnalyticsEvent("sample_interacted", { sample: "storybook_story", choice: id }, "home");
+    setStoryId(id);
+  };
+  const pickStyle = (index: number) => {
+    if (index !== pickedStyle) {
+      void trackAnalyticsEvent("sample_interacted", { sample: "storybook_style", choice: STYLES[index].id }, "home");
+    }
+    setPickedStyle(index);
+  };
+
   return (
-    <div className="grid min-w-0 gap-5">
+    <div className="grid min-w-0 gap-5" data-track-ux="storybook" data-track-view>
       <figure className="storybook-book m-0 max-sm:-mx-3">
         <div className="storybook-page-left" aria-hidden="true">
           <svg viewBox="0 0 300 340" className="block h-full w-full">
@@ -140,12 +153,14 @@ export default function StorybookSample() {
         <fieldset className="grid gap-2">
           <legend className="mb-2 text-sm font-semibold text-text-muted">Pick a story</legend>
           <div className="flex flex-wrap gap-2">
-            {STORIES.map((item) => (
+            {STORIES.map((item, index) => (
               <button
                 key={item.id}
                 type="button"
+                data-track-cta="pick_story"
+                data-track-pos={index + 1}
                 aria-pressed={item.id === storyId}
-                onClick={() => setStoryId(item.id)}
+                onClick={() => pickStory(item.id)}
                 className="min-h-11 rounded-full border border-border-control bg-surface px-4 text-sm font-semibold aria-pressed:border-[var(--room-library-accent)] aria-pressed:bg-[var(--room-library-accent)] aria-pressed:text-white"
               >
                 {item.label}
@@ -161,8 +176,10 @@ export default function StorybookSample() {
               <button
                 key={style.id}
                 type="button"
+                data-track-cta="pick_style"
+                data-track-pos={index + 1}
                 aria-pressed={index === styleIndex}
-                onClick={() => setPickedStyle(index)}
+                onClick={() => pickStyle(index)}
                 className="min-h-11 rounded-full border border-border-control bg-surface px-4 text-sm font-semibold aria-pressed:border-[var(--room-library-accent)] aria-pressed:bg-[var(--room-library-accent)] aria-pressed:text-white"
               >
                 {style.label}

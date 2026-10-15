@@ -1,15 +1,5 @@
 export const HOMEPAGE_CONTENT_VERSION = "hh-2026-10-02" as const;
 
-export type HomepageFeatureKey = "kitchen" | "library" | "nursery" | "shelf";
-export type HomepagePlacement = "hero" | "house" | "overview" | "preview" | "footer" | "final";
-export type HomepageDestination =
-  | "recipes_index"
-  | "recipe_detail"
-  | "collection_detail"
-  | "previews"
-  | "about"
-  | "support";
-
 export type HomepageRecipePresentationState =
   | { mode: "preparation" }
   | { mode: "free_ready"; approvedRecipeSlugs: readonly string[] }

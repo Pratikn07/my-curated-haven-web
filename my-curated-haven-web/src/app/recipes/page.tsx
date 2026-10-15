@@ -9,6 +9,7 @@ import { getSavedRecipeIds } from "@/lib/data/saved-recipes";
 import RecipeCard from "@/components/recipe/RecipeCard";
 import RecipeFilters from "@/components/recipe/RecipeFilters";
 import RecipeCatalogTracker from "@/components/recipe/RecipeCatalogTracker";
+import PageEventTracker from "@/components/analytics/PageEventTracker";
 import { parseFilterParams } from "@/lib/recipes/filters";
 import { SITE_ORIGIN } from "@/config/site-navigation";
 
@@ -152,10 +153,10 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
             : "Simple toddler recipes for busy families. Recipes marked free include their ingredients, step-by-step instructions and storage guidance, with no sign-up or payment. The others come in our recipe collections."}
         </p>
         {!isAdmin && shelf.length > 0 ? (
-          <p className="mt-4 text-base text-text-muted">
+          <p className="mt-4 text-base text-text-muted" data-track-ux="intro">
             Want more for a particular stage or week? Our collections gather recipes around one theme, such as{" "}
             {shelf.map((collection) => collection.title).join(", ")}.{" "}
-            <Link href="/collections" className="font-semibold text-action underline underline-offset-4 hover:text-action-hover">
+            <Link href="/collections" className="font-semibold text-action underline underline-offset-4 hover:text-action-hover" data-track-cta="browse_collections">
               Browse the collections
             </Link>
           </p>
@@ -164,7 +165,8 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 
       {/* Service Error State */}
       {fetchError ? (
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center" data-track-ux="empty_state">
+          <PageEventTracker event="load_failed" payload={{ primary_ux: "recipe_grid" }} />
           <h2 className="text-2xl font-bold text-foreground">
             Recipes Temporarily Unavailable
           </h2>
@@ -175,6 +177,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
             <Link
               href="/recipes"
               className="inline-flex min-h-12 items-center justify-center rounded-xl bg-action px-6 py-3 font-semibold text-action-foreground hover:bg-action-hover"
+              data-track-cta="retry"
             >
               Retry
             </Link>
@@ -190,7 +193,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
 
           {/* Recipe Grid or No Matches State */}
           {filteredRecipes.length > 0 ? (
-            <section aria-labelledby="recipe-results-heading">
+            <section aria-labelledby="recipe-results-heading" data-track-ux="recipe_grid">
               <h2 id="recipe-results-heading" className="sr-only">
                 Recipes
               </h2>
@@ -204,12 +207,14 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
                     isAuthenticated={Boolean(user)}
                     showSaveButton={isAdmin || freeIds.has(recipe.id)}
                     free={freeIds.has(recipe.id)}
+                    position={index + 1}
                   />
                 ))}
               </div>
             </section>
           ) : (
-            <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center">
+            <div className="rounded-[var(--radius-card)] border border-border bg-surface p-8 text-center" data-track-ux="empty_state">
+              {!isAdmin && <PageEventTracker event="empty_state_viewed" payload={{ primary_ux: "empty_state" }} />}
               <h2 className="text-xl font-bold text-foreground">
                 No matching recipes found
               </h2>
@@ -220,6 +225,7 @@ export default async function RecipesPage({ searchParams }: RecipesPageProps) {
                 <Link
                   href="/recipes"
                   className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border-control bg-surface px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted"
+                  data-track-cta="clear_filters"
                 >
                   Clear all filters
                 </Link>

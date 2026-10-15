@@ -17,6 +17,8 @@ import {
 } from "@/config/halloween";
 import type { HalloweenBookData, HalloweenMenuItem } from "@/lib/data/load-halloween";
 import { chocolateNote } from "@/config/allergen-notes";
+import { HALLOWEEN_COLLECTION_SLUG } from "@/config/halloween";
+import { offerAttributes } from "@/lib/analytics/track-markup";
 import { BeforeAfter, BookGrid, GhostPeek } from "./HalloweenClient";
 
 /** The colour each part of the story hands to the sky behind the page, from morning to night. */
@@ -84,7 +86,14 @@ export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; men
   const more = count - named.length;
   const contents = more > 0 ? `${named.join(", ")} and ${more} more.` : `${named.join(", ")}.`;
   return (
-    <section className="hw-bookcard" id="hw-bookcard" aria-labelledby="hw-bookcard-title">
+    <section
+      className="hw-bookcard"
+      id="hw-bookcard"
+      aria-labelledby="hw-bookcard-title"
+      data-track-ux="book_card"
+      data-track-view
+      {...(book.onSale ? offerAttributes("book_card", HALLOWEEN_COLLECTION_SLUG) : {})}
+    >
       <Image className="hw-bookcard-cover" src={HALLOWEEN_BOOK.cover.src} alt="" width={HALLOWEEN_BOOK.cover.width} height={HALLOWEEN_BOOK.cover.height} sizes="5.5rem" />
       <div className="hw-bookcard-body">
         <span className="hw-eyebrow">{HALLOWEEN_BOOK.eyebrow}</span>
@@ -96,8 +105,7 @@ export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; men
           <Link
             className="hw-cta hw-cta-small"
             href={book.onSale ? `${book.href}#buy` : book.href}
-            data-story-action="collection"
-            data-story-placement="card"
+            data-track-cta="get_book"
           >
             {book.onSale ? `Get all ${count}` : `See all ${count}`} <span aria-hidden="true">→</span>
           </Link>
@@ -115,7 +123,7 @@ export function HalloweenBookCard({ book, menu }: { book: HalloweenBookData; men
 export function HalloweenPlanStrip() {
   const { path, preview } = HALLOWEEN_MAKE_AHEAD_PLAN;
   return (
-    <section className="hw-plan" id="hw-plan" aria-labelledby="hw-plan-title" data-story-section="plan">
+    <section className="hw-plan" id="hw-plan" aria-labelledby="hw-plan-title" data-track-ux="plan_strip" data-track-view>
       <div className="hw-sec-head">
         <span className="hw-eyebrow">{HALLOWEEN_PLAN_STRIP.eyebrow}</span>
         <h2 id="hw-plan-title">{HALLOWEEN_PLAN_STRIP.heading}</h2>
@@ -135,7 +143,7 @@ export function HalloweenPlanStrip() {
         <Lock aria-hidden="true" />
         {HALLOWEEN_PLAN_STRIP.locked}
       </p>
-      <Link className="hw-open" href={path} data-story-action="make_ahead_plan" data-story-placement="plan">
+      <Link className="hw-open" href={path} data-track-cta="see_plan">
         {HALLOWEEN_PLAN_STRIP.link} <span aria-hidden="true">→</span>
       </Link>
     </section>
@@ -162,7 +170,14 @@ function Tag({ free }: { free: boolean }) {
 export function HalloweenRecipes({ menu }: { menu: HalloweenMenuItem[] }) {
   const sizes = "(max-width: 30rem) 100vw, 30rem";
   return (
-    <section className="hw-tricks" id="hw-recipes" aria-labelledby="hw-recipes-title" data-story-section="recipes" data-hw-clock="Sat 31 Oct · Halloween">
+    <section
+      className="hw-tricks"
+      id="hw-recipes"
+      aria-labelledby="hw-recipes-title"
+      data-hw-clock="Sat 31 Oct · Halloween"
+      data-track-ux="campaign_recipes"
+      data-track-view
+    >
       <div className="hw-sec-head">
         <h2 id="hw-recipes-title">Make them Halloween</h2>
         <p>Same food, one small step. Drag the line.</p>
@@ -171,7 +186,7 @@ export function HalloweenRecipes({ menu }: { menu: HalloweenMenuItem[] }) {
         const first = item.position === 1;
         const photo = <Image src={item.image} alt={item.photoAlt} fill sizes={sizes} priority={first} />;
         return (
-          <article className="hw-trick" key={item.slug}>
+          <article className="hw-trick" key={item.slug} data-track-pos={item.position}>
             <div className="hw-trick-media">
               {item.everyday ? (
                 <BeforeAfter after={photo} before={<Image src={item.everyday.src} alt={item.everyday.alt} fill sizes={sizes} loading={first ? "eager" : "lazy"} />} />
@@ -192,10 +207,7 @@ export function HalloweenRecipes({ menu }: { menu: HalloweenMenuItem[] }) {
               <Link
                 className="hw-open"
                 href={item.href}
-                data-story-action={item.free ? "campaign_recipe" : "collection"}
-                data-story-placement="recipes"
-                {...(item.recipeId ? { "data-recipe-id": item.recipeId } : {})}
-                data-recipe-position={item.position}
+                data-track-cta={item.free ? "open_recipe" : "see_collection"}
               >
                 {item.free ? `Open ${item.title}` : "See it in the Halloween collection"} <span aria-hidden="true">→</span>
               </Link>
@@ -229,7 +241,7 @@ export function HalloweenStory() {
   const [scare, ghosts] = HALLOWEEN_MORNING;
   return (
     <>
-      <section className="hw-story-head" id="hw-story" data-story-section="story" data-hw-clock={scare.clock}>
+      <section className="hw-story-head" id="hw-story" data-hw-clock={scare.clock} data-track-ux="story" data-track-view>
         <span className="hw-eyebrow">{HALLOWEEN_STORY.kicker}</span>
         <h2>{HALLOWEEN_STORY.heading}</h2>
         <p>{HALLOWEEN_STORY.lede}</p>
@@ -264,7 +276,7 @@ export function HalloweenStory() {
         <p className="hw-street-note">Keep scrolling to walk the street</p>
       </section>
 
-      <section className="hw-chapter hw-late" id="hw-night" data-story-section="story_end" data-hw-clock={HALLOWEEN_NIGHT.clock} data-hw-sky={SKY.night}>
+      <section className="hw-chapter hw-late" id="hw-night" data-hw-clock={HALLOWEEN_NIGHT.clock} data-hw-sky={SKY.night} data-track-ux="story" data-track-view>
         <Stamp moment={HALLOWEEN_NIGHT} />
         {HALLOWEEN_NIGHT.image ? (
           <figure className="hw-window">
@@ -332,7 +344,7 @@ export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; fr
       ? `Pumpkin, cocoa and berries, in food a toddler can hold. The free ones are a taste; the book has all ${book.recipes.length}.`
       : `Pumpkin, cocoa and berries, in food a toddler can hold. The book has all ${book.recipes.length}.`;
   return (
-    <section className="hw-book-sec hw-late" data-story-section="collection" data-hw-clock="Sat 31 Oct · night">
+    <section className="hw-book-sec hw-late" id="hw-collection" data-hw-clock="Sat 31 Oct · night" data-track-ux="book_tiles" data-track-view>
       <span className="hw-eyebrow hw-eyebrow-night">{HALLOWEEN_BOOK.eyebrow}</span>
       <h2>{HALLOWEEN_BOOK.heading}</h2>
       <p className="hw-lede">{lede}</p>
@@ -360,7 +372,7 @@ export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; fr
           Buy it once and it&apos;s yours. {HALLOWEEN_MAKE_AHEAD_PLAN.buyLine}
           {book.refresh ? ` ${book.refresh}` : ""}
         </p>
-        <Link className="hw-cta" href={book.href} data-story-action="collection" data-story-placement="collection">
+        <Link className="hw-cta" href={book.href} data-track-cta="see_collection">
           See the Halloween collection <span aria-hidden="true">→</span>
         </Link>
       </div>
@@ -370,12 +382,12 @@ export function HalloweenBook({ book, freeCount }: { book: HalloweenBookData; fr
 
 export function HalloweenClosing() {
   return (
-    <section className="hw-closing hw-late" data-story-section="closing" data-hw-clock="Sat 31 Oct · night">
+    <section className="hw-closing hw-late" data-hw-clock="Sat 31 Oct · night" data-track-ux="closing" data-track-view>
       <h2>{HALLOWEEN_CLOSING.heading}</h2>
       <p>{HALLOWEEN_CLOSING.signature}</p>
       <div className="hw-closing-links">
-        <a className="hw-ghostlink" href="#hw-recipes">Back to the recipes</a>
-        <Link className="hw-ghostlink" href="/recipes" data-story-action="recipes_index" data-story-placement="closing">
+        <a className="hw-ghostlink" href="#hw-recipes" data-track-cta="back_to_recipes">Back to the recipes</a>
+        <Link className="hw-ghostlink" href="/recipes" data-track-cta="see_all_recipes">
           Explore all recipes
         </Link>
       </div>

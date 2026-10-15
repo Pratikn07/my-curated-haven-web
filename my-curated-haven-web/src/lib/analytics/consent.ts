@@ -7,6 +7,10 @@ export const BROWSER_ID_STORAGE_KEY = "mch_browser_id";
 export const SESSION_ID_STORAGE_KEY = "mch_session_id";
 export const CAMPAIGN_STORAGE_KEY = "mch_campaign_attribution";
 export const ATTEMPT_REFS_STORAGE_KEY = "mch_analytics_attempt_refs";
+/** Slug of the Instagram landing page this browser session started on (sessionStorage). */
+export const ENTRY_STORY_STORAGE_KEY = "mch_entry_story";
+/** Set in a browser that has opened the admin console (localStorage), so its visits are filtered as internal. */
+export const INTERNAL_BROWSER_STORAGE_KEY = "mch_internal";
 
 export function readAttemptRefs(): string[] {
   if (typeof window === "undefined") return [];

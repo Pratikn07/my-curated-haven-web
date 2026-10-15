@@ -14,6 +14,8 @@ import {
 } from "@/components/collections/MakeAheadPlan";
 import MakeAheadPlanTracker from "@/components/collections/MakeAheadPlanTracker";
 import MakeAheadShopping from "@/components/collections/MakeAheadShopping";
+import TrackPageState from "@/components/analytics/TrackPageState";
+import { offerAttributes } from "@/lib/analytics/track-markup";
 import { LockIcon } from "@/components/recipe/RecipeLock";
 import { makeAheadPlanFor } from "@/config/halloween";
 import { SITE_ORIGIN } from "@/config/site-navigation";
@@ -115,8 +117,9 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
   if (read.status === "ok") {
     const { plan } = read;
     return (
-      <div className="mp-wrap">
+      <div className="mp-wrap" data-track-ux="plan">
         {owned && !isAdmin && offer ? <MakeAheadPlanTracker releaseId={offer.releaseId} /> : null}
+        {owned && !isAdmin ? <TrackPageState accessState="owned" /> : null}
         <PlanHeader plan={plan} bookSlug={book.slug} bookTitle={book.title} />
         <PlanMenu plan={plan} />
         <PlanDays plan={plan} />
@@ -146,7 +149,8 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
   // A buyer whose plan didn't load: say so, and never offer to sell them the book again.
   if (owned) {
     return (
-      <div className="mp-wrap">
+      <div className="mp-wrap" data-track-ux="plan">
+        {!isAdmin ? <TrackPageState accessState="owned" /> : null}
         {header}
         <div className="mp-card" role="status">
           <p>
@@ -155,7 +159,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
               : "Your plan is being added to your book. Please check back soon."}
           </p>
           <p className="mp-sub" style={{ margin: "0.75rem 0 0" }}>
-            <Link href={`/collections/${book.slug}`} className="font-semibold text-action underline underline-offset-4">
+            <Link href={`/collections/${book.slug}`} className="font-semibold text-action underline underline-offset-4" data-track-cta="open_collection">
               Open your collection
             </Link>
           </p>
@@ -169,9 +173,20 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
   const saleOffer = offer?.saleEnabled && offer.expected ? offer : null;
   const bookFreeRecipe = await loadBookFreeRecipe(new Set(book.recipes.map((recipe) => recipe.slug)));
   return (
-    <div className="mp-wrap">
+    <div className="mp-wrap" data-track-ux="plan">
+      {!isAdmin ? <TrackPageState accessState="preview" /> : null}
       {header}
-      <div className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 text-center shadow-sm sm:p-10">
+      <div
+        className="recipe-lock-card rounded-[var(--radius-card)] border border-action/30 bg-surface p-6 text-center shadow-sm sm:p-10"
+        data-track-ux="lock_card"
+        {...(saleOffer
+          ? offerAttributes("lock_card", saleOffer.collectionSlug, {
+              ownershipState: saleOffer.ownershipState,
+              priceMinor: saleOffer.priceMinor,
+              currency: saleOffer.currency,
+            })
+          : {})}
+      >
         <div className="recipe-lock-badge mx-auto flex h-14 w-14 items-center justify-center rounded-full">
           <LockIcon className="h-7 w-7" />
         </div>
@@ -190,12 +205,14 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
               formattedPrice={saleOffer.formattedPrice}
               ownershipState={saleOffer.ownershipState}
               expected={saleOffer.expected}
+              surface="lock_card"
               signInHint={false}
             />
           ) : null}
           <Link
             href={`/collections/${book.slug}`}
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-6 py-3 font-semibold text-foreground hover:bg-surface-muted"
+            data-track-cta="see_collection"
           >
             See all {recipeCount(book.recipes.length)}
           </Link>
@@ -206,6 +223,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
             <Link
               href={`/recipes/${bookFreeRecipe.slug}`}
               className="font-semibold text-action underline underline-offset-4 hover:text-action-hover"
+              data-track-cta="free_recipe"
             >
               {bookFreeRecipe.title}
             </Link>{" "}
@@ -218,6 +236,7 @@ export default async function MakeAheadPlanPage({ params }: PlanPageProps) {
             <Link
               href={`/sign-in?returnTo=${entry.path}`}
               className="font-semibold text-action underline underline-offset-4 hover:text-action-hover"
+              data-track-cta="sign_in"
             >
               Sign in
             </Link>{" "}
