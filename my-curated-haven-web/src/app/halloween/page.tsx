@@ -28,8 +28,8 @@ import { loadHalloweenPage } from "@/lib/data/load-halloween";
  */
 export const revalidate = 3600;
 
-// The page's editorial serif (headlines, recipe names, prices). Loaded here, not in the root layout,
-// so only /halloween downloads it; halloween.css points --font-display at it inside .hw.
+// The headline's serif (only "Halloween, the not-scary way."). Loaded here, not in the root layout,
+// so only /halloween downloads it; .hw-title in halloween.css uses it.
 const display = Cormorant_Garamond({
   variable: "--font-hw-display",
   subsets: ["latin"],
